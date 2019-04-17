@@ -11,5 +11,8 @@
     "url": "git@version.helsinki.fi:tike-ohtu/unitube-lataamo-proxy.git"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
 }
