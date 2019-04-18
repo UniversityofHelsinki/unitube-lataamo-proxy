@@ -8,19 +8,12 @@ module.exports = function(app) {
         .get(api.apiInfo);
 
     app.use('/proxy', proxy('localhost:3000', {
-          memoizeHost: false,
-          timeout: 60000,
-          proxyReqPathResolver: function(req) {
-            let url = require('url').parse(req.url).path;
-            console.log(`Proxy request to ${url}`);
-            return url;
-          },
-          proxyReqOptDecorator: function(proxyReqOpts, srcReq) {
-            return proxyReqOpts;
-          },
-          userResDecorator: function(proxyRes, proxyResData, userReq, userRes) {
-            return proxyResData;
-          }
-        }));
+        memoizeHost: false,
+        timeout: 60000,
+        userResDecorator: function(proxyRes, proxyResData, userReq, userRes) {
+            let data = JSON.parse(proxyResData.toString('utf8'));
+            return JSON.stringify(data);
+        }
+    }));
 
 };
