@@ -1,0 +1,27 @@
+image: node:8-alpine
+
+# Define the stages
+stages:
+  - setup
+  - test
+  - build
+
+# Define the process for each stage
+
+# Define the process for setup stage
+setup:
+  stage: setup
+  script:
+    - npm install
+
+# Define the process for test stage
+test:
+  stage: test
+  script:
+    - npm test
+
+# Define the process for build stage
+build:
+  stage: build
+  script:
+    - npm run build
