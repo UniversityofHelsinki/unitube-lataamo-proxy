@@ -45,8 +45,59 @@ deploy_dev:
     - mkdir ~/.ssh
     - echo $SSH_PRIVATE_KEY  >> ~/.ssh/id_rsa
     - chmod 700 ~/.ssh && chmod 600 ~/.ssh/*
-    - echo "====== Test ssh connection and make react-app folder if not exist ======"
+    - echo "====== Test ssh connection and make api folder if not exist ======"
     - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-dev.it.helsinki.fi "mkdir -p /home/lataamo/api"
     - echo "====== Sync local and remote directory ======"
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
     - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --delete ./ lataamo@lataamo-dev.it.helsinki.fi:/home/lataamo/api
+
+# Define the process for deploy stage to test environment
+deploy_test:
+  stage: deploy
+  environment:
+    name: test
+  only:
+    - test
+  script:
+    - echo "====== Deploy to test server ========"
+    - echo "====== Install rsync and openssh ========="
+    - apk add --no-cache rsync openssh
+    - echo "====== Activate the ssh-agent ========"
+    - eval $(ssh-agent -s)
+    - echo "======= Add the SSH key stored in SSH_PRIVATE_KEY variable to the agent store ====="
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+    - echo "====== Add target servers secret key ======"
+    - mkdir ~/.ssh
+    - echo $SSH_PRIVATE_KEY  >> ~/.ssh/id_rsa
+    - chmod 700 ~/.ssh && chmod 600 ~/.ssh/*
+    - echo "====== Test ssh connection and make api folder if not exist ======"
+    - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-test.it.helsinki.fi "mkdir -p /home/lataamo/api"
+    - echo "====== Sync local and remote directory ======"
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+    - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --delete ./ lataamo@lataamo-test.it.helsinki.fi:/home/lataamo/api
+
+# Define the process for deploy stage to test environment
+deploy_prod:
+  stage: deploy
+  environment:
+    name: prod
+  only:
+    - prod
+  when: manual
+  script:
+    - echo "====== Deploy to production server ========"
+    - echo "====== Install rsync and openssh ========="
+    - apk add --no-cache rsync openssh
+    - echo "====== Activate the ssh-agent ========"
+    - eval $(ssh-agent -s)
+    - echo "======= Add the SSH key stored in SSH_PRIVATE_KEY variable to the agent store ====="
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+    - echo "====== Add target servers secret key ======"
+    - mkdir ~/.ssh
+    - echo $SSH_PRIVATE_KEY  >> ~/.ssh/id_rsa
+    - chmod 700 ~/.ssh && chmod 600 ~/.ssh/*
+    - echo "====== Test ssh connection and make api folder if not exist ======"
+    - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-prod.it.helsinki.fi "mkdir -p /home/lataamo/api"
+    - echo "====== Sync local and remote directory ======"
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+    - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --delete ./ lataamo@lataamo-prod.it.helsinki.fi:/home/lataamo/api
