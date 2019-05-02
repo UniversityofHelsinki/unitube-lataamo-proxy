@@ -46,10 +46,10 @@ deploy_dev:
     - echo $SSH_PRIVATE_KEY  >> ~/.ssh/id_rsa
     - chmod 700 ~/.ssh && chmod 600 ~/.ssh/*
     - echo "====== Test ssh connection and make api folder if not exist ======"
-    - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-dev.it.helsinki.fi "mkdir -p /home/lataamo/api"
+    - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-dev.it.helsinki.fi "mkdir -p /home/lataamo/proxy"
     - echo "====== Sync local and remote directory ======"
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
-    - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --delete ./ lataamo@lataamo-dev.it.helsinki.fi:/home/lataamo/api
+    - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --delete ./ lataamo@lataamo-dev.it.helsinki.fi:/home/lataamo/proxy
 
 # Define the process for deploy stage to test environment
 deploy_test:
@@ -71,10 +71,10 @@ deploy_test:
     - echo $SSH_PRIVATE_KEY  >> ~/.ssh/id_rsa
     - chmod 700 ~/.ssh && chmod 600 ~/.ssh/*
     - echo "====== Test ssh connection and make api folder if not exist ======"
-    - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-test.it.helsinki.fi "mkdir -p /home/lataamo/api"
+    - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-test.it.helsinki.fi "mkdir -p /home/lataamo/proxy"
     - echo "====== Sync local and remote directory ======"
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
-    - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --delete ./ lataamo@lataamo-test.it.helsinki.fi:/home/lataamo/api
+    - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --delete ./ lataamo@lataamo-test.it.helsinki.fi:/home/lataamo/proxy
 
 # Define the process for deploy stage to test environment
 deploy_prod:
@@ -97,7 +97,7 @@ deploy_prod:
     - echo $SSH_PRIVATE_KEY  >> ~/.ssh/id_rsa
     - chmod 700 ~/.ssh && chmod 600 ~/.ssh/*
     - echo "====== Test ssh connection and make api folder if not exist ======"
-    - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-prod.it.helsinki.fi "mkdir -p /home/lataamo/api"
+    - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-prod.it.helsinki.fi "mkdir -p /home/lataamo/proxy"
     - echo "====== Sync local and remote directory ======"
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
-    - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --delete ./ lataamo@lataamo-prod.it.helsinki.fi:/home/lataamo/api
+    - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --delete ./ lataamo@lataamo-prod.it.helsinki.fi:/home/lataamo/proxy
