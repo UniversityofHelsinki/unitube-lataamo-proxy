@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "echo \"Testing build\"",
-    "start": "node app.js"
+    "start": "node app.js",
+    "nodemon": "nodemon ./app.js localhost 3000"
   },
   "repository": {
     "type": "git",
@@ -20,5 +21,8 @@
     "express": "^4.16.4",
     "express-http-proxy": "^1.5.1",
     "npm": "^6.9.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.0"
   }
 }
