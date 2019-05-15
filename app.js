@@ -18,17 +18,17 @@ app.use('/api', router);
 //     res.send({ status: 200, message: 'Alive' })
 // });
 
-app.get('/videos', (req, res) => {
-    res.send({ status: 200, message: 'Hello from /api/series' })
-});
+// app.get('/videos', (req, res) => {
+//     res.send({ status: 200, message: 'Hello from /api/series' })
+// });
 
-app.get('/series', (req, res) => {
-    res.send({ status: 200, message: 'Hello from /api/series' })
-});
+// app.get('/series', (req, res) => {
+//     res.send({ status: 200, message: 'Hello from /api/series' })
+// });
 
-app.get('/keywords', (req, res) => {
-    res.send({ status: 200, message: 'Hello from /api/keywords' })
-});
+// app.get('/keywords', (req, res) => {
+//     res.send({ status: 200, message: 'Hello from /api/keywords' })
+// });
 
 
 app.listen(port, () => {
