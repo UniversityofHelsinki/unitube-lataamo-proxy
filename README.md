@@ -5,6 +5,6 @@
 ### `npm install`
 install required packages
 
-### `node app.js`
+### `npm start nodemon`
 to start node server to localhost:3000 
 
