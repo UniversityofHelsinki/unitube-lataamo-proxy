@@ -50,7 +50,6 @@ deploy_dev:
     - echo "====== Sync local and remote directory ======"
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
     - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --delete ./ lataamo@lataamo-dev.it.helsinki.fi:/home/lataamo/proxy
-    - pm2 restart lataamo@lataamo-dev.it.helsinki.fi:/home/lataamo/proxy/app.js
 
 # Define the process for deploy stage to test environment
 deploy_test:
