@@ -116,9 +116,9 @@ module.exports = function(app) {
         })
 
 
-    app.route('/keywords').get((req, res) => {
+/*    app.route('/keywords').get((req, res) => {
 
         res.send("tadaa");
-    })
+    })*/
 
 };
