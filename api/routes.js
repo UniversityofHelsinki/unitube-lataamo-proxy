@@ -113,5 +113,12 @@ module.exports = function(app) {
                 const msg = error.message
                 res.json({ message: 'Error', msg })
             });
-        }) 
+        })
+
+
+    app.route('/keywords').get((req, res) => {
+
+        res.send("tadaa");
+    })
+
 };
