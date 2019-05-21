@@ -114,11 +114,4 @@ module.exports = function(app) {
                 res.json({ message: 'Error', msg })
             });
         })
-
-
-    app.route('/keywords').get((req, res) => {
-
-        res.send("tadaa");
-    })
-
 };
