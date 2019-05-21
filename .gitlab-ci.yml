@@ -76,6 +76,7 @@ deploy_test:
     - echo "====== Sync local and remote directory ======"
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
     - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --delete ./ lataamo@lataamo-test.it.helsinki.fi:/home/lataamo/proxy
+    - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-test.it.helsinki.fi "pm2 restart app"
 
 # Define the process for deploy stage to test environment
 deploy_prod:
@@ -102,3 +103,4 @@ deploy_prod:
     - echo "====== Sync local and remote directory ======"
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
     - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --delete ./ lataamo@lataamo-prod.it.helsinki.fi:/home/lataamo/proxy
+    - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-prod.it.helsinki.fi "pm2 restart app"
