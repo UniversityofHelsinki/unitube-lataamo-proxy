@@ -7,8 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "echo \"Testing build\"",
     "start": "node app.js",
-    "nodemon": "nodemon ./app.js localhost 3000",
-    "restart" : "pm2 restart app"
+    "nodemon": "nodemon ./app.js localhost 3000"
   },
   "repository": {
     "type": "git",
