@@ -111,4 +111,5 @@ restart_dev:
   only:
     - master
   script:
+    - npm i -g pm2
     - pm2 restart app
