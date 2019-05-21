@@ -11,7 +11,6 @@ stages:
   - setup
   - build
   - deploy
-  - restart
 
 # Define the process for each stage
 
@@ -51,6 +50,8 @@ deploy_dev:
     - echo "====== Sync local and remote directory ======"
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
     - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --delete ./ lataamo@lataamo-dev.it.helsinki.fi:/home/lataamo/proxy
+    - npm i -g pm2
+    - pm2 restart app
 
 # Define the process for deploy stage to test environment
 deploy_test:
@@ -102,14 +103,3 @@ deploy_prod:
     - echo "====== Sync local and remote directory ======"
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
     - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --delete ./ lataamo@lataamo-prod.it.helsinki.fi:/home/lataamo/proxy
-
-#    pm2 restart all
-restart_dev:
-  stage: restart
-  environment:
-    name: development
-  only:
-    - master
-  script:
-    - npm i -g pm2
-    - pm2 startOrReload process.json

@@ -1,9 +1,0 @@
-{
-  "apps" : [{
-    "name" : "App",
-    "script" : "app.js",
-    "env": {
-      "NODE_ENV": "development"
-    }
-  }]
-}
