@@ -1,6 +1,6 @@
 {
   "apps" : [{
-    "name" : "HTTP-API",
+    "name" : "App",
     "script" : "app.js"
   }]
 }
