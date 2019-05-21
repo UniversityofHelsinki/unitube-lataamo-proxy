@@ -112,4 +112,4 @@ restart_dev:
     - master
   script:
     - npm i -g pm2
-    - pm2 startOrReload package.json
+    - pm2 startOrReload process.json

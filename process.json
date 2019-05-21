@@ -1,0 +1,6 @@
+{
+  "apps" : [{
+    "name" : "HTTP-API",
+    "script" : "app.js"
+  }]
+}
