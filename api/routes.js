@@ -29,6 +29,10 @@ module.exports = function(app) {
     app.route('/')
         .get(api.apiInfo);
 
+    app.route("/user").get((req, res) => {
+        res.json(req.user);
+    });
+
 
     // "all" series from ocast
     app.route('/series').get((req, res) => {
