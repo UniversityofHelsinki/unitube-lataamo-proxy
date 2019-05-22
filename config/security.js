@@ -7,8 +7,7 @@ module.exports.shibbolethAuthentication = function (app, passport) {
                 headers: {
                     'eppn': {alias: 'eppn', required: true},
                     'preferredlanguage': {alias: 'preferredLanguage', required: true}
-                },
-            ...(environment !== "local" && { whitelist: '127.0.0.1/0'})
+                }
             })
         );
     app.use(passport.initialize());
