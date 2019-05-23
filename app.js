@@ -7,6 +7,7 @@ const passport = require('passport');
 
 const app = express();
 const port = 3000;
+const host = '127.0.0.1';
 const router = express.Router();
 
 routes(router);
@@ -18,8 +19,6 @@ app.use(bodyParser.json());
 app.use('/api', router);
 
 
-
-
-app.listen(port, () => {
+app.listen(port, host,  () => {
     console.log(`Example app listening on port ${port}!`)
 });    
