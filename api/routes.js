@@ -1,5 +1,7 @@
 'use strict';
 require('dotenv').config();
+const api   = require('./apiController');
+const eventsService = require('../service/eventsService');
 const proxy = require('express-http-proxy');
 const axios = require('axios'); // https://www.npmjs.com/package/axios
 
@@ -21,101 +23,35 @@ const opencastBase = axios.create({
 
 const OCAST_SERIES_PATH = '/api/series'
 const OCAST_VIDEOS_PATH = '/api/events'
-    
-
 
 module.exports = function(app) {
-    let api   = require('./apiController');
-    app.route('/')
-        .get(api.apiInfo);
+    app.get('/', api.apiInfo);
 
-    app.route("/user").get((req, res) => {
+    app.get("/user", (req, res) => {
         res.json(req.user);
     });
 
-
     // "all" series from ocast
-    app.route('/series').get((req, res) => {
-       
-        opencastBase.get(OCAST_SERIES_PATH)
-            .then(function (response) {
-                res.send(response.data)
-            })
-            .catch(function (error) {
-                const msg = error.message
-                res.json({ message: 'Error', msg })
-            });
-    })
-    
-
-
-    /*
-        // Input:
-        [
-            {
-                "identifier": "a91f1fff-e758-4fde-b48c-0e2d338b1115",
-                "creator": "University of Helsinki Unitube Administrator",
-                "presenter": [],
-                "created": "2019-02-01T11:13:30Z",
-                "subjects": [
-                "Toimintaelokuva"
-                ],
-                "start": "2019-02-01T11:13:30Z",
-                "description": "",
-                "title": "Moodle-testi 2",
-                "processing_state": "SUCCEEDED",
-                "duration": 0,
-                "archive_version": 3,
-                "contributor": [],
-                "has_previews": true,
-                "location": "",
-                "publication_status": [
-                "internal",
-                "engage-player",
-                "api"
-                ]
-            }
-        ]
-
-        // Output:
-        [
-            { 
-                "identifier": "a91f1fff-e758-4fde-b48c-0e2d338b1115", 
-                "title": "Moodle-testi 2", 
-                "duration": 0, 
-                "creator": "University of Helsinki Unitube Administrator" 
-            }
-        ]
-    */
-    const eventsForClient = (ocResponseData) => {
-        
-        if(!ocResponseData){
-            return [];
+    app.get('/series', async (req, res) => {
+        try {
+            const response = await opencastBase.get(OCAST_SERIES_PATH);
+            res.json(response.data);
+        } catch(error) {
+            const msg = error.message
+            res.json({ message: 'Error', msg })
         }
+    });
 
-        const eventArray = []
-        ocResponseData.forEach(event => {
-            eventArray.push({
-                "identifier": event.identifier,
-                "title": event.title,
-                "duration": event.duration,
-                "creator": event.creator
-            })
-        });
-        return eventArray;
-    }
 
-    
     // "all" events AKA videos from ocast
-    app.route('/events').get((req, res) => {
+    app.get('/events', async (req, res) => {
+        try {
+            const response = await opencastBase.get(OCAST_VIDEOS_PATH);
+            res.json(eventsService.filterEventsForClient(response.data));
+        } catch (error) {
+            const msg = error.message
+            res.json({ message: 'Error', msg })
+        }
+    });
 
-        opencastBase.get(OCAST_VIDEOS_PATH)
-            .then(function (response) {        
-                res.send(eventsForClient(response.data))
-            })
-            .catch(function (error) {
-                const msg = error.message
-                res.json({ message: 'Error', msg })
-            });
-        })
 };
