@@ -28,8 +28,8 @@ module.exports = function(app) {
         try {
             const userSeries = await apiService.userSeries(req.user.eppn);
             const seriesIdentifiers = seriesService.getSeriesIdentifiers(userSeries);
-            const data = await eventsService.getAllEvents(seriesIdentifiers);
-            const concatenatedArray = eventsService.concatenateArray(data);
+            const allEvents = await eventsService.getAllEvents(seriesIdentifiers);
+            const concatenatedArray = eventsService.concatenateArray(allEvents);
             res.json(eventsService.filterEventsForClient(concatenatedArray));
         } catch (error) {
             const msg = error.message
