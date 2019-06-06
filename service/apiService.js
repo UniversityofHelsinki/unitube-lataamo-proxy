@@ -3,7 +3,7 @@ const security = require('../config/security');
 const OCAST_SERIES_PATH = '/api/series/';
 const OCAST_VIDEOS_PATH = '/api/events/';
 
-const OCAST_VIDEOS_FILTER_CREATOR = '?filter=Creator:';
+const OCAST_SERIES_FILTER_CREATOR = '?filter=Creator:';
 const OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER = '?filter=series:'
 
 exports.getEventsByIdentifier = async (identifier) => {
@@ -18,9 +18,9 @@ exports.allSeries = async () => {
     return response.data;
 }
 
-exports.userSeries = async (user) => {
-    const userSeries = OCAST_SERIES_PATH + OCAST_VIDEOS_FILTER_CREATOR + user;
-    const response = await security.opencastBase.get(userSeries);
+exports.series = async () => {
+    const seriesUrl = OCAST_SERIES_PATH + OCAST_SERIES_FILTER_CREATOR + process.env.LATAAMO_OPENCAST_USER;
+    const response = await security.opencastBase.get(seriesUrl);
     return response.data;
 }
 

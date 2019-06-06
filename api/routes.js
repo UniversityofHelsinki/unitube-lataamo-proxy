@@ -26,8 +26,8 @@ module.exports = function(app) {
     // "user" own events AKA videos from ocast
     app.get('/userEvents', async (req, res) => {
         try {
-            const userSeries = await apiService.userSeries(req.user.eppn);
-            const seriesIdentifiers = seriesService.getSeriesIdentifiers(userSeries);
+            const userSeries = await apiService.series();
+            const seriesIdentifiers = seriesService.getSeriesIdentifiers(userSeries, req.user.eppn);
             const allEvents = await eventsService.getAllEvents(seriesIdentifiers);
             const concatenatedArray = eventsService.concatenateArray(allEvents);
             res.json(eventsService.filterEventsForClient(concatenatedArray));
