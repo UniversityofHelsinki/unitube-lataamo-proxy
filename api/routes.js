@@ -4,9 +4,6 @@ const api = require('./apiInfo');
 const eventsService = require('../service/eventsService');
 const seriesService = require('../service/seriesService');
 const apiService = require('../service/apiService');
-const security = require('../config/security');
-const proxy = require('express-http-proxy');
-
 
 module.exports = function(app) {
     app.get('/', api.apiInfo);
