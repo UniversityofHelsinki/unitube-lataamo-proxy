@@ -1,3 +1,5 @@
+const apiService = require('./apiService');
+
 exports.filterEventsForClient = (ocResponseData) => {
 
     if(!ocResponseData){
@@ -15,3 +17,12 @@ exports.filterEventsForClient = (ocResponseData) => {
     });
     return eventArray;
 }
+
+
+exports.getAllEvents  = async (seriesIdentifiers) => {
+    return await Promise.all(seriesIdentifiers.map(identifier => apiService.getEventsByIdentifier(identifier)));
+}
+
+exports.concatenateArray = (data) => Array.prototype.concat.apply([], data);
+
+
