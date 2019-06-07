@@ -1,10 +1,12 @@
+exports.getUserSeries = (series, user) =>  filterSeriesByUser(series, user);
+
 exports.getSeriesIdentifiers = (series, user) =>  {
-    const filteredSerieIdentifiersByUser = filterSerieIdentifiersByUser(series, user);
-    const seriesIdentifiers = getSeriesIdentifiers(filteredSerieIdentifiersByUser);
+    const userSeries = filterSeriesByUser(series, user);
+    const seriesIdentifiers = getSeriesIdentifiers(userSeries);
     return seriesIdentifiers;
 }
 
-const filterSerieIdentifiersByUser = (series, user) => {
+const filterSeriesByUser = (series, user) => {
     const filteredSeriesByUser = series.filter(serie => {
         return serie.contributors.some(contributor => {
              return contributor === user
