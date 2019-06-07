@@ -6,8 +6,8 @@ exports.getSeriesIdentifiers = (series, user) =>  {
 
 const filterSerieIdentifiersByUser = (series, user) => {
     const filteredSeriesByUser = series.filter(serie => {
-        return serie.organizers.some(organizer => {
-             return organizer === user
+        return serie.contributors.some(contributor => {
+             return contributor === user
         });
     });
     return filteredSeriesByUser;
