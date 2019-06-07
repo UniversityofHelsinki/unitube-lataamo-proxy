@@ -26,8 +26,8 @@ module.exports = function(app) {
     // "user" own series from ocast
     app.get('/userSeries', async (req, res) => {
         try {
-            const allSeries = await apiService.allSeries();
-            const userSeries = seriesService.getUserSeries(allSeries, req.user.eppn);
+            const series = await apiService.series();
+            const userSeries = seriesService.getUserSeries(series, req.user.eppn);
             res.json(userSeries);
         } catch(error) {
             const msg = error.message
