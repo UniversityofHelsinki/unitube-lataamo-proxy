@@ -2,9 +2,15 @@ const security = require('../config/security');
 
 const OCAST_SERIES_PATH = '/api/series/';
 const OCAST_VIDEOS_PATH = '/api/events/';
+const OCAST_USER_PATH = '/api/info/me'
 
 const OCAST_SERIES_FILTER_CREATOR = '?filter=Creator:';
 const OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER = '?filter=series:'
+
+exports.getUser = async () => {
+    const apiUser = await security.opencastBase.get(OCAST_USER_PATH);
+    return apiUser.data;
+}
 
 exports.getEventsByIdentifier = async (identifier) => {
     let userEventsUrl = OCAST_VIDEOS_PATH + OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER;
@@ -13,22 +19,11 @@ exports.getEventsByIdentifier = async (identifier) => {
     return response.data;
 }
 
-exports.allSeries = async () => {
-    const response = await security.opencastBase.get(OCAST_SERIES_PATH);
-    return response.data;
-}
-
-exports.series = async () => {
-    const seriesUrl = OCAST_SERIES_PATH + OCAST_SERIES_FILTER_CREATOR + process.env.LATAAMO_OPENCAST_USER;
+exports.getSeriesForApiUser = async (apiUser) => {
+    const seriesUrl = OCAST_SERIES_PATH + OCAST_SERIES_FILTER_CREATOR + apiUser.username;
     const response = await security.opencastBase.get(seriesUrl);
     return response.data;
 }
-
-exports.allEvents = async () => {
-    const response = await security.opencastBase.get(OCAST_VIDEOS_PATH);
-    return response.data;
-}
-
 
 
 

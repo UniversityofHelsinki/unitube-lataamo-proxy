@@ -4,6 +4,7 @@ const api = require('./apiInfo');
 const eventsService = require('../service/eventsService');
 const seriesService = require('../service/seriesService');
 const apiService = require('../service/apiService');
+const userService = require('../service/userService');
 
 module.exports = function(app) {
     app.get('/', api.apiInfo);
@@ -12,21 +13,11 @@ module.exports = function(app) {
         res.json(req.user);
     });
 
-    // "all" series from ocast
-    app.get('/series', async (req, res) => {
-        try {
-            const allSeries = await apiService.allSeries();
-            res.json(allSeries);
-        } catch(error) {
-            const msg = error.message
-            res.json({ message: 'Error', msg })
-        }
-    });
-
-    // "user" own series from ocast
+    // "user" own getSeriesForApiUser from ocast
     app.get('/userSeries', async (req, res) => {
         try {
-            const series = await apiService.series();
+            const apiUser = await userService.getApiUser();
+            const series = await apiService.getSeriesForApiUser(apiUser);
             const userSeries = seriesService.getUserSeries(series, req.user.eppn);
             res.json(userSeries);
         } catch(error) {
@@ -38,7 +29,8 @@ module.exports = function(app) {
     // "user" own events AKA videos from ocast
     app.get('/userEvents', async (req, res) => {
         try {
-            const userSeries = await apiService.series();
+            const apiUser = await userService.getApiUser();
+            const userSeries = await apiService.getSeriesForApiUser(apiUser);
             const seriesIdentifiers = seriesService.getSeriesIdentifiers(userSeries, req.user.eppn);
             const allEvents = await eventsService.getAllEvents(seriesIdentifiers);
             const concatenatedArray = eventsService.concatenateArray(allEvents);
@@ -48,16 +40,4 @@ module.exports = function(app) {
             res.json({ message: 'Error', msg })
         }
     });
-
-    // "all" events AKA videos from ocast
-    app.get('/events', async (req, res) => {
-        try {
-            const allEvents = await apiService.allEvents();
-            res.json(eventsService.filterEventsForClient(allEvents));
-        } catch (error) {
-            const msg = error.message
-            res.json({ message: 'Error', msg })
-        }
-    });
-
 };
