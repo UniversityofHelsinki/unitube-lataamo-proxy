@@ -21,6 +21,7 @@ module.exports = function(app) {
             const userSeries = seriesService.getUserSeries(series, req.user.eppn);
             res.json(userSeries);
         } catch(error) {
+            res.status(500)
             const msg = error.message
             res.json({ message: 'Error', msg })
         }
@@ -35,7 +36,8 @@ module.exports = function(app) {
             const allEvents = await eventsService.getAllEvents(seriesIdentifiers);
             const concatenatedArray = eventsService.concatenateArray(allEvents);
             res.json(eventsService.filterEventsForClient(concatenatedArray));
-        } catch (error) {
+        } catch (error) {          
+            res.status(500)         
             const msg = error.message
             res.json({ message: 'Error', msg })
         }
