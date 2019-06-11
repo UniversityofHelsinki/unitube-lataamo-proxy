@@ -20,7 +20,7 @@ exports.getEventsByIdentifier = async (identifier) => {
 }
 
 exports.getSeriesForApiUser = async (apiUser) => {
-    const seriesUrl = OCAST_SERIES_PATH + OCAST_SERIES_FILTER_CREATOR + apiUser.username;
+    const seriesUrl = OCAST_SERIES_PATH + OCAST_SERIES_FILTER_CREATOR + apiUser.name;
     const response = await security.opencastBase.get(seriesUrl);
     return response.data;
 }
