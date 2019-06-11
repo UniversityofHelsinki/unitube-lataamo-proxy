@@ -2,10 +2,11 @@ const security = require('../config/security');
 
 const OCAST_SERIES_PATH = '/api/series/';
 const OCAST_VIDEOS_PATH = '/api/events/';
-const OCAST_USER_PATH = '/api/info/me'
+const OCAST_USER_PATH = '/api/info/me';
+const OCAST_VIDEO_PUBLICATION_PATH = '/publications'
 
 const OCAST_SERIES_FILTER_CREATOR = '?filter=Creator:';
-const OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER = '?filter=series:'
+const OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER = '?filter=series:';
 
 exports.getUser = async () => {
     const apiUser = await security.opencastBase.get(OCAST_USER_PATH);
@@ -22,6 +23,13 @@ exports.getEventsByIdentifier = async (identifier) => {
 exports.getSeriesForApiUser = async (apiUser) => {
     const seriesUrl = OCAST_SERIES_PATH + OCAST_SERIES_FILTER_CREATOR + apiUser.name;
     const response = await security.opencastBase.get(seriesUrl);
+    return response.data;
+}
+
+exports.getPublicationsForEvent = async (eventId) => {
+    const publicationsUrl = OCAST_VIDEOS_PATH + eventId + OCAST_VIDEO_PUBLICATION_PATH;
+    console.log(publicationsUrl);
+    const response = await security.opencastBase.get(publicationsUrl);
     return response.data;
 }
 
