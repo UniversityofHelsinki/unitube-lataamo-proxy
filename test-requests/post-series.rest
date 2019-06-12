@@ -1,5 +1,5 @@
 POST http://localhost:8080/api/series
-Authorization: Basic admin opencast
+Authorization: Basic lataamo_testi admin
 Content-Type: application/x-www-form-urlencoded
 
 metadata=[
@@ -12,7 +12,7 @@ metadata=[
         "id": "title",
         "label": "EVENTS.SERIES.DETAILS.METADATA.TITLE",
         "type": "text",
-        "value": "title-Testing",
+        "value": "title-LATAAMO-103",
         "required": true
       },
       {
@@ -74,7 +74,7 @@ metadata=[
         "id": "contributor",
         "label": "EVENTS.SERIES.DETAILS.METADATA.CONTRIBUTORS",
         "type": "mixed_text",
-        "value": ["contributor-kasitunnus1", "contributor-kasitunnus2", "contributor-kasitunnus3"],
+        "value": ["tzrasane", "contributor-kasitunnus2", "contributor-kasitunnus3"],
         "required": false
       },
       {
