@@ -12,7 +12,8 @@ exports.filterEventsForClient = (ocResponseData) => {
             "identifier": event.identifier,
             "title": event.title,
             "duration": event.duration,
-            "creator": event.creator
+            "creator": event.creator,
+            "processing_state" : event.processing_state
         })
     });
     return eventArray;
