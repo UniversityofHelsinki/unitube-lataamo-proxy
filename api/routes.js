@@ -17,12 +17,9 @@ module.exports = function(app) {
     // selected video
     app.get("/video/:id", async (req, res) => {
         try {
-            const apiUser = await userService.getApiUser();
             const publications = await apiService.getPublicationsForEvent(req.params.id);
             const filteredPublication = publicationService.filterApiChannelPublication(publications);
-            console.log(filteredPublication);
             const mediaUrl = publicationService.getMediaUrlFromPublication(req.params.id, filteredPublication);
-            console.log(mediaUrl);
             res.json(mediaUrl);
         } catch(error) {
             const msg = error.message
