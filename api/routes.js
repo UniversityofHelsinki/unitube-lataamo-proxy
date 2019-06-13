@@ -5,12 +5,26 @@ const eventsService = require('../service/eventsService');
 const seriesService = require('../service/seriesService');
 const apiService = require('../service/apiService');
 const userService = require('../service/userService');
+const publicationService = require('../service/publicationService');
 
 module.exports = function(app) {
     app.get('/', api.apiInfo);
 
     app.get("/user", (req, res) => {
         res.json(req.user);
+    });
+
+    // selected video
+    app.get("/video/:id", async (req, res) => {
+        try {
+            const publications = await apiService.getPublicationsForEvent(req.params.id);
+            const filteredPublication = publicationService.filterApiChannelPublication(publications);
+            const mediaUrl = publicationService.getMediaUrlFromPublication(req.params.id, filteredPublication);
+            res.json(mediaUrl);
+        } catch(error) {
+            const msg = error.message
+            res.json({ message: 'Error', msg });
+        }
     });
 
     // "user" own getSeriesForApiUser from ocast
@@ -21,6 +35,7 @@ module.exports = function(app) {
             const userSeries = seriesService.getUserSeries(series, req.user.eppn);
             res.json(userSeries);
         } catch(error) {
+            res.status(500)
             const msg = error.message
             res.json({ message: 'Error', msg })
         }
@@ -35,7 +50,8 @@ module.exports = function(app) {
             const allEvents = await eventsService.getAllEvents(seriesIdentifiers);
             const concatenatedArray = eventsService.concatenateArray(allEvents);
             res.json(eventsService.filterEventsForClient(concatenatedArray));
-        } catch (error) {
+        } catch (error) {          
+            res.status(500)         
             const msg = error.message
             res.json({ message: 'Error', msg })
         }
