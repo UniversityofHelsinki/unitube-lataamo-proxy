@@ -24,7 +24,8 @@
     "express-http-proxy": "^1.5.1",
     "npm": "^6.9.0",
     "passport": "^0.4.0",
-    "passport-reverseproxy": "^0.1.0"
+    "passport-reverseproxy": "^0.1.0",
+    "pretty-ms": "^5.0.0"
   },
   "devDependencies": {
     "nodemon": "^1.19.1"

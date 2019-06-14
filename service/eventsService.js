@@ -1,4 +1,5 @@
 const apiService = require('./apiService');
+const prettyMilliseconds = require('pretty-ms');
 
 exports.filterEventsForClient = (ocResponseData) => {
 
@@ -11,7 +12,7 @@ exports.filterEventsForClient = (ocResponseData) => {
         eventArray.push({
             "identifier": event.identifier,
             "title": event.title,
-            "duration": event.duration,
+            "duration": prettyMilliseconds(event.duration),
             "creator": event.creator,
             "processing_state" : event.processing_state
         })
