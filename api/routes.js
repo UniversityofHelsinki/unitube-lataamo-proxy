@@ -49,9 +49,11 @@ module.exports = function(app) {
             const seriesIdentifiers = seriesService.getSeriesIdentifiers(userSeries, req.user.eppn);
             const allEvents = await eventsService.getAllEvents(seriesIdentifiers);
             const concatenatedArray = eventsService.concatenateArray(allEvents);
-            res.json(eventsService.filterEventsForClient(concatenatedArray));
-        } catch (error) {          
-            res.status(500)         
+            const allEventsWithMedia = await eventsService.getEventsWithMedia(concatenatedArray);
+            const allEventsWithMediaFile = await eventsService.getAllEventsWithMediaFileMetadata(allEventsWithMedia);
+            res.json(eventsService.filterEventsForClient(allEventsWithMediaFile));
+        } catch (error) {
+            res.status(500)
             const msg = error.message
             res.json({ message: 'Error', msg })
         }
