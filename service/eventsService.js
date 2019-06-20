@@ -12,7 +12,7 @@ exports.filterEventsForClient = (ocResponseData) => {
         eventArray.push({
             "identifier": event.identifier,
             "title": event.title,
-            "duration": prettyMilliseconds(event.mediaFileMetadata.duration),
+            "duration": prettyMilliseconds(event.mediaFileMetadata.duration, {secondsDecimalDigits:0}),
             "creator": event.creator,
             "processing_state" : event.processing_state
         })
