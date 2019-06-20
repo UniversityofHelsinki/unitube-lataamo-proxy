@@ -4,13 +4,22 @@ const bodyParser = require('body-parser');
 const routes = require('./api/routes');
 const security = require('./config/security');
 const passport = require('passport');
+var fs = require('fs')
+var morgan = require('morgan')
+var path = require('path')
 
 const app = express();
 const port = 3000;
 const host = '127.0.0.1';
 const router = express.Router();
+const LOG_FILE_NAME = 'access.log'
+const LOG_DIRECTORY = __dirname
+
+const accessLogStream = fs.createWriteStream(
+    path.join(LOG_DIRECTORY, LOG_FILE_NAME), { flags: 'a' })
 
 routes(router);
+app.use(morgan('combined', { stream: accessLogStream }))
 app.use(cors());
 
 security.shibbolethAuthentication(app, passport);
