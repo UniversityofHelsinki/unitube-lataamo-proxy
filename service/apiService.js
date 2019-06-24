@@ -7,6 +7,7 @@ const OCAST_VIDEO_PUBLICATION_PATH = '/publications';
 const OCAST_EVENT_MEDIA_PATH_PREFIX = '/admin-ng/event/';
 const OCAST_EVENT_MEDIA_PATH_SUFFIX = '/asset/media/media.json';
 const OCAST_EVENT_MEDIA_FILE_METADATA = '/asset/media/';
+const OCAST_EVENT_ACL = '/acl';
 
 const OCAST_SERIES_FILTER_CREATOR = '?filter=Creator:';
 const OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER = '?filter=series:';
@@ -46,6 +47,12 @@ exports.getMediaFileMetadataForEvent = async (eventId, mediaId) => {
     const response = await security.opencastBase.get(mediaFileMetadata);
     return response.data;
 }
+
+exports.getEventAcls = async (eventId) => {
+    let eventAclUrl = OCAST_VIDEOS_PATH + eventId + OCAST_EVENT_ACL;
+    const response = await security.opencastBase.get(eventAclUrl);
+    return response.data;
+};
 
 
 

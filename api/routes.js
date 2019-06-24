@@ -51,7 +51,8 @@ module.exports = function(app) {
             const concatenatedArray = eventsService.concatenateArray(allEvents);
             const allEventsWithMedia = await eventsService.getEventsWithMedia(concatenatedArray);
             const allEventsWithMediaFile = await eventsService.getAllEventsWithMediaFileMetadata(allEventsWithMedia);
-            res.json(eventsService.filterEventsForClient(allEventsWithMediaFile));
+            const allEventsWithAcls = await eventsService.getAllEventsWithAcls(allEventsWithMediaFile);
+            res.json(eventsService.filterEventsForClient(allEventsWithAcls));
         } catch (error) {
             res.status(500)
             const msg = error.message

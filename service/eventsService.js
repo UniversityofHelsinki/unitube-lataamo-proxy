@@ -1,5 +1,8 @@
 const apiService = require('./apiService');
 const prettyMilliseconds = require('pretty-ms');
+const constants = require('../config/constants');
+
+
 
 exports.filterEventsForClient = (ocResponseData) => {
 
@@ -14,16 +17,16 @@ exports.filterEventsForClient = (ocResponseData) => {
             "title": event.title,
             "duration": prettyMilliseconds(event.mediaFileMetadata.duration, {secondsDecimalDigits:0}),
             "creator": event.creator,
-            "processing_state" : event.processing_state
+            "processing_state" : event.processing_state,
+            "acls" : event.acls
         })
     });
     return eventArray;
-}
-
+};
 
 exports.getAllEvents  = async (seriesIdentifiers) => {
     return await Promise.all(seriesIdentifiers.map(identifier => apiService.getEventsByIdentifier(identifier)));
-}
+};
 
 exports.getEventsWithMedia = async (events) => {
     return Promise.all(events.map(async event => {
@@ -33,7 +36,7 @@ exports.getEventsWithMedia = async (events) => {
             media: media
         };
     }));
-}
+};
 
 exports.getAllEventsWithMediaFileMetadata = async (events) => {
     return Promise.all(events.map(async event => {
@@ -44,7 +47,17 @@ exports.getAllEventsWithMediaFileMetadata = async (events) => {
             mediaFileMetadata : mediaFileMetadata
         }
     }));
-}
+};
+
+exports.getAllEventsWithAcls = async (events) => {
+    return Promise.all(events.map(async event => {
+        const acls = await apiService.getEventAcls(event.identifier);
+        return {
+            ...event,
+            acls : acls
+        }
+    }));
+};
 
 exports.concatenateArray = (data) => Array.prototype.concat.apply([], data);
 
