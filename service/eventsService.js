@@ -1,8 +1,5 @@
 const apiService = require('./apiService');
 const prettyMilliseconds = require('pretty-ms');
-const constants = require('../config/constants');
-
-
 
 exports.filterEventsForClient = (ocResponseData) => {
 
@@ -51,7 +48,7 @@ exports.getAllEventsWithMediaFileMetadata = async (events) => {
 
 exports.getAllEventsWithAcls = async (events) => {
     return Promise.all(events.map(async event => {
-        const acls = await apiService.getEventAcls(event.identifier);
+        let acls = await apiService.getEventAcls(event.identifier);
         return {
             ...event,
             acls : acls
