@@ -48,10 +48,12 @@ module.exports = function(app) {
             const userSeries = await apiService.getSeriesForApiUser(apiUser);
             const seriesIdentifiers = seriesService.getSeriesIdentifiers(userSeries, req.user.eppn);
             const allEvents = await eventsService.getAllEvents(seriesIdentifiers);
-            const concatenatedArray = eventsService.concatenateArray(allEvents);
-            const allEventsWithMedia = await eventsService.getEventsWithMedia(concatenatedArray);
+            const concatenatedEventsArray = eventsService.concatenateArray(allEvents);
+            const allEventsWithMetaDatas = await eventsService.getAllEventsWithMetadatas(concatenatedEventsArray);
+            const allEventsWithMedia = await eventsService.getEventsWithMedia(allEventsWithMetaDatas);
             const allEventsWithMediaFile = await eventsService.getAllEventsWithMediaFileMetadata(allEventsWithMedia);
-            res.json(eventsService.filterEventsForClient(allEventsWithMediaFile));
+            const allEventsWithAcls = await eventsService.getAllEventsWithAcls(allEventsWithMediaFile);
+            res.json(eventsService.filterEventsForClient(allEventsWithAcls));
         } catch (error) {
             res.status(500)
             const msg = error.message
