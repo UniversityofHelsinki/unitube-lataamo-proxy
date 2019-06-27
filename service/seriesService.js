@@ -23,7 +23,5 @@ exports.getSerieFromEventMetadata = (metadata) => {
     const foundFieldWithSeriesInfo = metadata.fields.find(field => {
         return field.id === 'isPartOf';
     });
-
-    console.log("found: " + JSON.stringify(foundFieldWithSeriesInfo));
     return foundFieldWithSeriesInfo;
 };
