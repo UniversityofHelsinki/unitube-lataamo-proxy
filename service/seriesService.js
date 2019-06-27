@@ -9,7 +9,7 @@ exports.getSeriesIdentifiers = (series, user) =>  {
 const filterSeriesByUser = (series, user) => {
     const filteredSeriesByUser = series.filter(serie => {
         return serie.contributors.some(contributor => {
-             return contributor === user
+            return contributor === user
         });
     });
     return filteredSeriesByUser;
@@ -18,3 +18,12 @@ const filterSeriesByUser = (series, user) => {
 const getSeriesIdentifiers = (filteredSeriesByUser) => {
     return filteredSeriesByUser.map(serie => serie.identifier);
 }
+
+exports.getSerieFromEventMetadata = (metadata) => {
+    const foundFieldWithSeriesInfo = metadata.fields.find(field => {
+        return field.id === 'isPartOf';
+    });
+
+    console.log("found: " + JSON.stringify(foundFieldWithSeriesInfo));
+    return foundFieldWithSeriesInfo;
+};

@@ -1,3 +1,4 @@
+const seriesService = require('./seriesService');
 const apiService = require('./apiService');
 const prettyMilliseconds = require('pretty-ms');
 
@@ -25,6 +26,16 @@ exports.getAllEvents  = async (seriesIdentifiers) => {
     return await Promise.all(seriesIdentifiers.map(identifier => apiService.getEventsByIdentifier(identifier)));
 };
 
+exports.getAllEventsWithMetadatas = async (events) => {
+    return Promise.all(events.map(async event => {
+        const metadata = await apiService.getMetadataForEvent(event);
+        return {
+            ...event,
+            metadata: metadata
+        }
+    }));
+}
+
 exports.getEventsWithMedia = async (events) => {
     return Promise.all(events.map(async event => {
         const media = await apiService.getMediaForEvent(event);
@@ -48,7 +59,9 @@ exports.getAllEventsWithMediaFileMetadata = async (events) => {
 
 exports.getAllEventsWithAcls = async (events) => {
     return Promise.all(events.map(async event => {
-        let acls = await apiService.getEventAcls(event.identifier);
+        let metadata = event.metadata[0];
+        let serie = seriesService.getSerieFromEventMetadata(metadata);
+        let acls = await apiService.getEventAclsFromSerie(serie);
         return {
             ...event,
             acls : acls
