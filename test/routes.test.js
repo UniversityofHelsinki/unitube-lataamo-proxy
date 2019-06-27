@@ -97,40 +97,87 @@ describe('user eppn and preferredlanguage returned from /user route', () => {
 });
 
 
-// TODO
-describe.skip('user series returned from /userSeries route', () => {
+describe('user series returned from /userSeries route', () => {
 
   const mockTestUser = { 
     eppn: 'Tester-XYZ',
     preferredlanguage: 'fi'
   }
+
+  const mockApiUser =  { 
+    provider: 'opencast',
+    name: 'Opencast Project Administrator',
+    userrole: 'ROLE_USER_ADMIN',
+    email: 'admin@localhost',
+    username: 'admin' 
+  }
+
+  // these are filtered by contributor (eppn in contributor values)
+  const mockUserSeries = [ 
+    { identifier: '80f9ff5b-4163-48b7-b7cf-950be665de3c',
+      creator: 'Opencast Project Administrator',
+      created: '2019-06-11T12:59:40Z',
+      subjects: 
+        [ 'subjects-järvi',
+          'subjects-laavu',
+          'subjects-aamupuuro',
+          'subjects-turve',
+          'subjects-salama',
+          'subjects-koivikko' ],
+      organizers: [ 'creator-kasitunnus' ],
+      publishers: [ 'publisher-kasitunnus' ],
+      contributors: [ 'contrib1', 'jaaki' ],
+      title: 'title-LATAAMO-131' 
+    },
+    { identifier: 'd72a8c9e-f854-4ba4-9ed2-89405fae214e',
+      creator: 'Opencast Project Administrator',
+      created: '2019-05-22T09:56:43Z',
+      subjects: [ 'juusto', 'makasiini', 'aamupuuro', 'turve', 'salama', 'sämpylä' ],
+      organizers: [ 'organizer1' ],
+      publishers: [ '' ],
+      contributors: [ 'SeriesOwnerEppn', 'Tester A', 'Tester B' ],
+      title: 'kuutamossa' 
+    }
+  ]
   
-  before(() => {  
+  beforeEach(() => {  
     // mock needed opencast apis 
     nock(OCAST_BASE_URL)
       .get(OCAST_SERIES_PATH)
-      .query({filter: 'Creator:undefined'})
-      .reply(200, mockTestUser);
+      .query({filter: 'Creator:Opencast Project Administrator'})
+      .reply(200, mockUserSeries);
 
-    nock(OCAST_BASE_URL)
+    nock(OCAST_BASE_URL)  
       .get(OCAST_USER_PATH)
-      .reply(200, mockTestUser);
+      .reply(200, mockApiUser);
   })
 
-  it("should return series", async () => {
+  it("should return no series if user not the series contributor", async () => {
     let response = await supertest(app)
       .get(LATAAMO_USER_SERIES_PATH)
       .set('eppn', mockTestUser.eppn)
       .set('preferredlanguage', mockTestUser.preferredlanguage)
       .expect(200)
       .expect('Content-Type', /json/)
-    
-    
-    assert.equal(response.body.eppn, mockTestUser.eppn);
-    assert.equal(response.body.preferredlanguage, mockTestUser.preferredlanguage);
+
+    assert.isArray(response.body, 'Response should be an array');
+    assert.lengthOf(response.body, 0, 'Response array should be empty, no series should be returned');
   });
 
-  after(() => {
+
+  it("should return user's series if user is the series contributor", async () => {
+    let response = await supertest(app)
+      .get(LATAAMO_USER_SERIES_PATH)
+      .set('eppn', 'SeriesOwnerEppn')
+      .set('preferredlanguage', mockTestUser.preferredlanguage)
+      .expect(200)
+      .expect('Content-Type', /json/)
+
+    assert.isArray(response.body, 'Response should be an array');
+    assert.lengthOf(response.body, 1, 'Response array should not be empty, 1 series should be returned');
+  });
+
+  afterEach(() => {
     // remove mocks
     nock.cleanAll();
   })
