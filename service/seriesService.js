@@ -9,7 +9,7 @@ exports.getSeriesIdentifiers = (series, user) =>  {
 const filterSeriesByUser = (series, user) => {
     const filteredSeriesByUser = series.filter(serie => {
         return serie.contributors.some(contributor => {
-             return contributor === user
+            return contributor === user
         });
     });
     return filteredSeriesByUser;
@@ -18,3 +18,13 @@ const filterSeriesByUser = (series, user) => {
 const getSeriesIdentifiers = (filteredSeriesByUser) => {
     return filteredSeriesByUser.map(serie => serie.identifier);
 }
+
+exports.getSerieFromEventMetadata = (metadata) => {
+    const foundEpisodeFlavorMetadata = metadata.find(field => {
+       return field.flavor === 'dublincore/episode';
+    });
+    const foundFieldWithSeriesInfo = foundEpisodeFlavorMetadata.fields.find(field => {
+        return field.id === 'isPartOf';
+    });
+    return foundFieldWithSeriesInfo;
+};
