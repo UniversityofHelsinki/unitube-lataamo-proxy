@@ -20,7 +20,9 @@ const getSeriesIdentifiers = (filteredSeriesByUser) => {
 }
 
 exports.getSerieFromEventMetadata = (metadata) => {
+    console.log("metadata fields: ", metadata.fields);
     const foundFieldWithSeriesInfo = metadata.fields.find(field => {
+        console.log("field id :" , field.id);
         return field.id === 'isPartOf';
     });
     return foundFieldWithSeriesInfo;

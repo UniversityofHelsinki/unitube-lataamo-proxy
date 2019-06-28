@@ -58,7 +58,9 @@ exports.getAllEventsWithMediaFileMetadata = async (events) => {
 };
 
 exports.getAllEventsWithAcls = async (events) => {
+    console.log("events found", events);
     return Promise.all(events.map(async event => {
+        console.log("event metadata: ", event.metadata[0]);
         let metadata = event.metadata[0];
         let serie = seriesService.getSerieFromEventMetadata(metadata);
         let acls = await apiService.getEventAclsFromSerie(serie);
