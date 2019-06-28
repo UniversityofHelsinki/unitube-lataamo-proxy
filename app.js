@@ -4,9 +4,9 @@ const bodyParser = require('body-parser');
 const routes = require('./api/routes');
 const security = require('./config/security');
 const passport = require('passport');
-var fs = require('fs')
-var morgan = require('morgan')
-var path = require('path')
+const fs = require('fs')
+const morgan = require('morgan')
+const path = require('path')
 
 const app = express();
 const port = 3000;
@@ -30,4 +30,7 @@ app.use('/api', router);
 
 app.listen(port, host,  () => {
     console.log(`Example app listening on port ${port}!`)
-});    
+});   
+
+// for the tests
+module.exports = app;
