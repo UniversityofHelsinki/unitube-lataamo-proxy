@@ -20,9 +20,10 @@ const getSeriesIdentifiers = (filteredSeriesByUser) => {
 }
 
 exports.getSerieFromEventMetadata = (metadata) => {
-    console.log("metadata fields: ", metadata.fields);
-    const foundFieldWithSeriesInfo = metadata.fields.find(field => {
-        console.log("field id :" , field.id);
+    const foundEpisodeFlavorMetadata = metadata.find(field => {
+       return field.flavor === 'dublincore/episode';
+    });
+    const foundFieldWithSeriesInfo = foundEpisodeFlavorMetadata.fields.find(field => {
         return field.id === 'isPartOf';
     });
     return foundFieldWithSeriesInfo;
