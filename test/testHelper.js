@@ -10,7 +10,6 @@ const OCAST_EVENT_MEDIA_PATH_PREFIX = '/admin-ng/event/';
 const OCAST_EVENT_MEDIA_PATH_SUFFIX = '/asset/media/media.json';
 const OCAST_EVENT_MEDIA_FILE_METADATA = '/asset/media/';
 
-const OCAST_SERIES_FILTER_CREATOR = '?filter=Creator:';
 const OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER = '?filter=series:';
 
 
@@ -276,7 +275,6 @@ const series2_Events = () => nock(OCAST_BASE_URL)
 // /api/series/?filter=Creator:Opencast Project Administrator
 const lataamoSeries = () => nock(OCAST_BASE_URL)
     .get(OCAST_SERIES_PATH)
-    .query({filter: `Creator:${CREATOR_AKA_API_USER}`})
     .reply(200, mockUserSeries);
 
 // /api/info/me

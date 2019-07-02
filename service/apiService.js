@@ -11,7 +11,6 @@ const OCAST_EVENT_MEDIA_FILE_METADATA = '/asset/media/';
 const OCAST_ACL_PATH = '/acl';
 const OCAST_METADATA_PATH = '/metadata';
 
-const OCAST_SERIES_FILTER_CREATOR = '?filter=Creator:';
 const OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER = '?filter=series:';
 
 exports.getUser = async () => {
