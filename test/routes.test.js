@@ -77,7 +77,7 @@ describe('api info returned from / route', () => {
 });
 
 
-describe('user eppn and preferredlanguage returned from /user route', () => {
+describe('user eppn, preferredlanguage and hyGroupCn returned from /user route', () => {
 
   it("should return user", async () => {
     let response = await supertest(app)
@@ -90,6 +90,7 @@ describe('user eppn and preferredlanguage returned from /user route', () => {
 
     assert.equal(response.body.eppn, test.mockTestUser.eppn);
     assert.equal(response.body.preferredLanguage, test.mockTestUser.preferredlanguage);
+    assert.equal(response.body.hyGroupCn, test.mockTestUser.hyGroupCn);
   });
 });
 
