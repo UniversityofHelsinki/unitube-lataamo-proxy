@@ -6,11 +6,16 @@ exports.getSeriesIdentifiers = (series, user) =>  {
     return seriesIdentifiers;
 }
 
-const filterSeriesByUser = (series, user) => {
+const filteredUserAttributes = (user) => {
     let filteredAttributes = [];
     filteredAttributes.push(user.eppn);
     filteredAttributes.push(user.hyGroupCn);
     filteredAttributes = concatenateArray(filteredAttributes);
+    return filteredAttributes;
+}
+
+const filterSeriesByUser = (series, user) => {
+    const filteredAttributes = filteredUserAttributes(user);
     const filteredSeriesByUser = series.filter(serie => {
         return serie.contributors.some(contributor=> filteredAttributes.includes(contributor));
     });
