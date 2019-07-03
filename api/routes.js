@@ -30,9 +30,9 @@ module.exports = function(app) {
     // "user" own getSeriesForApiUser from ocast
     app.get('/userSeries', async (req, res) => {
         try {
-            const apiUser = await userService.getApiUser();
-            const series = await apiService.getSeriesForApiUser(apiUser);
-            const userSeries = seriesService.getUserSeries(series, req.user.eppn);
+            const loggedUser = userService.getLoggedUser(req.user);
+            const allSeries = await apiService.getAllSeries();
+            const userSeries = seriesService.getUserSeries(allSeries, loggedUser);
             res.json(userSeries);
         } catch(error) {
             res.status(500)
@@ -44,9 +44,9 @@ module.exports = function(app) {
     // "user" own events AKA videos from ocast
     app.get('/userEvents', async (req, res) => {
         try {
-            const apiUser = await userService.getApiUser();
-            const userSeries = await apiService.getSeriesForApiUser(apiUser);
-            const seriesIdentifiers = seriesService.getSeriesIdentifiers(userSeries, req.user.eppn);
+            const allSeries = await apiService.getAllSeries();
+            const loggedUser = userService.getLoggedUser(req.user);
+            const seriesIdentifiers = seriesService.getSeriesIdentifiers(allSeries, loggedUser);
             const allEvents = await eventsService.getAllEvents(seriesIdentifiers);
             const concatenatedEventsArray = eventsService.concatenateArray(allEvents);
             const allEventsWithMetaDatas = await eventsService.getAllEventsWithMetadatas(concatenatedEventsArray);
