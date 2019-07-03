@@ -190,32 +190,40 @@ describe('user events (videos) returned from /userEvents route', () => {
     assert.equal(response.body[2].identifier, TEST_EVENT_3_ID);
   });
 
-  /*
+
 
   it("should return events from series where users group is in contributors field", async () => {
     const userId = 'NOT_CONTRIBUTOR_IN_ANY_SERIES';
-
-    // see testHelper.js for the ids
-    const TEST_EVENT_1_ID = '6394a9b7-3c06-477e-841a-70862eb07bfb';
-    const TEST_EVENT_2_ID = '1fb5245f-ee1b-44cd-89f3-5ccf456ea0d4';
-    const TEST_EVENT_3_ID = '23af4ad3-6726-4f3d-bf21-c02b34753c32';
-
     let response = await supertest(app)
         .get(LATAAMO_USER_EVENTS_PATH)
         .set('eppn', userId)
         .set('preferredlanguage', test.mockTestUser.preferredlanguage)
-        .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+        .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
         .expect(200)
         .expect('Content-Type', /json/);
 
     assert.isArray(response.body, 'Response should be an array');
     assert.lengthOf(response.body, 3, 'Three events should be returned');
-    assert.equal(response.body[0].identifier, TEST_EVENT_1_ID);
-    assert.equal(response.body[1].identifier, TEST_EVENT_2_ID);
-    assert.equal(response.body[2].identifier, TEST_EVENT_3_ID);
+    assert.equal(response.body[0].identifier, test.constants.TEST_EVENT_1_ID);
+    assert.equal(response.body[1].identifier, test.constants.TEST_EVENT_2_ID);
+    assert.equal(response.body[2].identifier, test.constants.TEST_EVENT_3_ID);
   });
 
-*/
+
+  it("should return no events from series where users group is not in contributors field", async () => {
+    const userId = 'NOT_CONTRIBUTOR_IN_ANY_SERIES';
+    let response = await supertest(app)
+        .get(LATAAMO_USER_EVENTS_PATH)
+        .set('eppn', userId)
+        .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+        .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3')
+        .expect(200)
+        .expect('Content-Type', /json/);
+
+    assert.isArray(response.body, 'Response should be an array');
+    assert.equal(response.body.length, 0);
+  });
+
 
   it("no events should be returned if user is not contributor in any series", async () => {
     const userId = 'NOT_CONTRIBUTOR_IN_ANY_SERIES';
