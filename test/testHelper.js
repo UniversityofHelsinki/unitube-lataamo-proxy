@@ -2,7 +2,7 @@ const nock = require('nock');  // https://www.npmjs.com/package/nock
 
 
 // mocked Opencast APIs
-const CONSTANTS = {
+const CONSTANTS = Object.freeze({
     OCAST_BASE_URL : 'http://localhost:8080',
     OCAST_SERIES_PATH : '/api/series/',
     OCAST_VIDEOS_PATH : '/api/events/',
@@ -21,7 +21,7 @@ const CONSTANTS = {
     TEST_MEDIA_2_METADATA_ID : 'e14f98b1-3c61-45e7-8bb0-4a32ef66dac8',
     TEST_MEDIA_3_METADATA_ID : '1ca70749-cb47-403f-8bd2-3484759e68c1',
     CREATOR_AKA_API_USER : 'Opencast Project Administrator'
-};
+});
 
 
 const NO_RESULTS = [];
