@@ -14,6 +14,16 @@ module.exports = function(app) {
         res.json(req.user);
     });
 
+    app.get("/event/:id", async (req, res) => {
+       try {
+           const event = await apiService.getEvent(req.params.id);
+           res.json(event);
+       } catch (error) {
+           const msg = error.message
+           res.json({ message: 'Error', msg });
+       }
+    });
+
     // selected video
     app.get("/video/:id", async (req, res) => {
         try {
