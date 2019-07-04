@@ -17,7 +17,8 @@ module.exports = function(app) {
     app.get("/event/:id", async (req, res) => {
        try {
            const event = await apiService.getEvent(req.params.id);
-           res.json(event);
+           const eventWithSerie = await eventsService.getEventWithSerie(event);
+           res.json(eventWithSerie);
        } catch (error) {
            const msg = error.message
            res.json({ message: 'Error', msg });
