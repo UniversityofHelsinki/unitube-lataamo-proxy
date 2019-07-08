@@ -69,6 +69,15 @@ exports.getAllEventsWithAcls = async (events) => {
     }));
 };
 
+exports.getEventWithSerie = async (event) => {
+    const metadata = await apiService.getMetadataForEvent(event);
+    const serie = seriesService.getSerieFromEventMetadata(metadata);
+    return {
+        ...event,
+        isPartOf : serie.value
+    }
+}
+
 exports.concatenateArray = (data) => Array.prototype.concat.apply([], data);
 
 
