@@ -1,6 +1,8 @@
 const seriesService = require('./seriesService');
 const apiService = require('./apiService');
-const prettyMilliseconds = require('pretty-ms');
+const moment = require('moment');
+const momentDurationFormatSetup = require("moment-duration-format");
+momentDurationFormatSetup(moment);
 
 exports.filterEventsForClient = (ocResponseData) => {
 
@@ -13,7 +15,7 @@ exports.filterEventsForClient = (ocResponseData) => {
         eventArray.push({
             "identifier": event.identifier,
             "title": event.title,
-            "duration": prettyMilliseconds(event.mediaFileMetadata.duration, {secondsDecimalDigits:0}),
+            "duration": moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format("hh:mm:ss", {trim:false}),
             "creator": event.creator,
             "processing_state" : event.processing_state,
             "acls" : event.acls
