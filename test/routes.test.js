@@ -9,7 +9,7 @@ let test = require('./testHelper');
 
 // Unitube-lataamo proxy APIs under the test
 const LATAAMO_USER_SERIES_PATH = '/api/userSeries';
-const LATAAMO_USER_EVENTS_PATH = '/api/userEvents';
+const LATAAMO_USER_EVENTS_PATH = '/api/userVideos';
 const LATAAMO_API_INFO_PATH = '/api/';
 const LATAAMO_USER_PATH = '/api/user';
 
@@ -183,8 +183,28 @@ describe('user events (videos) returned from /userEvents route', () => {
     assert.equal(response.body[0].identifier, test.constants.TEST_EVENT_1_ID);
     assert.equal(response.body[1].identifier, test.constants.TEST_EVENT_2_ID);
     assert.equal(response.body[2].identifier, test.constants.TEST_EVENT_3_ID);
+    assert.isArray(response.body[0].visibility, "Video's visibility property should be an array");
+    assert.isArray(response.body[1].visibility, "Video's visibility property should be an array");
+    assert.isArray(response.body[2].visibility, "Video's visibility property should be an array");
+    assert.lengthOf(response.body[0].visibility, 1, 'Video should have one visibility value');
+    assert.lengthOf(response.body[1].visibility, 1, 'Video should have one visibility value');
+    assert.lengthOf(response.body[2].visibility, 1, 'Video should have one visibility value');
   });
 
+
+  it("events should have visibility array property", async () => {
+    let response = await supertest(app)
+        .get(LATAAMO_USER_EVENTS_PATH)
+        .set('eppn', 'SeriesOwnerEppn')
+        .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+        .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+        .expect(200)
+        .expect('Content-Type', /json/);
+
+    assert.isArray(response.body[0].visibility, "Video's visibility property should be an array");
+    assert.isArray(response.body[1].visibility, "Video's visibility property should be an array");
+    assert.isArray(response.body[2].visibility, "Video's visibility property should be an array");
+  });
 
 
   it("should return events from series where users group is in contributors field", async () => {
@@ -196,7 +216,7 @@ describe('user events (videos) returned from /userEvents route', () => {
         .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
         .expect(200)
         .expect('Content-Type', /json/);
-
+    
     assert.isArray(response.body, 'Response should be an array');
     assert.lengthOf(response.body, 3, 'Three events should be returned');
     assert.equal(response.body[0].identifier, test.constants.TEST_EVENT_1_ID);
@@ -205,7 +225,7 @@ describe('user events (videos) returned from /userEvents route', () => {
   });
 
 
-  it("should return no events from series where users group is not in contributors field", async () => {
+  it("no events should be returned from series where users group is not in contributors field", async () => {
     const userId = 'NOT_CONTRIBUTOR_IN_ANY_SERIES';
     let response = await supertest(app)
         .get(LATAAMO_USER_EVENTS_PATH)
