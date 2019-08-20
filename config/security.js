@@ -4,6 +4,10 @@ const password = process.env.LATAAMO_OPENCAST_PASS;
 const userpass = Buffer.from(`${username}:${password}`).toString('base64');
 const auth = `Basic ${userpass}`;
 const axios = require('axios'); // https://www.npmjs.com/package/axios
+
+const ipaddr = require('ipaddr.js');
+const localhostIP = ipaddr.process('127.0.0.1');
+
 let ReverseProxyStrategy = require('passport-reverseproxy');
 
 module.exports.shibbolethAuthentication = function (app, passport) {
@@ -13,7 +17,7 @@ module.exports.shibbolethAuthentication = function (app, passport) {
                 'preferredlanguage': {alias: 'preferredLanguage', required: true},
                 'hyGroupCn': {alias: 'hyGroupCn', required: true}
             },
-            whitelist: '127.0.0.1/0'
+            whitelist: localhostIP
         })
     );
     app.use(passport.initialize());
