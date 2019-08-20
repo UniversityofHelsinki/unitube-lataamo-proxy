@@ -53,7 +53,7 @@ module.exports = function(app) {
     });
 
     // "user" own events AKA videos from ocast
-    app.get('/userEvents', async (req, res) => {
+    app.get('/userVideos', async (req, res) => {
         try {
             const allSeries = await apiService.getAllSeries();
             const loggedUser = userService.getLoggedUser(req.user);

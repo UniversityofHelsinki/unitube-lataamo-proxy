@@ -9,10 +9,11 @@ let test = require('./testHelper');
 
 // Unitube-lataamo proxy APIs under the test
 const LATAAMO_USER_SERIES_PATH = '/api/userSeries';
-const LATAAMO_USER_EVENTS_PATH = '/api/userEvents';
+const LATAAMO_USER_EVENTS_PATH = '/api/userVideos';
 const LATAAMO_API_INFO_PATH = '/api/';
 const LATAAMO_USER_PATH = '/api/user';
 
+const constants = require('../utils/constants');
 
 describe('Authentication with shibboleth headers (eppn, preferredlanguage, hyGroupCn)', () => {
 
@@ -149,7 +150,6 @@ describe('user series returned from /userSeries route', () => {
   })
 });
 
-
 describe('user events (videos) returned from /userEvents route', () => {
   beforeEach(() => {
     // mock needed opencast api calls
@@ -167,6 +167,7 @@ describe('user events (videos) returned from /userEvents route', () => {
     test.mockOCastEvent2MediaMetadataCall();
     test.mockOCastEvent3MediaMetadataCall();
     test.mockOCastEvent1AclCall();
+    test.mockOcastEvent2AclCall();
   })
 
   it("should return events from series where user is contributor", async () => {
@@ -183,8 +184,30 @@ describe('user events (videos) returned from /userEvents route', () => {
     assert.equal(response.body[0].identifier, test.constants.TEST_EVENT_1_ID);
     assert.equal(response.body[1].identifier, test.constants.TEST_EVENT_2_ID);
     assert.equal(response.body[2].identifier, test.constants.TEST_EVENT_3_ID);
+    assert.isArray(response.body[0].visibility, "Video's visibility property should be an array");
+    assert.isArray(response.body[1].visibility, "Video's visibility property should be an array");
+    assert.isArray(response.body[2].visibility, "Video's visibility property should be an array");
+    assert.lengthOf(response.body[0].visibility, 1, 'Video should have one visibility value');
+    assert.equal(response.body[0].visibility, constants.STATUS_PUBLISHED);
+    assert.lengthOf(response.body[1].visibility, 1, 'Video should have one visibility value');
+    assert.equal(response.body[1].visibility, constants.STATUS_PUBLISHED);
+    assert.lengthOf(response.body[2].visibility, 2, 'Video should have two visibility values');
+    assert.deepEqual(response.body[2].visibility,[constants.STATUS_PUBLISHED, constants.STATUS_MOODLE]);
   });
 
+  it("events should have visibility array property", async () => {
+    let response = await supertest(app)
+        .get(LATAAMO_USER_EVENTS_PATH)
+        .set('eppn', 'SeriesOwnerEppn')
+        .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+        .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+        .expect(200)
+        .expect('Content-Type', /json/);
+
+    assert.isArray(response.body[0].visibility, "Video's visibility property should be an array");
+    assert.isArray(response.body[1].visibility, "Video's visibility property should be an array");
+    assert.isArray(response.body[2].visibility, "Video's visibility property should be an array");
+  });
 
 
   it("should return events from series where users group is in contributors field", async () => {
@@ -198,14 +221,13 @@ describe('user events (videos) returned from /userEvents route', () => {
         .expect('Content-Type', /json/);
 
     assert.isArray(response.body, 'Response should be an array');
-    assert.lengthOf(response.body, 3, 'Three events should be returned');
+    assert.lengthOf(response.body, 2, 'Two events should be returned');
     assert.equal(response.body[0].identifier, test.constants.TEST_EVENT_1_ID);
     assert.equal(response.body[1].identifier, test.constants.TEST_EVENT_2_ID);
-    assert.equal(response.body[2].identifier, test.constants.TEST_EVENT_3_ID);
   });
 
 
-  it("should return no events from series where users group is not in contributors field", async () => {
+  it("no events should be returned from series where users group is not in contributors field", async () => {
     const userId = 'NOT_CONTRIBUTOR_IN_ANY_SERIES';
     let response = await supertest(app)
         .get(LATAAMO_USER_EVENTS_PATH)
@@ -234,7 +256,6 @@ describe('user events (videos) returned from /userEvents route', () => {
     assert.isArray(response.body, 'Response should be an array');
     assert.equal(response.body.length, 0);
   });
-
 
   afterEach(() => {
     test.cleanAll();
