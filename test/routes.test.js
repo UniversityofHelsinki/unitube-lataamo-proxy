@@ -13,6 +13,7 @@ const LATAAMO_USER_EVENTS_PATH = '/api/userVideos';
 const LATAAMO_API_INFO_PATH = '/api/';
 const LATAAMO_USER_PATH = '/api/user';
 
+const constants = require('../utils/constants');
 
 describe('Authentication with shibboleth headers (eppn, preferredlanguage, hyGroupCn)', () => {
 
@@ -149,7 +150,6 @@ describe('user series returned from /userSeries route', () => {
   })
 });
 
-
 describe('user events (videos) returned from /userEvents route', () => {
   beforeEach(() => {
     // mock needed opencast api calls
@@ -167,6 +167,7 @@ describe('user events (videos) returned from /userEvents route', () => {
     test.mockOCastEvent2MediaMetadataCall();
     test.mockOCastEvent3MediaMetadataCall();
     test.mockOCastEvent1AclCall();
+    test.mockOcastEvent2AclCall();
   })
 
   it("should return events from series where user is contributor", async () => {
@@ -187,10 +188,12 @@ describe('user events (videos) returned from /userEvents route', () => {
     assert.isArray(response.body[1].visibility, "Video's visibility property should be an array");
     assert.isArray(response.body[2].visibility, "Video's visibility property should be an array");
     assert.lengthOf(response.body[0].visibility, 1, 'Video should have one visibility value');
+    assert.equal(response.body[0].visibility, constants.STATUS_PUBLISHED);
     assert.lengthOf(response.body[1].visibility, 1, 'Video should have one visibility value');
-    assert.lengthOf(response.body[2].visibility, 1, 'Video should have one visibility value');
+    assert.equal(response.body[1].visibility, constants.STATUS_PUBLISHED);
+    assert.lengthOf(response.body[2].visibility, 2, 'Video should have two visibility values');
+    assert.deepEqual(response.body[2].visibility,[constants.STATUS_PUBLISHED, constants.STATUS_MOODLE]);
   });
-
 
   it("events should have visibility array property", async () => {
     let response = await supertest(app)
@@ -216,12 +219,11 @@ describe('user events (videos) returned from /userEvents route', () => {
         .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
         .expect(200)
         .expect('Content-Type', /json/);
-    
+
     assert.isArray(response.body, 'Response should be an array');
-    assert.lengthOf(response.body, 3, 'Three events should be returned');
+    assert.lengthOf(response.body, 2, 'Two events should be returned');
     assert.equal(response.body[0].identifier, test.constants.TEST_EVENT_1_ID);
     assert.equal(response.body[1].identifier, test.constants.TEST_EVENT_2_ID);
-    assert.equal(response.body[2].identifier, test.constants.TEST_EVENT_3_ID);
   });
 
 
@@ -254,7 +256,6 @@ describe('user events (videos) returned from /userEvents route', () => {
     assert.isArray(response.body, 'Response should be an array');
     assert.equal(response.body.length, 0);
   });
-
 
   afterEach(() => {
     test.cleanAll();

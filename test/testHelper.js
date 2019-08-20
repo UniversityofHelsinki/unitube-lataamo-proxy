@@ -70,7 +70,7 @@ const mockUserSeries = [
     }
 ]
 
-const mockUserEvents =  [
+const mockUserEventsForSeries1 =  [
     {
         identifier: CONSTANTS.TEST_EVENT_1_ID,
         creator: 'Opencast Project Administrator',
@@ -104,7 +104,10 @@ const mockUserEvents =  [
         has_previews: true,
         location: '',
         publication_status: [ 'internal', 'engage-player', 'api', 'oaipmh-default' ]
-    },
+    }
+]
+
+const mockUserEventsForSeries2 =  [
     {
         identifier: CONSTANTS.TEST_EVENT_3_ID,
         creator: 'lataamo_testi',
@@ -138,6 +141,22 @@ const eventACLs =  [
     { allow: true, role: 'ROLE_ANONYMOUS', action: 'read' }
 ]
 
+// /api/series/d72a8c9e-f854-4ba4-9ed2-89405fae214e/acl
+const eventAclsFromSerie2 = () => {
+    return nock(CONSTANTS.OCAST_BASE_URL)
+        .get(`/api/series/${CONSTANTS.TEST_SERIES_2_ID}/acl`)
+        .reply(200, event2ACLs).persist(); // this url will be called several times so let's persist
+}
+
+const event2ACLs =  [
+    { allow: true, role: 'ROLE_USER_ADMIN', action: 'read' },
+    { allow: true, role: 'ROLE_USER_ADMIN', action: 'write' },
+    { allow: true, role: 'ROLE_ADMIN', action: 'read' },
+    { allow: true, role: 'ROLE_ADMIN', action: 'write' },
+    { allow: true, role: 'ROLE_ANONYMOUS', action: 'read' },
+    { allow: true, role: '123_Instructor', action: 'read' },
+    { allow: true, role: '123_Learner', action: 'read' },
+]
 
 // /admin-ng/event/6394a9b7-3c06-477e-841a-70862eb07bfb/asset/media/638b7ae1-0710-44df-b3db-55ee9e8b48ba.json
 const event1MediaMetadata = () => nock(CONSTANTS.OCAST_BASE_URL)
@@ -244,7 +263,7 @@ const event3Media = () => nock(CONSTANTS.OCAST_BASE_URL)
 
 const mockEventMetadata1 = [{"flavor":"dublincore\/episode","title":"EVENTS.EVENTS.DETAILS.CATALOG.EPISODE","fields":[{"readOnly":false,"id":"title","label":"EVENTS.EVENTS.DETAILS.METADATA.TITLE","type":"text","value":"LATAAMO-103 toka","required":true},{"readOnly":false,"id":"subjects","label":"EVENTS.EVENTS.DETAILS.METADATA.SUBJECT","type":"text","value":["Testin more"],"required":false},{"readOnly":false,"id":"description","label":"EVENTS.EVENTS.DETAILS.METADATA.DESCRIPTION","type":"text_long","value":"","required":false},{"translatable":true,"readOnly":false,"id":"language","label":"EVENTS.EVENTS.DETAILS.METADATA.LANGUAGE","type":"text","value":"","required":false},{"readOnly":false,"id":"rightsHolder","label":"EVENTS.EVENTS.DETAILS.METADATA.RIGHTS","type":"text","value":"","required":false},{"translatable":true,"readOnly":false,"id":"license","label":"EVENTS.EVENTS.DETAILS.METADATA.LICENSE","type":"text","value":"ALLRIGHTS","required":false},{"translatable":false,"readOnly":false,"id":"isPartOf","label":"EVENTS.EVENTS.DETAILS.METADATA.SERIES","type":"text","value":"80f9ff5b-4163-48b7-b7cf-950be665de3c","required":false},{"translatable":false,"readOnly":false,"id":"creator","label":"EVENTS.EVENTS.DETAILS.METADATA.PRESENTERS","type":"mixed_text","value":[],"required":false},{"translatable":false,"readOnly":false,"id":"contributor","label":"EVENTS.EVENTS.DETAILS.METADATA.CONTRIBUTORS","type":"mixed_text","value":["tzrasane"],"required":false},{"readOnly":false,"id":"startDate","label":"EVENTS.EVENTS.DETAILS.METADATA.START_DATE","type":"date","value":"2019-06-12","required":false},{"readOnly":false,"id":"startTime","label":"EVENTS.EVENTS.DETAILS.METADATA.START_TIME","type":"time","value":"07:47","required":false},{"readOnly":false,"id":"duration","label":"EVENTS.EVENTS.DETAILS.METADATA.DURATION","type":"text","value":"00:00:00","required":false},{"readOnly":false,"id":"location","label":"EVENTS.EVENTS.DETAILS.METADATA.LOCATION","type":"text","value":"","required":false},{"readOnly":false,"id":"source","label":"EVENTS.EVENTS.DETAILS.METADATA.SOURCE","type":"text","value":"","required":false},{"readOnly":true,"id":"created","label":"EVENTS.EVENTS.DETAILS.METADATA.CREATED","type":"date","value":"2019-06-12T07:47:49.000Z","required":false},{"readOnly":true,"id":"identifier","label":"EVENTS.EVENTS.DETAILS.METADATA.ID","type":"text","value":CONSTANTS.TEST_EVENT_1_ID,"required":false}]}]
 const mockEventMetadata2 = [{"flavor":"dublincore\/episode","title":"EVENTS.EVENTS.DETAILS.CATALOG.EPISODE","fields":[{"readOnly":false,"id":"title","label":"EVENTS.EVENTS.DETAILS.METADATA.TITLE","type":"text","value":"LAATAMO-103","required":true},{"readOnly":false,"id":"subjects","label":"EVENTS.EVENTS.DETAILS.METADATA.SUBJECT","type":"text","value":["testing"],"required":false},{"readOnly":false,"id":"description","label":"EVENTS.EVENTS.DETAILS.METADATA.DESCRIPTION","type":"text_long","value":"","required":false},{"translatable":true,"readOnly":false,"id":"language","label":"EVENTS.EVENTS.DETAILS.METADATA.LANGUAGE","type":"text","value":"","required":false},{"readOnly":false,"id":"rightsHolder","label":"EVENTS.EVENTS.DETAILS.METADATA.RIGHTS","type":"text","value":"","required":false},{"translatable":true,"readOnly":false,"id":"license","label":"EVENTS.EVENTS.DETAILS.METADATA.LICENSE","type":"text","value":"ALLRIGHTS","required":false},{"translatable":false,"readOnly":false,"id":"isPartOf","label":"EVENTS.EVENTS.DETAILS.METADATA.SERIES","type":"text","value":"80f9ff5b-4163-48b7-b7cf-950be665de3c","required":false},{"translatable":false,"readOnly":false,"id":"creator","label":"EVENTS.EVENTS.DETAILS.METADATA.PRESENTERS","type":"mixed_text","value":[],"required":false},{"translatable":false,"readOnly":false,"id":"contributor","label":"EVENTS.EVENTS.DETAILS.METADATA.CONTRIBUTORS","type":"mixed_text","value":["tzrasane"],"required":false},{"readOnly":false,"id":"startDate","label":"EVENTS.EVENTS.DETAILS.METADATA.START_DATE","type":"date","value":"2019-06-11","required":false},{"readOnly":false,"id":"startTime","label":"EVENTS.EVENTS.DETAILS.METADATA.START_TIME","type":"time","value":"13:04","required":false},{"readOnly":false,"id":"duration","label":"EVENTS.EVENTS.DETAILS.METADATA.DURATION","type":"text","value":"00:00:00","required":false},{"readOnly":false,"id":"location","label":"EVENTS.EVENTS.DETAILS.METADATA.LOCATION","type":"text","value":"","required":false},{"readOnly":false,"id":"source","label":"EVENTS.EVENTS.DETAILS.METADATA.SOURCE","type":"text","value":"","required":false},{"readOnly":true,"id":"created","label":"EVENTS.EVENTS.DETAILS.METADATA.CREATED","type":"date","value":"2019-06-11T13:04:43.000Z","required":false},{"readOnly":true,"id":"identifier","label":"EVENTS.EVENTS.DETAILS.METADATA.ID","type":"text","value":CONSTANTS.TEST_EVENT_2_ID,"required":false}]}]
-const mockEventMetadata3 = [{"flavor":"dublincore\/episode","title":"EVENTS.EVENTS.DETAILS.CATALOG.EPISODE","fields":[{"readOnly":false,"id":"title","label":"EVENTS.EVENTS.DETAILS.METADATA.TITLE","type":"text","value":"Captivating title","required":true},{"readOnly":false,"id":"subjects","label":"EVENTS.EVENTS.DETAILS.METADATA.SUBJECT","type":"text","value":["John Clark","Thiago Melo Costa"],"required":false},{"readOnly":false,"id":"description","label":"EVENTS.EVENTS.DETAILS.METADATA.DESCRIPTION","type":"text_long","value":"A great description","required":false},{"translatable":true,"readOnly":false,"id":"language","label":"EVENTS.EVENTS.DETAILS.METADATA.LANGUAGE","type":"text","value":"","required":false},{"readOnly":false,"id":"rightsHolder","label":"EVENTS.EVENTS.DETAILS.METADATA.RIGHTS","type":"text","value":"","required":false},{"translatable":true,"readOnly":false,"id":"license","label":"EVENTS.EVENTS.DETAILS.METADATA.LICENSE","type":"text","value":"","required":false},{"translatable":false,"readOnly":false,"id":"isPartOf","label":"EVENTS.EVENTS.DETAILS.METADATA.SERIES","type":"text","value":"80f9ff5b-4163-48b7-b7cf-950be665de3c","required":false},{"translatable":false,"readOnly":false,"id":"creator","label":"EVENTS.EVENTS.DETAILS.METADATA.PRESENTERS","type":"mixed_text","value":[],"required":false},{"translatable":false,"readOnly":false,"id":"contributor","label":"EVENTS.EVENTS.DETAILS.METADATA.CONTRIBUTORS","type":"mixed_text","value":[],"required":false},{"readOnly":false,"id":"startDate","label":"EVENTS.EVENTS.DETAILS.METADATA.START_DATE","type":"date","value":"2016-06-22","required":false},{"readOnly":false,"id":"startTime","label":"EVENTS.EVENTS.DETAILS.METADATA.START_TIME","type":"time","value":"13:30","required":false},{"readOnly":false,"id":"duration","label":"EVENTS.EVENTS.DETAILS.METADATA.DURATION","type":"text","value":"00:00:00","required":false},{"readOnly":false,"id":"location","label":"EVENTS.EVENTS.DETAILS.METADATA.LOCATION","type":"text","value":"","required":false},{"readOnly":false,"id":"source","label":"EVENTS.EVENTS.DETAILS.METADATA.SOURCE","type":"text","value":"","required":false},{"readOnly":true,"id":"created","label":"EVENTS.EVENTS.DETAILS.METADATA.CREATED","type":"date","value":"2016-06-22T13:30:00.000Z","required":false},{"readOnly":true,"id":"identifier","label":"EVENTS.EVENTS.DETAILS.METADATA.ID","type":"text","value":CONSTANTS.TEST_EVENT_3_ID,"required":false}]}]
+const mockEventMetadata3 = [{"flavor":"dublincore\/episode","title":"EVENTS.EVENTS.DETAILS.CATALOG.EPISODE","fields":[{"readOnly":false,"id":"title","label":"EVENTS.EVENTS.DETAILS.METADATA.TITLE","type":"text","value":"Captivating title","required":true},{"readOnly":false,"id":"subjects","label":"EVENTS.EVENTS.DETAILS.METADATA.SUBJECT","type":"text","value":["John Clark","Thiago Melo Costa"],"required":false},{"readOnly":false,"id":"description","label":"EVENTS.EVENTS.DETAILS.METADATA.DESCRIPTION","type":"text_long","value":"A great description","required":false},{"translatable":true,"readOnly":false,"id":"language","label":"EVENTS.EVENTS.DETAILS.METADATA.LANGUAGE","type":"text","value":"","required":false},{"readOnly":false,"id":"rightsHolder","label":"EVENTS.EVENTS.DETAILS.METADATA.RIGHTS","type":"text","value":"","required":false},{"translatable":true,"readOnly":false,"id":"license","label":"EVENTS.EVENTS.DETAILS.METADATA.LICENSE","type":"text","value":"","required":false},{"translatable":false,"readOnly":false,"id":"isPartOf","label":"EVENTS.EVENTS.DETAILS.METADATA.SERIES","type":"text","value":"d72a8c9e-f854-4ba4-9ed2-89405fae214e","required":false},{"translatable":false,"readOnly":false,"id":"creator","label":"EVENTS.EVENTS.DETAILS.METADATA.PRESENTERS","type":"mixed_text","value":[],"required":false},{"translatable":false,"readOnly":false,"id":"contributor","label":"EVENTS.EVENTS.DETAILS.METADATA.CONTRIBUTORS","type":"mixed_text","value":[],"required":false},{"readOnly":false,"id":"startDate","label":"EVENTS.EVENTS.DETAILS.METADATA.START_DATE","type":"date","value":"2016-06-22","required":false},{"readOnly":false,"id":"startTime","label":"EVENTS.EVENTS.DETAILS.METADATA.START_TIME","type":"time","value":"13:30","required":false},{"readOnly":false,"id":"duration","label":"EVENTS.EVENTS.DETAILS.METADATA.DURATION","type":"text","value":"00:00:00","required":false},{"readOnly":false,"id":"location","label":"EVENTS.EVENTS.DETAILS.METADATA.LOCATION","type":"text","value":"","required":false},{"readOnly":false,"id":"source","label":"EVENTS.EVENTS.DETAILS.METADATA.SOURCE","type":"text","value":"","required":false},{"readOnly":true,"id":"created","label":"EVENTS.EVENTS.DETAILS.METADATA.CREATED","type":"date","value":"2016-06-22T13:30:00.000Z","required":false},{"readOnly":true,"id":"identifier","label":"EVENTS.EVENTS.DETAILS.METADATA.ID","type":"text","value":CONSTANTS.TEST_EVENT_3_ID,"required":false}]}]
 
 // /api/6394a9b7-3c06-477e-841a-70862eb07bfb/metadata
 const eventMetadata_1 = () => nock(CONSTANTS.OCAST_BASE_URL)
@@ -265,13 +284,13 @@ const eventMetadata_3 = () => nock(CONSTANTS.OCAST_BASE_URL)
 const series1_Events = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(CONSTANTS.OCAST_VIDEOS_PATH)
     .query({filter: `series:${CONSTANTS.TEST_SERIES_1_ID}`})
-    .reply(200, mockUserEvents);
+    .reply(200, mockUserEventsForSeries1);
 
 // events by series /api/events/?filter=series:series:d72a8c9e-f854-4ba4-9ed2-89405fae214e
 const series2_Events = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(CONSTANTS.OCAST_VIDEOS_PATH)
     .query({filter: `series:${CONSTANTS.TEST_SERIES_2_ID}`})
-    .reply(200, NO_RESULTS);
+    .reply(200, mockUserEventsForSeries2);
 
 // /api/series/?filter=Creator:Opencast Project Administrator
 const lataamoSeries = () => nock(CONSTANTS.OCAST_BASE_URL)
@@ -302,6 +321,7 @@ module.exports.mockOCastEvent1MediaMetadataCall = event1MediaMetadata;
 module.exports.mockOCastEvent2MediaMetadataCall = event2MediaMetadata;
 module.exports.mockOCastEvent3MediaMetadataCall = event3MediaMetadata;
 module.exports.mockOCastEvent1AclCall = eventAclsFromSerie;
+module.exports.mockOcastEvent2AclCall = eventAclsFromSerie2;
 module.exports.constants = CONSTANTS;
 
 module.exports.cleanAll = cleanMocks;
