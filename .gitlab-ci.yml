@@ -9,7 +9,6 @@ cache:
 # Define the stages
 stages:
   - setup
-  - test
   - build
   - deploy
 
