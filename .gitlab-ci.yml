@@ -9,6 +9,7 @@ cache:
 # Define the stages
 stages:
   - setup
+  - test
   - build
   - deploy
 
@@ -19,6 +20,12 @@ setup:
   stage: setup
   script:
     - npm install
+
+# Define the process for test stage
+test:
+  stage: test
+  script:
+    - npm test
 
 # Define the process for build stage
 build:
