@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --exit",
+    "test": "cross-env OCAST_BASE_URL=localhost:8080 mocha --exit",
     "build": "echo \"Testing build\"",
     "start": "node app.js",
     "nodemon": "nodemon ./app.js localhost 3000"
@@ -19,6 +19,7 @@
     "axios": "^0.18.1",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
+    "cross-env": "^5.2.0",
     "dotenv": "^8.0.0",
     "express": "^4.17.1",
     "express-http-proxy": "^1.5.1",
