@@ -1,4 +1,4 @@
-const host = process.env.LATAAMO_OPENCAST_HOST;
+const host = process.env.LATAAMO_OPENCAST_HOST || 'localhost:8080';
 const username = process.env.LATAAMO_OPENCAST_USER;
 const password = process.env.LATAAMO_OPENCAST_PASS;
 const userpass = Buffer.from(`${username}:${password}`).toString('base64');
