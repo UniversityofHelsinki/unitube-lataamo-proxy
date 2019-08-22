@@ -20,7 +20,8 @@ exports.filterEventsForClient = (ocResponseData) => {
             "duration": moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format("hh:mm:ss", {trim:false}),
             "creator": event.creator,
             "processing_state" : event.processing_state,
-            "visibility" : calculateVisibilityPropertyForVideo(event)
+            "visibility" : calculateVisibilityPropertyForVideo(event),
+            "created": event.created
         })
     });
     return eventArray;
