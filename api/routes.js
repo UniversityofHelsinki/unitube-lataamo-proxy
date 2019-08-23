@@ -11,7 +11,7 @@ module.exports = function(app) {
     app.get('/', api.apiInfo);
 
     app.get("/user", (req, res) => {
-        res.json(req.user);
+        res.json(userService.getLoggedUser(req.user));
     });
 
     app.get("/event/:id", async (req, res) => {
