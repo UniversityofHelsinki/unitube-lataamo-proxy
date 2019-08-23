@@ -6,11 +6,18 @@ exports.getSeriesIdentifiers = (series, user) =>  {
     return seriesIdentifiers;
 }
 
+const filteredUserAttributes = (user) => {
+    let filteredAttributes = [];
+    filteredAttributes.push(user.eppn);
+    filteredAttributes.push(user.hyGroupCn);
+    filteredAttributes = concatenateArray(filteredAttributes);
+    return filteredAttributes;
+}
+
 const filterSeriesByUser = (series, user) => {
+    const filteredAttributes = filteredUserAttributes(user);
     const filteredSeriesByUser = series.filter(serie => {
-        return serie.contributors.some(contributor => {
-            return contributor === user
-        });
+        return serie.contributors.some(contributor=> filteredAttributes.includes(contributor));
     });
     return filteredSeriesByUser;
 }
@@ -28,3 +35,5 @@ exports.getSerieFromEventMetadata = (metadata) => {
     });
     return foundFieldWithSeriesInfo;
 };
+
+const concatenateArray = (data) => Array.prototype.concat.apply([], data);

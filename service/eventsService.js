@@ -1,6 +1,10 @@
 const seriesService = require('./seriesService');
 const apiService = require('./apiService');
-const prettyMilliseconds = require('pretty-ms');
+const moment = require('moment');
+const momentDurationFormatSetup = require("moment-duration-format");
+momentDurationFormatSetup(moment);
+const constants = require('../utils/constants');
+
 
 exports.filterEventsForClient = (ocResponseData) => {
 
@@ -13,14 +17,31 @@ exports.filterEventsForClient = (ocResponseData) => {
         eventArray.push({
             "identifier": event.identifier,
             "title": event.title,
-            "duration": prettyMilliseconds(event.mediaFileMetadata.duration, {secondsDecimalDigits:0}),
+            "duration": moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format("hh:mm:ss", {trim:false}),
             "creator": event.creator,
             "processing_state" : event.processing_state,
-            "acls" : event.acls
+            "visibility" : calculateVisibilityPropertyForVideo(event),
+            "created": event.created
         })
     });
     return eventArray;
 };
+
+const calculateVisibilityPropertyForVideo = (video) => {
+    const visibility = [];
+    const publishedAcl = video.acls.filter(acl => acl.role === constants.ROLE_ANONYMOUS);
+    const moodleAclInstructor = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_INSTRUCTOR));
+    const moodleAclLearner = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_LEARNER));
+
+    if (publishedAcl && publishedAcl.length > 0) {
+        visibility.push(constants.STATUS_PUBLISHED);
+    }
+
+    if (moodleAclInstructor && moodleAclLearner && moodleAclInstructor.length > 0 && moodleAclLearner.length > 0) {
+        visibility.push(constants.STATUS_MOODLE);
+    }
+    return [...new Set(visibility)]
+}
 
 exports.getAllEvents  = async (seriesIdentifiers) => {
     return await Promise.all(seriesIdentifiers.map(identifier => apiService.getEventsByIdentifier(identifier)));
@@ -68,6 +89,15 @@ exports.getAllEventsWithAcls = async (events) => {
         }
     }));
 };
+
+exports.getEventWithSerie = async (event) => {
+    const metadata = await apiService.getMetadataForEvent(event);
+    const serie = seriesService.getSerieFromEventMetadata(metadata);
+    return {
+        ...event,
+        isPartOf : serie.value
+    }
+}
 
 exports.concatenateArray = (data) => Array.prototype.concat.apply([], data);
 

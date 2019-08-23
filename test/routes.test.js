@@ -1,59 +1,60 @@
 
 const chai = require('chai');           // https://www.npmjs.com/package/chai
-const assert = chai.assert; 
-const nock = require('nock');           // https://www.npmjs.com/package/nock
+const assert = chai.assert;
 const supertest = require('supertest'); // https://www.npmjs.com/package/supertest
-const app = require('../app')
+const app = require('../app');
+
+let test = require('./testHelper');
 
 
-// Opencast APIs
-const OCAST_BASE_URL = 'http://localhost:8080';
-const OCAST_SERIES_PATH = '/api/series/';
-const OCAST_VIDEOS_PATH = '/api/events/';
-const OCAST_USER_PATH = '/api/info/me';
-const OCAST_VIDEO_PUBLICATION_PATH = '/publications';
-const OCAST_EVENT_MEDIA_PATH_PREFIX = '/admin-ng/event/';
-const OCAST_EVENT_MEDIA_PATH_SUFFIX = '/asset/media/media.json';
-const OCAST_EVENT_MEDIA_FILE_METADATA = '/asset/media/';
-
-const OCAST_SERIES_FILTER_CREATOR = '?filter=Creator:';
-const OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER = '?filter=series:';
-
-// Unitube-lataamo proxy APIs
+// Unitube-lataamo proxy APIs under the test
 const LATAAMO_USER_SERIES_PATH = '/api/userSeries';
+const LATAAMO_USER_EVENTS_PATH = '/api/userVideos';
 const LATAAMO_API_INFO_PATH = '/api/';
 const LATAAMO_USER_PATH = '/api/user';
 
+const constants = require('../utils/constants');
 
-describe('Authentication with shibboleth headers (eppn, preferredlanguage)', () => {
+describe('Authentication with shibboleth headers (eppn, preferredlanguage, hyGroupCn)', () => {
 
   it("should return 200 OK when eppn and preferredlanguage are present", async () => {
     let response = await supertest(app)
-      .get(LATAAMO_API_INFO_PATH)
-      .set('eppn', 'test_request_id')
-      .set('preferredlanguage', 'test_lang')
-      .expect(200)
-      .expect('Content-Type', /json/)
+        .get(LATAAMO_API_INFO_PATH)
+        .set('eppn', 'test_request_id')
+        .set('preferredlanguage', 'test_lang')
+        .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
+        .expect(200)
+        .expect('Content-Type', /json/)
   });
 
   it("should return 401 OK when eppn header not present", async () => {
     let response = await supertest(app)
-      .get(LATAAMO_API_INFO_PATH)
-      .set('preferredlanguage', 'test_lang')
-      .expect(401)
+        .get(LATAAMO_API_INFO_PATH)
+        .set('preferredlanguage', 'test_lang')
+        .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
+        .expect(401)
   });
 
   it("should return 401 OK when preferredlanguage header not present", async () => {
     let response = await supertest(app)
-      .get(LATAAMO_API_INFO_PATH)
-      .set('eppn', 'test_request_id')
-      .expect(401)
+        .get(LATAAMO_API_INFO_PATH)
+        .set('eppn', 'test_request_id')
+        .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
+        .expect(401)
   });
 
   it("should return 401 OK when preferredlanguage and eppn headers not present", async () => {
     let response = await supertest(app)
-      .get(LATAAMO_API_INFO_PATH)
-      .expect(401)
+        .get(LATAAMO_API_INFO_PATH)
+        .expect(401)
+  });
+
+  it("should return 401 OK when hyGroupCn header is not present", async () => {
+    let response = await supertest(app)
+        .get(LATAAMO_API_INFO_PATH)
+        .set('eppn', 'test_request_id')
+        .set('preferredlanguage', 'test_lang')
+        .expect(401)
   });
 
 });
@@ -63,11 +64,12 @@ describe('api info returned from / route', () => {
 
   it("should return api info", async () => {
     let response = await supertest(app)
-      .get(LATAAMO_API_INFO_PATH)
-      .set('eppn', 'test_request_id')
-      .set('preferredlanguage', 'test_lang')
-      .expect(200)
-      .expect('Content-Type', /json/)
+        .get(LATAAMO_API_INFO_PATH)
+        .set('eppn', 'test_request_id')
+        .set('preferredlanguage', 'test_lang')
+        .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
+        .expect(200)
+        .expect('Content-Type', /json/);
 
     assert.equal(response.body.message, 'API alive');
     assert.isNotNull(response.body.name);
@@ -76,89 +78,40 @@ describe('api info returned from / route', () => {
 });
 
 
-describe('user eppn and preferredlanguage returned from /user route', () => {
-
-  const mockTestUser = { 
-    eppn: 'Tester-XYZ',
-    preferredlanguage: 'fi'
-  }
+describe('user eppn, preferredlanguage and hyGroupCn returned from /user route', () => {
 
   it("should return user", async () => {
     let response = await supertest(app)
-      .get(LATAAMO_USER_PATH)
-      .set('eppn', mockTestUser.eppn)
-      .set('preferredlanguage', mockTestUser.preferredlanguage)
-      .expect(200)
-      .expect('Content-Type', /json/)
-  
-    assert.equal(response.body.eppn, mockTestUser.eppn);
-    assert.equal(response.body.preferredLanguage, mockTestUser.preferredlanguage);
+        .get(LATAAMO_USER_PATH)
+        .set('eppn', test.mockTestUser.eppn)
+        .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+        .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+        .expect(200)
+        .expect('Content-Type', /json/);
+
+    assert.equal(response.body.eppn, test.mockTestUser.eppn);
+    assert.equal(response.body.preferredLanguage, test.mockTestUser.preferredlanguage);
+    assert.equal(response.body.hyGroupCn, test.mockTestUser.hyGroupCn);
   });
 });
 
 
 describe('user series returned from /userSeries route', () => {
 
-  const mockTestUser = { 
-    eppn: 'Tester-XYZ',
-    preferredlanguage: 'fi'
-  }
-
-  const mockApiUser =  { 
-    provider: 'opencast',
-    name: 'Opencast Project Administrator',
-    userrole: 'ROLE_USER_ADMIN',
-    email: 'admin@localhost',
-    username: 'admin' 
-  }
-
-  // these are filtered by contributor (eppn in contributor values)
-  const mockUserSeries = [ 
-    { identifier: '80f9ff5b-4163-48b7-b7cf-950be665de3c',
-      creator: 'Opencast Project Administrator',
-      created: '2019-06-11T12:59:40Z',
-      subjects: 
-        [ 'subjects-järvi',
-          'subjects-laavu',
-          'subjects-aamupuuro',
-          'subjects-turve',
-          'subjects-salama',
-          'subjects-koivikko' ],
-      organizers: [ 'creator-kasitunnus' ],
-      publishers: [ 'publisher-kasitunnus' ],
-      contributors: [ 'contrib1', 'jaaki' ],
-      title: 'title-LATAAMO-131' 
-    },
-    { identifier: 'd72a8c9e-f854-4ba4-9ed2-89405fae214e',
-      creator: 'Opencast Project Administrator',
-      created: '2019-05-22T09:56:43Z',
-      subjects: [ 'juusto', 'makasiini', 'aamupuuro', 'turve', 'salama', 'sämpylä' ],
-      organizers: [ 'organizer1' ],
-      publishers: [ '' ],
-      contributors: [ 'SeriesOwnerEppn', 'Tester A', 'Tester B' ],
-      title: 'kuutamossa' 
-    }
-  ]
-  
-  beforeEach(() => {  
-    // mock needed opencast apis 
-    nock(OCAST_BASE_URL)
-      .get(OCAST_SERIES_PATH)
-      .query({filter: 'Creator:Opencast Project Administrator'})
-      .reply(200, mockUserSeries);
-
-    nock(OCAST_BASE_URL)  
-      .get(OCAST_USER_PATH)
-      .reply(200, mockApiUser);
+  beforeEach(() => {
+    // mock needed opencast apis
+    test.mockOCastSeriesApiCall();
+    test.mockOCastUserApiCall();
   })
 
-  it("should return no series if user not the series contributor", async () => {
+  it("should return no series if user and users groups are not in the series contributors list", async () => {
     let response = await supertest(app)
-      .get(LATAAMO_USER_SERIES_PATH)
-      .set('eppn', mockTestUser.eppn)
-      .set('preferredlanguage', mockTestUser.preferredlanguage)
-      .expect(200)
-      .expect('Content-Type', /json/)
+        .get(LATAAMO_USER_SERIES_PATH)
+        .set('eppn', test.mockTestUser.eppn)
+        .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+        .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+        .expect(200)
+        .expect('Content-Type', /json/);
 
     assert.isArray(response.body, 'Response should be an array');
     assert.lengthOf(response.body, 0, 'Response array should be empty, no series should be returned');
@@ -167,18 +120,145 @@ describe('user series returned from /userSeries route', () => {
 
   it("should return user's series if user is the series contributor", async () => {
     let response = await supertest(app)
-      .get(LATAAMO_USER_SERIES_PATH)
-      .set('eppn', 'SeriesOwnerEppn')
-      .set('preferredlanguage', mockTestUser.preferredlanguage)
-      .expect(200)
-      .expect('Content-Type', /json/)
+        .get(LATAAMO_USER_SERIES_PATH)
+        .set('eppn', 'SeriesOwnerEppn')
+        .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+        .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+        .expect(200)
+        .expect('Content-Type', /json/);
 
     assert.isArray(response.body, 'Response should be an array');
-    assert.lengthOf(response.body, 1, 'Response array should not be empty, 1 series should be returned');
+    assert.lengthOf(response.body, 2, 'Two series should be returned');
+  });
+
+  it("should return user's series if users group is in the series contributors list", async () => {
+    let response = await supertest(app)
+        .get(LATAAMO_USER_SERIES_PATH)
+        .set('eppn', test.mockTestUser.eppn)
+        .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+        .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
+        .expect(200)
+        .expect('Content-Type', /json/);
+
+    assert.isArray(response.body, 'Response should be an array');
+    assert.lengthOf(response.body, 1, 'One serie should be returned');
+    assert.equal(response.body[0].identifier, test.constants.TEST_SERIES_1_ID);
   });
 
   afterEach(() => {
-    // remove mocks
-    nock.cleanAll();
+    test.cleanAll();
   })
+});
+
+describe('user events (videos) returned from /userEvents route', () => {
+  beforeEach(() => {
+    // mock needed opencast api calls
+    test.mockOCastSeriesApiCall();
+    test.mockOCastUserApiCall();
+    test.mockOCastEvents_1_ApiCall();
+    test.mockOCastEvents_2_ApiCall();
+    test.mockOCastEventMetadata_1Call();
+    test.mockOCastEventMetadata_2Call();
+    test.mockOCastEventMetadata_3Call();
+    test.mockOCastEvent1MediaCall();
+    test.mockOCastEvent2MediaCall();
+    test.mockOCastEvent3MediaCall();
+    test.mockOCastEvent1MediaMetadataCall();
+    test.mockOCastEvent2MediaMetadataCall();
+    test.mockOCastEvent3MediaMetadataCall();
+    test.mockOCastEvent1AclCall();
+    test.mockOcastEvent2AclCall();
+  })
+
+  it("should return events from series where user is contributor", async () => {
+    let response = await supertest(app)
+        .get(LATAAMO_USER_EVENTS_PATH)
+        .set('eppn', 'SeriesOwnerEppn')
+        .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+        .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+        .expect(200)
+        .expect('Content-Type', /json/);
+
+    assert.isArray(response.body, 'Response should be an array');
+    assert.lengthOf(response.body, 3, 'Three events should be returned');
+    assert.equal(response.body[0].identifier, test.constants.TEST_EVENT_1_ID);
+    assert.equal(response.body[1].identifier, test.constants.TEST_EVENT_2_ID);
+    assert.equal(response.body[2].identifier, test.constants.TEST_EVENT_3_ID);
+    assert.isArray(response.body[0].visibility, "Video's visibility property should be an array");
+    assert.isArray(response.body[1].visibility, "Video's visibility property should be an array");
+    assert.isArray(response.body[2].visibility, "Video's visibility property should be an array");
+    assert.lengthOf(response.body[0].visibility, 1, 'Video should have one visibility value');
+    assert.equal(response.body[0].visibility, constants.STATUS_PUBLISHED);
+    assert.lengthOf(response.body[1].visibility, 1, 'Video should have one visibility value');
+    assert.equal(response.body[1].visibility, constants.STATUS_PUBLISHED);
+    assert.lengthOf(response.body[2].visibility, 2, 'Video should have two visibility values');
+    assert.deepEqual(response.body[2].visibility,[constants.STATUS_PUBLISHED, constants.STATUS_MOODLE]);
+  });
+
+  it("events should have visibility array property", async () => {
+    let response = await supertest(app)
+        .get(LATAAMO_USER_EVENTS_PATH)
+        .set('eppn', 'SeriesOwnerEppn')
+        .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+        .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+        .expect(200)
+        .expect('Content-Type', /json/);
+
+    assert.isArray(response.body[0].visibility, "Video's visibility property should be an array");
+    assert.isArray(response.body[1].visibility, "Video's visibility property should be an array");
+    assert.isArray(response.body[2].visibility, "Video's visibility property should be an array");
+  });
+
+
+  it("should return events from series where users group is in contributors field", async () => {
+    const userId = 'NOT_CONTRIBUTOR_IN_ANY_SERIES';
+    let response = await supertest(app)
+        .get(LATAAMO_USER_EVENTS_PATH)
+        .set('eppn', userId)
+        .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+        .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
+        .expect(200)
+        .expect('Content-Type', /json/);
+
+    assert.isArray(response.body, 'Response should be an array');
+    assert.lengthOf(response.body, 2, 'Two events should be returned');
+    assert.equal(response.body[0].identifier, test.constants.TEST_EVENT_1_ID);
+    assert.equal(response.body[1].identifier, test.constants.TEST_EVENT_2_ID);
+  });
+
+
+  it("no events should be returned from series where users group is not in contributors field", async () => {
+    const userId = 'NOT_CONTRIBUTOR_IN_ANY_SERIES';
+    let response = await supertest(app)
+        .get(LATAAMO_USER_EVENTS_PATH)
+        .set('eppn', userId)
+        .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+        .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3')
+        .expect(200)
+        .expect('Content-Type', /json/);
+
+    assert.isArray(response.body, 'Response should be an array');
+    assert.equal(response.body.length, 0);
+  });
+
+
+  it("no events should be returned if user is not contributor in any series", async () => {
+    const userId = 'NOT_CONTRIBUTOR_IN_ANY_SERIES';
+
+    let response = await supertest(app)
+        .get(LATAAMO_USER_EVENTS_PATH)
+        .set('eppn', userId)
+        .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+        .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+        .expect(200)
+        .expect('Content-Type', /json/);
+
+    assert.isArray(response.body, 'Response should be an array');
+    assert.equal(response.body.length, 0);
+  });
+
+  afterEach(() => {
+    test.cleanAll();
+  })
+
 });
