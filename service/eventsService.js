@@ -97,7 +97,7 @@ exports.getEventWithSerie = async (event) => {
         ...event,
         isPartOf : serie.value
     }
-}
+};
 
 exports.concatenateArray = (data) => Array.prototype.concat.apply([], data);
 

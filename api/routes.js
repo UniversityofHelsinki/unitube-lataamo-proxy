@@ -75,9 +75,13 @@ module.exports = function(app) {
     // update video metadata
     app.put('/userVideos/:id', async (req, res) => {
        try {
+           const videoMetadata = req.body;
+           const data = await apiService.updateVideoMetadata(videoMetadata);
            res.json({message : 'OK'});
        } catch(error) {
-
+           res.status(500)
+           const msg = error.message
+           res.json({ message: 'Error', msg })
        }
     });
 };
