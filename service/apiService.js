@@ -18,6 +18,12 @@ exports.getUser = async () => {
     return apiUser.data;
 }
 
+exports.getEvent = async (identifier) => {
+    let eventUrl = OCAST_VIDEOS_PATH + identifier;
+    const response = await security.opencastBase.get(eventUrl);
+    return response.data;
+}
+
 exports.getEventsByIdentifier = async (identifier) => {
     let userEventsUrl = OCAST_VIDEOS_PATH + OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER;
     userEventsUrl = userEventsUrl + identifier;

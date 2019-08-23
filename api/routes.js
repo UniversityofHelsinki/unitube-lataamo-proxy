@@ -14,6 +14,17 @@ module.exports = function(app) {
         res.json(userService.getLoggedUser(req.user));
     });
 
+    app.get("/event/:id", async (req, res) => {
+       try {
+           const event = await apiService.getEvent(req.params.id);
+           const eventWithSerie = await eventsService.getEventWithSerie(event);
+           res.json(eventWithSerie);
+       } catch (error) {
+           const msg = error.message
+           res.json({ message: 'Error', msg });
+       }
+    });
+
     // selected video
     app.get("/video/:id", async (req, res) => {
         try {
@@ -42,7 +53,7 @@ module.exports = function(app) {
     });
 
     // "user" own events AKA videos from ocast
-    app.get('/userEvents', async (req, res) => {
+    app.get('/userVideos', async (req, res) => {
         try {
             const allSeries = await apiService.getAllSeries();
             const loggedUser = userService.getLoggedUser(req.user);
