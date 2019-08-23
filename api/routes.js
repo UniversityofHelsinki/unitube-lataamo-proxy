@@ -71,4 +71,13 @@ module.exports = function(app) {
             res.json({ message: 'Error', msg })
         }
     });
+
+    // update video metadata
+    app.put('/userVideos/:id', async (req, res) => {
+       try {
+           res.json({message : 'OK'});
+       } catch(error) {
+
+       }
+    });
 };
