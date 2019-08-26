@@ -28,7 +28,6 @@ exports.filterEventsForClient = (ocResponseData) => {
 };
 
 exports.calculateVisibilityProperty = (video) => {
-    console.log(video.acls);
   return calculateVisibilityPropertyForVideo(video);
 };
 
@@ -113,6 +112,9 @@ exports.modifyEventMetadataForOpencast = (metadata) => {
         {
             "id" : "description",
             "value": metadata.description
+        }, {
+            "id" : "isPartOf",
+            "value" : metadata.isPartOf
         });
 
     return metadataArray;
