@@ -18,6 +18,10 @@ module.exports = function(app) {
        try {
            const event = await apiService.getEvent(req.params.id);
            const eventWithSerie = await eventsService.getEventWithSerie(event);
+           const eventAcls = await apiService.getEventAclsFromSerie(eventWithSerie.isPartOf);
+           eventWithSerie.acls = eventAcls;
+           const visibilities = eventsService.calculateVisibilityProperty(eventWithSerie);
+           eventWithSerie.visibility = visibilities;
            res.json(eventWithSerie);
        } catch (error) {
            const msg = error.message
@@ -75,8 +79,9 @@ module.exports = function(app) {
     // update video metadata
     app.put('/userVideos/:id', async (req, res) => {
        try {
-           const videoMetadata = req.body;
-           const data = await apiService.updateVideoMetadata(videoMetadata);
+           const rawEventMetadata = req.body;
+           const modifiedMetadata = eventsService.modifyEventMetadataForOpencast(rawEventMetadata);
+           const data = await apiService.updateEventMetadata(modifiedMetadata, req.body.identifier);
            res.json({message : 'OK'});
        } catch(error) {
            res.status(500)

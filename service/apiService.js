@@ -60,7 +60,7 @@ exports.getMediaFileMetadataForEvent = async (eventId, mediaId) => {
 };
 
 exports.getEventAclsFromSerie = async (serie) => {
-    const serieId = serie.value;
+    const serieId =  serie;
     let serieAclUrl = OCAST_SERIES_PATH + serieId + OCAST_ACL_PATH;
     const response = await security.opencastBase.get(serieAclUrl);
     return response.data;
@@ -72,22 +72,10 @@ exports.getMetadataForEvent = async (event) => {
     return response.data;
 };
 
-exports.updateVideoMetadata = async (metadata) => {
-    const videoId = metadata.identifier;
-    const videoMetaDataUrl = OCAST_VIDEOS_PATH + videoId + OCAST_METADATA_PATH + OCAST_TYPE_QUERY_PARAMETER + OCAST_TYPE_DUBLINCORE_EPISODE;
-    let metadataArray = [
-        {
-            "id": "title",
-            "value": "jeepajee"
-        },
-        {
-            "id": "description",
-            "value": "A great description 2"
-        }
-    ];
-
+exports.updateEventMetadata = async (metadata, id) => {
+    const videoMetaDataUrl = OCAST_VIDEOS_PATH + id + OCAST_METADATA_PATH + OCAST_TYPE_QUERY_PARAMETER + OCAST_TYPE_DUBLINCORE_EPISODE;
     let bodyFormData = new FormData();
-    bodyFormData.append('metadata', JSON.stringify(metadataArray));
+    bodyFormData.append('metadata', JSON.stringify(metadata));
     try {
         const headers = {
             ...bodyFormData.getHeaders(),

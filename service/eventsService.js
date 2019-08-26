@@ -27,6 +27,11 @@ exports.filterEventsForClient = (ocResponseData) => {
     return eventArray;
 };
 
+exports.calculateVisibilityProperty = (video) => {
+    console.log(video.acls);
+  return calculateVisibilityPropertyForVideo(video);
+};
+
 const calculateVisibilityPropertyForVideo = (video) => {
     const visibility = [];
     const publishedAcl = video.acls.filter(acl => acl.role === constants.ROLE_ANONYMOUS);
@@ -82,7 +87,7 @@ exports.getAllEventsWithAcls = async (events) => {
     return Promise.all(events.map(async event => {
         let metadata = event.metadata;
         let serie = seriesService.getSerieFromEventMetadata(metadata);
-        let acls = await apiService.getEventAclsFromSerie(serie);
+        let acls = await apiService.getEventAclsFromSerie(serie.value);
         return {
             ...event,
             acls : acls
@@ -97,6 +102,20 @@ exports.getEventWithSerie = async (event) => {
         ...event,
         isPartOf : serie.value
     }
+};
+
+exports.modifyEventMetadataForOpencast = (metadata) => {
+    const metadataArray = [];
+
+    metadataArray.push({
+            "id" : "title",
+            "value": metadata.title },
+        {
+            "id" : "description",
+            "value": metadata.description
+        });
+
+    return metadataArray;
 };
 
 exports.concatenateArray = (data) => Array.prototype.concat.apply([], data);
