@@ -6,6 +6,11 @@ const seriesService = require('../service/seriesService');
 const apiService = require('../service/apiService');
 const userService = require('../service/userService');
 const publicationService = require('../service/publicationService');
+const formidable = require('formidable');
+const busboy = require('connect-busboy');  //https://github.com/mscdex/connect-busboy
+const path = require('path');   // Used for manipulation with path
+const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
+
 
 module.exports = function(app) {
     app.get('/', api.apiInfo);
@@ -13,6 +18,16 @@ module.exports = function(app) {
     app.get("/user", (req, res) => {
         res.json(userService.getLoggedUser(req.user));
     });
+
+    app.use(busboy({
+        highWaterMark: 2 * 1024 * 1024, // Set 2MiB buffer
+    })); // Insert the busboy middle-ware
+    
+    const uploadPath = path.join(__dirname, 'uploads/'); // Register the upload path
+    console.log('using uploadPath:', uploadPath);
+    
+    fs.ensureDir(uploadPath); // Make sure that he upload path exits
+
 
     app.get("/event/:id", async (req, res) => {
        try {
@@ -71,4 +86,85 @@ module.exports = function(app) {
             res.json({ message: 'Error', msg })
         }
     });
+
+    // upload video file with formidable
+    app.post('/userVideos', async (req, res) => {
+        try{
+            const form = new formidable.IncomingForm();
+            form.parse(req);
+
+            let startTime;
+        
+            form.on('fileBegin', function (name, file){
+                startTime = new Date()
+                file.path = __dirname + '/uploads/' + file.name;
+            });
+        
+            form.on('file', function (name, file){
+                let timeDiff = new Date() - startTime;
+                console.log('Loading time with formidable', timeDiff, 'milliseconds');
+
+                doOcastRequest(file.path);
+                deleteFile(file.path); 
+
+                res.status(200)
+                res.json({ message: `${file.name} uploaded to lataamo-proxy in ${timeDiff} milliseconds.`})      
+            });   
+        }catch(error){
+            console.log('Err POST userVideos', error);
+            res.status(500)
+        }
+    });
+
+    // upload video file with busboy
+    app.post('/userVideosBB', async (req, res) => {
+        try{
+            req.pipe(req.busboy); // Pipe it trough busboy
+            let startTime;
+
+            req.busboy.on('file', (fieldname, file, filename) => {
+                startTime = new Date()
+                console.log(`Upload of '${filename}' started`);
+                const filePathOnDisk = path.join(uploadPath, filename);
+
+                // Create a write stream of the new file
+                const fstream = fs.createWriteStream(filePathOnDisk);
+                // Pipe it trough
+                file.pipe(fstream);
+        
+                // On finish of the upload
+                fstream.on('close', () => {
+                    let timeDiff = new Date() - startTime;
+                    console.log('Loading time with busboy', timeDiff, 'milliseconds');
+                    console.log(`Upload of '${filename}' finished`);
+                    //res.redirect('back');
+                    res.status(200)
+                    res.json({ message: `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds.`}) 
+                    doOcastRequest(filePathOnDisk);
+                    deleteFile(filePathOnDisk); 
+                });
+            });
+        }catch(error){
+            console.log('Err POST userVideos', error);
+            res.status(500)
+        }
+    });
+
+    // here construct ocast POST request
+    const doOcastRequest = (filename) => {
+        console.log('Constructing request for ocast....'); 
+    }
+
+    // clean after post
+    function deleteFile(filename) { 
+        console.log('delete file from disk');
+        
+        fs.unlink(filename, (err) => {
+            if (err) {
+                console.log('Failed to remove file', err.toString());
+            } else {
+                console.log('removed', filename);
+            }
+        });
+    }
 };
