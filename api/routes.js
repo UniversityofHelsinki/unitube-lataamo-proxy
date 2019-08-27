@@ -87,37 +87,8 @@ module.exports = function(app) {
         }
     });
 
-    // upload video file with formidable
+    // handle video file with busboy
     app.post('/userVideos', async (req, res) => {
-        try{
-            const form = new formidable.IncomingForm();
-            form.parse(req);
-
-            let startTime;
-        
-            form.on('fileBegin', function (name, file){
-                startTime = new Date()
-                file.path = __dirname + '/uploads/' + file.name;
-            });
-        
-            form.on('file', function (name, file){
-                let timeDiff = new Date() - startTime;
-                console.log('Loading time with formidable', timeDiff, 'milliseconds');
-
-                doOcastRequest(file.path);
-                deleteFile(file.path); 
-
-                res.status(200)
-                res.json({ message: `${file.name} uploaded to lataamo-proxy in ${timeDiff} milliseconds.`})      
-            });   
-        }catch(error){
-            console.log('Err POST userVideos', error);
-            res.status(500)
-        }
-    });
-
-    // upload video file with busboy
-    app.post('/userVideosBB', async (req, res) => {
         try{
             req.pipe(req.busboy); // Pipe it trough busboy
             let startTime;
@@ -136,8 +107,7 @@ module.exports = function(app) {
                 fstream.on('close', () => {
                     let timeDiff = new Date() - startTime;
                     console.log('Loading time with busboy', timeDiff, 'milliseconds');
-                    console.log(`Upload of '${filename}' finished`);
-                    //res.redirect('back');
+                    
                     res.status(200)
                     res.json({ message: `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds.`}) 
                     doOcastRequest(filePathOnDisk);
@@ -147,6 +117,7 @@ module.exports = function(app) {
         }catch(error){
             console.log('Err POST userVideos', error);
             res.status(500)
+            res.json({ message: `${filename} failed ${error}.`}) 
         }
     });
 
@@ -167,4 +138,4 @@ module.exports = function(app) {
             }
         });
     }
-};
+};  
