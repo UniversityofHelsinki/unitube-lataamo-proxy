@@ -27,8 +27,11 @@ exports.filterEventsForClient = (ocResponseData) => {
     return eventArray;
 };
 
-exports.calculateVisibilityProperty = (video) => {
-  return calculateVisibilityPropertyForVideo(video);
+exports.calculateVisibilityProperty = (event) => {
+    return {
+        ...event,
+        visibility: calculateVisibilityPropertyForVideo(event)
+    }
 };
 
 const calculateVisibilityPropertyForVideo = (video) => {
@@ -102,6 +105,46 @@ exports.getEventWithSerie = async (event) => {
         isPartOf : serie.value
     }
 };
+
+exports.getEventAclsFromSerie = async (eventWithSerie) => {
+    const eventAcls = await apiService.getEventAclsFromSerie(eventWithSerie.isPartOf);
+    return {
+        ...eventWithSerie,
+        acls : eventAcls
+    }
+};
+
+exports.getMetadataForEvent = async (event) => {
+    const metadata = await apiService.getMetadataForEvent(event);
+    return {
+        ...event,
+        metadata: metadata
+    }
+};
+
+exports.getMediaForEvent = async (event) => {
+    const media = await apiService.getMediaForEvent(event);
+    return {
+        ...event,
+        media: media
+    }
+};
+
+exports.getMediaFileMetadataForEvent = async (event) => {
+    let mediaId =  event.media[0].id;
+    const mediaFileMetaData = await apiService.getMediaFileMetadataForEvent(event.identifier, mediaId);
+    return {
+        ...event,
+        mediaFileMetadata : mediaFileMetaData
+    }
+};
+
+exports.getDurationFromMediaFileMetadataForEvent = (event) => {
+    return {
+        ...event,
+        duration: moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format("hh:mm:ss", {trim:false})
+    }
+}
 
 exports.modifyEventMetadataForOpencast = (metadata) => {
     const metadataArray = [];

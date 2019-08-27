@@ -14,22 +14,26 @@ module.exports = function(app) {
         res.json(req.user);
     });
 
+    // selected video metadata
     app.get("/event/:id", async (req, res) => {
        try {
            const event = await apiService.getEvent(req.params.id);
            const eventWithSerie = await eventsService.getEventWithSerie(event);
-           const eventAcls = await apiService.getEventAclsFromSerie(eventWithSerie.isPartOf);
-           eventWithSerie.acls = eventAcls;
-           const visibilities = eventsService.calculateVisibilityProperty(eventWithSerie);
-           eventWithSerie.visibility = visibilities;
-           res.json(eventWithSerie);
+           const eventWithAcls = await eventsService.getEventAclsFromSerie(eventWithSerie);
+           const eventWithVisibility = eventsService.calculateVisibilityProperty(eventWithAcls);
+           const eventWithMetadata = await eventsService.getMetadataForEvent(eventWithVisibility);
+           const eventWithMedia = await eventsService.getMediaForEvent(eventWithMetadata);
+           const eventWithMediaFileMetadata = await eventsService.getMediaFileMetadataForEvent(eventWithMedia);
+           const eventWithDuration = eventsService.getDurationFromMediaFileMetadataForEvent(eventWithMediaFileMetadata);
+           console.log('eventWithDuration', eventWithDuration);
+           res.json(eventWithDuration);
        } catch (error) {
            const msg = error.message
            res.json({ message: 'Error', msg });
        }
     });
 
-    // selected video
+    // selected video file url
     app.get("/video/:id", async (req, res) => {
         try {
             const publications = await apiService.getPublicationsForEvent(req.params.id);
