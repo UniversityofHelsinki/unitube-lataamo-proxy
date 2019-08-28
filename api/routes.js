@@ -6,7 +6,6 @@ const seriesService = require('../service/seriesService');
 const apiService = require('../service/apiService');
 const userService = require('../service/userService');
 const publicationService = require('../service/publicationService');
-const formidable = require('formidable');
 const busboy = require('connect-busboy');  //https://github.com/mscdex/connect-busboy
 const path = require('path');   // Used for manipulation with path
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
@@ -102,16 +101,23 @@ module.exports = function(app) {
                 const fstream = fs.createWriteStream(filePathOnDisk);
                 // Pipe it trough
                 file.pipe(fstream);
-        
+                
                 // On finish of the upload
-                fstream.on('close', () => {
+                fstream.on('close', async () => {
                     let timeDiff = new Date() - startTime;
                     console.log('Loading time with busboy', timeDiff, 'milliseconds');
                     
-                    res.status(200)
-                    res.json({ message: `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds.`}) 
-                    doOcastRequest(filePathOnDisk);
-                    deleteFile(filePathOnDisk); 
+                    const response = await apiService.uploadVideo(filePathOnDisk, filename)
+                    
+                    if (response.status == 201) {
+                        deleteFile(filePathOnDisk); 
+                        res.status(200)
+                        res.json({ message: `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)}`}) 
+                    } else {
+                        deleteFile(filePathOnDisk); 
+                        res.status(500)
+                        res.json({ message: `${filename} failed.`}) 
+                    }
                 });
             });
         }catch(error){
@@ -120,11 +126,6 @@ module.exports = function(app) {
             res.json({ message: `${filename} failed ${error}.`}) 
         }
     });
-
-    // here construct ocast POST request
-    const doOcastRequest = (filename) => {
-        console.log('Constructing request for ocast....'); 
-    }
 
     // clean after post
     function deleteFile(filename) { 

@@ -1,5 +1,9 @@
 const security = require('../config/security');
 
+const FormData = require('form-data'); // https://www.npmjs.com/package/form-data
+const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
+const { format } = require('date-fns') // https://www.npmjs.com/package/date-fns
+
 const OCAST_API_PATH = '/api/';
 const OCAST_SERIES_PATH = '/api/series/';
 const OCAST_VIDEOS_PATH = '/api/events/';
@@ -69,6 +73,118 @@ exports.getMetadataForEvent = async (event) => {
 }
 
 
+// on success status code 201 and payload:
+// {
+//     "identifier": "9ad24ff8-abda-4681-8f02-184b49364677"
+// }
+exports.uploadVideo = async (filePathOnDisk, videoFilename) => {
+    const videoUploadUrl = OCAST_VIDEOS_PATH;
+    const videoDescription = 'TEMPORARY DESCRIPTION, PLEASE UPDATE'
+    const startDate = format(new Date(), 'yyyy-MM-dd') // "2016-06-22"; 
+    const startTime = format(new Date(), 'pp') //"13:30:00Z";  
+    const inboxSeriesId = usersInboxSeriesId();  // User's INBOX series id
 
+    const metadataArray = [
+        {
+            "flavor": "dublincore/episode",
+            "fields": [
+            {
+                "id": "title",
+                "value": videoFilename
+            },
+            {
+                "id": "subjects",
+                "value": []
+            },
+            {
+                "id": "description",
+                "value": videoDescription
+            },
+            {
+                "id": "startDate",
+                "value": startDate
+            },
+            {
+                "id": "startTime",
+                "value": startTime
+            },
+            {
+                "id": "isPartOf",
+                "type": "text",
+                "value": inboxSeriesId
+            }
+            ]
+        }
+    ];
 
+    const aclArray = [
+        {
+          "action": "read",
+          "allow": true,  
+          "role": "ROLE_USER_ADMIN"
+        },
+        {
+          "action": "write",
+          "allow": true,
+          "role": "ROLE_USER_ADMIN"
+        },
+        {
+          "action": "read",
+          "allow": true,
+          "role": "ROLE_ADMIN"
+        },
+        {
+          "action": "write",
+          "allow": true,
+          "role": "ROLE_ADMIN"
+        },
+        {
+          "action": "read",
+          "allow": true,
+          "role": "ROLE_ANONYMOUS"
+        }
+      ]
 
+    const processingMetadata = {
+        "workflow": "schedule-and-upload",
+        "configuration": {
+          "flagForCutting": "false",
+          "flagForReview": "true",
+          "publishToEngage": "true",
+          "publishToHarvesting": "true",
+          "straightToPublishing": "true"
+        }
+      }  
+
+    let bodyFormData = new FormData();
+    bodyFormData.append('metadata', JSON.stringify(metadataArray));
+    bodyFormData.append('acl', JSON.stringify(aclArray));
+    bodyFormData.append('processing', JSON.stringify(processingMetadata));
+    // https://nodejs.org/api/fs.html#fs_fs_readfilesync_path_options
+    bodyFormData.append('presenter', fs.readFileSync(filePathOnDisk)); 
+    
+    try {
+        const headers = {
+            ...bodyFormData.getHeaders(),
+            "Content-Length": bodyFormData.getLengthSync(),
+            "Content-Disposition": "multipart/form-data"
+        };
+        const response = await security.opencastBase.post(videoUploadUrl, bodyFormData, {headers});
+        console.log('video uploaded: ', response.data);
+        return response;
+    } catch(err) {
+        throw Error('*** Error in video upload **** ', err);
+    }
+}
+
+function usersInboxSeriesId(){
+    return "dabbb475-b930-4b7f-8be9-3d0ac67768cf";
+}
+
+// const videoFileFromDisk = async (path) => {
+//     // https://nodejs.org/api/fs.html#fs_fs_readfile_path_options_callback
+//     fs.readFile(path, (err, data) => {
+//         if (err) throw err;
+//         return data;
+//       });
+// }
