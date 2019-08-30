@@ -74,6 +74,8 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeries) => 
     const startTime = format(new Date(), 'pp') //'10:03:52 AM'
     const inboxSeriesId = inboxUserSeries.identifier;  // User's INBOX series id
 
+
+    // refactor this array to constants.js
     const metadataArray = [
         {
             "flavor": "dublincore/episode",
