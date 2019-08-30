@@ -84,7 +84,7 @@ describe('user eppn, preferredlanguage and hyGroupCn returned from /user route',
     let response = await supertest(app)
         .get(LATAAMO_USER_PATH)
         .set('eppn', test.mockTestUser.eppn)
-        .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+        .set('preferredLanguage', test.mockTestUser.preferredlanguage)
         .set('hyGroupCn', test.mockTestUser.hyGroupCn)
         .expect(200)
         .expect('Content-Type', /json/);

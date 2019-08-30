@@ -3,9 +3,12 @@ const apiService = require('./apiService');
 exports.getLoggedUser = (user) => {
     let eppn = user.eppn.split('@')[0];
     let hyGroupCn = concatenateArray(user.hyGroupCn.split(";"));
+    let preferredLanguage = user.preferredLanguage;
+
     return {
         eppn: eppn,
-        hyGroupCn: hyGroupCn
+        hyGroupCn: hyGroupCn,
+        preferredLanguage: preferredLanguage
     }
 }
 

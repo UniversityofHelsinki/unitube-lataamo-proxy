@@ -28,18 +28,26 @@ module.exports = function(app) {
     fs.ensureDir(uploadPath); // Make sure that he upload path exits
 
 
+    // selected video metadata
     app.get("/event/:id", async (req, res) => {
        try {
            const event = await apiService.getEvent(req.params.id);
            const eventWithSerie = await eventsService.getEventWithSerie(event);
-           res.json(eventWithSerie);
+           const eventWithAcls = await eventsService.getEventAclsFromSerie(eventWithSerie);
+           const eventWithVisibility = eventsService.calculateVisibilityProperty(eventWithAcls);
+           const eventWithMetadata = await eventsService.getMetadataForEvent(eventWithVisibility);
+           const eventWithMedia = await eventsService.getMediaForEvent(eventWithMetadata);
+           const eventWithMediaFileMetadata = await eventsService.getMediaFileMetadataForEvent(eventWithMedia);
+           const eventWithDuration = eventsService.getDurationFromMediaFileMetadataForEvent(eventWithMediaFileMetadata);
+           console.log('eventWithDuration', eventWithDuration);
+           res.json(eventWithDuration);
        } catch (error) {
            const msg = error.message
            res.json({ message: 'Error', msg });
        }
     });
 
-    // selected video
+    // selected video file url
     app.get("/video/:id", async (req, res) => {
         try {
             const publications = await apiService.getPublicationsForEvent(req.params.id);
@@ -144,4 +152,18 @@ module.exports = function(app) {
             }
         });
     }
+
+    // update video metadata
+    app.put('/userVideos/:id', async (req, res) => {
+       try {
+           const rawEventMetadata = req.body;
+           const modifiedMetadata = eventsService.modifyEventMetadataForOpencast(rawEventMetadata);
+           const data = await apiService.updateEventMetadata(modifiedMetadata, req.body.identifier);
+           res.json({message : 'OK'});
+       } catch(error) {
+           res.status(500)
+           const msg = error.message
+           res.json({ message: 'Error', msg })
+       }
+    });
 };
