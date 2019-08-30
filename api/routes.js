@@ -21,10 +21,10 @@ module.exports = function(app) {
     app.use(busboy({
         highWaterMark: 2 * 1024 * 1024, // Set 2MiB buffer
     })); // Insert the busboy middle-ware
-    
+
     const uploadPath = path.join(__dirname, 'uploads/'); // Register the upload path
     console.log('using uploadPath:', uploadPath);
-    
+
     fs.ensureDir(uploadPath); // Make sure that he upload path exits
 
 
@@ -101,36 +101,41 @@ module.exports = function(app) {
                 const fstream = fs.createWriteStream(filePathOnDisk);
                 // Pipe it trough
                 file.pipe(fstream);
-                
+
                 // On finish of the upload
                 fstream.on('close', async () => {
                     let timeDiff = new Date() - startTime;
                     console.log('Loading time with busboy', timeDiff, 'milliseconds');
-                    
-                    const response = await apiService.uploadVideo(filePathOnDisk, filename)
-                    
+
+                    // TODO: resolve id for user's inbox series (LATAAMO-185)
+                    const loggedUser = userService.getLoggedUser(req.user);
+                    const allSeries = await apiService.getAllSeries();
+                    const userSeries = seriesService.getUserSeries(allSeries, loggedUser);
+                    const firstSerie = userSeries[0];
+                    const response = await apiService.uploadVideo(filePathOnDisk, filename, firstSerie)
+
                     if (response.status == 201) {
-                        deleteFile(filePathOnDisk); 
+                        deleteFile(filePathOnDisk);
                         res.status(200)
-                        res.json({ message: `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)}`}) 
+                        res.json({ message: `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)}`})
                     } else {
-                        deleteFile(filePathOnDisk); 
+                        deleteFile(filePathOnDisk);
                         res.status(500)
-                        res.json({ message: `${filename} failed.`}) 
+                        res.json({ message: `${filename} failed.`})
                     }
                 });
             });
         }catch(error){
             console.log('Err POST userVideos', error);
             res.status(500)
-            res.json({ message: `${filename} failed ${error}.`}) 
+            res.json({ message: `${filename} failed ${error}.`})
         }
     });
 
     // clean after post
-    function deleteFile(filename) { 
+    function deleteFile(filename) {
         console.log('delete file from disk');
-        
+
         fs.unlink(filename, (err) => {
             if (err) {
                 console.log('Failed to remove file', err.toString());
@@ -139,4 +144,4 @@ module.exports = function(app) {
             }
         });
     }
-};  
+};

@@ -67,12 +67,12 @@ exports.getMetadataForEvent = async (event) => {
 //     "identifier": "9ad24ff8-abda-4681-8f02-184b49364677"
 // }
 // from opencast server
-exports.uploadVideo = async (filePathOnDisk, videoFilename) => {
+exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeries) => {
     const videoUploadUrl = constants.OCAST_VIDEOS_PATH;
     const videoDescription = 'TEMPORARY DESCRIPTION, PLEASE UPDATE'
     const startDate = format(new Date(), 'yyyy-MM-dd') // '2016-06-22'
-    const startTime = format(new Date(), 'pp') //'10:03:52 AM'  
-    const inboxSeriesId = usersInboxSeriesId();  // User's INBOX series id
+    const startTime = format(new Date(), 'pp') //'10:03:52 AM'
+    const inboxSeriesId = inboxUserSeries.identifier;  // User's INBOX series id
 
     const metadataArray = [
         {
@@ -105,7 +105,7 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename) => {
             }
             ]
         }
-    ]; 
+    ];
     // these are now constant values, maybe should be editable
     const acls = constants.ACL_ARRAY;
     const processingMetadata = constants.PROCESSING_METADATA;
@@ -132,7 +132,3 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename) => {
     }
 }
 
-// TODO: resolve id for user's inbox series (LATAAMO-185)
-const usersInboxSeriesId = () => {
-    return 'dabbb475-b930-4b7f-8be9-3d0ac67768cf';
-}
