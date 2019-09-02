@@ -7,7 +7,7 @@ const apiService = require('../service/apiService');
 const userService = require('../service/userService');
 const publicationService = require('../service/publicationService');
 const busboy = require('connect-busboy');  //https://github.com/mscdex/connect-busboy
-const path = require('path');   // Used for manipulation with path
+const path = require('path');
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 
 
@@ -18,15 +18,10 @@ module.exports = function(app) {
         res.json(userService.getLoggedUser(req.user));
     });
 
+    // busboy middle-ware
     app.use(busboy({
         highWaterMark: 2 * 1024 * 1024, // Set 2MiB buffer
-    })); // Insert the busboy middle-ware
-
-    const uploadPath = path.join(__dirname, 'uploads/'); // Register the upload path
-    console.log('using uploadPath:', uploadPath);
-
-    fs.ensureDir(uploadPath); // Make sure that he upload path exits
-
+    })); 
 
     // selected video metadata
     app.get("/event/:id", async (req, res) => {
@@ -94,9 +89,44 @@ module.exports = function(app) {
         }
     });
 
+
+    const returnOrCreateUsersInboxSeries = async (loggedUser) => {
+        const lataamoInboxSeriesTitle = `Lataamo-INBOX-${loggedUser.eppn}`
+        const allSeries = await apiService.getAllSeries();
+        const userSeries = seriesService.getUserSeries(allSeries, loggedUser);
+
+        let inboxSeries = userSeries.find(series => series.title === lataamoInboxSeriesTitle);
+      
+        if (!inboxSeries) {
+            try {
+            // create inbox
+            console.log('INBOX series not found with title', lataamoInboxSeriesTitle);
+            inboxSeries = await apiService.createLataamoInboxSeries(loggedUser.eppn);
+            console.log('created inbox', inboxSeries);
+            } catch(err) { 
+                throw Error('ERROR in returnOrCreateUsersInboxSeries', err)
+            }  
+        }
+        return inboxSeries;
+    }
+
+    // make sure the upload dir exists
+    const ensureUploadDir = async (directory) => {
+        try {
+            // https://github.com/jprichardson/node-fs-extra/blob/HEAD/docs/ensureDir.md
+            await fs.ensureDir(directory)
+            console.log('using uploadPath:', directory);
+        } catch (err) {
+            console.error('Error in ensureUploadDir', err)
+        }
+    }
+
     // handle video file with busboy
     app.post('/userVideos', async (req, res) => {
         try{
+            const uploadPath = path.join(__dirname, 'uploads/');
+            ensureUploadDir(uploadPath);
+
             req.pipe(req.busboy); // Pipe it trough busboy
             let startTime;
 
@@ -115,12 +145,16 @@ module.exports = function(app) {
                     let timeDiff = new Date() - startTime;
                     console.log('Loading time with busboy', timeDiff, 'milliseconds');
 
-                    // TODO: resolve id for user's inbox series (LATAAMO-185)
                     const loggedUser = userService.getLoggedUser(req.user);
-                    const allSeries = await apiService.getAllSeries();
-                    const userSeries = seriesService.getUserSeries(allSeries, loggedUser);
-                    const firstSerie = userSeries[0];
-                    const response = await apiService.uploadVideo(filePathOnDisk, filename, firstSerie)
+                    const inboxSeries = await returnOrCreateUsersInboxSeries(loggedUser);
+
+                    if(!inboxSeries || !inboxSeries.identifier){
+                        console.log('Err POST userVideos failed, failed to resolve inboxSeries for user');
+                        res.status(500)
+                        res.json({ message: `${filename} failed to resolve inboxSeries for user`})
+                    }
+
+                    const response = await apiService.uploadVideo(filePathOnDisk, filename, inboxSeries.identifier)
 
                     if (response.status == 201) {
                         deleteFile(filePathOnDisk);
