@@ -3,19 +3,11 @@ const FormData = require('form-data'); // https://www.npmjs.com/package/form-dat
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 const { format } = require('date-fns') // https://www.npmjs.com/package/date-fns
 const constants = require('../utils/constants');
-const OCAST_API_PATH = '/api/';
-const OCAST_SERIES_PATH = '/api/series/';
-const OCAST_VIDEOS_PATH = '/api/events/';
-const OCAST_USER_PATH = '/api/info/me';
-const OCAST_VIDEO_PUBLICATION_PATH = '/publications';
-const OCAST_EVENT_MEDIA_PATH_PREFIX = '/admin-ng/event/';
-const OCAST_EVENT_MEDIA_PATH_SUFFIX = '/asset/media/media.json';
-const OCAST_EVENT_MEDIA_FILE_METADATA = '/asset/media/';
-const OCAST_ACL_PATH = '/acl';
-const OCAST_METADATA_PATH = '/metadata';
-const OCAST_TYPE_QUERY_PARAMETER = '?type=';
-const OCAST_TYPE_DUBLINCORE_EPISODE = 'dublincore/episode';
+const { inboxSeriesTitleForLoggedUser } = require('../utils/helpers'); // helper functions
 
+//
+// This file is the façade for opencast server
+//
 
 exports.getUser = async () => {
     const apiUser = await security.opencastBase.get(constants.OCAST_USER_PATH);
@@ -73,7 +65,7 @@ exports.getMetadataForEvent = async (event) => {
 };
 
 exports.updateEventMetadata = async (metadata, id) => {
-    const videoMetaDataUrl = OCAST_VIDEOS_PATH + id + OCAST_METADATA_PATH + OCAST_TYPE_QUERY_PARAMETER + OCAST_TYPE_DUBLINCORE_EPISODE;
+    const videoMetaDataUrl = constants.OCAST_VIDEOS_PATH + id + constants.OCAST_METADATA_PATH + constants.OCAST_TYPE_QUERY_PARAMETER + constants.OCAST_TYPE_DUBLINCORE_EPISODE;
     let bodyFormData = new FormData();
     bodyFormData.append('metadata', JSON.stringify(metadata));
     try {
@@ -85,7 +77,8 @@ exports.updateEventMetadata = async (metadata, id) => {
         return response.data;
     } catch(error) {
         console.log(error);
-        return response.error;
+        //return response.error;  // response is undefined here!
+        throw error;
     }
 
 }
@@ -158,7 +151,7 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
         console.log('video uploaded: ', response.data);
         return response;
     } catch(err) {
-        throw Error('*** Error in video upload **** ', err);
+        throw err;
     }
 }
 
@@ -167,7 +160,7 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
 exports.createLataamoInboxSeries = async (userId) => {
     console.log('creating inbox series for', userId);
     
-    const lataamoInboxSeriesTitle = `Lataamo-INBOX-${userId}`;
+    const lataamoInboxSeriesTitle = inboxSeriesTitleForLoggedUser(userId);
     const lataamoInboxSeriesDescription = `Lataamo-INBOX series for ${userId}`;
     const lataamoInboxSeriesLicense = 'PUT HERE THE DEFAULT INBOX SERIES LICENSE';
     const lataamoInboxSeriesLanguage = 'en';
@@ -282,7 +275,7 @@ exports.createLataamoInboxSeries = async (userId) => {
           console.log('Inbox series created: ', response.data);
           return response.data;
       } catch(err) {
-          throw Error('*** Error in inbox series creation **** ', err);
+          throw err;
       }
 
 };

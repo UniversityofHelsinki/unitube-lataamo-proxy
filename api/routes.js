@@ -9,6 +9,7 @@ const publicationService = require('../service/publicationService');
 const busboy = require('connect-busboy');  //https://github.com/mscdex/connect-busboy
 const path = require('path');
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
+const { inboxSeriesTitleForLoggedUser } = require('../utils/helpers'); // helper functions
 
 
 module.exports = function(app) {
@@ -91,23 +92,23 @@ module.exports = function(app) {
 
 
     const returnOrCreateUsersInboxSeries = async (loggedUser) => {
-        const lataamoInboxSeriesTitle = `Lataamo-INBOX-${loggedUser.eppn}`
-        const allSeries = await apiService.getAllSeries();
-        const userSeries = seriesService.getUserSeries(allSeries, loggedUser);
+        const lataamoInboxSeriesTitle = inboxSeriesTitleForLoggedUser(loggedUser.eppn);
 
-        let inboxSeries = userSeries.find(series => series.title === lataamoInboxSeriesTitle);
-      
-        if (!inboxSeries) {
-            try {
-            // create inbox
-            console.log('INBOX series not found with title', lataamoInboxSeriesTitle);
-            inboxSeries = await apiService.createLataamoInboxSeries(loggedUser.eppn);
-            console.log('created inbox', inboxSeries);
-            } catch(err) { 
-                throw Error('ERROR in returnOrCreateUsersInboxSeries', err)
-            }  
+        try {
+            const allSeries = await apiService.getAllSeries();
+            const userSeries = seriesService.getUserSeries(allSeries, loggedUser);
+    
+            let inboxSeries = userSeries.find(series => series.title === lataamoInboxSeriesTitle);
+          
+            if (!inboxSeries) {
+                console.log('INBOX series not found with title', lataamoInboxSeriesTitle);
+                inboxSeries = await apiService.createLataamoInboxSeries(loggedUser.eppn);
+                console.log('created inbox', inboxSeries);
+            }
+            return inboxSeries;
+        }catch(err){
+            throw err
         }
-        return inboxSeries;
     }
 
     // make sure the upload dir exists
@@ -116,18 +117,28 @@ module.exports = function(app) {
             // https://github.com/jprichardson/node-fs-extra/blob/HEAD/docs/ensureDir.md
             await fs.ensureDir(directory)
             console.log('using uploadPath:', directory);
+            return true;
         } catch (err) {
             console.error('Error in ensureUploadDir', err)
+            return false;
         }
     }
 
     // handle video file with busboy
     app.post('/userVideos', async (req, res) => {
-        try{
+        try {
             const uploadPath = path.join(__dirname, 'uploads/');
-            ensureUploadDir(uploadPath);
+
+            if(!ensureUploadDir(uploadPath)){
+                // upload dir failed log and return error
+                console.log('Upload dir unavailable', uploadPath);
+                res.status(500);
+                const msg = 'Upload dir unavailable.'
+                res.json({ message: 'Error', msg });
+            }
 
             req.pipe(req.busboy); // Pipe it trough busboy
+
             let startTime;
 
             req.busboy.on('file', (fieldname, file, filename) => {
@@ -140,37 +151,62 @@ module.exports = function(app) {
                 // Pipe it trough
                 file.pipe(fstream);
 
-                // On finish of the upload
+                // On finish of the file write to disk
                 fstream.on('close', async () => {
-                    let timeDiff = new Date() - startTime;
-                    console.log('Loading time with busboy', timeDiff, 'milliseconds');
+                    try {
+                        const loggedUser = userService.getLoggedUser(req.user);
+                        let timeDiff = new Date() - startTime;
+                        console.log('Loading time with busboy', timeDiff, 'milliseconds');
+                        
+                        let inboxSeries
+                        try {
+                            inboxSeries = await returnOrCreateUsersInboxSeries(loggedUser);
 
-                    const loggedUser = userService.getLoggedUser(req.user);
-                    const inboxSeries = await returnOrCreateUsersInboxSeries(loggedUser);
-
-                    if(!inboxSeries || !inboxSeries.identifier){
-                        console.log('Err POST userVideos failed, failed to resolve inboxSeries for user');
-                        res.status(500)
-                        res.json({ message: `${filename} failed to resolve inboxSeries for user`})
-                    }
-
-                    const response = await apiService.uploadVideo(filePathOnDisk, filename, inboxSeries.identifier)
-
-                    if (response.status == 201) {
+                            if (!inboxSeries || !inboxSeries.identifier) {
+                                res.status(500)
+                                res.json({ message: `${filename} failed to resolve inboxSeries for user`})
+                            }
+                        } catch(err) {
+                            // Log error and throw reason
+                            console.log(err)
+                            throw "Failed to resolve user's inbox series";
+                        }
+                        
+                        try {
+                            const response = await apiService.uploadVideo(filePathOnDisk, filename, inboxSeries.identifier)
+                    
+                            if (response && response.status == 201) {
+                                // on succes clean file from disk and return 200
+                                deleteFile(filePathOnDisk);
+                                res.status(200)
+                                res.json({ message: `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)}`})
+                            } else {
+                                // on failure clean file from disk and return 500
+                                deleteFile(filePathOnDisk);
+                                res.json({ message: `${filename} failed.`})
+                                res.status(500)
+                            }
+                        } catch(err) {
+                            // Log error and throw reason
+                            console.log(err);
+                            throw 'Failed to upload video to opencast';
+                        }
+                    } catch(err) {
+                        // catch and clean file from disk
+                        // return response to user client
                         deleteFile(filePathOnDisk);
-                        res.status(200)
-                        res.json({ message: `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)}`})
-                    } else {
-                        deleteFile(filePathOnDisk);
-                        res.status(500)
-                        res.json({ message: `${filename} failed.`})
+                        res.status(500);
+                        const msg = `Upload of ${filename} failed. ${err}.`;
+                        res.json({ message: 'Error', msg });
                     }
                 });
             });
-        }catch(error){
-            console.log('Err POST userVideos', error);
-            res.status(500)
-            res.json({ message: `${filename} failed ${error}.`})
+        } catch(err) {
+            // log error and return 500
+            console.log(err);
+            res.status(500);
+            const msg = `${filename} failed ${err}.`;
+            res.json({ message: 'Error', msg });
         }
     });
 
