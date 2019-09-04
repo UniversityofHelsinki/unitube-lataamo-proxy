@@ -3,19 +3,11 @@ const FormData = require('form-data'); // https://www.npmjs.com/package/form-dat
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 const { format } = require('date-fns') // https://www.npmjs.com/package/date-fns
 const constants = require('../utils/constants');
-const OCAST_API_PATH = '/api/';
-const OCAST_SERIES_PATH = '/api/series/';
-const OCAST_VIDEOS_PATH = '/api/events/';
-const OCAST_USER_PATH = '/api/info/me';
-const OCAST_VIDEO_PUBLICATION_PATH = '/publications';
-const OCAST_EVENT_MEDIA_PATH_PREFIX = '/admin-ng/event/';
-const OCAST_EVENT_MEDIA_PATH_SUFFIX = '/asset/media/media.json';
-const OCAST_EVENT_MEDIA_FILE_METADATA = '/asset/media/';
-const OCAST_ACL_PATH = '/acl';
-const OCAST_METADATA_PATH = '/metadata';
-const OCAST_TYPE_QUERY_PARAMETER = '?type=';
-const OCAST_TYPE_DUBLINCORE_EPISODE = 'dublincore/episode';
+const { inboxSeriesTitleForLoggedUser } = require('../utils/helpers'); // helper functions
 
+//
+// This file is the façade for opencast server
+//
 
 exports.getUser = async () => {
     const apiUser = await security.opencastBase.get(constants.OCAST_USER_PATH);
@@ -73,7 +65,7 @@ exports.getMetadataForEvent = async (event) => {
 };
 
 exports.updateEventMetadata = async (metadata, id) => {
-    const videoMetaDataUrl = OCAST_VIDEOS_PATH + id + OCAST_METADATA_PATH + OCAST_TYPE_QUERY_PARAMETER + OCAST_TYPE_DUBLINCORE_EPISODE;
+    const videoMetaDataUrl = constants.OCAST_VIDEOS_PATH + id + constants.OCAST_METADATA_PATH + constants.OCAST_TYPE_QUERY_PARAMETER + constants.OCAST_TYPE_DUBLINCORE_EPISODE;
     let bodyFormData = new FormData();
     bodyFormData.append('metadata', JSON.stringify(metadata));
     try {
@@ -85,7 +77,8 @@ exports.updateEventMetadata = async (metadata, id) => {
         return response.data;
     } catch(error) {
         console.log(error);
-        return response.error;
+        //return response.error;  // response is undefined here!
+        throw error;
     }
 
 }
@@ -96,13 +89,12 @@ exports.updateEventMetadata = async (metadata, id) => {
 //     "identifier": "9ad24ff8-abda-4681-8f02-184b49364677"
 // }
 // from opencast server
-exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeries) => {
+exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) => {
     const videoUploadUrl = constants.OCAST_VIDEOS_PATH;
     const videoDescription = 'TEMPORARY DESCRIPTION, PLEASE UPDATE'
     const startDate = format(new Date(), 'yyyy-MM-dd') // '2016-06-22'
-    const startTime = format(new Date(), 'pp') //'10:03:52 AM'
-    const inboxSeriesId = inboxUserSeries.identifier;  // User's INBOX series id
-
+    const startTime = format(new Date(), 'pp') // '10:03:52 AM'
+    const inboxSeriesId = inboxUserSeriesId;  // User's INBOX series id
 
     // refactor this array to constants.js
     const metadataArray = [
@@ -159,7 +151,131 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeries) => 
         console.log('video uploaded: ', response.data);
         return response;
     } catch(err) {
-        throw Error('*** Error in video upload **** ', err);
+        throw err;
     }
 }
 
+
+// create the default lataamo INBOX series for the given userId
+exports.createLataamoInboxSeries = async (userId) => {
+    console.log('creating inbox series for', userId);
+    
+    const lataamoInboxSeriesTitle = inboxSeriesTitleForLoggedUser(userId);
+    const lataamoInboxSeriesDescription = `Lataamo-INBOX series for ${userId}`;
+    const lataamoInboxSeriesLicense = 'PUT HERE THE DEFAULT INBOX SERIES LICENSE';
+    const lataamoInboxSeriesLanguage = 'en';
+    const lataamoInboxSeriesCreator = 'Lataamo-proxy-service';
+    const lataamoInboxSeriesSubject = 'Lataamo-INBOX';
+    const seriesUrl = constants.OCAST_SERIES_PATH;
+
+    metadataArray = [
+        {
+            "flavor": "dublincore/series",
+            "title": "Opencast Series DublinCore",
+            "fields": [
+              {
+                "readOnly": false,
+                "id": "title",
+                "label": "EVENTS.SERIES.DETAILS.METADATA.TITLE",
+                "type": "text",
+                "value": lataamoInboxSeriesTitle,
+                "required": true
+              },
+              {
+                "readOnly": false,
+                "id": "subjects",
+                "label": "EVENTS.SERIES.DETAILS.METADATA.SUBJECT",
+                "type": "text",
+                "value": [
+                    lataamoInboxSeriesSubject
+                ],
+                "required": false
+              },
+              {
+                "readOnly": false,
+                "id": "description",
+                "label": "EVENTS.SERIES.DETAILS.METADATA.DESCRIPTION",
+                "type": "text",
+                "value": lataamoInboxSeriesDescription,
+                "required": false
+              },
+              {
+                "translatable": true,
+                "readOnly": false,
+                "id": "language",
+                "label": "EVENTS.SERIES.DETAILS.METADATA.LANGUAGE",
+                "type": "text",
+                "value": lataamoInboxSeriesLanguage,
+                "required": false
+              },
+              {
+                "readOnly": false,
+                "id": "rightsHolder",
+                "label": "EVENTS.SERIES.DETAILS.METADATA.RIGHTS",
+                "type": "text",
+                "value": userId,
+                "required": false
+              },
+              {
+                "translatable": true,
+                "readOnly": false,
+                "id": "license",
+                "label": "EVENTS.SERIES.DETAILS.METADATA.LICENSE",
+                "type": "text",
+                "value": lataamoInboxSeriesLicense,
+                "required": false
+              },
+              {
+                "translatable": false,
+                "readOnly": false,
+                "id": "creator",
+                "label": "EVENTS.SERIES.DETAILS.METADATA.CREATED_BY",
+                "type": "mixed_text",
+                "value": [
+                    lataamoInboxSeriesCreator, userId
+                  ],
+                "required": false
+              },
+              {
+                "translatable": false,
+                "readOnly": false,
+                "id": "contributor",
+                "label": "EVENTS.SERIES.DETAILS.METADATA.CONTRIBUTORS",
+                "type": "mixed_text",
+                "value": [userId],
+                "required": false
+              },
+              {
+                "translatable": false,
+                "readOnly": false,
+                "id": "publisher",
+                "label": "EVENTS.SERIES.DETAILS.METADATA.PUBLISHERS",
+                "type": "mixed_text",
+                "value": [userId],
+                "required": false
+              }
+            ]
+          }
+      ];
+
+      // these are now constant values, maybe should be editable
+      const acls = constants.ACL_ARRAY;
+
+      let bodyFormData = new FormData();
+      bodyFormData.append('metadata', JSON.stringify(metadataArray));
+      bodyFormData.append('acl', JSON.stringify(acls));
+  
+      try {
+          const headers = {
+              ...bodyFormData.getHeaders(),
+              "Content-Type": "application/x-www-form-urlencoded"
+          };
+
+          const response = await security.opencastBase.post(seriesUrl, bodyFormData, {headers});
+          console.log('Inbox series created: ', response.data);
+          return response.data;
+      } catch(err) {
+          throw err;
+      }
+
+};
