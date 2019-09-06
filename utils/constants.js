@@ -17,6 +17,8 @@ const OCAST_EVENT_MEDIA_PATH_SUFFIX = '/asset/media/media.json';
 const OCAST_EVENT_MEDIA_FILE_METADATA = '/asset/media/';
 const OCAST_ACL_PATH = '/acl';
 const OCAST_METADATA_PATH = '/metadata';
+const OCAST_TYPE_QUERY_PARAMETER = '?type=';
+const OCAST_TYPE_DUBLINCORE_EPISODE = 'dublincore/episode';
 
 const OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER = '?filter=series:';
 
@@ -77,5 +79,7 @@ module.exports = {
     OCAST_ACL_PATH,
     OCAST_METADATA_PATH,
     OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER,
-    PROCESSING_METADATA
+    PROCESSING_METADATA,
+    OCAST_TYPE_QUERY_PARAMETER,
+    OCAST_TYPE_DUBLINCORE_EPISODE
 };
