@@ -16,26 +16,36 @@ module.exports = function(app) {
 
     /**
     * @swagger
-    *     /:
+    *     /api/:
     *     get:
     *       tags:
     *         - retrieve
-    *       summary: alive message (ping)
+    *       summary: Return status message (ping).
     *       responses:
     *         304:
-    *           description: This returns alive message (ping)
-    */
+    *           description: A status message (ping) with version info.
+    *         401:
+    *           description: Not authenticated. Required Shibboleth headers not present in the request.
+    *         default:
+    *           description: Unexpected error    
+    */
     app.get('/', api.apiInfo);
 
     /**
-     * @swagger
-     *     /user:
-     *     get:
-     *       tags:
-     *         - retrieve
-     *       summary: user info
-     *       description: This should return logged user
-     */
+    * @swagger
+    *     /api/user:
+    *     get:
+    *       tags:
+    *         - retrieve
+    *       summary: Returns the logged in user.
+    *       responses:
+    *         200:
+    *           description: A user object in JSON.
+    *         401:
+    *           description: Not authenticated. Required Shibboleth headers not present in the request.
+    *         default:
+    *           description: Unexpected error     
+    */
     app.get("/user", (req, res) => {
         res.json(userService.getLoggedUser(req.user));
     });
@@ -47,18 +57,23 @@ module.exports = function(app) {
 
    /**
     * @swagger
-    *     /event/{id}:
+    *     /api/event/{id}:
     *     get:
     *       tags:
     *         - retrieve
-    *       summary: video's details
-    *       description: This should return selected video's metadata
+    *       summary: Return video's details by ID.
+    *       description: Returns selected video's information.
     *       parameters:
     *         - in: path
     *           name: id
     *           required: true
-    *           description: ID of the video (event) to get
-    */    
+    *           description: ID of the video AKA event.
+    *       responses:
+    *         401:
+    *           description: Not authenticated. Required Shibboleth headers not present in the request.
+    *         default:
+    *           description: Unexpected error    
+    */    
     app.get("/event/:id", async (req, res) => {
        try {
            const event = await apiService.getEvent(req.params.id);
@@ -80,18 +95,23 @@ module.exports = function(app) {
 
    /**
     * @swagger
-    *     /video/{id}:
+    *     /api/video/{id}:
     *     get:
     *       tags:
     *         - retrieve
-    *       summary: video's media URL
-    *       description: Returns selected video's media URL (url to media file)
+    *       summary: Return video's media URL by ID.
+    *       description: Returns selected video's media URL (url to video file).
     *       parameters:
     *         - in: path
     *           name: id
     *           required: true
-    *           description: ID of the video (event)
-    */     
+    *           description: ID of the video AKA event.
+    *       responses:
+    *         401:
+    *           description: Not authenticated. Required Shibboleth headers not present in the request.
+    *         default:
+    *           description: Unexpected error
+    */     
     app.get("/video/:id", async (req, res) => {
         try {
             const publications = await apiService.getPublicationsForEvent(req.params.id);
@@ -107,12 +127,19 @@ module.exports = function(app) {
     
    /**
     * @swagger
-    *     /userSeries:
+    *     /api/userSeries:
     *     get:
     *       tags:
     *         - retrieve
-    *       summary: user's series
-    *       description: Returns series for logged user
+    *       summary: Return user's series.
+    *       description: Returns series for logged in user. These series are the ones user is listed as contributor.
+    *       responses:
+    *         200:
+    *           description: List of series.
+    *         401:
+    *           description: Not authenticated. Required Shibboleth headers not present in the request.
+    *         500:
+    *           description: Internal server error, an error occured.
     */ 
     app.get('/userSeries', async (req, res) => {
         try {
@@ -130,12 +157,17 @@ module.exports = function(app) {
      
    /**
     * @swagger
-    *     /userVideos:
+    *     /api/userVideos:
     *     get:
     *       tags:
     *         - retrieve
-    *       summary: user's videos
-    *       description: videos for logged user
+    *       summary: Returns user's videos.
+    *       description: Returns videos for logged user. Returns the videos that are connected to user's series.
+    *       responses:
+    *         200:
+    *           description: List of videos.
+    *         401:
+    *           description: Not authenticated. Required Shibboleth headers not present in the request.
     */ 
     app.get('/userVideos', async (req, res) => {
         try {
@@ -192,24 +224,26 @@ module.exports = function(app) {
 
    /**
     * @swagger
-    *     /userVideos:
+    *     /api/userVideos:
     *     post:
     *       tags:
     *         - create
-    *       summary: Upload video file
-    *       description: Upload a video file to Opencast
+    *       summary: Upload a video file.
+    *       description: Upload a video file to Opencast service. Video is saved to Lataamo proxy before sending to Opencast.
     *       consumes:
     *         - multipart/form-data
     *       parameters:
     *         - in: formData
     *           name: videofile
     *           type: file
-    *           description: The video to be uploaded
+    *           description: The video file to be uploaded.
     *       responses:
-    *         201:
-    *           description: Created
+    *         200:
+    *           description: OK. Response message in JSON containing msg and Opencast identifier for the video.
+    *         401:
+    *           description: Not authenticated. Required Shibboleth headers not present in the request.
     *         500:
-    *           description: TBD, something went wrong
+    *           description: Internal server error, an error occured.
     */      
     app.post('/userVideos', async (req, res) => {
         try {
@@ -312,16 +346,16 @@ module.exports = function(app) {
     
    /**
     * @swagger
-    *     /userVideos/{id}:
+    *     /api/userVideos/{id}:
     *     put:
     *       tags:
     *         - update
-    *       summary: Updates video information
+    *       summary: Updates video's information by ID.
     *       consumes:
     *         - application/json
     *       parameters:
     *         - in: body
-    *           description: The video to be updated
+    *           description: The video to be updated.
     *           schema: 
     *             type: object
     *             required:
@@ -341,10 +375,14 @@ module.exports = function(app) {
     *               isPartOf:
     *                 type: string
     *                 description: id of the series the video belongs to
-    *     responses:
+    *       responses:
     *         200:
     *           description: OK
-    */   
+    *         401:
+    *           description: Not authenticated. Required Shibboleth headers not present in the request.
+    *         500:
+    *           description: Internal server error, an error occured.    
+    */   
     app.put('/userVideos/:id', async (req, res) => {
        try {
            const rawEventMetadata = req.body;
