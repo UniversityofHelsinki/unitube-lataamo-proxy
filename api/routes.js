@@ -60,8 +60,7 @@ module.exports = function(app) {
     app.get('/userSeries', async (req, res) => {
         try {
             const loggedUser = userService.getLoggedUser(req.user);
-            const allSeries = await apiService.getAllSeries();
-            const userSeries = seriesService.getUserSeries(allSeries, loggedUser);
+            const userSeries = await apiService.getUserSeries(loggedUser);
             res.json(userSeries);
         } catch(error) {
             res.status(500)
@@ -73,9 +72,9 @@ module.exports = function(app) {
     // "user" own events AKA videos from ocast
     app.get('/userVideos', async (req, res) => {
         try {
-            const allSeries = await apiService.getAllSeries();
             const loggedUser = userService.getLoggedUser(req.user);
-            const seriesIdentifiers = seriesService.getSeriesIdentifiers(allSeries, loggedUser);
+            const ownSeries = await apiService.getUserSeries(loggedUser);
+            const seriesIdentifiers = seriesService.getSeriesIdentifiers(ownSeries, loggedUser);
             const allEvents = await eventsService.getAllEvents(seriesIdentifiers);
             const concatenatedEventsArray = eventsService.concatenateArray(allEvents);
             const allEventsWithMetaDatas = await eventsService.getAllEventsWithMetadatas(concatenatedEventsArray);
@@ -95,9 +94,7 @@ module.exports = function(app) {
         const lataamoInboxSeriesTitle = inboxSeriesTitleForLoggedUser(loggedUser.eppn);
 
         try {
-            const allSeries = await apiService.getAllSeries();
-            const userSeries = seriesService.getUserSeries(allSeries, loggedUser);
-    
+            const userSeries = await apiService.getUserSeries(loggedUser);
             let inboxSeries = userSeries.find(series => series.title === lataamoInboxSeriesTitle);
           
             if (!inboxSeries) {
