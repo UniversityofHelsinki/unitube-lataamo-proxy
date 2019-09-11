@@ -157,22 +157,20 @@ module.exports = function(router) {
         }
     });
 
-    /**
+   /**
     * @swagger
-    *     /api/userSeries:
+    *     /api/userVideos:
     *     get:
     *       tags:
     *         - retrieve
-    *       summary: Return user's series.
-    *       description: Returns series for logged in user. These series are the ones user is listed as contributor.
+    *       summary: Returns user's videos.
+    *       description: Returns videos for logged user. Returns the videos that are connected to user's series.
     *       responses:
     *         200:
-    *           description: List of series.
+    *           description: List of videos.
     *         401:
     *           description: Not authenticated. Required Shibboleth headers not present in the request.
-    *         500:
-    *           description: Internal server error, an error occured.
-    */ 
+    */      
     router.get('/userVideos', async (req, res) => {
         try {
             const loggedUser = userService.getLoggedUser(req.user);
