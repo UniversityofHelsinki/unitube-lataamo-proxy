@@ -100,8 +100,10 @@ describe('user series returned from /userSeries route', () => {
 
   beforeEach(() => {
     // mock needed opencast apis
-    test.mockOCastSeriesApiCall();
+    test.mockOCastSeriesApiCallEmpty();
+    test.mockOCastSeriesApiCall2();
     test.mockOCastUserApiCall();
+    test.mockOCastSeriesApiCall();
   })
 
   it("should return no series if user and users groups are not in the series contributors list", async () => {
@@ -154,6 +156,9 @@ describe('user events (videos) returned from /userEvents route', () => {
   beforeEach(() => {
     // mock needed opencast api calls
     test.mockOCastSeriesApiCall();
+    test.mockOCastSeriesApiCall3();
+    test.mockOCastSeriesApiCall4();
+    test.mockOCastSeriesApiCall5();
     test.mockOCastUserApiCall();
     test.mockOCastEvents_1_ApiCall();
     test.mockOCastEvents_2_ApiCall();
