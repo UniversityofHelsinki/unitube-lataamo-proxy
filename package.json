@@ -34,6 +34,7 @@
     "npm": "^6.10.3",
     "passport": "^0.4.0",
     "passport-reverseproxy": "^0.1.0",
+    "ipaddr.js": "latest",
     "path": "^0.12.7",
     "pretty-ms": "^5.0.0",
     "swagger-jsdoc": "^3.4.0",
