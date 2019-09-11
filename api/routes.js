@@ -10,9 +10,14 @@ const busboy = require('connect-busboy');  //https://github.com/mscdex/conn
 const path = require('path');
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 const { inboxSeriesTitleForLoggedUser } = require('../utils/helpers'); // helper functions
+const swaggerUi = require('swagger-ui-express');
+const apiSpecs = require('../config/swagger'); // swagger config
 
 
-module.exports = function(app) {
+module.exports = function(router) {
+    // https://www.npmjs.com/package/swagger-ui-express
+    router.use('/api-docs', swaggerUi.serve);
+    router.get('/api-docs', swaggerUi.setup(apiSpecs));
 
     /**
     * @swagger
@@ -29,7 +34,7 @@ module.exports = function(app) {
     *         default:
     *           description: Unexpected error    
     */
-    app.get('/', api.apiInfo);
+    router.get('/', api.apiInfo);
 
     /**
     * @swagger
@@ -46,12 +51,12 @@ module.exports = function(app) {
     *         default:
     *           description: Unexpected error     
     */
-    app.get("/user", (req, res) => {
+    router.get("/user", (req, res) => {
         res.json(userService.getLoggedUser(req.user));
     });
 
     // busboy middle-ware
-    app.use(busboy({
+    router.use(busboy({
         highWaterMark: 2 * 1024 * 1024, // Set 2MiB buffer
     })); 
 
@@ -74,7 +79,7 @@ module.exports = function(app) {
     *         default:
     *           description: Unexpected error    
     */    
-    app.get("/event/:id", async (req, res) => {
+   router.get("/event/:id", async (req, res) => {
        try {
            const event = await apiService.getEvent(req.params.id);
            const eventWithSerie = await eventsService.getEventWithSerie(event);
@@ -112,7 +117,7 @@ module.exports = function(app) {
     *         default:
     *           description: Unexpected error
     */     
-    app.get("/video/:id", async (req, res) => {
+   router.get("/video/:id", async (req, res) => {
         try {
             const publications = await apiService.getPublicationsForEvent(req.params.id);
             const filteredPublication = publicationService.filterApiChannelPublication(publications);
@@ -141,7 +146,7 @@ module.exports = function(app) {
     *         500:
     *           description: Internal server error, an error occured.
     */ 
-    app.get('/userSeries', async (req, res) => {
+    router.get('/userSeries', async (req, res) => {
         try {
             const loggedUser = userService.getLoggedUser(req.user);
             const allSeries = await apiService.getAllSeries();
@@ -169,7 +174,7 @@ module.exports = function(app) {
     *         401:
     *           description: Not authenticated. Required Shibboleth headers not present in the request.
     */ 
-    app.get('/userVideos', async (req, res) => {
+    router.get('/userVideos', async (req, res) => {
         try {
             const allSeries = await apiService.getAllSeries();
             const loggedUser = userService.getLoggedUser(req.user);
@@ -245,7 +250,7 @@ module.exports = function(app) {
     *         500:
     *           description: Internal server error, an error occured.
     */      
-    app.post('/userVideos', async (req, res) => {
+    router.post('/userVideos', async (req, res) => {
         try {
             const uploadPath = path.join(__dirname, 'uploads/');
 
@@ -383,7 +388,7 @@ module.exports = function(app) {
     *         500:
     *           description: Internal server error, an error occured.    
     */   
-    app.put('/userVideos/:id', async (req, res) => {
+   router.put('/userVideos/:id', async (req, res) => {
        try {
            const rawEventMetadata = req.body;
            const modifiedMetadata = eventsService.modifyEventMetadataForOpencast(rawEventMetadata);
