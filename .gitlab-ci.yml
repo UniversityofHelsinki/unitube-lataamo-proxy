@@ -10,6 +10,7 @@ cache:
 stages:
   - setup
   - build
+  - test
   - deploy
 
 # Define the process for each stage
@@ -25,6 +26,12 @@ build:
   stage: build
   script:
     - npm run build
+
+# Define the process for test stage
+test:
+  stage: test
+  script:
+    - npm test
 
 # Define the process for deploy stage to development environment
 deploy_dev:
