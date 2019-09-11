@@ -7,9 +7,6 @@ const passport = require('passport');
 const fs = require('fs')
 const morgan = require('morgan')
 const path = require('path')
-// api docs
-const swaggerUi = require('swagger-ui-express');
-const apiSpecs = require('./config/swagger');
 
 const app = express();
 const port = 3000;
@@ -29,9 +26,6 @@ security.shibbolethAuthentication(app, passport);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use('/api', router);
-
-// enable swagger
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(apiSpecs));
 
 
 app.listen(port, host,  () => {
