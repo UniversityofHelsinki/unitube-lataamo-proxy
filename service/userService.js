@@ -1,12 +1,14 @@
 const apiService = require('./apiService');
 
-exports.getApiUser = async () => await apiService.getUser();
-
 exports.getLoggedUser = (user) => {
+    let eppn = user.eppn.split('@')[0];
     let hyGroupCn = concatenateArray(user.hyGroupCn.split(";"));
+    let preferredLanguage = user.preferredLanguage;
+
     return {
-        eppn: user.eppn,
-        hyGroupCn: hyGroupCn
+        eppn: eppn,
+        hyGroupCn: hyGroupCn,
+        preferredLanguage: preferredLanguage
     }
 }
 

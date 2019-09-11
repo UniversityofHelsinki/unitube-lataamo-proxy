@@ -28,7 +28,7 @@ module.exports.shibbolethAuthentication = function (app, passport) {
 // ocast base url and authorization header
 module.exports.opencastBase = axios.create({
     baseURL: host,
-    //timeout: 1000,
+    maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
     headers: {'authorization': auth}
 });
 
