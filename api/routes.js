@@ -51,7 +51,7 @@ module.exports = function(router) {
     *           description: Not authenticated. Required Shibboleth headers not present in the request.
     *         default:
     *           description: Unexpected error     
-    */    
+    */
     router.get("/user", (req, res) => {
         res.json(userService.getLoggedUser(req.user));
     });
@@ -59,7 +59,7 @@ module.exports = function(router) {
     // busboy middle-ware
     router.use(busboy({
         highWaterMark: 2 * 1024 * 1024, // Set 2MiB buffer
-    })); 
+    }));
 
     /**
     * @swagger
@@ -79,7 +79,7 @@ module.exports = function(router) {
     *           description: Not authenticated. Required Shibboleth headers not present in the request.
     *         default:
     *           description: Unexpected error    
-    */     
+    */ 
     router.get("/event/:id", async (req, res) => {
        try {
            const event = await apiService.getEvent(req.params.id);
@@ -170,7 +170,7 @@ module.exports = function(router) {
     *           description: List of videos.
     *         401:
     *           description: Not authenticated. Required Shibboleth headers not present in the request.
-    */      
+    */ 
     router.get('/userVideos', async (req, res) => {
         try {
             const loggedUser = userService.getLoggedUser(req.user);
@@ -197,7 +197,7 @@ module.exports = function(router) {
         try {
             const userSeries = await apiService.getUserSeries(loggedUser);
             let inboxSeries = userSeries.find(series => series.title === lataamoInboxSeriesTitle);
-          
+
             if (!inboxSeries) {
                 console.log('INBOX series not found with title', lataamoInboxSeriesTitle);
                 inboxSeries = await apiService.createLataamoInboxSeries(loggedUser.eppn);
@@ -277,7 +277,7 @@ module.exports = function(router) {
                         const loggedUser = userService.getLoggedUser(req.user);
                         let timeDiff = new Date() - startTime;
                         console.log('Loading time with busboy', timeDiff, 'milliseconds');
-                        
+
                         let inboxSeries
                         try {
                             inboxSeries = await returnOrCreateUsersInboxSeries(loggedUser);
@@ -291,10 +291,10 @@ module.exports = function(router) {
                             console.log(err)
                             throw "Failed to resolve user's inbox series";
                         }
-                        
+
                         try {
                             const response = await apiService.uploadVideo(filePathOnDisk, filename, inboxSeries.identifier)
-                    
+
                             if (response && response.status == 201) {
                                 // on succes clean file from disk and return 200
                                 deleteFile(filePathOnDisk);
@@ -355,7 +355,7 @@ module.exports = function(router) {
     *       parameters:
     *         - in: body
     *           description: The video to be updated.
-    *           schema: 
+    *           schema:
     *             type: object
     *             required:
     *               - identifier
@@ -394,4 +394,58 @@ module.exports = function(router) {
            res.json({ message: 'Error', msg })
        }
     });
+
+    /**
+        * @swagger
+         *     /api/series:
+         *     post:
+     *       tags:
+     *         - create
+     *       summary: Creates new series with acls
+     *       consumes:
+     *         - application/json
+     *       parameters:
+     *         - in: body
+     *           description: The series to be to be created.
+     *           schema:
+     *             type: object
+     *             required:
+     *               - id
+     *               - value
+     *               - flavor
+     *               - contributor
+     *             properties:
+     *               id:
+     *                 type: string
+     *                 description:  field type
+     *               value:
+     *                 type: string
+     *                 description: name of the title
+     *               flavor:
+     *                  type: string
+     *                  description: type of metadata to be created
+     *               contributor:
+     *                  type: array
+     *                  items:
+     *                      type: string
+     *       responses:
+     *         200:
+     *          identifier: series identifier
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         500:
+     *           description: Internal server error, an error occured.    
+     */
+    router.post('/series', async (req, res) => {
+        try {
+            let series = req.body;
+            const response = await apiService.createSeries(req.user, series);
+            res.json(response.data.identifier);
+        } catch (error) {
+            res.status(500)
+            const msg = error.message
+            res.json({ message: 'Error', msg })
+        }
+    });
+
 };

@@ -83,6 +83,66 @@ exports.updateEventMetadata = async (metadata, id) => {
         //return response.error;  // response is undefined here!
         throw error;
     }
+};
+
+exports.createSeries = async (user, series) => {
+    const seriesUploadUrl = constants.OCAST_SERIES_PATH;
+    let metadata = [
+        {
+            "label": "Opencast Series DublinCore",
+            "flavor": "dublincore/series",
+            "fields": [
+                {
+                    "id": "title",
+                    "value": "Captivating title"
+                },
+                {
+                    "id": "subjects",
+                    "value": [
+                        "John Clark",
+                        "Thiago Melo Costa"
+                    ]
+                },
+                {
+                    "id": "description",
+                    "value": "A great description"
+                },
+                {
+                    "id": "contributor",
+                    "value": [user.eppn]
+                }
+            ]
+        }
+    ];
+
+    let acls = [
+        {
+            "allow": true,
+            "action": "write",
+            "role": "ROLE_ADMIN"
+        },
+        {
+            "allow": true,
+            "action": "read",
+            "role": "ROLE_USER"
+        }
+    ];
+
+    let bodyFormData = new FormData();
+    bodyFormData.append('metadata', JSON.stringify(metadata));
+    bodyFormData.append('acl', JSON.stringify(acls));
+
+    try {
+        const headers = {
+            ...bodyFormData.getHeaders(),
+            "Content-Length": bodyFormData.getLengthSync()
+        };
+        const response = await security.opencastBase.post(seriesUploadUrl, bodyFormData, {headers});
+        console.log('series uploaded: ', response.data);
+        return response;
+    } catch(err) {
+        throw err;
+    }
 
 }
 
@@ -162,7 +222,7 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
 // create the default lataamo INBOX series for the given userId
 exports.createLataamoInboxSeries = async (userId) => {
     console.log('creating inbox series for', userId);
-    
+
     const lataamoInboxSeriesTitle = inboxSeriesTitleForLoggedUser(userId);
     const lataamoInboxSeriesDescription = `Lataamo-INBOX series for ${userId}`;
     const lataamoInboxSeriesLicense = 'PUT HERE THE DEFAULT INBOX SERIES LICENSE';
@@ -267,7 +327,7 @@ exports.createLataamoInboxSeries = async (userId) => {
       let bodyFormData = new FormData();
       bodyFormData.append('metadata', JSON.stringify(metadataArray));
       bodyFormData.append('acl', JSON.stringify(acls));
-  
+
       try {
           const headers = {
               ...bodyFormData.getHeaders(),
