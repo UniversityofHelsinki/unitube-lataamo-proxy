@@ -85,53 +85,11 @@ exports.updateEventMetadata = async (metadata, id) => {
     }
 };
 
-exports.createSeries = async (user, series) => {
+exports.createSeries = async (user, seriesMetadata, seriesAcl) => {
     const seriesUploadUrl = constants.OCAST_SERIES_PATH;
-    let metadata = [
-        {
-            "label": "Opencast Series DublinCore",
-            "flavor": "dublincore/series",
-            "fields": [
-                {
-                    "id": "title",
-                    "value": "Captivating title"
-                },
-                {
-                    "id": "subjects",
-                    "value": [
-                        "John Clark",
-                        "Thiago Melo Costa"
-                    ]
-                },
-                {
-                    "id": "description",
-                    "value": "A great description"
-                },
-                {
-                    "id": "contributor",
-                    "value": [user.eppn]
-                }
-            ]
-        }
-    ];
-
-    let acls = [
-        {
-            "allow": true,
-            "action": "write",
-            "role": "ROLE_ADMIN"
-        },
-        {
-            "allow": true,
-            "action": "read",
-            "role": "ROLE_USER"
-        }
-    ];
-
     let bodyFormData = new FormData();
-    bodyFormData.append('metadata', JSON.stringify(metadata));
-    bodyFormData.append('acl', JSON.stringify(acls));
-
+    bodyFormData.append('metadata', JSON.stringify(seriesMetadata));
+    bodyFormData.append('acl', JSON.stringify(seriesAcl));
     try {
         const headers = {
             ...bodyFormData.getHeaders(),
@@ -193,7 +151,7 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
         }
     ];
     // these are now constant values, maybe should be editable
-    const acls = constants.ACL_ARRAY;
+    const acls = constants.SERIES_ACL_TEMPLATE;
     const processingMetadata = constants.PROCESSING_METADATA;
 
     let bodyFormData = new FormData();
@@ -322,7 +280,7 @@ exports.createLataamoInboxSeries = async (userId) => {
       ];
 
       // these are now constant values, maybe should be editable
-      const acls = constants.ACL_ARRAY;
+      const acls = constants.SERIES_ACL_TEMPLATE;
 
       let bodyFormData = new FormData();
       bodyFormData.append('metadata', JSON.stringify(metadataArray));

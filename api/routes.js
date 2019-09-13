@@ -400,11 +400,29 @@ module.exports = function(router) {
          *     /api/series:
          *     post:
      *       tags:
-     *         - create
+     *         - insert
      *       summary: Creates new series with acls
+     *       consumes:
+     *         - application/json
+     *       parameters:
+     *         - in: body
+     *           description: The series to be created
+     *           schema:
+     *             type: object
+     *             required:
+     *               - title
+     *               - description
+     *               - acls
+     *             properties:
+     *               title:
+     *                 type: string
+     *                 description: title of the series
+     *               description:
+     *                 type: string
+     *                 description: description for the series
      *       responses:
      *         200:
-     *          description: OK. Response message in JSON containing msg and Opencast identifier for the series.
+     *           description: OK, returns the new series identifier
      *         401:
      *           description: Not authenticated. Required Shibboleth headers not present in the request.
      *         500:
@@ -413,7 +431,10 @@ module.exports = function(router) {
     router.post('/series', async (req, res) => {
         try {
             let series = req.body;
-            const response = await apiService.createSeries(req.user, series);
+
+            let modifiedSeriesMetadata = seriesService.openCastFormatSeriesMetadata(series);
+            let modifiedSeriesAclMetadata = seriesService.openCastFormatSeriesAclList(series.acl);
+            const response = await apiService.createSeries(req.user, modifiedSeriesMetadata, modifiedSeriesAclMetadata);
             res.json(response.data.identifier);
         } catch (error) {
             res.status(500)
