@@ -44,7 +44,7 @@ const updateSeriesEntryById = (seriesMetadataTemplate, id, value) => {
     });
 };
 
-const updateSeriesContributorsList = (seriesMetadataTemplate, id, value) => {
+const updateSeriesContributorsList = (seriesMetadataTemplate, value) => {
     const seriesContributors = constants.SERIES_CONTRIBUTORS_TEMPLATE;
     seriesContributors.value = value;
     return seriesMetadataTemplate[0].fields.push(seriesContributors);
@@ -54,16 +54,37 @@ exports.openCastFormatSeriesMetadata = (metadata) => {
     let seriesMetadataTemplate = constants.SERIES_METADATA;
     updateSeriesEntryById(seriesMetadataTemplate, "title", metadata.title);
     updateSeriesEntryById(seriesMetadataTemplate, "description", metadata.description);
-    updateSeriesContributorsList(seriesMetadataTemplate, "contributor", metadata.contributors);
+    updateSeriesContributorsList(seriesMetadataTemplate, metadata.contributors);
     return seriesMetadataTemplate;
 };
 
-exports.openCastFormatSeriesAclList = (alcs) => {
-    // todo genarate acl array based on series acl selection
+const updateAclTemplateReadEntry = (seriesACLTemplateReadEntry, aclRole) => {
+    return {
+        ...seriesACLTemplateReadEntry,
+        role: aclRole
+    }
+};
+
+const updateAclTemplateWriteEntry = (seriesACLTemplateWriteEntry, aclRole) => {
+    return {
+        ...seriesACLTemplateWriteEntry,
+        role: aclRole
+    }
+};
+
+const updateSeriesAclList = (aclList) => {
     let seriesAclTemplate = constants.SERIES_ACL_TEMPLATE;
+    let seriesACLTemplateReadEntry = constants.SERIES_ACL_TEMPLATE_READ_ENTRY;
+    let seriesACLTemplateWriteEntry = constants.SERIES_ACL_TEMPLATE_WRITE_ENTRY;
+    aclList.forEach(aclRole => {
+        seriesACLTemplateReadEntry = updateAclTemplateReadEntry(seriesACLTemplateReadEntry, aclRole);
+        seriesACLTemplateWriteEntry = updateAclTemplateWriteEntry(seriesACLTemplateWriteEntry, aclRole);
+        seriesAclTemplate.push(seriesACLTemplateReadEntry);
+        seriesAclTemplate.push(seriesACLTemplateWriteEntry);
+    });
     return seriesAclTemplate;
-}
+};
 
-
+exports.openCastFormatSeriesAclList = (metadata) => updateSeriesAclList(metadata.acl);
 
 const concatenateArray = (data) => Array.prototype.concat.apply([], data);
