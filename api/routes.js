@@ -56,6 +56,31 @@ module.exports = function(app) {
         }
     });
 
+    //selected serie file url
+    app.get('/series/:id', async (req, res) => {
+        try {
+            const serie = await apiService.getSerie(req.params.id);
+            res.json(serie);
+        } catch(error) {
+            const msg = error.message
+            res.json({ message: 'Error', msg });
+        }
+    });
+
+    // update serie metadata
+    app.put('/series/:id', async (req, res) => {
+        try {
+            const rawEventMetadata = req.body;
+            const modifiedMetadata = eventsService.modifySerieEventMetadataForOpencast(rawEventMetadata);
+            const data = await apiService.updateSerieEventMetadata(modifiedMetadata, req.body.identifier);
+            res.json({message : 'OK'});
+        } catch(error) {
+            res.status(500)
+            const msg = error.message
+            res.json({ message: 'Error', msg })
+        }
+    });
+
     // "user" own getSeriesForApiUser from ocast
     app.get('/userSeries', async (req, res) => {
         try {

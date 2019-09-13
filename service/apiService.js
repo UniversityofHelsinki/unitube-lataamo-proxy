@@ -27,6 +27,49 @@ exports.getEventsByIdentifier = async (identifier) => {
     return response.data;
 };
 
+exports.getSerie = async (serieId) => {
+    const seriesUrl = constants.OCAST_SERIES_PATH + serieId;
+    const response = await security.opencastBase.get(seriesUrl);
+    return response.data;
+};
+/*
+exports.updateSerieMetadata = async (metadata, id) => {
+    const videoMetaDataUrl = constants.OCAST_VIDEOS_PATH + id + constants.OCAST_METADATA_PATH + constants.OCAST_TYPE_QUERY_PARAMETER + constants.OCAST_TYPE_DUBLINCORE_EPISODE;
+    let bodyFormData = new FormData();
+    bodyFormData.append('metadata', JSON.stringify(metadata));
+    try {
+        const headers = {
+            ...bodyFormData.getHeaders(),
+            "Content-Length": bodyFormData.getLengthSync()
+        };
+        const response = await security.opencastBase.put(videoMetaDataUrl, bodyFormData, {headers});
+        return response.data;
+    } catch(error) {
+        console.log(error);
+        //return response.error;  // response is undefined here!
+        throw error;
+    }
+}*/
+
+exports.updateSerieEventMetadata = async (metadata, id) => {
+    const serieMetaDataUrl = constants.OCAST_SERIES_PATH + id + constants.OCAST_METADATA_PATH +  constants.OCAST_TYPE_QUERY_PARAMETER + constants.OCAST_TYPE_DUBLINCORE_SERIES;
+
+    let bodyFormData = new FormData();
+    bodyFormData.append('metadata', JSON.stringify(metadata));
+    try {
+        const headers = {
+            ...bodyFormData.getHeaders(),
+            "Content-Length": bodyFormData.getLengthSync()
+        };
+        const response = await security.opencastBase.put(serieMetaDataUrl, bodyFormData, {headers});
+        return response.data;
+    } catch(error) {
+        console.log(error);
+        //return response.error;  // response is undefined here!
+        throw error;
+    }
+}
+
 exports.getAllSeries = async () => {
     const seriesUrl = constants.OCAST_SERIES_PATH ;
     const response = await security.opencastBase.get(seriesUrl);
