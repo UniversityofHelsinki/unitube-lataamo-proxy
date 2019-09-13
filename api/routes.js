@@ -412,7 +412,8 @@ module.exports = function(router) {
      *             required:
      *               - title
      *               - description
-     *               - acls
+     *               - acl
+     *               - contributors
      *             properties:
      *               title:
      *                 type: string
@@ -420,6 +421,14 @@ module.exports = function(router) {
      *               description:
      *                 type: string
      *                 description: description for the series
+     *               acl:
+     *                type: array
+     *                items:
+     *                  type: string
+     *               contributors:
+     *                type: array
+     *                items:
+     *                  type: string
      *       responses:
      *         200:
      *           description: OK, returns the new series identifier
