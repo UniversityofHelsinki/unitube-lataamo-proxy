@@ -13,3 +13,11 @@ exports.getLoggedUser = (user) => {
 }
 
 const concatenateArray = (data) => Array.prototype.concat.apply([], data);
+
+exports.parseContributor = (paramArr) => {
+    return paramArr.map(concatContributors);
+}
+
+const concatContributors = (value) => {
+    return  "contributors:" + value;
+}

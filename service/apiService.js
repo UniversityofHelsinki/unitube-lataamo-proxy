@@ -4,6 +4,7 @@ const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 const { format } = require('date-fns') // https://www.npmjs.com/package/date-fns
 const constants = require('../utils/constants');
 const { inboxSeriesTitleForLoggedUser } = require('../utils/helpers'); // helper functions
+const userService = require('./userService');
 
 //
 // This file is the façade for opencast server
@@ -52,8 +53,10 @@ exports.updateSerieEventMetadata = async (metadata, id) => {
     }
 }
 
-exports.getAllSeries = async () => {
-    const seriesUrl = constants.OCAST_SERIES_PATH ;
+exports.getUserSeries = async (user) => {
+
+    const conributorParameters = userService.parseContributor(user.hyGroupCn);
+    const seriesUrl = constants.OCAST_SERIES_PATH +  '?filter=contributors:' + user.eppn + ',' + conributorParameters;
     const response = await security.opencastBase.get(seriesUrl);
     return response.data;
 };

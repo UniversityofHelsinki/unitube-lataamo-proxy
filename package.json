@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --exit",
+    "test": "cross-env LATAAMO_OPENCAST_HOST=http://localhost:8080 mocha --exit",
     "build": "echo \"Testing build\"",
     "start": "node app.js",
     "nodemon": "nodemon ./app.js localhost 3000"
@@ -34,8 +34,11 @@
     "npm": "^6.10.3",
     "passport": "^0.4.0",
     "passport-reverseproxy": "^0.1.0",
+    "ipaddr.js": "latest",
     "path": "^0.12.7",
-    "pretty-ms": "^5.0.0"
+    "pretty-ms": "^5.0.0",
+    "swagger-jsdoc": "^3.4.0",
+    "swagger-ui-express": "^4.0.7"
   },
   "devDependencies": {
     "chai": "^4.2.0",

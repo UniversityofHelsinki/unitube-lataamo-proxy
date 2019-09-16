@@ -56,7 +56,7 @@ const mockUserSeries = [
                 'subjects-koivikko' ],
         organizers: [ 'creator-kasitunnus' ],
         publishers: [ 'publisher-kasitunnus' ],
-        contributors: [ 'SeriesOwnerEppn', 'contrib1', 'jaaki', 'grp-lataamo-1' ],
+        contributors: [ 'SeriesOwnerEppn', 'contrib1', 'jaaki', 'grp-lataamo-1', 'grp-XYZ'],
         title: 'title-LATAAMO-131'
     },
     { identifier: CONSTANTS.TEST_SERIES_2_ID,
@@ -65,10 +65,57 @@ const mockUserSeries = [
         subjects: [ 'juusto', 'makasiini', 'aamupuuro', 'turve', 'salama', 'sämpylä' ],
         organizers: [ 'organizer1' ],
         publishers: [ '' ],
-        contributors: [ 'SeriesOwnerEppn', 'Tester A', 'Tester B' ],
+        contributors: [ 'SeriesOwnerEppn', 'Tester A', 'Tester B', 'Tester-XYZ' ],
         title: 'kuutamossa'
     }
 ]
+
+const mockUserSeries2 = [
+    { identifier: CONSTANTS.TEST_SERIES_1_ID,
+        creator: 'Opencast Project Administrator',
+        created: '2019-06-11T12:59:40Z',
+        subjects:
+            [ 'subjects-järvi',
+                'subjects-laavu',
+                'subjects-aamupuuro',
+                'subjects-turve',
+                'subjects-salama',
+                'subjects-koivikko' ],
+        organizers: [ 'creator-kasitunnus' ],
+        publishers: [ 'publisher-kasitunnus' ],
+        contributors: [ 'SeriesOwnerEppn', 'contrib1', 'jaaki', 'grp-lataamo-1', 'grp-XYZ'],
+        title: 'title-LATAAMO-131'
+    }
+]
+
+const mockUserSeries3 = [
+    { identifier: CONSTANTS.TEST_SERIES_1_ID,
+        creator: 'Opencast Project Administrator',
+        created: '2019-06-11T12:59:40Z',
+        subjects:
+            [ 'subjects-järvi',
+                'subjects-laavu',
+                'subjects-aamupuuro',
+                'subjects-turve',
+                'subjects-salama',
+                'subjects-koivikko' ],
+        organizers: [ 'creator-kasitunnus' ],
+        publishers: [ 'publisher-kasitunnus' ],
+        contributors: [ 'SeriesOwnerEppn', 'contrib1', 'jaaki', 'grp-lataamo-1', 'grp-XYZ'],
+        title: 'title-LATAAMO-131'
+    },
+    { identifier: CONSTANTS.TEST_SERIES_2_ID,
+        creator: 'Opencast Project Administrator',
+        created: '2019-05-22T09:56:43Z',
+        subjects: [ 'juusto', 'makasiini', 'aamupuuro', 'turve', 'salama', 'sämpylä' ],
+        organizers: [ 'organizer1' ],
+        publishers: [ '' ],
+        contributors: [ 'SeriesOwnerEppn', 'Tester A', 'Tester B', 'Tester-XYZ' ],
+        title: 'kuutamossa'
+    }
+]
+
+const mockUserSeriesEmpty = []
 
 const mockUserEventsForSeries1 =  [
     {
@@ -292,10 +339,36 @@ const series2_Events = () => nock(CONSTANTS.OCAST_BASE_URL)
     .query({filter: `series:${CONSTANTS.TEST_SERIES_2_ID}`})
     .reply(200, mockUserEventsForSeries2);
 
+const lataamoSeriesEmpty = () =>
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .get(CONSTANTS.OCAST_SERIES_PATH + "?filter=contributors:Tester-XYZ,contributors:grp-XYZ")
+        .reply(200, mockUserSeriesEmpty);
+
 // /api/series/?filter=Creator:Opencast Project Administrator
-const lataamoSeries = () => nock(CONSTANTS.OCAST_BASE_URL)
-    .get(CONSTANTS.OCAST_SERIES_PATH)
+const lataamoSeries = () =>
+    nock(CONSTANTS.OCAST_BASE_URL)
+    .get(CONSTANTS.OCAST_SERIES_PATH + "?filter=contributors:SeriesOwnerEppn,contributors:grp-XYZ")
     .reply(200, mockUserSeries);
+
+const lataamoSeries2 = () =>
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .get(CONSTANTS.OCAST_SERIES_PATH + "?filter=contributors:Tester-XYZ,contributors:grp-lataamo-2,contributors:grp-lataamo-3,contributors:grp-lataamo-1")
+        .reply(200, mockUserSeries2);
+
+const lataamoSeries3 = () =>
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .get(CONSTANTS.OCAST_SERIES_PATH + "?filter=contributors:NOT_CONTRIBUTOR_IN_ANY_SERIES,contributors:grp-lataamo-2,contributors:grp-lataamo-3,contributors:grp-lataamo-1")
+        .reply(200, mockUserSeries2);
+
+const lataamoSeries4 = () =>
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .get(CONSTANTS.OCAST_SERIES_PATH + "?filter=contributors:NOT_CONTRIBUTOR_IN_ANY_SERIES,contributors:grp-lataamo-2,contributors:grp-lataamo-3")
+        .reply(200, mockUserSeriesEmpty);
+
+const lataamoSeries5 = () =>
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .get(CONSTANTS.OCAST_SERIES_PATH + "?filter=contributors:NOT_CONTRIBUTOR_IN_ANY_SERIES,contributors:grp-XYZ")
+        .reply(200, mockUserSeriesEmpty);
 
 // /api/info/me
 const lataamoApiUser = () => nock(CONSTANTS.OCAST_BASE_URL)
@@ -307,7 +380,12 @@ const cleanMocks = () => nock.cleanAll();
 
 module.exports.mockApiUser = mockApiUser;
 module.exports.mockTestUser = mockTestUser;
+module.exports.mockOCastSeriesApiCallEmpty = lataamoSeriesEmpty;
 module.exports.mockOCastSeriesApiCall = lataamoSeries;
+module.exports.mockOCastSeriesApiCall2 = lataamoSeries2;
+module.exports.mockOCastSeriesApiCall3 = lataamoSeries3;
+module.exports.mockOCastSeriesApiCall4 = lataamoSeries4;
+module.exports.mockOCastSeriesApiCall5 = lataamoSeries5;
 module.exports.mockOCastUserApiCall = lataamoApiUser;
 module.exports.mockOCastEvents_1_ApiCall = series1_Events;
 module.exports.mockOCastEvents_2_ApiCall = series2_Events;
