@@ -130,7 +130,7 @@ module.exports = function(router) {
     });
 
     //selected serie file url
-    app.get('/series/:id', async (req, res) => {
+    router.get('/series/:id', async (req, res) => {
         try {
             const serie = await apiService.getSerie(req.params.id);
             res.json(serie);
@@ -141,7 +141,7 @@ module.exports = function(router) {
     });
 
     // update serie metadata
-    app.put('/series/:id', async (req, res) => {
+    router.put('/series/:id', async (req, res) => {
         try {
             const rawEventMetadata = req.body;
             const modifiedMetadata = eventsService.modifySerieEventMetadataForOpencast(rawEventMetadata);
