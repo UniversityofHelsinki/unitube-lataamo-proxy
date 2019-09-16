@@ -286,7 +286,6 @@ describe('user series post', () => {
         .set('hyGroupCn', test.mockTestUser.hyGroupCn)
         .expect(200)
         .expect('Content-Type', /json/);
-    console.log(response.body);
     assert.equal(response.body, test.constants.SUCCESSFUL_UPDATE_ID);
   });
 });
