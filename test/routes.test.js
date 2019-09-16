@@ -10,6 +10,7 @@ let test = require('./testHelper');
 // Unitube-lataamo proxy APIs under the test
 const LATAAMO_USER_SERIES_PATH = '/api/userSeries';
 const LATAAMO_USER_EVENTS_PATH = '/api/userVideos';
+const LATAAMO_SERIES_PATH = '/api/series';
 const LATAAMO_API_INFO_PATH = '/api/';
 const LATAAMO_USER_PATH = '/api/user';
 
@@ -149,7 +150,7 @@ describe('user series returned from /userSeries route', () => {
 
   afterEach(() => {
     test.cleanAll();
-  })
+  });
 });
 
 describe('user events (videos) returned from /userEvents route', () => {
@@ -173,6 +174,7 @@ describe('user events (videos) returned from /userEvents route', () => {
     test.mockOCastEvent3MediaMetadataCall();
     test.mockOCastEvent1AclCall();
     test.mockOcastEvent2AclCall();
+    test.mockLataamoPostSeriesCall();
   })
 
   it("should return events from series where user is contributor", async () => {
@@ -261,9 +263,37 @@ describe('user events (videos) returned from /userEvents route', () => {
     assert.isArray(response.body, 'Response should be an array');
     assert.equal(response.body.length, 0);
   });
-
-  afterEach(() => {
-    test.cleanAll();
-  })
-
 });
+
+afterEach(() => {
+  test.cleanAll();
+});
+
+describe('user series post', () => {
+
+  beforeEach(() => {
+    // mock needed opencast api calls
+    test.mockLataamoPostSeriesCall();
+  });
+
+  it("Successful series update should return 200 and identifier", async () => {
+    const userId = 'NOT_CONTRIBUTOR_IN_ANY_SERIES';
+    let response = await supertest(app)
+        .post(LATAAMO_SERIES_PATH)
+        .send({title: 'Hieno video', description: 'hienon videon kuvaus'})
+        .set('eppn', userId)
+        .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+        .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+        .expect(200)
+        .expect('Content-Type', /json/);
+    console.log(response.body);
+    assert.equal(response.body, test.constants.SUCCESSFUL_UPDATE_ID);
+  });
+});
+
+afterEach(() => {
+  test.cleanAll();
+});
+
+
+
