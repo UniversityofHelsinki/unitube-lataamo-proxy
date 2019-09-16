@@ -30,7 +30,7 @@ const getSeriesIdentifiers = (filteredSeriesByUser) => {
 
 exports.getSerieFromEventMetadata = (metadata) => {
     const foundEpisodeFlavorMetadata = metadata.find(field => {
-       return field.flavor === 'dublincore/episode';
+        return field.flavor === 'dublincore/episode';
     });
     const foundFieldWithSeriesInfo = foundEpisodeFlavorMetadata.fields.find(field => {
         return field.id === 'isPartOf';
@@ -40,7 +40,7 @@ exports.getSerieFromEventMetadata = (metadata) => {
 
 const updateSeriesEntryById = (seriesMetadataTemplate, id, value) => {
     return seriesMetadataTemplate[0].fields.filter(field => {
-         return field.id === id ? field.value = value : ''
+        return field.id === id ? field.value = value : ''
     });
 };
 
@@ -48,13 +48,29 @@ const updateSeriesContributorsList = (seriesMetadataTemplate, contributors) => {
     const seriesContributors = constants.SERIES_CONTRIBUTORS_TEMPLATE;
     seriesContributors.value = contributors;
     return seriesMetadataTemplate[0].fields.push(seriesContributors);
+};
+
+const addUserInContributorsList = (contributors, user) => {
+    const foundOwner = contributors.find(contributor => {
+        return contributor === user.eppn;
+    });
+    if(!foundOwner) {
+        contributors.push(user.eppn);
+    }
+};
+
+
+const addUserToEmptyContributorsList = (metadata, user) => {
+    !metadata.contributors ? metadata.contributors = [user.eppn] : metadata.contributors;
 }
 
-exports.openCastFormatSeriesMetadata = (metadata) => {
+exports.openCastFormatSeriesMetadata = (metadata, user) => {
     let seriesMetadataTemplate = constants.SERIES_METADATA;
     updateSeriesEntryById(seriesMetadataTemplate, "title", metadata.title);
     updateSeriesEntryById(seriesMetadataTemplate, "description", metadata.description);
-    metadata.contributors && metadata.contributors.length > 0 ? updateSeriesContributorsList(seriesMetadataTemplate, metadata.contributors) : '';
+    addUserToEmptyContributorsList(metadata, user);
+    addUserInContributorsList(metadata.contributors, user);
+    updateSeriesContributorsList(seriesMetadataTemplate, metadata.contributors);
     return seriesMetadataTemplate;
 };
 

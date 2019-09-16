@@ -441,7 +441,7 @@ module.exports = function(router) {
         try {
             let series = req.body;
 
-            let modifiedSeriesMetadata = seriesService.openCastFormatSeriesMetadata(series);
+            let modifiedSeriesMetadata = seriesService.openCastFormatSeriesMetadata(series, req.user);
             let modifiedSeriesAclMetadata = seriesService.openCastFormatSeriesAclList(series);
             const response = await apiService.createSeries(req.user, modifiedSeriesMetadata, modifiedSeriesAclMetadata);
             res.json(response.data.identifier);
