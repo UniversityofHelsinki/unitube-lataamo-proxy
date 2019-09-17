@@ -20,7 +20,8 @@ const CONSTANTS = Object.freeze({
     TEST_MEDIA_1_METADATA_ID : '638b7ae1-0710-44df-b3db-55ee9e8b48ba',
     TEST_MEDIA_2_METADATA_ID : 'e14f98b1-3c61-45e7-8bb0-4a32ef66dac8',
     TEST_MEDIA_3_METADATA_ID : '1ca70749-cb47-403f-8bd2-3484759e68c1',
-    CREATOR_AKA_API_USER : 'Opencast Project Administrator'
+    CREATOR_AKA_API_USER : 'Opencast Project Administrator',
+    SUCCESSFUL_UPDATE_ID : '123456'
 });
 
 
@@ -370,6 +371,11 @@ const lataamoSeries5 = () =>
         .get(CONSTANTS.OCAST_SERIES_PATH + "?filter=contributors:NOT_CONTRIBUTOR_IN_ANY_SERIES,contributors:grp-XYZ")
         .reply(200, mockUserSeriesEmpty);
 
+const lataamoPostSeries = () =>
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .post(CONSTANTS.OCAST_SERIES_PATH)
+        .reply(200, { identifier: CONSTANTS.SUCCESSFUL_UPDATE_ID });
+
 // /api/info/me
 const lataamoApiUser = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(CONSTANTS.OCAST_USER_PATH)
@@ -400,6 +406,7 @@ module.exports.mockOCastEvent2MediaMetadataCall = event2MediaMetadata;
 module.exports.mockOCastEvent3MediaMetadataCall = event3MediaMetadata;
 module.exports.mockOCastEvent1AclCall = eventAclsFromSerie;
 module.exports.mockOcastEvent2AclCall = eventAclsFromSerie2;
+module.exports.mockLataamoPostSeriesCall = lataamoPostSeries;
 module.exports.constants = CONSTANTS;
 
 module.exports.cleanAll = cleanMocks;
