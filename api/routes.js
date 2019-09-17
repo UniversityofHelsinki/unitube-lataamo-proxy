@@ -21,37 +21,37 @@ module.exports = function(router) {
     router.get('/api-docs', swaggerUi.setup(apiSpecs));
 
     /**
-    * @swagger
-    *     /api/:
-    *     get:
-    *       tags:
-    *         - retrieve
-    *       summary: Return status message (ping).
-    *       responses:
-    *         304:
-    *           description: A status message (ping) with version info.
-    *         401:
-    *           description: Not authenticated. Required Shibboleth headers not present in the request.
-    *         default:
-    *           description: Unexpected error    
-    */
+         * @swagger
+         *     /api/:
+         *     get:
+     *       tags:
+     *         - retrieve
+     *       summary: Return status message (ping).
+     *       responses:
+     *         304:
+     *           description: A status message (ping) with version info.
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         default:
+     *           description: Unexpected error    
+     */
     router.get('/', api.apiInfo);
 
-    /**
-    * @swagger
-    *     /api/user:
-    *     get:
-    *       tags:
-    *         - retrieve
-    *       summary: Returns the logged in user.
-    *       responses:
-    *         200:
-    *           description: A user object in JSON.
-    *         401:
-    *           description: Not authenticated. Required Shibboleth headers not present in the request.
-    *         default:
-    *           description: Unexpected error     
-    */    
+    /**
+        * @swagger
+     *     /api/user:
+     *     get:
+     *       tags:
+     *         - retrieve
+     *       summary: Returns the logged in user.
+     *       responses:
+     *         200:
+     *           description: A user object in JSON.
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         default:
+     *           description: Unexpected error     
+     */
     router.get("/user", (req, res) => {
         res.json(userService.getLoggedUser(req.user));
     });
@@ -59,64 +59,64 @@ module.exports = function(router) {
     // busboy middle-ware
     router.use(busboy({
         highWaterMark: 2 * 1024 * 1024, // Set 2MiB buffer
-    })); 
+    }));
 
-    /**
-    * @swagger
-    *     /api/event/{id}:
-    *     get:
-    *       tags:
-    *         - retrieve
-    *       summary: Return video's details by ID.
-    *       description: Returns selected video's information.
-    *       parameters:
-    *         - in: path
-    *           name: id
-    *           required: true
-    *           description: ID of the video AKA event.
-    *       responses:
-    *         401:
-    *           description: Not authenticated. Required Shibboleth headers not present in the request.
-    *         default:
-    *           description: Unexpected error    
-    */     
+    /**
+        * @swagger
+         *     /api/event/{id}:
+         *     get:
+     *       tags:
+     *         - retrieve
+     *       summary: Return video's details by ID.
+         *       description: Returns selected video's information.
+     *       parameters:
+     *         - in: path
+     *           name: id
+     *           required: true
+     *           description: ID of the video AKA event.
+     *       responses:
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         default:
+     *           description: Unexpected error    
+     */
     router.get("/event/:id", async (req, res) => {
-       try {
-           const event = await apiService.getEvent(req.params.id);
-           const eventWithSerie = await eventsService.getEventWithSerie(event);
-           const eventWithAcls = await eventsService.getEventAclsFromSerie(eventWithSerie);
-           const eventWithVisibility = eventsService.calculateVisibilityProperty(eventWithAcls);
-           const eventWithMetadata = await eventsService.getMetadataForEvent(eventWithVisibility);
-           const eventWithMedia = await eventsService.getMediaForEvent(eventWithMetadata);
-           const eventWithMediaFileMetadata = await eventsService.getMediaFileMetadataForEvent(eventWithMedia);
-           const eventWithDuration = eventsService.getDurationFromMediaFileMetadataForEvent(eventWithMediaFileMetadata);
-           console.log('eventWithDuration', eventWithDuration);
-           res.json(eventWithDuration);
-       } catch (error) {
-           const msg = error.message
-           res.json({ message: 'Error', msg });
-       }
+        try {
+            const event = await apiService.getEvent(req.params.id);
+            const eventWithSerie = await eventsService.getEventWithSerie(event);
+            const eventWithAcls = await eventsService.getEventAclsFromSerie(eventWithSerie);
+            const eventWithVisibility = eventsService.calculateVisibilityProperty(eventWithAcls);
+            const eventWithMetadata = await eventsService.getMetadataForEvent(eventWithVisibility);
+            const eventWithMedia = await eventsService.getMediaForEvent(eventWithMetadata);
+            const eventWithMediaFileMetadata = await eventsService.getMediaFileMetadataForEvent(eventWithMedia);
+            const eventWithDuration = eventsService.getDurationFromMediaFileMetadataForEvent(eventWithMediaFileMetadata);
+            console.log('eventWithDuration', eventWithDuration);
+            res.json(eventWithDuration);
+        } catch (error) {
+            const msg = error.message
+            res.json({ message: 'Error', msg });
+        }
     });
 
-    /**
-    * @swagger
-    *     /api/video/{id}:
-    *     get:
-    *       tags:
-    *         - retrieve
-    *       summary: Return video's media URL by ID.
-    *       description: Returns selected video's media URL (url to video file).
-    *       parameters:
-    *         - in: path
-    *           name: id
-    *           required: true
-    *           description: ID of the video AKA event.
-    *       responses:
-    *         401:
-    *           description: Not authenticated. Required Shibboleth headers not present in the request.
-    *         default:
-    *           description: Unexpected error
-    */
+    /**
+        * @swagger
+         *     /api/video/{id}:
+         *     get:
+     *       tags:
+     *         - retrieve
+     *       summary: Return video's media URL by ID.
+         *       description: Returns selected video's media URL (url to video file).
+     *       parameters:
+     *         - in: path
+     *           name: id
+     *           required: true
+     *           description: ID of the video AKA event.
+     *       responses:
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         default:
+     *           description: Unexpected error
+     */
     router.get("/video/:id", async (req, res) => {
         try {
             const publications = await apiService.getPublicationsForEvent(req.params.id);
@@ -129,22 +129,22 @@ module.exports = function(router) {
         }
     });
 
-    /**
-    * @swagger
-    *     /api/userSeries:
-    *     get:
-    *       tags:
-    *         - retrieve
-    *       summary: Return user's series.
-    *       description: Returns series for logged in user. These series are the ones user is listed as contributor.
-    *       responses:
-    *         200:
-    *           description: List of series.
-    *         401:
-    *           description: Not authenticated. Required Shibboleth headers not present in the request.
-    *         500:
-    *           description: Internal server error, an error occured.
-    */
+    /**
+        * @swagger
+         *     /api/userSeries:
+         *     get:
+     *       tags:
+     *         - retrieve
+     *       summary: Return user's series.
+         *       description: Returns series for logged in user. These series are the ones user is listed as contributor.
+     *       responses:
+     *         200:
+     *           description: List of series.
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         500:
+     *           description: Internal server error, an error occured.
+         */
     router.get('/userSeries', async (req, res) => {
         try {
             const loggedUser = userService.getLoggedUser(req.user);
@@ -157,20 +157,20 @@ module.exports = function(router) {
         }
     });
 
-   /**
-    * @swagger
-    *     /api/userVideos:
-    *     get:
-    *       tags:
-    *         - retrieve
-    *       summary: Returns user's videos.
-    *       description: Returns videos for logged user. Returns the videos that are connected to user's series.
-    *       responses:
-    *         200:
-    *           description: List of videos.
-    *         401:
-    *           description: Not authenticated. Required Shibboleth headers not present in the request.
-    */      
+    /**
+        * @swagger
+         *     /api/userVideos:
+         *     get:
+     *       tags:
+     *         - retrieve
+     *       summary: Returns user's videos.
+         *       description: Returns videos for logged user. Returns the videos that are connected to user's series.
+     *       responses:
+     *         200:
+     *           description: List of videos.
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+         */
     router.get('/userVideos', async (req, res) => {
         try {
             const loggedUser = userService.getLoggedUser(req.user);
@@ -197,7 +197,7 @@ module.exports = function(router) {
         try {
             const userSeries = await apiService.getUserSeries(loggedUser);
             let inboxSeries = userSeries.find(series => series.title === lataamoInboxSeriesTitle);
-          
+
             if (!inboxSeries) {
                 console.log('INBOX series not found with title', lataamoInboxSeriesTitle);
                 inboxSeries = await apiService.createLataamoInboxSeries(loggedUser.eppn);
@@ -222,29 +222,29 @@ module.exports = function(router) {
         }
     }
 
-    /**
-    * @swagger
-    *     /api/userVideos:
-    *     post:
-    *       tags:
-    *         - create
-    *       summary: Upload a video file.
-    *       description: Upload a video file to Opencast service. Video is saved to Lataamo proxy before sending to Opencast.
-    *       consumes:
-    *         - multipart/form-data
-    *       parameters:
-    *         - in: formData
-    *           name: videofile
-    *           type: file
-    *           description: The video file to be uploaded.
-    *       responses:
-    *         200:
-    *           description: OK. Response message in JSON containing msg and Opencast identifier for the video.
-    *         401:
-    *           description: Not authenticated. Required Shibboleth headers not present in the request.
-    *         500:
-    *           description: Internal server error, an error occured.
-    */  
+    /**
+        * @swagger
+         *     /api/userVideos:
+         *     post:
+     *       tags:
+     *         - create
+     *       summary: Upload a video file.
+         *       description: Upload a video file to Opencast service. Video is saved to Lataamo proxy before sending to Opencast.
+     *       consumes:
+     *         - multipart/form-data
+     *       parameters:
+     *         - in: formData
+     *           name: videofile
+     *           type: file
+     *           description: The video file to be uploaded.
+     *       responses:
+     *         200:
+     *           description: OK. Response message in JSON containing msg and Opencast identifier for the video.
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         500:
+     *           description: Internal server error, an error occured.
+         */
     router.post('/userVideos', async (req, res) => {
         try {
             const uploadPath = path.join(__dirname, 'uploads/');
@@ -277,7 +277,7 @@ module.exports = function(router) {
                         const loggedUser = userService.getLoggedUser(req.user);
                         let timeDiff = new Date() - startTime;
                         console.log('Loading time with busboy', timeDiff, 'milliseconds');
-                        
+
                         let inboxSeries
                         try {
                             inboxSeries = await returnOrCreateUsersInboxSeries(loggedUser);
@@ -291,10 +291,10 @@ module.exports = function(router) {
                             console.log(err)
                             throw "Failed to resolve user's inbox series";
                         }
-                        
+
                         try {
                             const response = await apiService.uploadVideo(filePathOnDisk, filename, inboxSeries.identifier)
-                    
+
                             if (response && response.status == 201) {
                                 // on succes clean file from disk and return 200
                                 deleteFile(filePathOnDisk);
@@ -343,55 +343,113 @@ module.exports = function(router) {
         });
     }
 
-    /**
-    * @swagger
-    *     /api/userVideos/{id}:
-    *     put:
-    *       tags:
-    *         - update
-    *       summary: Updates video's information by ID.
-    *       consumes:
-    *         - application/json
-    *       parameters:
-    *         - in: body
-    *           description: The video to be updated.
-    *           schema: 
-    *             type: object
-    *             required:
-    *               - identifier
-    *               - title
-    *               - isPartOf
-    *             properties:
-    *               identifier:
-    *                 type: string
-    *                 description: id of the video
-    *               title:
-    *                 type: string
-    *                 description: title of the video AKA the name
-    *               description:
-    *                 type: string
-    *                 description: description for the video
-    *               isPartOf:
-    *                 type: string
-    *                 description: id of the series the video belongs to
-    *       responses:
-    *         200:
-    *           description: OK
-    *         401:
-    *           description: Not authenticated. Required Shibboleth headers not present in the request.
-    *         500:
-    *           description: Internal server error, an error occured.    
-    */ 
+    /**
+        * @swagger
+         *     /api/userVideos/{id}:
+         *     put:
+     *       tags:
+     *         - update
+     *       summary: Updates video's information by ID.
+     *       consumes:
+     *         - application/json
+     *       parameters:
+     *         - in: body
+     *           description: The video to be updated.
+     *           schema:
+     *             type: object
+     *             required:
+     *               - identifier
+     *               - title
+     *               - isPartOf
+     *             properties:
+     *               identifier:
+     *                 type: string
+     *                 description: id of the video
+     *               title:
+     *                 type: string
+     *                 description: title of the video AKA the name
+     *               description:
+     *                 type: string
+     *                 description: description for the video
+     *               isPartOf:
+     *                 type: string
+     *                 description: id of the series the video belongs to
+     *       responses:
+     *         200:
+     *           description: OK
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         500:
+     *           description: Internal server error, an error occured.    
+     */
     router.put('/userVideos/:id', async (req, res) => {
-       try {
-           const rawEventMetadata = req.body;
-           const modifiedMetadata = eventsService.modifyEventMetadataForOpencast(rawEventMetadata);
-           const data = await apiService.updateEventMetadata(modifiedMetadata, req.body.identifier);
-           res.json({message : 'OK'});
-       } catch(error) {
-           res.status(500)
-           const msg = error.message
-           res.json({ message: 'Error', msg })
-       }
+        try {
+            const rawEventMetadata = req.body;
+            const modifiedMetadata = eventsService.modifyEventMetadataForOpencast(rawEventMetadata);
+            const data = await apiService.updateEventMetadata(modifiedMetadata, req.body.identifier);
+            res.json({message : 'OK'});
+        } catch(error) {
+            res.status(500)
+            const msg = error.message
+            res.json({ message: 'Error', msg })
+        }
     });
+
+    /**
+        * @swagger
+         *     /api/series:
+         *     post:
+     *       tags:
+     *         - insert
+     *       summary: Creates new series with acls
+     *       consumes:
+     *         - application/json
+     *       parameters:
+     *         - in: body
+     *           description: The series to be created
+     *           schema:
+     *             type: object
+     *             required:
+     *               - title
+     *               - description
+     *               - acl
+     *               - contributors
+     *             properties:
+     *               title:
+     *                 type: string
+     *                 description: title of the series
+     *               description:
+     *                 type: string
+     *                 description: description for the series
+     *               acl:
+     *                type: array
+     *                items:
+     *                  type: string
+     *               contributors:
+     *                type: array
+     *                items:
+     *                  type: string
+     *       responses:
+     *         200:
+     *           description: OK, returns the new series identifier
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         500:
+     *           description: Internal server error, an error occured.    
+     */
+    router.post('/series', async (req, res) => {
+        try {
+            let series = req.body;
+            const loggedUser = userService.getLoggedUser(req.user);
+            let modifiedSeriesMetadata = seriesService.openCastFormatSeriesMetadata(series, loggedUser);
+            let modifiedSeriesAclMetadata = seriesService.openCastFormatSeriesAclList(series);
+            const response = await apiService.createSeries(req.user, modifiedSeriesMetadata, modifiedSeriesAclMetadata);
+            res.json(response.data.identifier);
+        } catch (error) {
+            res.status(500)
+            const msg = error.message
+            res.json({ message: 'Error', msg })
+        }
+    });
+
 };

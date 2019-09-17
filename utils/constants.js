@@ -22,44 +22,76 @@ const OCAST_TYPE_DUBLINCORE_EPISODE = 'dublincore/episode';
 
 const OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER = '?filter=series:';
 
-const ACL_ARRAY = [
+const SERIES_ACL_TEMPLATE = [
     {
-      "action": "read",
-      "allow": true,  
-      "role": "ROLE_USER_ADMIN"
+        "action": "read",
+        "allow": true,
+        "role": "ROLE_USER_ADMIN"
     },
     {
-      "action": "write",
-      "allow": true,
-      "role": "ROLE_USER_ADMIN"
+        "action": "write",
+        "allow": true,
+        "role": "ROLE_USER_ADMIN"
     },
     {
-      "action": "read",
-      "allow": true,
-      "role": "ROLE_ADMIN"
+        "action": "read",
+        "allow": true,
+        "role": "ROLE_ADMIN"
     },
     {
-      "action": "write",
-      "allow": true,
-      "role": "ROLE_ADMIN"
+        "action": "write",
+        "allow": true,
+        "role": "ROLE_ADMIN"
     },
     {
-      "action": "read",
-      "allow": true,
-      "role": "ROLE_ANONYMOUS"
+        "action": "read",
+        "allow": true,
+        "role": "ROLE_ANONYMOUS"
     }
-  ]
+];
 
-  const PROCESSING_METADATA = {
+const PROCESSING_METADATA = {
     "workflow": "schedule-and-upload",
     "configuration": {
-      "flagForCutting": "false",
-      "flagForReview": "true",
-      "publishToEngage": "true",
-      "publishToHarvesting": "true",
-      "straightToPublishing": "true"
+        "flagForCutting": "false",
+        "flagForReview": "true",
+        "publishToEngage": "true",
+        "publishToHarvesting": "true",
+        "straightToPublishing": "true"
     }
-  }   
+};
+
+const SERIES_CONTRIBUTORS_TEMPLATE = {
+    "id": "contributor",
+    "value": ""
+};
+
+const SERIES_ACL_TEMPLATE_READ_ENTRY = {
+    "allow": true,
+    "action": "read"
+};
+
+const SERIES_ACL_TEMPLATE_WRITE_ENTRY = {
+    "allow": true,
+    "action": "write"
+};
+
+const SERIES_METADATA = [
+    {
+        "label": "Opencast Series DublinCore",
+        "flavor": "dublincore/series",
+        "fields": [
+            {
+                "id": "title",
+                "value": ""
+            },
+            {
+                "id": "description",
+                "value": ""
+            }
+        ]
+    }
+];
 
 module.exports = {
     ROLE_ANONYMOUS,
@@ -67,7 +99,7 @@ module.exports = {
     STATUS_MOODLE,
     MOODLE_ACL_INSTRUCTOR,
     MOODLE_ACL_LEARNER,
-    ACL_ARRAY,
+    SERIES_ACL_TEMPLATE,
     OCAST_API_PATH,
     OCAST_SERIES_PATH,
     OCAST_VIDEOS_PATH,
@@ -81,5 +113,9 @@ module.exports = {
     OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER,
     PROCESSING_METADATA,
     OCAST_TYPE_QUERY_PARAMETER,
-    OCAST_TYPE_DUBLINCORE_EPISODE
+    OCAST_TYPE_DUBLINCORE_EPISODE,
+    SERIES_METADATA,
+    SERIES_CONTRIBUTORS_TEMPLATE,
+    SERIES_ACL_TEMPLATE_READ_ENTRY,
+    SERIES_ACL_TEMPLATE_WRITE_ENTRY
 };

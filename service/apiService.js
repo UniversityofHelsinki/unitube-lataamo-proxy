@@ -83,6 +83,24 @@ exports.updateEventMetadata = async (metadata, id) => {
         //return response.error;  // response is undefined here!
         throw error;
     }
+};
+
+exports.createSeries = async (user, seriesMetadata, seriesAcl) => {
+    const seriesUploadUrl = constants.OCAST_SERIES_PATH;
+    let bodyFormData = new FormData();
+    bodyFormData.append('metadata', JSON.stringify(seriesMetadata));
+    bodyFormData.append('acl', JSON.stringify(seriesAcl));
+    try {
+        const headers = {
+            ...bodyFormData.getHeaders(),
+            "Content-Length": bodyFormData.getLengthSync()
+        };
+        const response = await security.opencastBase.post(seriesUploadUrl, bodyFormData, {headers});
+        console.log('series uploaded: ', response.data);
+        return response;
+    } catch(err) {
+        throw err;
+    }
 
 }
 
@@ -133,7 +151,7 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
         }
     ];
     // these are now constant values, maybe should be editable
-    const acls = constants.ACL_ARRAY;
+    const acls = constants.SERIES_ACL_TEMPLATE;
     const processingMetadata = constants.PROCESSING_METADATA;
 
     let bodyFormData = new FormData();
@@ -162,7 +180,7 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
 // create the default lataamo INBOX series for the given userId
 exports.createLataamoInboxSeries = async (userId) => {
     console.log('creating inbox series for', userId);
-    
+
     const lataamoInboxSeriesTitle = inboxSeriesTitleForLoggedUser(userId);
     const lataamoInboxSeriesDescription = `Lataamo-INBOX series for ${userId}`;
     const lataamoInboxSeriesLicense = 'PUT HERE THE DEFAULT INBOX SERIES LICENSE';
@@ -262,12 +280,12 @@ exports.createLataamoInboxSeries = async (userId) => {
       ];
 
       // these are now constant values, maybe should be editable
-      const acls = constants.ACL_ARRAY;
+      const acls = constants.SERIES_ACL_TEMPLATE;
 
       let bodyFormData = new FormData();
       bodyFormData.append('metadata', JSON.stringify(metadataArray));
       bodyFormData.append('acl', JSON.stringify(acls));
-  
+
       try {
           const headers = {
               ...bodyFormData.getHeaders(),
