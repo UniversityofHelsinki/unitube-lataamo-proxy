@@ -10,12 +10,12 @@ const publicationService = require('../service/publicationService');
 const busboy = require('connect-busboy');  //https://github.com/mscdex/connect-busboy
 const path = require('path');
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
-const { inboxSeriesTitleForLoggedUser } = require('../utils/helpers'); // helper functions
+const {inboxSeriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
 const swaggerUi = require('swagger-ui-express');
 const apiSpecs = require('../config/swagger'); // swagger config
 
 
-module.exports = function(router) {
+module.exports = function (router) {
     // https://www.npmjs.com/package/swagger-ui-express
     router.use('/api-docs', swaggerUi.serve);
     router.get('/api-docs', swaggerUi.setup(apiSpecs));
@@ -94,7 +94,7 @@ module.exports = function(router) {
             res.json(eventWithDuration);
         } catch (error) {
             const msg = error.message
-            res.json({ message: 'Error', msg });
+            res.json({message: 'Error', msg});
         }
     });
 
@@ -123,9 +123,89 @@ module.exports = function(router) {
             const filteredPublication = publicationService.filterApiChannelPublication(publications);
             const mediaUrl = publicationService.getMediaUrlFromPublication(req.params.id, filteredPublication);
             res.json(mediaUrl);
-        } catch(error) {
+        } catch (error) {
             const msg = error.message
-            res.json({ message: 'Error', msg });
+            res.json({message: 'Error', msg});
+        }
+    });
+
+    /**
+        * @swagger
+         *     /api/series/{id}:
+         *     get:
+     *       tags:
+     *         - retrieve
+     *       summary: Return serie by ID.
+         *       description: Returns selected series media.
+     *       parameters:
+     *         - in: path
+     *           name: id
+     *           required: true
+     *           description: ID of the serie.
+     *       responses:
+     *         200:
+     *           description: Serie.
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         default:
+     *           description: Unexpected error
+         */
+     router.get('/series/:id', async (req, res) => {
+        try {
+            const serie = await apiService.getSerie(req.params.id);
+            res.json(serie);
+        } catch (error) {
+            const msg = error.message
+            res.json({message: 'Error', msg});
+        }
+    });
+
+    /**
+        * @swagger
+         *     /api/series/{id}:
+         *     put:
+     *       tags:
+     *         - update
+     *       summary: Updates series information by ID.
+     *       consumes:
+     *         - application/json
+     *       parameters:
+     *         - in: body
+     *           description: The serie to be updated.
+     *           schema:
+     *             type: object
+     *             required:
+     *               - identifier
+     *               - title
+     *               - isPartOf
+     *             properties:
+     *               identifier:
+     *                 type: string
+     *                 description: id of the serie
+     *               title:
+     *                 type: string
+     *                 description: title of the serie AKA the name
+     *               description:
+     *                 type: string
+     *                 description: description for the serie
+     *       responses:
+     *         200:
+     *           description: OK
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         500:
+     *           description: Internal server error, an error occured.    
+     */
+    router.put('/series/:id', async (req, res) => {
+        try {
+            const rawEventMetadata = req.body;
+            const modifiedMetadata = eventsService.modifySerieEventMetadataForOpencast(rawEventMetadata);
+            const data = await apiService.updateSerieEventMetadata(modifiedMetadata, req.body.identifier);
+            res.json({message: 'OK'});
+        } catch (error) {
+            res.status(500)
+            const msg = error.message
+            res.json({message: 'Error', msg})
         }
     });
 
@@ -145,56 +225,15 @@ module.exports = function(router) {
      *         500:
      *           description: Internal server error, an error occured.
          */
-    //selected serie file url
-    router.get('/series/:id', async (req, res) => {
-        try {
-            const serie = await apiService.getSerie(req.params.id);
-            res.json(serie);
-        } catch(error) {
-            const msg = error.message
-            res.json({ message: 'Error', msg });
-        }
-    });
-
-    // update serie metadata
-    router.put('/series/:id', async (req, res) => {
-        try {
-            const rawEventMetadata = req.body;
-            const modifiedMetadata = eventsService.modifySerieEventMetadataForOpencast(rawEventMetadata);
-            const data = await apiService.updateSerieEventMetadata(modifiedMetadata, req.body.identifier);
-            res.json({message : 'OK'});
-        } catch(error) {
-            res.status(500)
-            const msg = error.message
-            res.json({ message: 'Error', msg })
-        }
-    });
-
-   /**
-    * @swagger
-    *     /api/userSeries:
-    *     get:
-    *       tags:
-    *         - retrieve
-    *       summary: Return user's series.
-    *       description: Returns series for logged in user. These series are the ones user is listed as contributor.
-    *       responses:
-    *         200:
-    *           description: List of series.
-    *         401:
-    *           description: Not authenticated. Required Shibboleth headers not present in the request.
-    *         500:
-    *           description: Internal server error, an error occured.
-    */
     router.get('/userSeries', async (req, res) => {
         try {
             const loggedUser = userService.getLoggedUser(req.user);
             const userSeries = await apiService.getUserSeries(loggedUser);
             res.json(userSeries);
-        } catch(error) {
+        } catch (error) {
             res.status(500)
             const msg = error.message
-            res.json({ message: 'Error', msg })
+            res.json({message: 'Error', msg})
         }
     });
 
@@ -227,7 +266,7 @@ module.exports = function(router) {
         } catch (error) {
             res.status(500)
             const msg = error.message
-            res.json({ message: 'Error', msg })
+            res.json({message: 'Error', msg})
         }
     });
 
@@ -245,7 +284,7 @@ module.exports = function(router) {
                 console.log('created inbox', inboxSeries);
             }
             return inboxSeries;
-        }catch(err){
+        } catch (err) {
             throw err
         }
     }
@@ -290,12 +329,12 @@ module.exports = function(router) {
         try {
             const uploadPath = path.join(__dirname, 'uploads/');
 
-            if(!ensureUploadDir(uploadPath)){
+            if (!ensureUploadDir(uploadPath)) {
                 // upload dir failed log and return error
                 console.log('Upload dir unavailable', uploadPath);
                 res.status(500);
                 const msg = 'Upload dir unavailable.'
-                res.json({ message: 'Error', msg });
+                res.json({message: 'Error', msg});
             }
 
             req.pipe(req.busboy); // Pipe it trough busboy
@@ -304,7 +343,7 @@ module.exports = function(router) {
 
             req.busboy.on('file', (fieldname, file, filename) => {
                 startTime = new Date()
-                console.log(`Upload of '${filename}' started`);
+                console.log(`Upload of '${ filename }' started`);
                 const filePathOnDisk = path.join(uploadPath, filename);
 
                 // Create a write stream of the new file
@@ -325,9 +364,9 @@ module.exports = function(router) {
 
                             if (!inboxSeries || !inboxSeries.identifier) {
                                 res.status(500)
-                                res.json({ message: `${filename} failed to resolve inboxSeries for user`})
+                                res.json({message: `${ filename } failed to resolve inboxSeries for user`})
                             }
-                        } catch(err) {
+                        } catch (err) {
                             // Log error and throw reason
                             console.log(err)
                             throw "Failed to resolve user's inbox series";
@@ -340,34 +379,34 @@ module.exports = function(router) {
                                 // on succes clean file from disk and return 200
                                 deleteFile(filePathOnDisk);
                                 res.status(200)
-                                res.json({ message: `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)}`})
+                                res.json({message: `${ filename } uploaded to lataamo-proxy in ${ timeDiff } milliseconds. Opencast event ID: ${ JSON.stringify(response.data) }`})
                             } else {
                                 // on failure clean file from disk and return 500
                                 deleteFile(filePathOnDisk);
-                                res.json({ message: `${filename} failed.`})
+                                res.json({message: `${ filename } failed.`})
                                 res.status(500)
                             }
-                        } catch(err) {
+                        } catch (err) {
                             // Log error and throw reason
                             console.log(err);
                             throw 'Failed to upload video to opencast';
                         }
-                    } catch(err) {
+                    } catch (err) {
                         // catch and clean file from disk
                         // return response to user client
                         deleteFile(filePathOnDisk);
                         res.status(500);
-                        const msg = `Upload of ${filename} failed. ${err}.`;
-                        res.json({ message: 'Error', msg });
+                        const msg = `Upload of ${ filename } failed. ${ err }.`;
+                        res.json({message: 'Error', msg});
                     }
                 });
             });
-        } catch(err) {
+        } catch (err) {
             // log error and return 500
             console.log(err);
             res.status(500);
-            const msg = `${filename} failed ${err}.`;
-            res.json({ message: 'Error', msg });
+            const msg = `${ filename } failed ${ err }.`;
+            res.json({message: 'Error', msg});
         }
     });
 
@@ -428,11 +467,11 @@ module.exports = function(router) {
             const rawEventMetadata = req.body;
             const modifiedMetadata = eventsService.modifyEventMetadataForOpencast(rawEventMetadata);
             const data = await apiService.updateEventMetadata(modifiedMetadata, req.body.identifier);
-            res.json({message : 'OK'});
-        } catch(error) {
+            res.json({message: 'OK'});
+        } catch (error) {
             res.status(500)
             const msg = error.message
-            res.json({ message: 'Error', msg })
+            res.json({message: 'Error', msg})
         }
     });
 
@@ -489,7 +528,7 @@ module.exports = function(router) {
         } catch (error) {
             res.status(500)
             const msg = error.message
-            res.json({ message: 'Error', msg })
+            res.json({message: 'Error', msg})
         }
     });
 
