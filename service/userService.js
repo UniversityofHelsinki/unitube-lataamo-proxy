@@ -19,5 +19,5 @@ exports.parseContributor = (paramArr) => {
 }
 
 const concatContributors = (value) => {
-    return  "contributors:" + value;
+    return  `contributors:${value}`;
 }
