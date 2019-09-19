@@ -163,6 +163,20 @@ exports.modifyEventMetadataForOpencast = (metadata) => {
     return metadataArray;
 };
 
+exports.modifySerieEventMetadataForOpencast = (metadata) => {
+    const metadataArray = [];
+
+    metadataArray.push({
+            "id" : "title",
+            "value": metadata.title },
+        {
+            "id" : "description",
+            "value": metadata.description
+        });
+
+    return metadataArray;
+};
+
 exports.concatenateArray = (data) => Array.prototype.concat.apply([], data);
 
 
