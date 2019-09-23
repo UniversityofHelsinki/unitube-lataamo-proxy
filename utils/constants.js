@@ -55,7 +55,7 @@ const PROCESSING_METADATA = {
     "workflow": "schedule-and-upload",
     "configuration": {
         "flagForCutting": "false",
-        "flagForReview": "true",
+        "flagForReview": "false",
         "publishToEngage": "true",
         "publishToHarvesting": "true",
         "straightToPublishing": "true"
