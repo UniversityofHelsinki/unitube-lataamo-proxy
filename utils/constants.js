@@ -43,11 +43,6 @@ const SERIES_ACL_TEMPLATE = [
         "action": "write",
         "allow": true,
         "role": "ROLE_ADMIN"
-    },
-    {
-        "action": "read",
-        "allow": true,
-        "role": "ROLE_ANONYMOUS"
     }
 ];
 
