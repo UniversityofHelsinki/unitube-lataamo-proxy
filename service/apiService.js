@@ -53,6 +53,37 @@ exports.updateSerieEventMetadata = async (metadata, id) => {
     }
 }
 
+exports.updateSeriesAcldata = async (acl, id) => {
+    const seriesAclUrl = constants.OCAST_SERIES_PATH + id + constants.OCAST_ACL_PATH;
+
+    let bodyFormData = new FormData();
+    bodyFormData.append('acl', JSON.stringify(acl));
+    try {
+        const headers = {
+            ...bodyFormData.getHeaders(),
+            "Content-Length": bodyFormData.getLengthSync()
+        };
+        const response = await security.opencastBase.put(seriesAclUrl, bodyFormData, {headers});
+        return response.data;
+    } catch(error) {
+        console.log(error);
+        //return response.error;  // response is undefined here!
+        throw error;
+    }
+}
+
+exports.getSeriesAcldata = async (id) => {
+    const seriesAclUrl = constants.OCAST_SERIES_PATH + id + constants.OCAST_ACL_PATH;
+    try {
+        const response = await security.opencastBase.get(seriesAclUrl);
+        return response.data;
+    } catch(error) {
+        console.log(error);
+        //return response.error;  // response is undefined here!
+        throw error;
+    }
+}
+
 exports.getUserSeries = async (user) => {
 
     const conributorParameters = userService.parseContributor(user.hyGroupCn);

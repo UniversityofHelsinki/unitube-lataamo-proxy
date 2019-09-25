@@ -151,7 +151,7 @@ module.exports = function (router) {
      *       tags:
      *         - retrieve
      *       summary: Return serie by ID.
-         *       description: Returns selected series media.
+         *       description: Returns selected series media and publish info
      *       parameters:
      *         - in: path
      *           name: id
@@ -167,8 +167,9 @@ module.exports = function (router) {
          */
      router.get('/series/:id', async (req, res) => {
         try {
-            const serie = await apiService.getSerie(req.params.id);
-            res.json(serie);
+            const series = await apiService.getSerie(req.params.id);
+            const userSeriesWithPublished = await seriesService.addPublishedInfoInSeriesData(series);
+            res.json(userSeriesWithPublished);
         } catch (error) {
             const msg = error.message;
             res.json({message: 'Error', msg});
@@ -186,7 +187,7 @@ module.exports = function (router) {
      *         - application/json
      *       parameters:
      *         - in: body
-     *           description: The serie to be updated.
+     *           description: The series to be updated.
      *           schema:
      *             type: object
      *             required:
@@ -214,7 +215,9 @@ module.exports = function (router) {
     router.put('/series/:id', async (req, res) => {
         try {
             const rawEventMetadata = req.body;
-            const modifiedMetadata = eventsService.modifySerieEventMetadataForOpencast(rawEventMetadata);
+            let modifiedMetadata = eventsService.modifySerieEventMetadataForOpencast(rawEventMetadata);
+            let modifiedSeriesAclMetadata = seriesService.openCastFormatSeriesAclList(rawEventMetadata);
+            const response = await apiService.updateSeriesAcldata(modifiedSeriesAclMetadata, req.body.identifier);
             const data = await apiService.updateSerieEventMetadata(modifiedMetadata, req.body.identifier);
             res.json({message: 'OK'});
         } catch (error) {
@@ -232,6 +235,7 @@ module.exports = function (router) {
      *         - retrieve
      *       summary: Return user's series.
          *       description: Returns series for logged in user. These series are the ones user is listed as contributor.
+         *                    Published info of series is also returned.
      *       responses:
      *         200:
      *           description: List of series.
@@ -245,7 +249,8 @@ module.exports = function (router) {
             logger.info(`GET /userSeries USER: ${req.user.eppn}`);
             const loggedUser = userService.getLoggedUser(req.user);
             const userSeries = await apiService.getUserSeries(loggedUser);
-            res.json(userSeries);
+            const userSeriesWithPublished = await seriesService.addPublishedInfoInSeries(userSeries);
+            res.json(userSeriesWithPublished);
         } catch (error) {
             res.status(500);
             const msg = error.message;
