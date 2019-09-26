@@ -6,7 +6,10 @@ exports.filterApiChannelPublication = (publications) => {
 };
 
 
-exports.getMediaUrlFromPublication = (eventId , publication) => {
-    const mediaUrl =  publication[0].media[0].url;
-    return {id: eventId, url : mediaUrl};
+exports.getMediaUrlsFromPublication = (eventId , publication) => {
+    let mediaUrls = [];
+    publication[0].media.some(media =>  {
+        mediaUrls.push({id: eventId, url: media.url})
+    });
+    return mediaUrls;
 }

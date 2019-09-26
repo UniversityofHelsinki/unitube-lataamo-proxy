@@ -116,8 +116,8 @@ module.exports = function (router) {
          *     get:
      *       tags:
      *         - retrieve
-     *       summary: Return video's media URL by ID.
-         *       description: Returns selected video's media URL (url to video file).
+     *       summary: Return video's media URL's by ID.
+         *       description: Returns list of selected video's media URL's (url to video(s) file(s)).
      *       parameters:
      *         - in: path
      *           name: id
@@ -134,8 +134,8 @@ module.exports = function (router) {
             logger.info(`GET video media url /video/:id VIDEO ${req.params.id} USER: ${req.user.eppn}`);
             const publications = await apiService.getPublicationsForEvent(req.params.id);
             const filteredPublication = publicationService.filterApiChannelPublication(publications);
-            const mediaUrl = publicationService.getMediaUrlFromPublication(req.params.id, filteredPublication);
-            res.json(mediaUrl);
+            const mediaUrls = publicationService.getMediaUrlsFromPublication(req.params.id, filteredPublication);
+            res.json(mediaUrls);
         } catch (error) {
             const msg = error.message;
             logger.error(`Error GET /video/:id ${msg} VIDEO ${req.params.id} USER ${req.user.eppn}`);
