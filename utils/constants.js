@@ -6,6 +6,9 @@ const MOODLE_ACL_LEARNER = '_Learner';
 const STATUS_PUBLISHED = 'status_published';
 const STATUS_MOODLE = 'status_moodle';
 
+const VIDEO_PRESENTER_DELIVERY = 'presenter/delivery';
+const VIDEO_PRESENTATION_DELIVERY = 'presentation/delivery';
+
 // opencast service paths
 const OCAST_API_PATH = '/api/';
 const OCAST_SERIES_PATH = '/api/series/';
@@ -115,5 +118,7 @@ module.exports = {
     SERIES_METADATA,
     SERIES_CONTRIBUTORS_TEMPLATE,
     SERIES_ACL_TEMPLATE_READ_ENTRY,
-    SERIES_ACL_TEMPLATE_WRITE_ENTRY
+    SERIES_ACL_TEMPLATE_WRITE_ENTRY,
+    VIDEO_PRESENTER_DELIVERY,
+    VIDEO_PRESENTATION_DELIVERY
 };
