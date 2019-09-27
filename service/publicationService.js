@@ -28,19 +28,23 @@ const filterOnlyHighestQualityPublication = (mediaArray) => {
         mediaPresenterObject = mediaPresenterDelivery.reduce((maxPresenterHeight, media) => {
             return media.height > maxPresenterHeight.height ? media : maxPresenterHeight;
         });
+    } else {
+        mediaPresenterObject = mediaPresenterDelivery[0];
     }
 
     if (mediaPresentationDelivery && mediaPresentationDelivery.length > 1) {
         mediaPresentationObject = mediaPresentationDelivery.reduce((maxPresentationHeight, media) => {
             return media.height > maxPresentationHeight.height ? media : maxPresentationHeight;
         });
+    } else {
+        mediaPresentationObject = mediaPresentationDelivery[0];
     }
 
-    if (mediaPresenterObject.url) {
+    if (mediaPresenterObject && mediaPresenterObject.url) {
         allMedias.push(mediaPresenterObject);
     }
 
-    if (mediaPresentationObject.url) {
+    if (mediaPresentationObject && mediaPresentationObject.url) {
         allMedias.push(mediaPresentationObject);
     }
 
