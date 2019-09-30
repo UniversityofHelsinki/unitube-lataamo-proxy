@@ -14,8 +14,7 @@ const {inboxSeriesTitleForLoggedUser} = require('../utils/helpers'); // helper f
 const swaggerUi = require('swagger-ui-express');
 const apiSpecs = require('../config/swagger'); // swagger config
 const logger = require('../config/lataamoWinston');
-
-
+const constants = require('../utils/constants');
 
 module.exports = function (router) {
     // https://www.npmjs.com/package/swagger-ui-express
@@ -216,7 +215,7 @@ module.exports = function (router) {
         try {
             const rawEventMetadata = req.body;
             let modifiedMetadata = eventsService.modifySerieEventMetadataForOpencast(rawEventMetadata);
-            let modifiedSeriesAclMetadata = seriesService.openCastFormatSeriesAclList(rawEventMetadata);
+            let modifiedSeriesAclMetadata = seriesService.openCastFormatSeriesAclList(rawEventMetadata, constants.UPDATE_SERIES);
             const response = await apiService.updateSeriesAcldata(modifiedSeriesAclMetadata, req.body.identifier);
             const data = await apiService.updateSerieEventMetadata(modifiedMetadata, req.body.identifier);
             res.json({message: 'OK'});
@@ -562,7 +561,7 @@ module.exports = function (router) {
             let series = req.body;
             const loggedUser = userService.getLoggedUser(req.user);
             let modifiedSeriesMetadata = seriesService.openCastFormatSeriesMetadata(series, loggedUser);
-            let modifiedSeriesAclMetadata = seriesService.openCastFormatSeriesAclList(series);
+            let modifiedSeriesAclMetadata = seriesService.openCastFormatSeriesAclList(series, constants.CREATE_SERIES);
             const response = await apiService.createSeries(req.user, modifiedSeriesMetadata, modifiedSeriesAclMetadata);
             res.json(response.data.identifier);
         } catch (error) {

@@ -89,7 +89,7 @@ const updateAclTemplateWriteEntry = (seriesACLTemplateWriteEntry, aclRole) => {
     }
 };
 
-const updateSeriesAclList = (aclList) => {
+const updateSeriesAclList = (aclList, operation) => {
     let seriesAclTemplate = [...constants.SERIES_ACL_TEMPLATE];
     let seriesACLTemplateReadEntry = constants.SERIES_ACL_TEMPLATE_READ_ENTRY;
     let seriesACLTemplateWriteEntry = constants.SERIES_ACL_TEMPLATE_WRITE_ENTRY;
@@ -98,13 +98,15 @@ const updateSeriesAclList = (aclList) => {
             seriesACLTemplateReadEntry = updateAclTemplateReadEntry(seriesACLTemplateReadEntry, aclRole);
             seriesACLTemplateWriteEntry = updateAclTemplateWriteEntry(seriesACLTemplateWriteEntry, aclRole);
             seriesAclTemplate.push(seriesACLTemplateReadEntry);
-            seriesAclTemplate.push(seriesACLTemplateWriteEntry);
+            if (operation === constants.CREATE_SERIES) { //only added when creating new series
+                seriesAclTemplate.push(seriesACLTemplateWriteEntry);
+            }
         });
     }
     return seriesAclTemplate;
 };
 
-exports.openCastFormatSeriesAclList = (metadata) => updateSeriesAclList(metadata.acl);
+exports.openCastFormatSeriesAclList = (metadata, operation) => updateSeriesAclList(metadata.acl, operation);
 
 const concatenateArray = (data) => Array.prototype.concat.apply([], data);
 
