@@ -7,15 +7,8 @@ exports.filterApiChannelPublication = (publications) => {
     return filteredPublications;
 };
 
-const filterOnlyHighestQualityPublication = (mediaArray) => {
-    let allMedias = [];
-    let mediaPresenterDelivery = [];
-    let mediaPresentationDelivery = [];
-
-    let mediaPresenterObject = {};
-    let mediaPresentationObject = {};
-
-    mediaArray.some(media =>  {
+const filterMediaTypes = (mediaArray, mediaPresenterDelivery, mediaPresentationDelivery) => {
+    mediaArray.some(media => {
         if (media.flavor === constants.VIDEO_PRESENTER_DELIVERY) {
             mediaPresenterDelivery.push(media);
         }
@@ -23,22 +16,34 @@ const filterOnlyHighestQualityPublication = (mediaArray) => {
             mediaPresentationDelivery.push(media);
         }
     });
+};
 
-    if (mediaPresenterDelivery && mediaPresenterDelivery.length > 1) {
-        mediaPresenterObject = mediaPresenterDelivery.reduce((maxPresenterHeight, media) => {
-            return media.height > maxPresenterHeight.height ? media : maxPresenterHeight;
-        });
-    } else {
-        mediaPresenterObject = mediaPresenterDelivery[0];
+const filterHighestQualityMediaObject = (mediaArray, mediaObject) => {
+    if (mediaArray) {
+        if (mediaArray.length > 1)
+            mediaObject = mediaArray.reduce((maxObjectHeight, media) => {
+                return media.height > maxObjectHeight.height ? media : maxObjectHeight;
+            });
+        else {
+            mediaObject = mediaArray[0];
+        }
     }
+    return mediaObject;
+};
 
-    if (mediaPresentationDelivery && mediaPresentationDelivery.length > 1) {
-        mediaPresentationObject = mediaPresentationDelivery.reduce((maxPresentationHeight, media) => {
-            return media.height > maxPresentationHeight.height ? media : maxPresentationHeight;
-        });
-    } else {
-        mediaPresentationObject = mediaPresentationDelivery[0];
-    }
+const filterOnlyHighestQualityPublications = (mediaArray) => {
+    let allMedias = [];
+    let mediaPresenterDelivery = [];
+    let mediaPresentationDelivery = [];
+
+    let mediaPresenterObject = {};
+    let mediaPresentationObject = {};
+
+    filterMediaTypes(mediaArray, mediaPresenterDelivery, mediaPresentationDelivery);
+
+    mediaPresenterObject = filterHighestQualityMediaObject(mediaPresenterDelivery, mediaPresenterObject);
+
+    mediaPresentationObject = filterHighestQualityMediaObject(mediaPresentationDelivery, mediaPresentationObject);
 
     if (mediaPresenterObject && mediaPresenterObject.url) {
         allMedias.push(mediaPresenterObject);
@@ -55,12 +60,12 @@ exports.getMediaUrlsFromPublication = (eventId , publication) => {
     let mediaUrls = [];
     let filteredMedias = [];
     if (publication[0].media && publication[0].media.length > 0) {
-       filteredMedias = filterOnlyHighestQualityPublication(publication[0].media);
-       if (filteredMedias && filteredMedias.length > 0) {
-           filteredMedias.some(media =>  {
-               mediaUrls.push({id: eventId, url: media.url})
-           });
-       }
+        filteredMedias = filterOnlyHighestQualityPublications(publication[0].media);
+        if (filteredMedias && filteredMedias.length > 0) {
+            filteredMedias.some(media =>  {
+                mediaUrls.push({id: eventId, url: media.url})
+            });
+        }
     } else {
         mediaUrls.push({id: eventId, url: ''})
     }
