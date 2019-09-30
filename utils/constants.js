@@ -1,4 +1,3 @@
-
 const ROLE_ANONYMOUS = 'ROLE_ANONYMOUS';
 
 const MOODLE_ACL_INSTRUCTOR = '_Instructor';
@@ -22,6 +21,9 @@ const OCAST_TYPE_DUBLINCORE_EPISODE = 'dublincore/episode';
 const OCAST_TYPE_DUBLINCORE_SERIES = 'dublincore/series';
 
 const OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER = '?filter=series:';
+
+const UPDATE_SERIES = 'update_series';
+const CREATE_SERIES = 'create_series';
 
 const SERIES_ACL_TEMPLATE = [
     {
@@ -115,5 +117,7 @@ module.exports = {
     SERIES_METADATA,
     SERIES_CONTRIBUTORS_TEMPLATE,
     SERIES_ACL_TEMPLATE_READ_ENTRY,
-    SERIES_ACL_TEMPLATE_WRITE_ENTRY
+    SERIES_ACL_TEMPLATE_WRITE_ENTRY,
+    UPDATE_SERIES,
+    CREATE_SERIES
 };

@@ -5,6 +5,9 @@ const nock = require('nock');  // https://www.npmjs.com/package/nock
 const CONSTANTS = Object.freeze({
     OCAST_BASE_URL : process.env.LATAAMO_OPENCAST_HOST,
     OCAST_SERIES_PATH : '/api/series/',
+    OCAST_ACL : '/acl',
+    OCAST_UPDATE_SERIES_PATH : '/api/series/123456',
+    OCAST_UPDATE_SERIES_METADATA_PATH :  '/metadata?type=dublincore/series',
     OCAST_VIDEOS_PATH : '/api/events/',
     OCAST_USER_PATH : '/api/info/me',
     OCAST_VIDEO_PUBLICATION_PATH : '/publications',
@@ -14,6 +17,7 @@ const CONSTANTS = Object.freeze({
     OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER : '?filter=series:',
     TEST_SERIES_1_ID : '80f9ff5b-4163-48b7-b7cf-950be665de3c',
     TEST_SERIES_2_ID : 'd72a8c9e-f854-4ba4-9ed2-89405fae214e',
+    TEST_SERIES_3_ID : '604d78ac-733f-4c65-b13a-29172fbc0c6f',
     TEST_EVENT_1_ID : '6394a9b7-3c06-477e-841a-70862eb07bfb',
     TEST_EVENT_2_ID : '1fb5245f-ee1b-44cd-89f3-5ccf456ea0d4',
     TEST_EVENT_3_ID : '23af4ad3-6726-4f3d-bf21-c02b34753c32',
@@ -39,6 +43,12 @@ const mockTestUser = {
     eppn: 'Tester-XYZ',
     preferredlanguage: 'fi',
     hyGroupCn: 'grp-XYZ'
+}
+
+const mockTestUser2 = {
+    eppn: 'Tester-XYZ',
+    preferredlanguage: 'fi',
+    hyGroupCn: 'grp-lataamo-6'
 }
 
 // TODO: put json into separate files
@@ -113,6 +123,15 @@ const mockUserSeries3 = [
         publishers: [ '' ],
         contributors: [ 'SeriesOwnerEppn', 'Tester A', 'Tester B', 'Tester-XYZ' ],
         title: 'kuutamossa'
+    },
+    { identifier: CONSTANTS.TEST_SERIES_3_ID,
+        creator: 'Opencast Project Administrator',
+        created: '2019-05-22T09:56:43Z',
+        subjects: [ 'juusto', 'makasiini', 'aamupuuro', 'salama', 'sämpylä' ],
+        organizers: [ 'organizer1' ],
+        publishers: [ '' ],
+        contributors: [ 'SeriesOwnerEppn', 'Tester B', 'Tester-XYZ' ],
+        title: 'title-LATAAMO-132'
     }
 ]
 
@@ -204,6 +223,19 @@ const event2ACLs =  [
     { allow: true, role: 'ROLE_ANONYMOUS', action: 'read' },
     { allow: true, role: '123_Instructor', action: 'read' },
     { allow: true, role: '123_Learner', action: 'read' },
+]
+
+const eventAclsFromSerie3 = () => {
+    return nock(CONSTANTS.OCAST_BASE_URL)
+        .get(`/api/series/${CONSTANTS.TEST_SERIES_3_ID}/acl`)
+        .reply(200, event3ACLs).persist(); // this url will be called several times so let's persist
+}
+
+const event3ACLs =  [
+    { allow: true, role: 'ROLE_USER_ADMIN', action: 'read' },
+    { allow: true, role: 'ROLE_USER_ADMIN', action: 'write' },
+    { allow: true, role: 'ROLE_ADMIN', action: 'read' },
+    { allow: true, role: 'ROLE_ADMIN', action: 'write' },
 ]
 
 // /admin-ng/event/6394a9b7-3c06-477e-841a-70862eb07bfb/asset/media/638b7ae1-0710-44df-b3db-55ee9e8b48ba.json
@@ -371,28 +403,55 @@ const lataamoSeries5 = () =>
         .get(CONSTANTS.OCAST_SERIES_PATH + "?filter=contributors:NOT_CONTRIBUTOR_IN_ANY_SERIES,contributors:grp-XYZ")
         .reply(200, mockUserSeriesEmpty);
 
+const lataamoSeries6 = () =>
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .get(CONSTANTS.OCAST_SERIES_PATH + "?filter=contributors:Tester-XYZ,contributors:grp-lataamo-6")
+        .reply(200, mockUserSeries3);
+
 const lataamoPostSeries = () =>
     nock(CONSTANTS.OCAST_BASE_URL)
         .post(CONSTANTS.OCAST_SERIES_PATH)
         .reply(200, { identifier: CONSTANTS.SUCCESSFUL_UPDATE_ID });
+
+const lataamoPutSeries = () =>
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .put(CONSTANTS.OCAST_UPDATE_SERIES_PATH)
+        .reply(200, { identifier: CONSTANTS.SUCCESSFUL_UPDATE_ID });
+
+const lataamoUpdateSeriesAcl = () =>
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .put(CONSTANTS.OCAST_UPDATE_SERIES_PATH + CONSTANTS.OCAST_ACL)
+        .reply(200, { identifier: CONSTANTS.SUCCESSFUL_UPDATE_ID });
+
+const lataamoUpdateSeriesMetadata = () =>
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .put(CONSTANTS.OCAST_UPDATE_SERIES_PATH + CONSTANTS.OCAST_UPDATE_SERIES_METADATA_PATH)
+        .reply(200);
 
 // /api/info/me
 const lataamoApiUser = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(CONSTANTS.OCAST_USER_PATH)
     .reply(200, mockApiUser);
 
+const lataamoApiUser2 = () => nock(CONSTANTS.OCAST_BASE_URL)
+    .get(CONSTANTS.OCAST_USER_PATH)
+    .reply(200, mockApiUser2);
+
 const cleanMocks = () => nock.cleanAll();
 
 
 module.exports.mockApiUser = mockApiUser;
 module.exports.mockTestUser = mockTestUser;
+module.exports.mockTestUser2 = mockTestUser2;
 module.exports.mockOCastSeriesApiCallEmpty = lataamoSeriesEmpty;
 module.exports.mockOCastSeriesApiCall = lataamoSeries;
 module.exports.mockOCastSeriesApiCall2 = lataamoSeries2;
 module.exports.mockOCastSeriesApiCall3 = lataamoSeries3;
 module.exports.mockOCastSeriesApiCall4 = lataamoSeries4;
 module.exports.mockOCastSeriesApiCall5 = lataamoSeries5;
+module.exports.mockOCastSeriesApiCall6 = lataamoSeries6;
 module.exports.mockOCastUserApiCall = lataamoApiUser;
+module.exports.mockOCastUserApiCall2 = lataamoApiUser2;
 module.exports.mockOCastEvents_1_ApiCall = series1_Events;
 module.exports.mockOCastEvents_2_ApiCall = series2_Events;
 module.exports.mockOCastEventMetadata_1Call = eventMetadata_1;
@@ -406,7 +465,11 @@ module.exports.mockOCastEvent2MediaMetadataCall = event2MediaMetadata;
 module.exports.mockOCastEvent3MediaMetadataCall = event3MediaMetadata;
 module.exports.mockOCastEvent1AclCall = eventAclsFromSerie;
 module.exports.mockOcastEvent2AclCall = eventAclsFromSerie2;
+module.exports.mockOcastEvent3AclCall = eventAclsFromSerie3;
 module.exports.mockLataamoPostSeriesCall = lataamoPostSeries;
+module.exports.mockLataamoPutSeriesCall = lataamoPutSeries;
+module.exports.mockLataamoUpdateSeriesAcl = lataamoUpdateSeriesAcl;
+module.exports.mockLataamoUpdateSeriesMetadata = lataamoUpdateSeriesMetadata;
 module.exports.constants = CONSTANTS;
 
 module.exports.cleanAll = cleanMocks;
