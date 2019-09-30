@@ -116,8 +116,8 @@ module.exports = function (router) {
          *     get:
      *       tags:
      *         - retrieve
-     *       summary: Return video's media URL's by ID.
-         *       description: Returns list of selected video's media URL's (url to video(s) file(s)).
+     *       summary: Return video's highest quality media URL's by ID.
+         *       description: Returns list of selected video's highest quality media URL's (url to video(s) file(s)).
      *       parameters:
      *         - in: path
      *           name: id
