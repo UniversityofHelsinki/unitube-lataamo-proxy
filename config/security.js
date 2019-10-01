@@ -1,4 +1,6 @@
 const host = process.env.LATAAMO_OPENCAST_HOST;
+const esbHost = process.env.ESB_HOST;
+const esbApiKey = process.env.ESB_API_KEY;
 const username = process.env.LATAAMO_OPENCAST_USER;
 const password = process.env.LATAAMO_OPENCAST_PASS;
 const userpass = Buffer.from(`${username}:${password}`).toString('base64');
@@ -30,5 +32,10 @@ module.exports.opencastBase = axios.create({
     baseURL: host,
     maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
     headers: {'authorization': auth}
+});
+
+module.exports.esbBase = axios.create({
+    baseURL: esbHost,
+    maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
 });
 

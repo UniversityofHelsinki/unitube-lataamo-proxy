@@ -1,3 +1,6 @@
+// esb service paths
+const ESB_IAM_GROUPS_PATH = '/iam/group/unitube/search/';
+
 const ROLE_ANONYMOUS = 'ROLE_ANONYMOUS';
 
 const MOODLE_ACL_INSTRUCTOR = '_Instructor';
@@ -119,5 +122,6 @@ module.exports = {
     SERIES_ACL_TEMPLATE_READ_ENTRY,
     SERIES_ACL_TEMPLATE_WRITE_ENTRY,
     UPDATE_SERIES,
-    CREATE_SERIES
+    CREATE_SERIES,
+    ESB_IAM_GROUPS_PATH
 };

@@ -7,6 +7,7 @@ const seriesService = require('../service/seriesService');
 const apiService = require('../service/apiService');
 const userService = require('../service/userService');
 const publicationService = require('../service/publicationService');
+const iamGroupsApi = require('../service/iamGroupsApi');
 const busboy = require('connect-busboy');  //https://github.com/mscdex/connect-busboy
 const path = require('path');
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
@@ -566,6 +567,17 @@ module.exports = function (router) {
             res.json(response.data.identifier);
         } catch (error) {
             res.status(500);
+            const msg = error.message;
+            res.json({message: 'Error', msg});
+        }
+    });
+
+    router.get('/iamGroups/:query', async (req, res) => {
+        try {
+            logger.info(`GET /iamGroups/:query ${req.params.query}`);
+            const iamGroups = await iamGroupsApi.getIamGroups(req.params.query);
+            res.json(iamGroups);
+        } catch (error) {
             const msg = error.message;
             res.json({message: 'Error', msg});
         }
