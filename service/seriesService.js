@@ -1,8 +1,9 @@
 const constants = require('../utils/constants');
+const apiService = require('../service/apiService');
 
-exports.getUserSeries = (series, user) =>  filterSeriesByUser(series, user);
+exports.getUserSeries = (series, user) => filterSeriesByUser(series, user);
 
-exports.getSeriesIdentifiers = (series, user) =>  {
+exports.getSeriesIdentifiers = (series, user) => {
     const userSeries = filterSeriesByUser(series, user);
     const seriesIdentifiers = getSeriesIdentifiers(userSeries);
     return seriesIdentifiers;
@@ -19,7 +20,7 @@ const filteredUserAttributes = (user) => {
 const filterSeriesByUser = (series, user) => {
     const filteredAttributes = filteredUserAttributes(user);
     const filteredSeriesByUser = series.filter(serie => {
-        return serie.contributors.some(contributor=> filteredAttributes.includes(contributor));
+        return serie.contributors.some(contributor => filteredAttributes.includes(contributor));
     });
     return filteredSeriesByUser;
 }
@@ -54,7 +55,7 @@ const addUserInContributorsList = (contributors, user) => {
     const foundOwner = contributors.find(contributor => {
         return contributor === user.eppn;
     });
-    if(!foundOwner) {
+    if (!foundOwner) {
         contributors.push(user.eppn);
     }
 };
@@ -88,21 +89,54 @@ const updateAclTemplateWriteEntry = (seriesACLTemplateWriteEntry, aclRole) => {
     }
 };
 
-const updateSeriesAclList = (aclList) => {
-    let seriesAclTemplate = constants.SERIES_ACL_TEMPLATE;
+const updateSeriesAclList = (aclList, operation) => {
+    let seriesAclTemplate = [...constants.SERIES_ACL_TEMPLATE];
     let seriesACLTemplateReadEntry = constants.SERIES_ACL_TEMPLATE_READ_ENTRY;
     let seriesACLTemplateWriteEntry = constants.SERIES_ACL_TEMPLATE_WRITE_ENTRY;
-    if(aclList) {
+    if (aclList) {
         aclList.forEach(aclRole => {
             seriesACLTemplateReadEntry = updateAclTemplateReadEntry(seriesACLTemplateReadEntry, aclRole);
             seriesACLTemplateWriteEntry = updateAclTemplateWriteEntry(seriesACLTemplateWriteEntry, aclRole);
             seriesAclTemplate.push(seriesACLTemplateReadEntry);
-            seriesAclTemplate.push(seriesACLTemplateWriteEntry);
+            if (operation === constants.CREATE_SERIES) { //only added when creating new series
+                seriesAclTemplate.push(seriesACLTemplateWriteEntry);
+            }
         });
     }
     return seriesAclTemplate;
 };
 
-exports.openCastFormatSeriesAclList = (metadata) => updateSeriesAclList(metadata.acl);
+exports.openCastFormatSeriesAclList = (metadata, operation) => updateSeriesAclList(metadata.acl, operation);
 
 const concatenateArray = (data) => Array.prototype.concat.apply([], data);
+
+// Looping array of series elements
+//
+// Adds published value in series array for each series:
+//   if user has ROLE_ANONYMOUS --> published is true otherwise false
+exports.addPublishedInfoInSeries = async (seriesList) => {
+
+    let seriesListWithPublished = [];
+    for (const series of seriesList) {
+        let roles = await apiService.getSeriesAcldata(series.identifier);
+        if (roles && roles.find((item) => item.role === constants.ROLE_ANONYMOUS)) {
+            series.published = true;
+            seriesListWithPublished.push(series);
+        } else {
+            series.published = false;
+            seriesListWithPublished.push(series);
+        }
+    }
+    return seriesListWithPublished;
+}
+
+exports.addPublishedInfoInSeriesData = async (series) => {
+
+    let roles = await apiService.getSeriesAcldata(series.identifier);
+    if (roles && roles.find((item) => item.role === constants.ROLE_ANONYMOUS)) {
+        series.published = true;
+    } else {
+        series.published = false;
+    }
+    return series;
+}
