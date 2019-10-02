@@ -1,12 +1,16 @@
 // esb service paths
 const ESB_IAM_GROUPS_PATH = '/iam/group/unitube/search/';
 
+
 const ROLE_ANONYMOUS = 'ROLE_ANONYMOUS';
 
 const MOODLE_ACL_INSTRUCTOR = '_Instructor';
 const MOODLE_ACL_LEARNER = '_Learner';
 const STATUS_PUBLISHED = 'status_published';
 const STATUS_MOODLE = 'status_moodle';
+
+const VIDEO_PRESENTER_DELIVERY = 'presenter/delivery';
+const VIDEO_PRESENTATION_DELIVERY = 'presentation/delivery';
 
 // opencast service paths
 const OCAST_API_PATH = '/api/';
@@ -116,11 +120,12 @@ module.exports = {
     OCAST_TYPE_QUERY_PARAMETER,
     OCAST_TYPE_DUBLINCORE_EPISODE,
     OCAST_TYPE_DUBLINCORE_SERIES,
-    OCAST_TYPE_DUBLINCORE_EPISODE,
     SERIES_METADATA,
     SERIES_CONTRIBUTORS_TEMPLATE,
     SERIES_ACL_TEMPLATE_READ_ENTRY,
     SERIES_ACL_TEMPLATE_WRITE_ENTRY,
+    VIDEO_PRESENTER_DELIVERY,
+    VIDEO_PRESENTATION_DELIVERY,
     UPDATE_SERIES,
     CREATE_SERIES,
     ESB_IAM_GROUPS_PATH

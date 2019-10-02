@@ -1,3 +1,4 @@
+
 const chai = require('chai');           // https://www.npmjs.com/package/chai
 const assert = chai.assert;
 const supertest = require('supertest'); // https://www.npmjs.com/package/supertest
@@ -12,6 +13,7 @@ const LATAAMO_USER_EVENTS_PATH = '/api/userVideos';
 const LATAAMO_SERIES_PATH = '/api/series';
 const LATAAMO_API_INFO_PATH = '/api/';
 const LATAAMO_USER_PATH = '/api/user';
+const LATAAMO_API_VIDEO_PATH = '/api/video/';
 
 const constants = require('../utils/constants');
 
@@ -180,6 +182,50 @@ describe('user series returned from /userSeries route', () => {
     afterEach(() => {
         test.cleanAll();
     });
+  afterEach(() => {
+    test.cleanAll();
+  });
+});
+
+describe('user video urls returned from /video/id events route', () => {
+  beforeEach(() => {
+    // mock needed opencast api calls
+    test.mockEventPublicationCall();
+    test.mockEvent2PubcliationCall();
+  });
+
+  it("should return highest quality video url", async () => {
+    let response = await supertest(app)
+        .get(LATAAMO_API_VIDEO_PATH + test.constants.TEST_EVENT_1_ID)
+        .set('eppn', 'SeriesOwnerEppn')
+        .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+        .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+        .expect(200)
+        .expect('Content-Type', /json/);
+
+    assert.isArray(response.body, 'Response should be an array');
+    assert.lengthOf(response.body, 1, 'One video should be returned');
+    assert.equal(response.body[0].url, 'https://ocast-devel-i1.it.helsinki.fi/static/mh_default_org/api/b419f01d-c203-4610-a1d4-a4b8904083d4/a9f5e413-1dcc-4832-a750-251a16893b2f/Samsung_and_RedBull_See_the_Unexpected_HDR_UHD_4K_Demo.mp4');
+  });
+
+  it('should return two highest quality videos', async () =>  {
+    let response = await supertest(app)
+        .get(LATAAMO_API_VIDEO_PATH + test.constants.TEST_EVENT_2_ID)
+        .set('eppn', 'SeriesOwnerEppn')
+        .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+        .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+        .expect(200)
+        .expect('Content-Type', /json/);
+
+    assert.isArray(response.body, 'Response should be an array');
+    assert.lengthOf(response.body, 2, 'Two videos should be returned');
+    assert.equal(response.body[0].url, 'https://ocast-devel-i1.it.helsinki.fi/static/mh_default_org/api/9059828c-8cef-4caf-a878-d6fa0a359857/a4227095-2b28-4846-b538-a0c8129d54b8/SHOT4_4K_CC_injected.mp4');
+    assert.equal(response.body[1].url, 'https://ocast-devel-i1.it.helsinki.fi/static/mh_default_org/api/9059828c-8cef-4caf-a878-d6fa0a359857/e11d592c-f67c-423c-a275-fb4d39868510/SHOT4_4K_CC_injected.mp4');
+  });
+
+  afterEach(() => {
+    test.cleanAll();
+  });
 });
 
 
@@ -208,28 +254,28 @@ describe('user series put', () => {
 });
 
 describe('user events (videos) returned from /userEvents route', () => {
-    beforeEach(() => {
-        // mock needed opencast api calls
-        test.mockOCastSeriesApiCall();
-        test.mockOCastSeriesApiCall3();
-        test.mockOCastSeriesApiCall4();
-        test.mockOCastSeriesApiCall5();
-        test.mockOCastUserApiCall();
-        test.mockOCastEvents_1_ApiCall();
-        test.mockOCastEvents_2_ApiCall();
-        test.mockOCastEventMetadata_1Call();
-        test.mockOCastEventMetadata_2Call();
-        test.mockOCastEventMetadata_3Call();
-        test.mockOCastEvent1MediaCall();
-        test.mockOCastEvent2MediaCall();
-        test.mockOCastEvent3MediaCall();
-        test.mockOCastEvent1MediaMetadataCall();
-        test.mockOCastEvent2MediaMetadataCall();
-        test.mockOCastEvent3MediaMetadataCall();
-        test.mockOCastEvent1AclCall();
-        test.mockOcastEvent2AclCall();
-        test.mockLataamoPostSeriesCall();
-    })
+  beforeEach(() => {
+    // mock needed opencast api calls
+    test.mockOCastSeriesApiCall();
+    test.mockOCastSeriesApiCall3();
+    test.mockOCastSeriesApiCall4();
+    test.mockOCastSeriesApiCall5();
+    test.mockOCastUserApiCall();
+    test.mockOCastEvents_1_ApiCall();
+    test.mockOCastEvents_2_ApiCall();
+    test.mockOCastEventMetadata_1Call();
+    test.mockOCastEventMetadata_2Call();
+    test.mockOCastEventMetadata_3Call();
+    test.mockOCastEvent1MediaCall();
+    test.mockOCastEvent2MediaCall();
+    test.mockOCastEvent3MediaCall();
+    test.mockOCastEvent1MediaMetadataCall();
+    test.mockOCastEvent2MediaMetadataCall();
+    test.mockOCastEvent3MediaMetadataCall();
+    test.mockOCastEvent1AclCall();
+    test.mockOcastEvent2AclCall();
+    test.mockLataamoPostSeriesCall();
+  });
 
     it("should return events from series where user is contributor", async () => {
         let response = await supertest(app)
