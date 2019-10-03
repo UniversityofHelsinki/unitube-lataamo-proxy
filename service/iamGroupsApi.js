@@ -6,7 +6,8 @@ exports.getIamGroups = async (query) => {
         const iamGroupsApiPath = constants.ESB_IAM_GROUPS_PATH + query;
         const response = await security.esbGroupsBase.get(iamGroupsApiPath);
         return response.data;
-    } catch (e) {
-        console.log(e);
+    } catch (error) {
+        console.log(error);
+        throw error;
     }
 };
