@@ -122,20 +122,42 @@ exports.getMetadataForEvent = async (event) => {
     return response.data;
 };
 
-exports.updateEventMetadata = async (metadata, id) => {
-    const videoMetaDataUrl = constants.OCAST_VIDEOS_PATH + id + constants.OCAST_METADATA_PATH + constants.OCAST_TYPE_QUERY_PARAMETER + constants.OCAST_TYPE_DUBLINCORE_EPISODE;
+exports.updateEventMetadata = async (metadata, eventId) => {
+    const videoMetaDataUrl = constants.OCAST_VIDEOS_PATH + eventId + constants.OCAST_METADATA_PATH + constants.OCAST_TYPE_QUERY_PARAMETER + constants.OCAST_TYPE_DUBLINCORE_EPISODE;
     let bodyFormData = new FormData();
     bodyFormData.append('metadata', JSON.stringify(metadata));
+
+    const republishMetadataUrl = '/workflow/start';
+    const mediapackageUrl = '/assets/episode/';
+
     try {
-        const headers = {
+        let headers = {
             ...bodyFormData.getHeaders(),
             "Content-Length": bodyFormData.getLengthSync()
         };
+        // update event metadata
         const response = await security.opencastBase.put(videoMetaDataUrl, bodyFormData, {headers});
-        return response.data;
+
+        if(response.status !== 204){
+            console.log(error);
+            throw error;
+        }
+        // get mediapackage for republish query
+        const mediapackageJson = await security.opencastBase.get(mediapackageUrl + eventId);
+
+        bodyFormData = new FormData();
+        bodyFormData.append('definition', 'republish-metadata');
+        bodyFormData.append('mediapackage', mediapackageJson.data);
+        headers = {
+            ...bodyFormData.getHeaders(),
+            "Content-Length": bodyFormData.getLengthSync()
+        };
+        // do the republish
+        const resp = await security.opencastBase.post(republishMetadataUrl, bodyFormData, {headers});
+
+        return resp;  // this is not used anywhere
     } catch (error) {
         console.log(error);
-        //return response.error;  // response is undefined here!
         throw error;
     }
 };
@@ -157,7 +179,7 @@ exports.createSeries = async (user, seriesMetadata, seriesAcl) => {
         throw err;
     }
 
-}
+};
 
 
 // on success returns status code 201 and payload:

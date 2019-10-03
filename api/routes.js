@@ -22,9 +22,9 @@ module.exports = function (router) {
     router.get('/api-docs', swaggerUi.setup(apiSpecs));
 
     /**
-         * @swagger
-         *     /api/:
-         *     get:
+     * @swagger
+     *     /api/:
+     *     get:
      *       tags:
      *         - retrieve
      *       summary: Return status message (ping).
@@ -39,7 +39,7 @@ module.exports = function (router) {
     router.get('/', api.apiInfo);
 
     /**
-        * @swagger
+     * @swagger
      *     /api/user:
      *     get:
      *       tags:
@@ -71,13 +71,13 @@ module.exports = function (router) {
     }));
 
     /**
-        * @swagger
-         *     /api/event/{id}:
-         *     get:
+     * @swagger
+     *     /api/event/{id}:
+     *     get:
      *       tags:
      *         - retrieve
      *       summary: Return video's details by ID.
-         *       description: Returns selected video's information.
+     *       description: Returns selected video's information.
      *       parameters:
      *         - in: path
      *           name: id
@@ -110,13 +110,13 @@ module.exports = function (router) {
     });
 
     /**
-        * @swagger
-         *     /api/video/{id}:
-         *     get:
+     * @swagger
+     *     /api/video/{id}:
+     *     get:
      *       tags:
      *         - retrieve
      *       summary: Return video's highest quality media URL's by ID.
-         *       description: Returns list of selected video's highest quality media URL's (url to video(s) file(s)).
+     *       description: Returns list of selected video's highest quality media URL's (url to video(s) file(s)).
      *       parameters:
      *         - in: path
      *           name: id
@@ -144,13 +144,13 @@ module.exports = function (router) {
     });
 
     /**
-        * @swagger
-         *     /api/series/{id}:
-         *     get:
+     * @swagger
+     *     /api/series/{id}:
+     *     get:
      *       tags:
      *         - retrieve
      *       summary: Return serie by ID.
-         *       description: Returns selected series media and publish info
+     *       description: Returns selected series media and publish info
      *       parameters:
      *         - in: path
      *           name: id
@@ -163,7 +163,7 @@ module.exports = function (router) {
      *           description: Not authenticated. Required Shibboleth headers not present in the request.
      *         default:
      *           description: Unexpected error
-         */
+     */
      router.get('/series/:id', async (req, res) => {
         try {
             const series = await apiService.getSerie(req.params.id);
@@ -176,9 +176,9 @@ module.exports = function (router) {
     });
 
     /**
-        * @swagger
-         *     /api/series/{id}:
-         *     put:
+     * @swagger
+     *     /api/series/{id}:
+     *     put:
      *       tags:
      *         - update
      *       summary: Updates series information by ID.
@@ -227,14 +227,14 @@ module.exports = function (router) {
     });
 
     /**
-        * @swagger
-         *     /api/userSeries:
-         *     get:
+     * @swagger
+     *     /api/userSeries:
+     *     get:
      *       tags:
      *         - retrieve
      *       summary: Return user's series.
-         *       description: Returns series for logged in user. These series are the ones user is listed as contributor.
-         *                    Published info of series is also returned.
+     *       description: Returns series for logged in user. These series are the ones user is listed as contributor.
+     *                    Published info of series is also returned.
      *       responses:
      *         200:
      *           description: List of series.
@@ -242,7 +242,7 @@ module.exports = function (router) {
      *           description: Not authenticated. Required Shibboleth headers not present in the request.
      *         500:
      *           description: Internal server error, an error occured.
-         */
+     */
     router.get('/userSeries', async (req, res) => {
         try {
             logger.info(`GET /userSeries USER: ${req.user.eppn}`);
@@ -329,13 +329,13 @@ module.exports = function (router) {
     }
 
     /**
-        * @swagger
-         *     /api/userVideos:
-         *     post:
+     * @swagger
+     *     /api/userVideos:
+     *     post:
      *       tags:
      *         - create
      *       summary: Upload a video file.
-         *       description: Upload a video file to Opencast service. Video is saved to Lataamo proxy before sending to Opencast.
+     *       description: Upload a video file to Opencast service. Video is saved to Lataamo proxy before sending to Opencast.
      *       consumes:
      *         - multipart/form-data
      *       parameters:
@@ -350,7 +350,7 @@ module.exports = function (router) {
      *           description: Not authenticated. Required Shibboleth headers not present in the request.
      *         500:
      *           description: Internal server error, an error occured.
-         */
+     */
     router.post('/userVideos', async (req, res) => {
         try {
             logger.info(`POST /userVideos - Upload video started. USER: ${req.user.eppn}`);
@@ -461,9 +461,9 @@ module.exports = function (router) {
     }
 
     /**
-        * @swagger
-         *     /api/userVideos/{id}:
-         *     put:
+     * @swagger
+     *     /api/userVideos/{id}:
+     *     put:
      *       tags:
      *         - update
      *       summary: Updates video's information by ID.
@@ -504,8 +504,10 @@ module.exports = function (router) {
            logger.info(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn}`);
            const rawEventMetadata = req.body;
            const modifiedMetadata = eventsService.modifyEventMetadataForOpencast(rawEventMetadata);
-           const data = await apiService.updateEventMetadata(modifiedMetadata, req.body.identifier);
-           res.json({message : 'OK'});
+           const response = await apiService.updateEventMetadata(modifiedMetadata, req.body.identifier);
+
+           res.status(response.status);
+           res.json({message : response.statusText});
        } catch(error) {
            res.status(500);
            const msg = error.message
@@ -515,11 +517,11 @@ module.exports = function (router) {
     });
 
     /**
-        * @swagger
-         *     /api/series:
-         *     post:
+     * @swagger
+     *     /api/series:
+     *     post:
      *       tags:
-     *         - insert
+     *         - create
      *       summary: Creates new series with acls
      *       consumes:
      *         - application/json
