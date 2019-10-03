@@ -37,5 +37,5 @@ module.exports.opencastBase = axios.create({
 module.exports.esbGroupsBase = axios.create({
     baseURL: esbHost,
     maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
-    headers: {'apikey': esbGroupsApiKey}
+    headers: {'apikey': esbGroupsApiKey, 'Content-Type': 'application/json;charset=utf-8'},
 });
