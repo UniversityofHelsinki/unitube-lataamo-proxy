@@ -1,6 +1,7 @@
 const host = process.env.LATAAMO_OPENCAST_HOST;
 const esbHost = process.env.ESB_HOST;
 const esbPersonsApiKey = process.env.ESB_PERSONS_API_KEY;
+const esbGroupsApiKey = process.env.ESB_GROUPS_API_KEY;
 const username = process.env.LATAAMO_OPENCAST_USER;
 const password = process.env.LATAAMO_OPENCAST_PASS;
 const userpass = Buffer.from(`${username}:${password}`).toString('base64');
@@ -41,3 +42,9 @@ module.exports.esbPersonBase = axios.create({
 });
 
 
+
+module.exports.esbGroupsBase = axios.create({
+    baseURL: esbHost,
+    maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
+    headers: {'apikey': esbGroupsApiKey, 'Content-Type': 'application/json;charset=utf-8'},
+});
