@@ -98,9 +98,6 @@ const updateSeriesAclList = (aclList, operation) => {
             seriesACLTemplateReadEntry = updateAclTemplateReadEntry(seriesACLTemplateReadEntry, aclRole);
             seriesACLTemplateWriteEntry = updateAclTemplateWriteEntry(seriesACLTemplateWriteEntry, aclRole);
             seriesAclTemplate.push(seriesACLTemplateReadEntry);
-            if (operation === constants.CREATE_SERIES) { //only added when creating new series
-                seriesAclTemplate.push(seriesACLTemplateWriteEntry);
-            }
         });
     }
     return seriesAclTemplate;
@@ -130,13 +127,33 @@ exports.addPublishedInfoInSeries = async (seriesList) => {
     return seriesListWithPublished;
 }
 
-exports.addPublishedInfoInSeriesData = async (series) => {
+exports.addPublishedInfoInSeriesAndMoodleRoles = async (series) => {
 
     let roles = await apiService.getSeriesAcldata(series.identifier);
     if (roles && roles.find((item) => item.role === constants.ROLE_ANONYMOUS)) {
-        series.published = true;
+        series.published = constants.ROLE_ANONYMOUS;
     } else {
-        series.published = false;
+        series.published = "";
     }
+    series.moodleNumber = "";
+    series.moodleNumbers = moodleNumbersFromRoles(roles);
     return series;
+}
+
+let instructor = new RegExp(constants.MOODLE_ACL_INSTRUCTOR, 'g');
+let learner = new RegExp(constants.MOODLE_ACL_LEARNER, 'g');
+
+const moodleNumbersFromRoles = (roles) => {
+
+    let moodlenumbers = [];
+    for (const item of roles) {
+        if (item.role.match(instructor) || item.role.match(learner)) {
+            let ind = item.role.indexOf("_");
+            let val = item.role.substring(0, ind);
+            moodlenumbers.push(val);
+        }
+    }
+    const uniqueMoodleNumbers = Array.from(new Set(moodlenumbers));
+
+    return uniqueMoodleNumbers;
 }
