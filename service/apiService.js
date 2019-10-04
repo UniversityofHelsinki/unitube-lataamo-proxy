@@ -124,13 +124,15 @@ exports.getMetadataForEvent = async (event) => {
 
 exports.updateEventMetadata = async (metadata, eventId) => {
     const videoMetaDataUrl = constants.OCAST_VIDEOS_PATH + eventId + constants.OCAST_METADATA_PATH + constants.OCAST_TYPE_QUERY_PARAMETER + constants.OCAST_TYPE_DUBLINCORE_EPISODE;
-    let bodyFormData = new FormData();
-    bodyFormData.append('metadata', JSON.stringify(metadata));
 
+    // republish paths
     const republishMetadataUrl = '/workflow/start';
-    const mediapackageUrl = '/assets/episode/';
+    const mediapackageUrl = '/assets/episode/' + eventId;
 
     try {
+        let bodyFormData = new FormData();
+        bodyFormData.append('metadata', JSON.stringify(metadata));
+
         let headers = {
             ...bodyFormData.getHeaders(),
             "Content-Length": bodyFormData.getLengthSync()
@@ -138,24 +140,38 @@ exports.updateEventMetadata = async (metadata, eventId) => {
         // update event metadata
         const response = await security.opencastBase.put(videoMetaDataUrl, bodyFormData, {headers});
 
+        // let's break if response from PUT not ok
         if(response.status !== 204){
             console.log(error);
             throw error;
         }
-        // get mediapackage for republish query
-        const mediapackageJson = await security.opencastBase.get(mediapackageUrl + eventId);
 
+        // get mediapackage for the republish query
+        const mediapackageJson = await security.opencastBase.get(mediapackageUrl);
+
+        // properties object for the republish query
+        const republishProperties = {
+            publishLive: false,
+            uploadedSearchPreview: true,
+            publishToOaiPmh: true,
+            comment: false,
+            publishToMediaModule: true
+        };
+
+        // form data for the republish request
         bodyFormData = new FormData();
         bodyFormData.append('definition', 'republish-metadata');
         bodyFormData.append('mediapackage', mediapackageJson.data);
+        bodyFormData.append('properties', JSON.stringify(republishProperties));
+
         headers = {
             ...bodyFormData.getHeaders(),
             "Content-Length": bodyFormData.getLengthSync()
         };
-        // do the republish
+        // do the republish request
         const resp = await security.opencastBase.post(republishMetadataUrl, bodyFormData, {headers});
 
-        return resp;  // this is not used anywhere
+        return resp;
     } catch (error) {
         console.log(error);
         throw error;
