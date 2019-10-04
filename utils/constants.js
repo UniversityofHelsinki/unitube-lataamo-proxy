@@ -1,3 +1,6 @@
+// esb service paths
+const ESB_IAM_GROUPS_PATH = '/iam/group/unitube/search/';
+
 
 const ROLE_ANONYMOUS = 'ROLE_ANONYMOUS';
 
@@ -124,5 +127,6 @@ module.exports = {
     VIDEO_PRESENTER_DELIVERY,
     VIDEO_PRESENTATION_DELIVERY,
     UPDATE_SERIES,
-    CREATE_SERIES
+    CREATE_SERIES,
+    ESB_IAM_GROUPS_PATH
 };
