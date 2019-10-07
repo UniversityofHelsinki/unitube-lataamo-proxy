@@ -149,16 +149,11 @@ exports.updateEventMetadata = async (metadata, eventId) => {
         // get mediapackage for the republish query
         const mediapackageJson = await security.opencastBase.get(mediapackageUrl);
 
-        // properties object for the republish query
-        // Opencast instantiates a java.util.Properties from the value, so key=value pairs and \n as a delimeter.
-        // https://docs.oracle.com/javase/7/docs/api/java/util/Properties.html#load(java.io.InputStream)
-        const republishProperties = "publishLive=false\nuploadedSearchPreview=true\npublishToOaiPmh=true\ncomment=false\npublishToMediaModule=true";
-
         // form data for the republish request
         bodyFormData = new FormData();
         bodyFormData.append('definition', 'republish-metadata');
         bodyFormData.append('mediapackage', mediapackageJson.data);
-        bodyFormData.append('properties', republishProperties);
+        bodyFormData.append('properties', constants.PROPERTIES_REPUBLISH_METADATA);
 
         headers = {
             ...bodyFormData.getHeaders(),

@@ -95,6 +95,14 @@ const SERIES_METADATA = [
     }
 ];
 
+
+// properties object for the republish query
+// Opencast instantiates a java.util.Properties from the value, so key=value pairs and \n as a delimeter.
+// https://docs.oracle.com/javase/7/docs/api/java/util/Properties.html#load(java.io.InputStream)
+const PROPERTIES_REPUBLISH_METADATA =
+    "publishLive=false\nuploadedSearchPreview=true\npublishToOaiPmh=true\ncomment=false\npublishToMediaModule=true";
+
+
 module.exports = {
     ROLE_ANONYMOUS,
     STATUS_PUBLISHED,
@@ -124,5 +132,6 @@ module.exports = {
     VIDEO_PRESENTER_DELIVERY,
     VIDEO_PRESENTATION_DELIVERY,
     UPDATE_SERIES,
-    CREATE_SERIES
+    CREATE_SERIES,
+    PROPERTIES_REPUBLISH_METADATA
 };
