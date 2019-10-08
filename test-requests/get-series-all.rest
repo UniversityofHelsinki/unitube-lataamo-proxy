@@ -1,0 +1,2 @@
+GET http://localhost:8080/api/series
+Authorization: Basic admin opencast

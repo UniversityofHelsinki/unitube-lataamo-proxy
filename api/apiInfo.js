@@ -13,7 +13,7 @@ if (exists(packageFilename)) {
     version = pkg.version;
 }
 
-exports.apiInfo = function(req, res) {
+exports.apiInfo =  (req, res) => {
     res.json({ status: 200,
         message: 'API alive',
         name: name,

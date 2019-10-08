@@ -1,0 +1,118 @@
+POST http://localhost:8080/api/series
+Authorization: Basic lataamo_testi admin
+Content-Type: application/x-www-form-urlencoded
+
+metadata=[
+  {
+    "flavor": "dublincore/series",
+    "title": "Opencast Series DublinCore",
+    "fields": [
+      {
+        "readOnly": false,
+        "id": "title",
+        "label": "EVENTS.SERIES.DETAILS.METADATA.TITLE",
+        "type": "text",
+        "value": "title-LATAAMO-103",
+        "required": true
+      },
+      {
+        "readOnly": false,
+        "id": "subjects",
+        "label": "EVENTS.SERIES.DETAILS.METADATA.SUBJECT",
+        "type": "text",
+        "value": [
+          "subjects-järvi", "subjects-laavu", "subjects-aamupuuro", "subjects-turve", "subjects-salama", "subjects-koivikko"
+        ],
+        "required": false
+      },
+      {
+        "readOnly": false,
+        "id": "description",
+        "label": "EVENTS.SERIES.DETAILS.METADATA.DESCRIPTION",
+        "type": "text",
+        "value": "Test description",
+        "required": false
+      },
+      {
+        "translatable": true,
+        "readOnly": false,
+        "id": "language",
+        "label": "EVENTS.SERIES.DETAILS.METADATA.LANGUAGE",
+        "type": "text",
+        "value": "language-finland",
+        "required": false
+      },
+      {
+        "readOnly": false,
+        "id": "rightsHolder",
+        "label": "EVENTS.SERIES.DETAILS.METADATA.RIGHTS",
+        "type": "text",
+        "value": "rightsHolder-kasitunnus",
+        "required": false
+      },
+      {
+        "translatable": true,
+        "readOnly": false,
+        "id": "license",
+        "label": "EVENTS.SERIES.DETAILS.METADATA.LICENSE",
+        "type": "text",
+        "value": "",
+        "required": false
+      },
+      {
+        "translatable": false,
+        "readOnly": false,
+        "id": "creator",
+        "label": "EVENTS.SERIES.DETAILS.METADATA.CREATED_BY",
+        "type": "mixed_text",
+        "value": ["creator-kasitunnus"],
+        "required": false
+      },
+      {
+        "translatable": false,
+        "readOnly": false,
+        "id": "contributor",
+        "label": "EVENTS.SERIES.DETAILS.METADATA.CONTRIBUTORS",
+        "type": "mixed_text",
+        "value": ["tzrasane", "contributor-kasitunnus2", "contributor-kasitunnus3"],
+        "required": false
+      },
+      {
+        "translatable": false,
+        "readOnly": false,
+        "id": "publisher",
+        "label": "EVENTS.SERIES.DETAILS.METADATA.PUBLISHERS",
+        "type": "mixed_text",
+        "value": ["publisher-kasitunnus"],
+        "required": false
+      }
+    ]
+  }
+]
+&acl=[
+  {
+    "action": "read",
+    "allow": true,  
+    "role": "ROLE_USER_ADMIN"
+  },
+  {
+    "action": "write",
+    "allow": true,
+    "role": "ROLE_USER_ADMIN"
+  },
+  {
+    "action": "read",
+    "allow": true,
+    "role": "ROLE_ADMIN"
+  },
+  {
+    "action": "write",
+    "allow": true,
+    "role": "ROLE_ADMIN"
+  },
+  {
+    "action": "read",
+    "allow": true,
+    "role": "ROLE_ANONYMOUS"
+  }
+]

@@ -1,0 +1,2 @@
+GET http://localhost:8080/api/series/efef451e-3374-4348-b6c2-3b737522eb5d
+Authorization: Basic admin opencast

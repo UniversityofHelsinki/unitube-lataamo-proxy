@@ -1,0 +1,154 @@
+POST http://localhost:8080/api/events
+Authorization: Basic admin opencast
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundarybZM9LmUJDdH4qVAu
+
+------WebKitFormBoundarybZM9LmUJDdH4qVAu
+Content-Disposition: form-data; filename="fruits_on_table.mp4"
+Content-Type: video/mp4
+
+------WebKitFormBoundarybZM9LmUJDdH4qVAu
+Content-Disposition: form-data; name="metadata"
+
+
+metadata=[
+    {
+        "flavor": "dublincore/episode",
+        "title": "EVENTS.EVENTS.DETAILS.CATALOG.EPISODE",
+        "fields": [
+        {
+            "id": "title",
+            "type": "text",
+            "value": "koestus",
+            "tabindex": 1,
+            "$$hashKey": "object:872"
+        },
+        {
+            "id": "subject",
+            "type": "text",
+            "value": "subject-koestus",
+            "tabindex": 2,
+            "$$hashKey": "object:873"
+        },
+        {
+            "id": "description",
+            "type": "text_long",
+            "value": "desc-koestus",
+            "tabindex": 3,
+            "$$hashKey": "object:874"
+        },
+        {
+            "translatable": true,
+            "id": "language",
+            "type": "text",
+            "value": "eng",
+            "tabindex": 4,
+            "$$hashKey": "object:875"
+        },
+        {
+            "id": "rightsHolder",
+            "type": "text",
+            "value": "",
+            "tabindex": 5,
+            "$$hashKey": "object:876"
+        },
+        {
+            "translatable": true,
+            "id": "license",
+            "type": "ordered_text",
+            "value": "ALLRIGHTS",
+            "tabindex": 6,
+            "$$hashKey": "object:877"
+        },
+        {
+            "translatable": false,
+            "id": "isPartOf",
+            "type": "text",
+            "value": "6c2a157f-b2c3-4c98-bece-6aa0fba6bef8",
+            "tabindex": 7,
+            "$$hashKey": "object:878"
+        },
+        {
+            "translatable": false,
+            "id": "creator",
+            "type": "mixed_text",
+            "value": [
+            "presenter-koestus"
+            ],
+            "tabindex": 8,
+            "$$hashKey": "object:879"
+        },
+        {
+            "translatable": false,
+            "id": "contributor",
+            "type": "mixed_text",
+            "value": [
+            "contributor-koestus"
+            ],
+            "tabindex": 9,
+            "$$hashKey": "object:880"
+        },
+        {
+            "id": "startDate",
+            "value": "2019-05-23T07:13:34.851Z",
+            "type": "date",
+            "tabindex": 7
+        }
+        ]
+    }
+]
+&acl=[
+    {
+        "action": "read",
+        "allow": true,
+        "role": "ROLE_USER_ADMIN"
+    },
+    {
+        "action": "write",
+        "allow": true,
+        "role": "ROLE_USER_ADMIN"
+    },
+    {
+        "action": "read",
+        "allow": true,
+        "role": "ROLE_ADMIN"
+    },
+    {
+        "action": "write",
+        "allow": true,
+        "role": "ROLE_ADMIN"
+    },
+    {
+        "action": "read",
+        "allow": true,
+        "role": "ROLE_ANONYMOUS"
+    }
+    ]
+&source= {
+    "type": "UPLOAD"
+}
+&assets={
+    "workflow": "publish-uploaded-assets",
+    "options": [
+        {
+            "id": "track_presenter",
+            "type": "track",
+            "flavorType": "presenter",
+            "flavorSubType": "source",
+            "multiple": false,
+            "displayOrder": 13,
+            "title": "EVENTS.EVENTS.NEW.SOURCE.UPLOAD.NON_SEGMENTABLE"
+        },
+        {
+            "id": "track_presentation",
+            "type": "track",
+            "flavorType": "presentation",
+            "flavorSubType": "source",
+            "multiple": false,
+            "displayOrder": 14,
+            "title": "EVENTS.EVENTS.NEW.SOURCE.UPLOAD.SEGMENTABLE"
+        }
+    ]
+}
+
+< /Users/toni/Downloads/fruits_on_table.mp4
+------WebKitFormBoundarybZM9LmUJDdH4qVAu--
