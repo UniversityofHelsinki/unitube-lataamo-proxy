@@ -37,12 +37,6 @@ const logger = createLogger({
             filename: `${LOG_DIR}/lataamo-error-%DATE%.log`,
             level: 'error',
             datePattern: 'YYYY-MM-DD'})
-    ],
-    // https://www.npmjs.com/package/winston#handling-uncaught-exceptions-with-winston
-    exceptionHandlers: [
-        new DailyRotateFile({
-            filename: `${LOG_DIR}/uncaught-exceptions-%DATE%.log`,
-            datePattern: 'YYYY-MM-DD'})
     ]
 });
 
