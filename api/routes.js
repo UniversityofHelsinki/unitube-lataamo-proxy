@@ -168,7 +168,7 @@ module.exports = function (router) {
      router.get('/series/:id', async (req, res) => {
         try {
             const series = await apiService.getSerie(req.params.id);
-            const userSeriesWithPublished = await seriesService.addPublishedInfoInSeriesData(series);
+            const userSeriesWithPublished = await seriesService.addPublishedInfoInSeriesAndMoodleRoles(series);
             res.json(userSeriesWithPublished);
         } catch (error) {
             const msg = error.message;
