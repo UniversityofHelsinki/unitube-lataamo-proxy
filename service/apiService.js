@@ -34,6 +34,21 @@ exports.getSerie = async (serieId) => {
     return response.data;
 };
 
+const doNotdropThese = 'grp-';
+
+exports.removeSomeContributors = async (series) => {
+
+    let res = []
+    series.contributors.forEach(function (item) {
+        if (item.startsWith(doNotdropThese)) {
+            res.push(item);
+        }
+    })
+    series.contributors = [...res];
+
+    return res;
+}
+
 exports.updateSerieEventMetadata = async (metadata, id) => {
     const serieMetaDataUrl = constants.OCAST_SERIES_PATH + id + constants.OCAST_METADATA_PATH + constants.OCAST_TYPE_QUERY_PARAMETER + constants.OCAST_TYPE_DUBLINCORE_SERIES;
 
