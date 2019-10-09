@@ -69,7 +69,7 @@ exports.openCastFormatSeriesMetadata = (metadata, user) => {
     let seriesMetadataTemplate = constants.SERIES_METADATA;
     updateSeriesEntryById(seriesMetadataTemplate, "title", metadata.title);
     updateSeriesEntryById(seriesMetadataTemplate, "description", metadata.description);
-    addUserToEmptyContributorsList(metadata, user);
+    exports.addUserToEmptyContributorsList(metadata, user);
     addUserInContributorsList(metadata.contributors, user);
     updateSeriesContributorsList(seriesMetadataTemplate, metadata.contributors);
     return seriesMetadataTemplate;
