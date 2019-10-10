@@ -34,19 +34,23 @@ exports.getSerie = async (serieId) => {
     return response.data;
 };
 
-const doNotdropThese = 'grp-';
+const addToIamGroups = 'grp-';
 
-exports.removeSomeContributors = async (series) => {
+exports.contributorsToIamGroupsAndPersons = async (series) => {
+    let iamgroups = [];
+    let persons = [];
 
-    let res = []
     series.contributors.forEach(function (item) {
-        if (item.startsWith(doNotdropThese)) {
-            res.push(item);
+        if (item.startsWith(addToIamGroups)) {
+            iamgroups.push(item);
+        } else {
+            persons.push(item);
         }
     })
-    series.contributors = [...res];
+    series.iamgroups = [...iamgroups];
+    series.persons = [...persons];
 
-    return res;
+    return iamgroups;
 }
 
 exports.updateSerieEventMetadata = async (metadata, id) => {
