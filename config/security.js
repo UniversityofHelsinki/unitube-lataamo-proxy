@@ -14,6 +14,7 @@ const localhostIP = ipaddr.process('127.0.0.1');
 let ReverseProxyStrategy = require('passport-reverseproxy');
 
 module.exports.shibbolethAuthentication = function (app, passport) {
+    console.log(process.env);
     passport.use(new ReverseProxyStrategy({
             headers: {
                 'eppn': {alias: 'eppn', required: true},
