@@ -30,7 +30,7 @@ app.use('/api', router);
 
 app.listen(port, host,  () => {
     console.log(`Example app listening on port ${port}!`)
-});   
+});
 
 // for the tests
 module.exports = app;
