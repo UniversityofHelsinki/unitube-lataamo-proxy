@@ -34,14 +34,15 @@ exports.getSerie = async (serieId) => {
     return response.data;
 };
 
-const addToIamGroups = 'grp-';
+const addToIamGroups = ['grp-', 'hy-', 'sys-'];
 
 exports.contributorsToIamGroupsAndPersons = async (series) => {
     let iamgroups = [];
     let persons = [];
 
     series.contributors.forEach(function (item) {
-        if (item.startsWith(addToIamGroups)) {
+        const match = addToIamGroups.filter(entry => item.includes(entry));
+        if (match && match.length > 0) {
             iamgroups.push(item);
         } else {
             persons.push(item);
@@ -49,8 +50,6 @@ exports.contributorsToIamGroupsAndPersons = async (series) => {
     })
     series.iamgroups = [...iamgroups];
     series.persons = [...persons];
-
-    return iamgroups;
 }
 
 exports.updateSerieEventMetadata = async (metadata, id) => {
