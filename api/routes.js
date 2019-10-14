@@ -57,7 +57,6 @@ module.exports = function (router) {
      */
     router.get("/user", (req, res) => {
         try {
-            console.log(req.headers);
             logger.info(`GET /user USER: ${req.user.eppn}`);
             res.json(userService.getLoggedUser(req.user));
         } catch(err) {
