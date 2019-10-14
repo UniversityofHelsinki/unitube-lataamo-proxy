@@ -7,13 +7,15 @@ const passport = require('passport');
 const fs = require('fs')
 const morgan = require('morgan')
 const path = require('path')
+const logger = require('./config/winstonLogger');
 
 const app = express();
 const port = 3000;
 const host = '127.0.0.1';
 const router = express.Router();
-const LOG_FILE_NAME = 'access.log'
-const LOG_DIRECTORY = __dirname
+const LOG_FILE_NAME = 'access.log';
+const LOG_DIRECTORY = __dirname;
+
 
 const accessLogStream = fs.createWriteStream(
     path.join(LOG_DIRECTORY, LOG_FILE_NAME), { flags: 'a' })
@@ -29,8 +31,8 @@ app.use('/api', router);
 
 
 app.listen(port, host,  () => {
-    console.log(`Example app listening on port ${port}!`)
-});
+    logger.info(`lataamo proxy is listening on port ${port}!`);
+});   
 
 // for the tests
 module.exports = app;
