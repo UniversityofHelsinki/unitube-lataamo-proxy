@@ -4,16 +4,18 @@ require('dotenv').config();
 const api = require('./apiInfo');
 const eventsService = require('../service/eventsService');
 const seriesService = require('../service/seriesService');
+const personApiService = require('../service/personApiService');
 const apiService = require('../service/apiService');
 const userService = require('../service/userService');
 const publicationService = require('../service/publicationService');
+const iamGroupsApi = require('../service/iamGroupsApi');
 const busboy = require('connect-busboy');  //https://github.com/mscdex/connect-busboy
 const path = require('path');
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 const {inboxSeriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
 const swaggerUi = require('swagger-ui-express');
 const apiSpecs = require('../config/swagger'); // swagger config
-const logger = require('../config/lataamoWinston');
+const logger = require('../config/winstonLogger');
 const constants = require('../utils/constants');
 
 module.exports = function (router) {
@@ -167,7 +169,7 @@ module.exports = function (router) {
      router.get('/series/:id', async (req, res) => {
         try {
             const series = await apiService.getSerie(req.params.id);
-            const userSeriesWithPublished = await seriesService.addPublishedInfoInSeriesData(series);
+            const userSeriesWithPublished = await seriesService.addPublishedInfoInSeriesAndMoodleRoles(series);
             res.json(userSeriesWithPublished);
         } catch (error) {
             const msg = error.message;
@@ -572,5 +574,28 @@ module.exports = function (router) {
             res.json({message: 'Error', msg});
         }
     });
+
+    router.get('/iamGroups/:query', async (req, res) => {
+        try {
+            logger.info(`GET /iamGroups/:query ${req.params.query}`);
+            const iamGroups = await iamGroupsApi.getIamGroups(req.params.query);
+            res.json(iamGroups);
+        } catch (error) {
+            const msg = error.message;
+            res.json({message: 'Error', msg});
+        }
+    });
+
+    router.get('/persons/:query', async (req, res) => {
+        try {
+            logger.info(`GET /persons/:query ${req.params.query}`);
+            const persons = await personApiService.getPersons(req.params.query);
+            res.json(persons);
+        } catch (error) {
+            const msg = error.message;
+            res.json({message: 'Error', msg});
+        }
+    });
+
 
 };

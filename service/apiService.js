@@ -181,7 +181,6 @@ exports.createSeries = async (user, seriesMetadata, seriesAcl) => {
             "Content-Length": bodyFormData.getLengthSync()
         };
         const response = await security.opencastBase.post(seriesUploadUrl, bodyFormData, {headers});
-        console.log('series uploaded: ', response.data);
         return response;
     } catch (err) {
         throw err;
@@ -254,7 +253,6 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
         };
         // do we want to wait ocast's reponse?
         const response = await security.opencastBase.post(videoUploadUrl, bodyFormData, {headers});
-        console.log('video uploaded: ', response.data);
         return response;
     } catch (err) {
         throw err;
@@ -264,8 +262,6 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
 
 // create the default lataamo INBOX series for the given userId
 exports.createLataamoInboxSeries = async (userId) => {
-    console.log('creating inbox series for', userId);
-
     const lataamoInboxSeriesTitle = inboxSeriesTitleForLoggedUser(userId);
     const lataamoInboxSeriesDescription = `Lataamo-INBOX series for ${ userId }`;
     const lataamoInboxSeriesLicense = 'PUT HERE THE DEFAULT INBOX SERIES LICENSE';
@@ -376,9 +372,7 @@ exports.createLataamoInboxSeries = async (userId) => {
             ...bodyFormData.getHeaders(),
             "Content-Type": "application/x-www-form-urlencoded"
         };
-
         const response = await security.opencastBase.post(seriesUrl, bodyFormData, {headers});
-        console.log('Inbox series created: ', response.data);
         return response.data;
     } catch (err) {
         throw err;
