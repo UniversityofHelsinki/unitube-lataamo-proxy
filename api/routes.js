@@ -4,6 +4,7 @@ require('dotenv').config();
 const api = require('./apiInfo');
 const eventsService = require('../service/eventsService');
 const seriesService = require('../service/seriesService');
+const personApiService = require('../service/personApiService');
 const apiService = require('../service/apiService');
 const userService = require('../service/userService');
 const publicationService = require('../service/publicationService');
@@ -582,5 +583,17 @@ module.exports = function (router) {
             res.json({message: 'Error', msg});
         }
     });
+
+    router.get('/persons/:query', async (req, res) => {
+        try {
+            logger.info(`GET /persons/:query ${req.params.query}`);
+            const persons = await personApiService.getPersons(req.params.query);
+            res.json(persons);
+        } catch (error) {
+            const msg = error.message;
+            res.json({message: 'Error', msg});
+        }
+    });
+
 
 };
