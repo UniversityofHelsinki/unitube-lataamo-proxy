@@ -15,7 +15,7 @@ const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 const {inboxSeriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
 const swaggerUi = require('swagger-ui-express');
 const apiSpecs = require('../config/swagger'); // swagger config
-const logger = require('../config/lataamoWinston');
+const logger = require('../config/winstonLogger');
 const constants = require('../utils/constants');
 
 module.exports = function (router) {
