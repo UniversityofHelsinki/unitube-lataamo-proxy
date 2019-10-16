@@ -140,20 +140,50 @@ exports.getMetadataForEvent = async (event) => {
     return response.data;
 };
 
-exports.updateEventMetadata = async (metadata, id) => {
-    const videoMetaDataUrl = constants.OCAST_VIDEOS_PATH + id + constants.OCAST_METADATA_PATH + constants.OCAST_TYPE_QUERY_PARAMETER + constants.OCAST_TYPE_DUBLINCORE_EPISODE;
-    let bodyFormData = new FormData();
-    bodyFormData.append('metadata', JSON.stringify(metadata));
+exports.updateEventMetadata = async (metadata, eventId) => {
+    const videoMetaDataUrl = constants.OCAST_VIDEOS_PATH + eventId + constants.OCAST_METADATA_PATH + constants.OCAST_TYPE_QUERY_PARAMETER + constants.OCAST_TYPE_DUBLINCORE_EPISODE;
+
+    // republish paths
+    const republishMetadataUrl = '/workflow/start';
+    const mediapackageUrl = '/assets/episode/' + eventId;
+
     try {
-        const headers = {
+        let bodyFormData = new FormData();
+        bodyFormData.append('metadata', JSON.stringify(metadata));
+
+        let headers = {
             ...bodyFormData.getHeaders(),
             "Content-Length": bodyFormData.getLengthSync()
         };
+        // update event metadata
         const response = await security.opencastBase.put(videoMetaDataUrl, bodyFormData, {headers});
-        return response.data;
+
+        // let's break if response from PUT not ok
+        if(response.status !== 204){
+            console.log(error);
+            throw error;
+        }
+
+        // get mediapackage for the republish query
+        const mediapackageJson = await security.opencastBase.get(mediapackageUrl);
+
+        // form data for the republish request
+        bodyFormData = new FormData();
+        bodyFormData.append('definition', 'republish-metadata');
+        bodyFormData.append('mediapackage', mediapackageJson.data);
+        bodyFormData.append('properties', constants.PROPERTIES_REPUBLISH_METADATA);
+
+        headers = {
+            ...bodyFormData.getHeaders(),
+            "Content-Length": bodyFormData.getLengthSync()
+        };
+
+        // do the republish request
+        const resp = await security.opencastBase.post(republishMetadataUrl, bodyFormData, {headers});
+
+        return resp;
     } catch (error) {
         console.log(error);
-        //return response.error;  // response is undefined here!
         throw error;
     }
 };
@@ -169,13 +199,12 @@ exports.createSeries = async (user, seriesMetadata, seriesAcl) => {
             "Content-Length": bodyFormData.getLengthSync()
         };
         const response = await security.opencastBase.post(seriesUploadUrl, bodyFormData, {headers});
-        console.log('series uploaded: ', response.data);
         return response;
     } catch (err) {
         throw err;
     }
 
-}
+};
 
 
 // on success returns status code 201 and payload:
@@ -242,7 +271,6 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
         };
         // do we want to wait ocast's reponse?
         const response = await security.opencastBase.post(videoUploadUrl, bodyFormData, {headers});
-        console.log('video uploaded: ', response.data);
         return response;
     } catch (err) {
         throw err;
@@ -252,8 +280,6 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
 
 // create the default lataamo INBOX series for the given userId
 exports.createLataamoInboxSeries = async (userId) => {
-    console.log('creating inbox series for', userId);
-
     const lataamoInboxSeriesTitle = inboxSeriesTitleForLoggedUser(userId);
     const lataamoInboxSeriesDescription = `Lataamo-INBOX series for ${ userId }`;
     const lataamoInboxSeriesLicense = 'PUT HERE THE DEFAULT INBOX SERIES LICENSE';
@@ -364,9 +390,7 @@ exports.createLataamoInboxSeries = async (userId) => {
             ...bodyFormData.getHeaders(),
             "Content-Type": "application/x-www-form-urlencoded"
         };
-
         const response = await security.opencastBase.post(seriesUrl, bodyFormData, {headers});
-        console.log('Inbox series created: ', response.data);
         return response.data;
     } catch (err) {
         throw err;
