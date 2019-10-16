@@ -169,6 +169,7 @@ module.exports = function (router) {
      router.get('/series/:id', async (req, res) => {
         try {
             const series = await apiService.getSerie(req.params.id);
+            await apiService.contributorsToIamGroupsAndPersons(series);
             const userSeriesWithPublished = await seriesService.addPublishedInfoInSeriesAndMoodleRoles(series);
             res.json(userSeriesWithPublished);
         } catch (error) {
@@ -216,6 +217,8 @@ module.exports = function (router) {
     router.put('/series/:id', async (req, res) => {
         try {
             const rawEventMetadata = req.body;
+            const loggedUser = userService.getLoggedUser(req.user);
+            seriesService.addUserToEmptyContributorsList(rawEventMetadata, loggedUser);
             let modifiedMetadata = eventsService.modifySerieEventMetadataForOpencast(rawEventMetadata);
             let modifiedSeriesAclMetadata = seriesService.openCastFormatSeriesAclList(rawEventMetadata, constants.UPDATE_SERIES);
             const response = await apiService.updateSeriesAcldata(modifiedSeriesAclMetadata, req.body.identifier);

@@ -172,7 +172,12 @@ exports.modifySerieEventMetadataForOpencast = (metadata) => {
         {
             "id" : "description",
             "value": metadata.description
-        });
+        },
+        {
+            "id" : "contributor",
+            "value": metadata.contributors
+        }
+    );
 
     return metadataArray;
 };
