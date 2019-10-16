@@ -403,7 +403,7 @@ describe('user series post', () => {
     beforeEach(() => {
         // mock needed opencast api calls
         test.mockLataamoPostSeriesCall();
-        test.mockOCastSeriesApiCall7();
+        test.mockOCastSeriesApiCall8();
     });
 
     it("Successful series update should return 200 and identifier", async () => {
