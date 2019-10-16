@@ -61,15 +61,15 @@ const addUserInContributorsList = (contributors, user) => {
 };
 
 
-const addUserToEmptyContributorsList = (metadata, user) => {
-    !metadata.contributors ? metadata.contributors = [user.eppn] : metadata.contributors;
+exports.addUserToEmptyContributorsList = (metadata, user) => {
+    !metadata.contributors || metadata.contributors.length === 0 ? metadata.contributors = [user.eppn] : metadata.contributors;
 }
 
 exports.openCastFormatSeriesMetadata = (metadata, user) => {
     let seriesMetadataTemplate = constants.SERIES_METADATA;
     updateSeriesEntryById(seriesMetadataTemplate, "title", metadata.title);
     updateSeriesEntryById(seriesMetadataTemplate, "description", metadata.description);
-    addUserToEmptyContributorsList(metadata, user);
+    exports.addUserToEmptyContributorsList(metadata, user);
     addUserInContributorsList(metadata.contributors, user);
     updateSeriesContributorsList(seriesMetadataTemplate, metadata.contributors);
     return seriesMetadataTemplate;
