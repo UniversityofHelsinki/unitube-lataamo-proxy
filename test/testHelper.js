@@ -79,7 +79,7 @@ const mockUserSeries = [
         contributors: [ 'SeriesOwnerEppn', 'Tester A', 'Tester B', 'Tester-XYZ' ],
         title: 'kuutamossa'
     }
-]
+];
 
 const mockUserSeries2 = [
     { identifier: CONSTANTS.TEST_SERIES_1_ID,
@@ -97,7 +97,7 @@ const mockUserSeries2 = [
         contributors: [ 'SeriesOwnerEppn', 'contrib1', 'jaaki', 'grp-lataamo-1', 'grp-XYZ'],
         title: 'title-LATAAMO-131'
     }
-]
+];
 
 const mockUserSeries3 = [
     { identifier: CONSTANTS.TEST_SERIES_1_ID,
@@ -132,6 +132,24 @@ const mockUserSeries3 = [
         publishers: [ '' ],
         contributors: [ 'SeriesOwnerEppn', 'Tester B', 'Tester-XYZ' ],
         title: 'title-LATAAMO-132'
+    }
+];
+
+const mockUserSeries4 = [
+    { identifier: CONSTANTS.TEST_SERIES_1_ID,
+        creator: 'Opencast Project Administrator',
+        created: '2019-06-11T12:59:40Z',
+        subjects:
+            [ 'subjects-järvi',
+                'subjects-laavu',
+                'subjects-aamupuuro',
+                'subjects-turve',
+                'subjects-salama',
+                'subjects-koivikko' ],
+        organizers: [ 'creator-kasitunnus' ],
+        publishers: [ 'publisher-kasitunnus' ],
+        contributors: [ 'SeriesOwnerEppn'],
+        title: 'inbox SeriesOwnerEppn'
     }
 ];
 
@@ -1182,6 +1200,11 @@ const lataamoSeries6 = () =>
         .get(CONSTANTS.OCAST_SERIES_PATH + "?filter=contributors:Tester-XYZ,contributors:grp-lataamo-6")
         .reply(200, mockUserSeries3);
 
+const lataamoSeries7 = () =>
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .get(CONSTANTS.OCAST_SERIES_PATH + "?filter=contributors:SeriesOwnerEppn,contributors:grp-XYZ")
+        .reply(200, mockUserSeries4);
+
 const lataamoPostSeries = () =>
     nock(CONSTANTS.OCAST_BASE_URL)
         .post(CONSTANTS.OCAST_SERIES_PATH)
@@ -1224,6 +1247,7 @@ module.exports.mockOCastSeriesApiCall3 = lataamoSeries3;
 module.exports.mockOCastSeriesApiCall4 = lataamoSeries4;
 module.exports.mockOCastSeriesApiCall5 = lataamoSeries5;
 module.exports.mockOCastSeriesApiCall6 = lataamoSeries6;
+module.exports.mockOCastSeriesApiCall7 = lataamoSeries7;
 module.exports.mockOCastUserApiCall = lataamoApiUser;
 module.exports.mockOCastUserApiCall2 = lataamoApiUser2;
 module.exports.mockOCastEvents_1_ApiCall = series1_Events;

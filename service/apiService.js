@@ -34,6 +34,16 @@ exports.getSerie = async (serieId) => {
     return response.data;
 };
 
+exports.getInboxSeries = async (user, seriesTitle) => {
+    const contributorParameters = userService.parseContributor(user.hyGroupCn);
+    const seriesUrl = constants.OCAST_SERIES_PATH + '?filter=contributors:' + user.eppn + ',' + contributorParameters;
+    const response = await security.opencastBase.get(seriesUrl);
+    const seriesTitles = response.data.map(series => series.title);
+
+    return seriesTitle==="inbox " + user.eppn && seriesTitles.includes(seriesTitle);
+
+};
+
 exports.updateSerieEventMetadata = async (metadata, id) => {
     const serieMetaDataUrl = constants.OCAST_SERIES_PATH + id + constants.OCAST_METADATA_PATH + constants.OCAST_TYPE_QUERY_PARAMETER + constants.OCAST_TYPE_DUBLINCORE_SERIES;
 
