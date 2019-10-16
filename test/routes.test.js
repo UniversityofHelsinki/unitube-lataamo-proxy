@@ -187,6 +187,35 @@ describe('user series returned from /userSeries route', () => {
   });
 });
 
+describe('user series person - and iamgroup administrators returned from /series route', () => {
+
+    beforeEach(() => {
+        // mock needed opencast apis
+        test.mockOCastSeriesApiCall7();
+        test.mockOCastEvent1AclCall();
+    })
+
+    it("should return user's series with three iamgroups and three persons ", async () => {
+        let response = await supertest(app)
+            .get(LATAAMO_SERIES_PATH + '/123456')
+            .set('eppn', test.mockTestUser2.eppn)
+            .set('preferredlanguage', test.mockTestUser2.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser2.hyGroupCn)
+            .expect(200)
+            .expect('Content-Type', /json/);
+
+        assert.lengthOf(response.body.persons, 3, 'Three person administrators should be returned');
+        assert.lengthOf(response.body.iamgroups, 3, 'Three group administrators should be returned');
+    });
+
+    afterEach(() => {
+        test.cleanAll();
+    });
+    afterEach(() => {
+        test.cleanAll();
+    });
+});
+
 describe('user video urls returned from /video/id events route', () => {
   beforeEach(() => {
     // mock needed opencast api calls

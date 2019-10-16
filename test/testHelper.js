@@ -135,6 +135,17 @@ const mockUserSeries3 = [
     }
 ];
 
+const mockUserSeries4 =
+    { identifier: CONSTANTS.TEST_SERIES_1_ID,
+        creator: 'Opencast Project Administrator',
+        created: '2019-05-22T09:56:43Z',
+        subjects: [ 'juusto', 'makasiini', 'aamupuuro', 'salama', 'sämpylä' ],
+        organizers: [ 'organizer1' ],
+        publishers: [ '' ],
+        contributors: ['baabenom', 'grp-a9000-johto', 'e0008344', 'sys-personec-1', 'alanevax', 'hy-duunarit'],
+        title: 'title-LATAAMO-132'
+     };
+
 const mockUserSeriesEmpty = [];
 
 const mockUserEventsForSeries1 =  [
@@ -1182,6 +1193,11 @@ const lataamoSeries6 = () =>
         .get(CONSTANTS.OCAST_SERIES_PATH + "?filter=contributors:Tester-XYZ,contributors:grp-lataamo-6")
         .reply(200, mockUserSeries3);
 
+const lataamoSeries7 = () =>
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .get(CONSTANTS.OCAST_SERIES_PATH + "123456")
+        .reply(200, mockUserSeries4);
+
 const lataamoPostSeries = () =>
     nock(CONSTANTS.OCAST_BASE_URL)
         .post(CONSTANTS.OCAST_SERIES_PATH)
@@ -1213,7 +1229,6 @@ const lataamoApiUser2 = () => nock(CONSTANTS.OCAST_BASE_URL)
 
 const cleanMocks = () => nock.cleanAll();
 
-
 module.exports.mockApiUser = mockApiUser;
 module.exports.mockTestUser = mockTestUser;
 module.exports.mockTestUser2 = mockTestUser2;
@@ -1224,6 +1239,7 @@ module.exports.mockOCastSeriesApiCall3 = lataamoSeries3;
 module.exports.mockOCastSeriesApiCall4 = lataamoSeries4;
 module.exports.mockOCastSeriesApiCall5 = lataamoSeries5;
 module.exports.mockOCastSeriesApiCall6 = lataamoSeries6;
+module.exports.mockOCastSeriesApiCall7 = lataamoSeries7;
 module.exports.mockOCastUserApiCall = lataamoApiUser;
 module.exports.mockOCastUserApiCall2 = lataamoApiUser2;
 module.exports.mockOCastEvents_1_ApiCall = series1_Events;

@@ -34,6 +34,24 @@ exports.getSerie = async (serieId) => {
     return response.data;
 };
 
+const addToIamGroups = ['grp-', 'hy-', 'sys-'];
+
+exports.contributorsToIamGroupsAndPersons = async (series) => {
+    let iamgroups = [];
+    let persons = [];
+
+    series.contributors.forEach(function (item) {
+        const match = addToIamGroups.filter(entry => item.includes(entry));
+        if (match && match.length > 0) {
+            iamgroups.push(item);
+        } else {
+            persons.push(item);
+        }
+    })
+    series.iamgroups = [...iamgroups];
+    series.persons = [...persons];
+}
+
 exports.updateSerieEventMetadata = async (metadata, id) => {
     const serieMetaDataUrl = constants.OCAST_SERIES_PATH + id + constants.OCAST_METADATA_PATH + constants.OCAST_TYPE_QUERY_PARAMETER + constants.OCAST_TYPE_DUBLINCORE_SERIES;
 
