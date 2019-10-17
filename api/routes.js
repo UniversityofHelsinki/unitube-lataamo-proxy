@@ -567,10 +567,17 @@ module.exports = function (router) {
         try {
             let series = req.body;
             const loggedUser = userService.getLoggedUser(req.user);
-            let modifiedSeriesMetadata = seriesService.openCastFormatSeriesMetadata(series, loggedUser);
-            let modifiedSeriesAclMetadata = seriesService.openCastFormatSeriesAclList(series, constants.CREATE_SERIES);
-            const response = await apiService.createSeries(req.user, modifiedSeriesMetadata, modifiedSeriesAclMetadata);
-            res.json(response.data.identifier);
+            let exists = await seriesService.checkIfInboxSeriesExists(loggedUser, series.title);
+            if(exists){
+                res.status(403);
+                res.json({message: 'inbox ' + loggedUser.eppn + ' already exists. Series was not created.'});
+            }else{
+                let modifiedSeriesMetadata = seriesService.openCastFormatSeriesMetadata(series, loggedUser);
+                let modifiedSeriesAclMetadata = seriesService.openCastFormatSeriesAclList(series, constants.CREATE_SERIES);
+                const response = await apiService.createSeries(req.user, modifiedSeriesMetadata, modifiedSeriesAclMetadata);
+                res.json(response.data.identifier);
+            }
+
         } catch (error) {
             res.status(500);
             const msg = error.message;
