@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "cross-env LATAAMO_OPENCAST_HOST=http://localhost:8080 mocha --exit",
-    "coverage": "nyc --reporter=lcov npm run test",
+    "coverage": "nyc --reporter=lcov --reporter=text npm run test",
     "build": "echo \"Testing build\"",
     "start": "node app.js",
     "nodemon": "nodemon ./app.js localhost 3000"
