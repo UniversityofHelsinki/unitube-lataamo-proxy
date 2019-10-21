@@ -560,6 +560,8 @@ module.exports = function (router) {
      *           description: OK, returns the new series identifier
      *         401:
      *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         403:
+     *           description: Forbidden. Series' name contained "inbox".
      *         500:
      *           description: Internal server error, an error occured.    
      */
@@ -567,10 +569,11 @@ module.exports = function (router) {
         try {
             let series = req.body;
             const loggedUser = userService.getLoggedUser(req.user);
-            let exists = await seriesService.checkIfInboxSeriesExists(loggedUser, series.title);
+            let exists = series.title.toLowerCase().includes('inbox');
+ 
             if(exists){
                 res.status(403);
-                res.json({message: 'inbox ' + loggedUser.eppn + ' already exists. Series was not created.'});
+                res.json({message: '"inbox" not allowed in series title. Series was not created.'});
             }else{
                 let modifiedSeriesMetadata = seriesService.openCastFormatSeriesMetadata(series, loggedUser);
                 let modifiedSeriesAclMetadata = seriesService.openCastFormatSeriesAclList(series, constants.CREATE_SERIES);

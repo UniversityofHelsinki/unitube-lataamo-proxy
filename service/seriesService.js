@@ -143,10 +143,6 @@ exports.addPublishedInfoInSeriesAndMoodleRoles = async (series) => {
     return series;
 }
 
-exports.checkIfInboxSeriesExists = async (user, title) => {
-    return await apiService.getInboxSeries(user, title);
-}
-
 let instructor = new RegExp(constants.MOODLE_ACL_INSTRUCTOR, 'g');
 let learner = new RegExp(constants.MOODLE_ACL_LEARNER, 'g');
 
