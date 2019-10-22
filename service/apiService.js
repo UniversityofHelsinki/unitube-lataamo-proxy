@@ -44,14 +44,12 @@ exports.getInboxSeries = async (user, seriesTitle) => {
 
 };
 
-const addToIamGroups = ['grp-', 'hy-', 'sys-'];
-
 exports.contributorsToIamGroupsAndPersons = async (series) => {
     let iamgroups = [];
     let persons = [];
 
     series.contributors.forEach(function (item) {
-        const match = addToIamGroups.filter(entry => item.includes(entry));
+        const match = constants.ADD_TO_IAM_GROUPS.filter(entry => item.includes(entry));
         if (match && match.length > 0) {
             iamgroups.push(item);
         } else {

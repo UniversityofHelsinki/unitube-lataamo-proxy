@@ -4,6 +4,7 @@ const ESB_IAM_GROUPS_PATH = '/iam/group/unitube/search/';
 
 
 const ROLE_ANONYMOUS = 'ROLE_ANONYMOUS';
+const ROLE_KATSOMO = 'ROLE_KATSOMO';
 
 const MOODLE_ACL_INSTRUCTOR = '_Instructor';
 const MOODLE_ACL_LEARNER = '_Learner';
@@ -82,6 +83,8 @@ const SERIES_ACL_TEMPLATE_WRITE_ENTRY = {
     "action": "write"
 };
 
+const ADD_TO_IAM_GROUPS = ['grp-', 'hy-', 'sys-'];
+
 const SERIES_METADATA = [
     {
         "label": "Opencast Series DublinCore",
@@ -109,6 +112,8 @@ const PROPERTIES_REPUBLISH_METADATA =
 
 module.exports = {
     ROLE_ANONYMOUS,
+    ROLE_KATSOMO,
+    ADD_TO_IAM_GROUPS,
     STATUS_PUBLISHED,
     STATUS_MOODLE,
     MOODLE_ACL_INSTRUCTOR,

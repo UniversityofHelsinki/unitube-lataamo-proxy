@@ -98,7 +98,7 @@ const updateSeriesAclList = (aclList) => {
             seriesACLTemplateReadEntry = updateAclTemplateReadEntry(seriesACLTemplateReadEntry, aclRole);
             seriesACLTemplateWriteEntry = updateAclTemplateWriteEntry(seriesACLTemplateWriteEntry, aclRole);
             seriesAclTemplate.push(seriesACLTemplateReadEntry);
-            if (aclRole !== constants.ROLE_ANONYMOUS) {
+            if (aclRole !== constants.ROLE_ANONYMOUS && aclRole !== constants.ROLE_KATSOMO) {
                 seriesAclTemplate.push(seriesACLTemplateWriteEntry);
             }
         });
