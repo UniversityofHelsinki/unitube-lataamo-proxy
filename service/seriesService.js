@@ -90,6 +90,7 @@ const updateAclTemplateWriteEntry = (seriesACLTemplateWriteEntry, aclRole) => {
 };
 
 const isMoodleAclRole = aclRole => aclRole.includes(constants.MOODLE_ACL_INSTRUCTOR) || aclRole.includes(constants.MOODLE_ACL_LEARNER);
+const publicRole = publicRole => publicRole.includes(constants.ROLE_ANONYMOUS) || publicRole.includes(constants.ROLE_KATSOMO);
 
 const updateSeriesAclList = (aclList) => {
     let seriesAclTemplate = [...constants.SERIES_ACL_TEMPLATE];
@@ -100,8 +101,7 @@ const updateSeriesAclList = (aclList) => {
             seriesACLTemplateReadEntry = updateAclTemplateReadEntry(seriesACLTemplateReadEntry, aclRole);
             seriesACLTemplateWriteEntry = updateAclTemplateWriteEntry(seriesACLTemplateWriteEntry, aclRole);
             seriesAclTemplate.push(seriesACLTemplateReadEntry);
-            if (aclRole !== constants.ROLE_ANONYMOUS && !isMoodleAclRole(aclRole)) {
-            if (aclRole !== constants.ROLE_ANONYMOUS && aclRole !== constants.ROLE_KATSOMO) {
+            if (!publicRole(aclRole) && !isMoodleAclRole(aclRole)) {
                 seriesAclTemplate.push(seriesACLTemplateWriteEntry);
             }
         });
