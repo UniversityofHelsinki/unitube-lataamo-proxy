@@ -34,9 +34,26 @@ exports.calculateVisibilityProperty = (event) => {
     }
 };
 
+const publicRole = publicRole => publicRole.includes(constants.ROLE_ANONYMOUS) || publicRole.includes(constants.ROLE_KATSOMO);
+
 const calculateVisibilityPropertyForVideo = (video) => {
     const visibility = [];
     const publishedAcl = video.acls.filter(acl => acl.role === constants.ROLE_ANONYMOUS);
+    /*if (video.acls) {
+        video.acls.forEach(aclRole => {
+            if (!publicRole(aclRole)) {
+                console.log("moi");
+            }
+        })
+    }*/
+   /* let countPublicRoles = 0;
+    video.acls.forEach(item => {
+        const match = constants.ADD_TO_IAM_GROUPS.filter(entry => item.includes(entry));
+        if (match && match.length > 0) {
+            ++countPublicRoles;
+        }
+    })*/
+
     const moodleAclInstructor = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_INSTRUCTOR));
     const moodleAclLearner = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_LEARNER));
 
