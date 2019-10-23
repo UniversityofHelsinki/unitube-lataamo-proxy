@@ -146,7 +146,7 @@ describe('user series returned from /userSeries route', () => {
             .expect('Content-Type', /json/);
 
         assert.isArray(response.body, 'Response should be an array');
-        assert.lengthOf(response.body, 1, 'One serie should be returned');
+        assert.lengthOf(response.body, 1, 'One series should be returned');
         assert.equal(response.body[0].identifier, test.constants.TEST_SERIES_1_ID);
     });
 
@@ -185,6 +185,35 @@ describe('user series returned from /userSeries route', () => {
   afterEach(() => {
     test.cleanAll();
   });
+});
+
+describe('user series person - and iamgroup administrators returned from /series route', () => {
+
+    beforeEach(() => {
+        // mock needed opencast apis
+        test.mockOCastSeriesApiCall7();
+        test.mockOCastEvent1AclCall();
+    })
+
+    it("should return user's series with three iamgroups and three persons ", async () => {
+        let response = await supertest(app)
+            .get(LATAAMO_SERIES_PATH + '/123456')
+            .set('eppn', test.mockTestUser2.eppn)
+            .set('preferredlanguage', test.mockTestUser2.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser2.hyGroupCn)
+            .expect(200)
+            .expect('Content-Type', /json/);
+
+        assert.lengthOf(response.body.persons, 3, 'Three person administrators should be returned');
+        assert.lengthOf(response.body.iamgroups, 3, 'Three group administrators should be returned');
+    });
+
+    afterEach(() => {
+        test.cleanAll();
+    });
+    afterEach(() => {
+        test.cleanAll();
+    });
 });
 
 describe('user video urls returned from /video/id events route', () => {
@@ -374,19 +403,32 @@ describe('user series post', () => {
     beforeEach(() => {
         // mock needed opencast api calls
         test.mockLataamoPostSeriesCall();
+        test.mockOCastSeriesApiCall8();
     });
 
     it("Successful series update should return 200 and identifier", async () => {
-        const userId = 'NOT_CONTRIBUTOR_IN_ANY_SERIES';
         let response = await supertest(app)
             .post(LATAAMO_SERIES_PATH)
-            .send({title: 'Hieno video', description: 'hienon videon kuvaus'})
-            .set('eppn', userId)
+            .send({title: 'Hieno sarja', description: 'hienon sarjan kuvaus'})
+            .set('eppn', 'SeriesOwnerEppn')
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
             .expect(200)
             .expect('Content-Type', /json/);
         assert.equal(response.body, test.constants.SUCCESSFUL_UPDATE_ID);
+    });
+
+    it("Unsuccessful series update should return 403", async () => {
+        const userId = 'SeriesOwnerEppn';
+        let response = await supertest(app)
+            .post(LATAAMO_SERIES_PATH)
+            .send({title: 'inbox SeriesOwnerEppn', description: 'Inbox sarja'})
+            .set('eppn', userId)
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .expect(403)
+            .expect('Content-Type', /json/);
+        assert.equal(response.body.message, 'inbox '+ userId + ' already exists. Series was not created.');
     });
 });
 

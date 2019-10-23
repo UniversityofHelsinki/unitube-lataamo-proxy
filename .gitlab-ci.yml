@@ -1,4 +1,4 @@
-image: node:8-alpine
+image: node:10-alpine
 
 # Cache node modules - speeds up future builds
 cache:
@@ -31,7 +31,8 @@ build:
 test:
   stage: test
   script:
-    - npm test
+    - npm run coverage
+  coverage: /All files\s*\|\s*([\d\.]+)/
 
 # Define the process for deploy stage to development environment
 deploy_dev:
@@ -56,7 +57,7 @@ deploy_dev:
     - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-dev.it.helsinki.fi "mkdir -p /home/lataamo/proxy"
     - echo "====== Sync local and remote directory ======"
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
-    - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --exclude=".env" --delete ./ lataamo@lataamo-dev.it.helsinki.fi:/home/lataamo/proxy
+    - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --exclude=".env" --exclude="/api/uploads" --exclude="/logs" --delete ./ lataamo@lataamo-dev.it.helsinki.fi:/home/lataamo/proxy
     - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-dev.it.helsinki.fi "pm2 restart app"
 
 # Define the process for deploy stage to test environment
@@ -82,7 +83,7 @@ deploy_test:
     - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-test.it.helsinki.fi "mkdir -p /home/lataamo/proxy"
     - echo "====== Sync local and remote directory ======"
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
-    - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --exclude=".env" --delete ./ lataamo@lataamo-test.it.helsinki.fi:/home/lataamo/proxy
+    - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --exclude=".env" --exclude="/api/uploads" --exclude="/logs"  --delete ./ lataamo@lataamo-test.it.helsinki.fi:/home/lataamo/proxy
     - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-test.it.helsinki.fi "pm2 restart app"
 
 # Define the process for deploy stage to test environment
@@ -109,5 +110,5 @@ deploy_prod:
     - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-prod.it.helsinki.fi "mkdir -p /home/lataamo/proxy"
     - echo "====== Sync local and remote directory ======"
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
-    - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --exclude=".env" --delete ./ lataamo@lataamo-prod.it.helsinki.fi:/home/lataamo/proxy
+    - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --exclude=".env" --exclude="/api/uploads" --exclude="/logs"  --delete ./ lataamo@lataamo-prod.it.helsinki.fi:/home/lataamo/proxy
     - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-prod.it.helsinki.fi "pm2 restart app"

@@ -1,3 +1,4 @@
+const ESB_PERSONS_PATH = '/person/unitube/search/';
 // esb service paths
 const ESB_IAM_GROUPS_PATH = '/iam/group/unitube/search/';
 
@@ -98,6 +99,14 @@ const SERIES_METADATA = [
     }
 ];
 
+
+// properties object for the republish query
+// Opencast instantiates a java.util.Properties from the value, so key=value pairs and \n as a delimeter.
+// https://docs.oracle.com/javase/7/docs/api/java/util/Properties.html#load(java.io.InputStream)
+const PROPERTIES_REPUBLISH_METADATA =
+    "publishLive=false\nuploadedSearchPreview=true\npublishToOaiPmh=true\ncomment=false\npublishToMediaModule=true";
+
+
 module.exports = {
     ROLE_ANONYMOUS,
     STATUS_PUBLISHED,
@@ -127,6 +136,8 @@ module.exports = {
     VIDEO_PRESENTER_DELIVERY,
     VIDEO_PRESENTATION_DELIVERY,
     UPDATE_SERIES,
+    ESB_IAM_GROUPS_PATH,
     CREATE_SERIES,
-    ESB_IAM_GROUPS_PATH
+    ESB_PERSONS_PATH,
+    PROPERTIES_REPUBLISH_METADATA
 };
