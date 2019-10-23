@@ -5,6 +5,7 @@ const {format} = require('date-fns') // https://www.npmjs.com/package/date-fns
 const constants = require('../utils/constants');
 const {inboxSeriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
 const userService = require('./userService');
+const eventsService = require('./eventsService');
 
 //
 // This file is the façade for opencast server
@@ -150,37 +151,64 @@ exports.getMetadataForEvent = async (event) => {
     return response.data;
 };
 
+
 exports.updateEventMetadata = async (metadata, eventId) => {
-    const videoMetaDataUrl = constants.OCAST_VIDEOS_PATH + eventId + constants.OCAST_METADATA_PATH + constants.OCAST_TYPE_QUERY_PARAMETER + constants.OCAST_TYPE_DUBLINCORE_EPISODE;
-
-    // republish paths
-    const republishMetadataUrl = '/workflow/start';
-    const mediapackageUrl = '/assets/episode/' + eventId;
-
     try {
+        // check evemt transaction status
+        // http://localhost:8080/admin-ng/event/99f13fe3-2e07-4cbf-bf1e-789e1f0c2a5e/hasActiveTransaction
+        const transactionStatusPath = constants.OCAST_EVENT_MEDIA_PATH_PREFIX + eventId + '/hasActiveTransaction';
+        const response1 = await security.opencastBase.get(transactionStatusPath);
+
+        if (response1.data && response1.data.active === true) {
+            // transaction active, return
+            return {
+                status: 403,
+                statusText: 'Transaction active for given event',
+                eventId: eventId
+            }
+        }
+
+        const videoMetaDataUrl = constants.OCAST_VIDEOS_PATH + eventId + constants.OCAST_METADATA_PATH + constants.OCAST_TYPE_QUERY_PARAMETER + constants.OCAST_TYPE_DUBLINCORE_EPISODE;
+        const modifiedMetadata = eventsService.modifyEventMetadataForOpencast(metadata);
+
+        // republish paths
+        const republishMetadataUrl = '/workflow/start';
+        const mediapackageUrl = '/assets/episode/' + eventId;
+
         let bodyFormData = new FormData();
-        bodyFormData.append('metadata', JSON.stringify(metadata));
+        bodyFormData.append('metadata', JSON.stringify(modifiedMetadata));
 
         let headers = {
             ...bodyFormData.getHeaders(),
             "Content-Length": bodyFormData.getLengthSync()
         };
         // update event metadata
-        const response = await security.opencastBase.put(videoMetaDataUrl, bodyFormData, {headers});
+        const response2 = await security.opencastBase.put(videoMetaDataUrl, bodyFormData, {headers});
 
         // let's break if response from PUT not ok
-        if(response.status !== 204){
-            console.log(error);
-            throw error;
+        if(response2.status !== 204){
+            return {
+                status: response2.status,
+                statusText: response2.statusText,
+                eventId: eventId
+            }
         }
 
         // get mediapackage for the republish query
-        const mediapackageJson = await security.opencastBase.get(mediapackageUrl);
+        response3 = await security.opencastBase.get(mediapackageUrl);
+
+        if(response3.status !== 200){
+            return {
+                status: response3.status,
+                statusText: response3.statusText,
+                eventId: eventId
+            }
+        }
 
         // form data for the republish request
         bodyFormData = new FormData();
         bodyFormData.append('definition', 'republish-metadata');
-        bodyFormData.append('mediapackage', mediapackageJson.data);
+        bodyFormData.append('mediapackage', response3.data);
         bodyFormData.append('properties', constants.PROPERTIES_REPUBLISH_METADATA);
 
         headers = {
@@ -191,7 +219,11 @@ exports.updateEventMetadata = async (metadata, eventId) => {
         // do the republish request
         const resp = await security.opencastBase.post(republishMetadataUrl, bodyFormData, {headers});
 
-        return resp;
+        return {
+            status: resp.status,
+            statusText: resp.statusText,
+            eventId: eventId
+        }
     } catch (error) {
         console.log(error);
         throw error;

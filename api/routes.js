@@ -501,24 +501,34 @@ module.exports = function (router) {
      *           description: OK
      *         401:
      *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         403:
+     *           description: Forbidden. Event (video) has an active transaction in progress on the Opencast server.
      *         500:
      *           description: Internal server error, an error occured.    
      */
     router.put('/userVideos/:id', async (req, res) => {
-       try {
-           logger.info(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn}`);
-           const rawEventMetadata = req.body;
-           const modifiedMetadata = eventsService.modifyEventMetadataForOpencast(rawEventMetadata);
-           const response = await apiService.updateEventMetadata(modifiedMetadata, req.body.identifier);
+        try {
+            logger.info(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn}`);
+            
+            const rawEventMetadata = req.body;
+            const response = await apiService.updateEventMetadata(rawEventMetadata, req.body.identifier);
 
-           res.status(response.status);
-           res.json({message : response.statusText});
-       } catch(error) {
-           res.status(500);
-           const msg = error.message
-           logger.error(`Error PUT /userVideos/:id ${msg} USER ${req.user.eppn}`);
-           res.json({ message: 'Error', msg });
-       }
+            if (response.status === 200) {
+                logger.info(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} OK`);
+            } else if (response.status === 403){
+                logger.warn(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} ${response.statusText}`);
+            } else {
+                logger.error(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} ${response.statusText}`);
+            }
+            
+            res.status(response.status);
+            res.json({message : response.statusText});
+        } catch(error) {           
+            res.status(500);
+            const msg = error.message
+            logger.error(`Error PUT /userVideos/:id ${msg} USER ${req.user.eppn}`);
+            res.json({ message: 'Error', msg });
+        }
     });
 
     /**

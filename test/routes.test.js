@@ -432,6 +432,87 @@ describe('user series post', () => {
     });
 });
 
+
+describe('Updating videos aka events', () => {
+
+    it('Should fail if the event has an active transaction on opencast', async () => {
+        test.mockOpencastEventActiveTransaction('234234234');
+
+        let response = await supertest(app)
+            .put(LATAAMO_USER_EVENTS_PATH + '/234234234')
+            .send({title: 'Hieno', description: 'Hienon kuvaus', identifier: '234234234'}) // id from req body!
+            .set('eppn', 'SeriesOwnerEppn')
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .expect(403)
+            .expect('Content-Type', /json/);
+        assert.equal(response.body.message, 'Transaction active for given event');
+    });
+
+    it('Should fail if update event metadata request returns something else than 204 from opencast', async () => {
+        test.mockOpencastEventNoActiveTransaction('234234234');
+        test.mockOpencastUpdateEventNOK('234234234');
+
+        await supertest(app)
+            .put(LATAAMO_USER_EVENTS_PATH + '/234234234')
+            .send({title: 'Hieno', description: 'Hienon kuvaus', identifier: '234234234'}) // id from req body!
+            .set('eppn', 'SeriesOwnerEppn')
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .expect(400)
+            .expect('Content-Type', /json/);
+    });
+
+
+    it('Should fail if GET mediapackage request returns something else than 200 from opencast', async () => {
+        test.mockOpencastEventNoActiveTransaction('234234234');
+        test.mockOpencastUpdateEventOK('234234234');
+        test.mockOpencastFailedMediaPackageRequest('234234234');
+
+        let response = await supertest(app)
+            .put(LATAAMO_USER_EVENTS_PATH + '/234234234')
+            .send({title: 'Hieno', description: 'Hienon kuvaus', identifier: '234234234'}) // id from req body!
+            .set('eppn', 'SeriesOwnerEppn')
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .expect(400)
+            .expect('Content-Type', /json/);
+    });
+
+    it('Should fail if republish metadata request returns something else than 204 from opencast', async () => {
+        test.mockOpencastEventNoActiveTransaction('234234234');
+        test.mockOpencastUpdateEventOK('234234234');
+        test.mockOpencastMediaPackageRequest('234234234');
+        test.mockOpencastFailedRepublishMetadataRequest('234234234');
+
+        await supertest(app)
+            .put(LATAAMO_USER_EVENTS_PATH + '/234234234')
+            .send({title: 'Hieno', description: 'Hienon kuvaus', identifier: '234234234'}) // id from req body!
+            .set('eppn', 'SeriesOwnerEppn')
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .expect(400)
+            .expect('Content-Type', /json/);
+    });
+
+    it('Should update event if all OK', async () => {
+        test.mockOpencastEventNoActiveTransaction('234234234');
+        test.mockOpencastUpdateEventOK('234234234');
+        test.mockOpencastMediaPackageRequest('234234234');
+        test.mockOpencastRepublishMetadataRequest('234234234');
+
+        await supertest(app)
+            .put(LATAAMO_USER_EVENTS_PATH + '/234234234')
+            .send({title: 'Hieno', description: 'Hienon kuvaus', identifier: '234234234'}) // id from req body!
+            .set('eppn', 'SeriesOwnerEppn')
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .expect(200)
+            .expect('Content-Type', /json/);
+    });
+});
+
+
 afterEach(() => {
     test.cleanAll();
 });
