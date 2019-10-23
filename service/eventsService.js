@@ -1,3 +1,4 @@
+const commonService = require('./commonService');
 const seriesService = require('./seriesService');
 const apiService = require('./apiService');
 const moment = require('moment');
@@ -34,32 +35,14 @@ exports.calculateVisibilityProperty = (event) => {
     }
 };
 
-const publicRole = publicRole => publicRole.includes(constants.ROLE_ANONYMOUS) || publicRole.includes(constants.ROLE_KATSOMO);
-
 const calculateVisibilityPropertyForVideo = (video) => {
     const visibility = [];
-    const publishedAcl = video.acls.filter(acl => acl.role === constants.ROLE_ANONYMOUS);
-    /*if (video.acls) {
-        video.acls.forEach(aclRole => {
-            if (!publicRole(aclRole)) {
-                console.log("moi");
-            }
-        })
-    }*/
-   /* let countPublicRoles = 0;
-    video.acls.forEach(item => {
-        const match = constants.ADD_TO_IAM_GROUPS.filter(entry => item.includes(entry));
-        if (match && match.length > 0) {
-            ++countPublicRoles;
-        }
-    })*/
+    if (commonService.publicRoleCount(video.acls) === 2) { //video has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
+        visibility.push(constants.STATUS_PUBLISHED);
+    }
 
     const moodleAclInstructor = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_INSTRUCTOR));
     const moodleAclLearner = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_LEARNER));
-
-    if (publishedAcl && publishedAcl.length > 0) {
-        visibility.push(constants.STATUS_PUBLISHED);
-    }
 
     if (moodleAclInstructor && moodleAclLearner && moodleAclInstructor.length > 0 && moodleAclLearner.length > 0) {
         visibility.push(constants.STATUS_MOODLE);

@@ -84,6 +84,7 @@ const SERIES_ACL_TEMPLATE_WRITE_ENTRY = {
 };
 
 const ADD_TO_IAM_GROUPS = ['grp-', 'hy-', 'sys-'];
+const PUBLIC_ROLES = [ROLE_ANONYMOUS, ROLE_KATSOMO];
 
 const SERIES_METADATA = [
     {
@@ -114,6 +115,7 @@ module.exports = {
     ROLE_ANONYMOUS,
     ROLE_KATSOMO,
     ADD_TO_IAM_GROUPS,
+    PUBLIC_ROLES,
     STATUS_PUBLISHED,
     STATUS_MOODLE,
     MOODLE_ACL_INSTRUCTOR,

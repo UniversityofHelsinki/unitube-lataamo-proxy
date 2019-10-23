@@ -1,3 +1,4 @@
+const commonService = require('./commonService');
 const constants = require('../utils/constants');
 const apiService = require('../service/apiService');
 
@@ -116,13 +117,13 @@ const concatenateArray = (data) => Array.prototype.concat.apply([], data);
 // Looping array of series elements
 //
 // Adds published value in series array for each series:
-//   if user has ROLE_ANONYMOUS --> published is true otherwise false
+//   if user has ROLE_ANONYMOUS and ROLE_KATSOMO --> published is true otherwise false
 exports.addPublishedInfoInSeries = async (seriesList) => {
 
     let seriesListWithPublished = [];
     for (const series of seriesList) {
         let roles = await apiService.getSeriesAcldata(series.identifier);
-        if (roles && roles.find((item) => item.role === constants.ROLE_ANONYMOUS)) {
+        if (roles && commonService.publicRoleCount(roles) === 2) { //series has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
             series.published = true;
             seriesListWithPublished.push(series);
         } else {
@@ -136,7 +137,7 @@ exports.addPublishedInfoInSeries = async (seriesList) => {
 exports.addPublishedInfoInSeriesAndMoodleRoles = async (series) => {
 
     let roles = await apiService.getSeriesAcldata(series.identifier);
-    if (roles && roles.find((item) => item.role === constants.ROLE_ANONYMOUS)) {
+    if (roles && commonService.publicRoleCount(roles) === 2) { //series has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
         series.published = constants.ROLE_ANONYMOUS;
     } else {
         series.published = "";
