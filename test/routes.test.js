@@ -422,7 +422,46 @@ describe('user series post', () => {
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
             .expect(403)
             .expect('Content-Type', /json/);
-        assert.equal(response.body.message, 'inbox '+ userId + ' already exists. Series was not created.');
+        assert.equal(response.body.message, '"inbox" not allowed in series title. Series was not created.');
+    });
+
+    it('"inbox" string not allowed in series\' title', async () => {
+        const userId = 'SeriesOwnerEppn';
+        let response = await supertest(app)
+            .post(LATAAMO_SERIES_PATH)
+            .send({title: 'inbox in the title', description: 'Inbox sarja'})
+            .set('eppn', userId)
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .expect(403)
+            .expect('Content-Type', /json/);
+        assert.equal(response.body.message, '"inbox" not allowed in series title. Series was not created.');
+    });
+
+    it('"INBOX" string not allowed in series\' title', async () => {
+        const userId = 'SeriesOwnerEppn';
+        let response = await supertest(app)
+            .post(LATAAMO_SERIES_PATH)
+            .send({title: 'INBOX in the title', description: 'Inbox sarja'})
+            .set('eppn', userId)
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .expect(403)
+            .expect('Content-Type', /json/);
+        assert.equal(response.body.message, '"inbox" not allowed in series title. Series was not created.');
+    });
+
+    it('"InBoX" string not allowed in series\' title', async () => {
+        const userId = 'SeriesOwnerEppn';
+        let response = await supertest(app)
+            .post(LATAAMO_SERIES_PATH)
+            .send({title: 'InBoX in the title', description: 'Inbox sarja'})
+            .set('eppn', userId)
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .expect(403)
+            .expect('Content-Type', /json/);
+        assert.equal(response.body.message, '"inbox" not allowed in series title. Series was not created.');
     });
 });
 
