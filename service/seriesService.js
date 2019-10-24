@@ -123,7 +123,7 @@ exports.addPublishedInfoInSeries = async (seriesList) => {
     let seriesListWithPublished = [];
     for (const series of seriesList) {
         let roles = await apiService.getSeriesAcldata(series.identifier);
-        if (roles && commonService.publicRoleCount(roles) === 2) { //series has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
+        if (commonService.publicRoleCount(roles) === 2) { //series has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
             series.published = true;
             seriesListWithPublished.push(series);
         } else {
@@ -137,7 +137,7 @@ exports.addPublishedInfoInSeries = async (seriesList) => {
 exports.addPublishedInfoInSeriesAndMoodleRoles = async (series) => {
 
     let roles = await apiService.getSeriesAcldata(series.identifier);
-    if (roles && commonService.publicRoleCount(roles) === 2) { //series has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
+    if (commonService.publicRoleCount(roles) === 2) { //series has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
         series.published = constants.ROLE_ANONYMOUS;
     } else {
         series.published = "";
