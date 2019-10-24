@@ -13,7 +13,7 @@ const LATAAMO_USER_EVENTS_PATH = '/api/userVideos';
 const LATAAMO_SERIES_PATH = '/api/series';
 const LATAAMO_API_INFO_PATH = '/api/';
 const LATAAMO_USER_PATH = '/api/user';
-const LATAAMO_API_VIDEO_PATH = '/api/video/';
+const LATAAMO_API_VIDEO_PATH = '/api/videoUrl/';
 
 const constants = require('../utils/constants');
 
@@ -107,7 +107,7 @@ describe('user series returned from /userSeries route', () => {
         test.mockOCastSeriesApiCall();
         test.mockOCastEvent1AclCall();
         test.mockOcastEvent2AclCall();
-    })
+    });
 
     it("should return no series if user and users groups are not in the series contributors list", async () => {
         let response = await supertest(app)
@@ -163,7 +163,7 @@ describe('user series returned from /userSeries route', () => {
         test.mockOCastEvent1AclCall();
         test.mockOcastEvent2AclCall();
         test.mockOcastEvent3AclCall();
-    })
+    });
 
     it("should return user's series published == true for the first and second series and published == false for the third series", async () => {
         let response = await supertest(app)
@@ -182,9 +182,6 @@ describe('user series returned from /userSeries route', () => {
     afterEach(() => {
         test.cleanAll();
     });
-  afterEach(() => {
-    test.cleanAll();
-  });
 });
 
 describe('user series person - and iamgroup administrators returned from /series route', () => {
@@ -193,7 +190,7 @@ describe('user series person - and iamgroup administrators returned from /series
         // mock needed opencast apis
         test.mockOCastSeriesApiCall7();
         test.mockOCastEvent1AclCall();
-    })
+    });
 
     it("should return user's series with three iamgroups and three persons ", async () => {
         let response = await supertest(app)
@@ -208,9 +205,6 @@ describe('user series person - and iamgroup administrators returned from /series
         assert.lengthOf(response.body.iamgroups, 3, 'Three group administrators should be returned');
     });
 
-    afterEach(() => {
-        test.cleanAll();
-    });
     afterEach(() => {
         test.cleanAll();
     });
@@ -428,7 +422,46 @@ describe('user series post', () => {
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
             .expect(403)
             .expect('Content-Type', /json/);
-        assert.equal(response.body.message, 'inbox '+ userId + ' already exists. Series was not created.');
+        assert.equal(response.body.message, '"inbox" not allowed in series title. Series was not created.');
+    });
+
+    it('"inbox" string not allowed in series\' title', async () => {
+        const userId = 'SeriesOwnerEppn';
+        let response = await supertest(app)
+            .post(LATAAMO_SERIES_PATH)
+            .send({title: 'inbox in the title', description: 'Inbox sarja'})
+            .set('eppn', userId)
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .expect(403)
+            .expect('Content-Type', /json/);
+        assert.equal(response.body.message, '"inbox" not allowed in series title. Series was not created.');
+    });
+
+    it('"INBOX" string not allowed in series\' title', async () => {
+        const userId = 'SeriesOwnerEppn';
+        let response = await supertest(app)
+            .post(LATAAMO_SERIES_PATH)
+            .send({title: 'INBOX in the title', description: 'Inbox sarja'})
+            .set('eppn', userId)
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .expect(403)
+            .expect('Content-Type', /json/);
+        assert.equal(response.body.message, '"inbox" not allowed in series title. Series was not created.');
+    });
+
+    it('"InBoX" string not allowed in series\' title', async () => {
+        const userId = 'SeriesOwnerEppn';
+        let response = await supertest(app)
+            .post(LATAAMO_SERIES_PATH)
+            .send({title: 'InBoX in the title', description: 'Inbox sarja'})
+            .set('eppn', userId)
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .expect(403)
+            .expect('Content-Type', /json/);
+        assert.equal(response.body.message, '"inbox" not allowed in series title. Series was not created.');
     });
 });
 
