@@ -113,7 +113,7 @@ module.exports = function (router) {
 
     /**
      * @swagger
-     *     /api/video/{id}:
+     *     /api/videoUrl/{id}:
      *     get:
      *       tags:
      *         - retrieve
@@ -130,16 +130,16 @@ module.exports = function (router) {
      *         default:
      *           description: Unexpected error
      */
-    router.get("/video/:id", async (req, res) => {
+    router.get("/videoUrl/:id", async (req, res) => {
         try {
-            logger.info(`GET video media url /video/:id VIDEO ${req.params.id} USER: ${req.user.eppn}`);
+            logger.info(`GET video media url /videoUrl/:id VIDEO ${req.params.id} USER: ${req.user.eppn}`);
             const publications = await apiService.getPublicationsForEvent(req.params.id);
             const filteredPublication = publicationService.filterApiChannelPublication(publications);
             const mediaUrls = publicationService.getMediaUrlsFromPublication(req.params.id, filteredPublication);
             res.json(mediaUrls);
         } catch (error) {
             const msg = error.message;
-            logger.error(`Error GET /video/:id ${msg} VIDEO ${req.params.id} USER ${req.user.eppn}`);
+            logger.error(`Error GET /videoUrl/:id ${msg} VIDEO ${req.params.id} USER ${req.user.eppn}`);
             res.status(500);
             res.json({ message: 'Error', msg });
         }
@@ -151,16 +151,16 @@ module.exports = function (router) {
      *     get:
      *       tags:
      *         - retrieve
-     *       summary: Return serie by ID.
+     *       summary: Return series by ID.
      *       description: Returns selected series media and publish info
      *       parameters:
      *         - in: path
      *           name: id
      *           required: true
-     *           description: ID of the serie.
+     *           description: ID of the series.
      *       responses:
      *         200:
-     *           description: Serie.
+     *           description: Series.
      *         401:
      *           description: Not authenticated. Required Shibboleth headers not present in the request.
      *         default:
@@ -199,20 +199,20 @@ module.exports = function (router) {
      *             properties:
      *               identifier:
      *                 type: string
-     *                 description: id of the serie
+     *                 description: id of the series
      *               title:
      *                 type: string
-     *                 description: title of the serie AKA the name
+     *                 description: title of the series AKA the name
      *               description:
      *                 type: string
-     *                 description: description for the serie
+     *                 description: description for the series
      *       responses:
      *         200:
      *           description: OK
      *         401:
      *           description: Not authenticated. Required Shibboleth headers not present in the request.
      *         500:
-     *           description: Internal server error, an error occured.    
+     *           description: Internal server error, an error occurred.    
      */
     router.put('/series/:id', async (req, res) => {
         try {
@@ -246,7 +246,7 @@ module.exports = function (router) {
      *         401:
      *           description: Not authenticated. Required Shibboleth headers not present in the request.
      *         500:
-     *           description: Internal server error, an error occured.
+     *           description: Internal server error, an error occurred.
      */
     router.get('/userSeries', async (req, res) => {
         try {
@@ -277,7 +277,7 @@ module.exports = function (router) {
     *         401:
     *           description: Not authenticated. Required Shibboleth headers not present in the request.
     *         500:
-    *           description: Internal server error, an error occured.
+    *           description: Internal server error, an error occurred.
     */ 
     router.get('/userVideos', async (req, res) => {
         try {
@@ -374,7 +374,7 @@ module.exports = function (router) {
             let startTime;
 
             req.busboy.on('file', (fieldname, file, filename) => {
-                startTime = new Date()
+                startTime = new Date();
                 logger.info(`Upload of '${filename}' started  USER: ${req.user.eppn}`);
                 const filePathOnDisk = path.join(uploadPath, filename);
 
@@ -411,8 +411,8 @@ module.exports = function (router) {
                         try {
                             const response = await apiService.uploadVideo(filePathOnDisk, filename, inboxSeries.identifier);
 
-                            if (response && response.status == 201) {
-                                // on succes clean file from disk and return 200
+                            if (response && response.status === 201) {
+                                // on success clean file from disk and return 200
                                 deleteFile(filePathOnDisk);
                                 res.status(200);
                                 logger.info(`${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. 
@@ -502,7 +502,7 @@ module.exports = function (router) {
      *         401:
      *           description: Not authenticated. Required Shibboleth headers not present in the request.
      *         500:
-     *           description: Internal server error, an error occured.    
+     *           description: Internal server error, an error occurred.    
      */
     router.put('/userVideos/:id', async (req, res) => {
        try {
@@ -515,7 +515,7 @@ module.exports = function (router) {
            res.json({message : response.statusText});
        } catch(error) {
            res.status(500);
-           const msg = error.message
+           const msg = error.message;
            logger.error(`Error PUT /userVideos/:id ${msg} USER ${req.user.eppn}`);
            res.json({ message: 'Error', msg });
        }
@@ -561,7 +561,7 @@ module.exports = function (router) {
      *         401:
      *           description: Not authenticated. Required Shibboleth headers not present in the request.
      *         500:
-     *           description: Internal server error, an error occured.    
+     *           description: Internal server error, an error occurred.    
      */
     router.post('/series', async (req, res) => {
         try {
