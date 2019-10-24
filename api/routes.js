@@ -588,6 +588,25 @@ module.exports = function (router) {
         }
     });
 
+    /**
+     * @swagger
+     *     /iamGroups/:query:
+     *     get:
+     *       tags:
+     *         - retrieve
+     *       summary: Return iam groups by query
+     *       description: Returns iam group(s) by query
+     *       parameters:
+     *         - in: path
+     *           name: path
+     *           required: true
+     *           description: query values.
+     *       responses:
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         default:
+     *           description: Unexpected error    
+     */ 
     router.get('/iamGroups/:query', async (req, res) => {
         try {
             logger.info(`GET /iamGroups/:query ${req.params.query}`);
@@ -599,6 +618,25 @@ module.exports = function (router) {
         }
     });
 
+    /**
+     * @swagger
+     *     /persons/:query:
+     *     get:
+     *       tags:
+     *         - retrieve
+     *       summary: Return persons by query
+     *       description: Returns person(s) by query
+     *       parameters:
+     *         - in: path
+     *           name: path
+     *           required: true
+     *           description: query values.
+     *       responses:
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         default:
+     *           description: Unexpected error    
+     */    
     router.get('/persons/:query', async (req, res) => {
         try {
             logger.info(`GET /persons/:query ${req.params.query}`);
@@ -609,6 +647,4 @@ module.exports = function (router) {
             res.json({message: 'Error', msg});
         }
     });
-
-
 };
