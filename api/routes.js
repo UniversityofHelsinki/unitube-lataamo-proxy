@@ -17,6 +17,7 @@ const swaggerUi = require('swagger-ui-express');
 const apiSpecs = require('../config/swagger'); // swagger config
 const logger = require('../config/winstonLogger');
 const constants = require('../utils/constants');
+const messageKeys = require('../utils/message-keys');
 
 module.exports = function (router) {
     // https://www.npmjs.com/package/swagger-ui-express
@@ -63,7 +64,10 @@ module.exports = function (router) {
             const msg = error.message;
             logger.error(`Error GET /user ${msg} USER ${req.user.eppn}`);
             res.status(500);
-            res.json({ message: 'Error', msg });
+            res.json({ 
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_USER, 
+                msg 
+            });
         }
     });
 
@@ -107,7 +111,10 @@ module.exports = function (router) {
            const msg = error.message;
            logger.error(`Error GET /event/:id ${msg} VIDEO ${req.params.id} USER ${req.user.eppn}`);
            res.status(500);
-           res.json({ message: 'Error', msg });
+           res.json({ 
+               message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_DETAILS, 
+               msg 
+            });
        }
     });
 
@@ -141,7 +148,10 @@ module.exports = function (router) {
             const msg = error.message;
             logger.error(`Error GET /videoUrl/:id ${msg} VIDEO ${req.params.id} USER ${req.user.eppn}`);
             res.status(500);
-            res.json({ message: 'Error', msg });
+            res.json({ 
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_VIDEO_URL, 
+                msg 
+            });
         }
     });
 
@@ -174,7 +184,10 @@ module.exports = function (router) {
             res.json(userSeriesWithPublished);
         } catch (error) {
             const msg = error.message;
-            res.json({message: 'Error', msg});
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_SERIES_DETAILS, 
+                msg
+            });
         }
     });
 
@@ -227,7 +240,10 @@ module.exports = function (router) {
         } catch (error) {
             res.status(500);
             const msg = error.message;
-            res.json({message: 'Error', msg})
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPDATE_SERIES_DETAILS, 
+                msg
+            })
         }
     });
 
@@ -259,7 +275,10 @@ module.exports = function (router) {
             res.status(500);
             const msg = error.message;
             logger.error(`Error GET /userSeries ${msg} USER ${req.user.eppn}`);
-            res.json({ message: 'Error', msg })
+            res.json({ 
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_SERIES_LIST_FOR_USER, 
+                msg 
+            })
         }
     });
 
@@ -296,7 +315,10 @@ module.exports = function (router) {
             res.status(500);
             const msg = error.message;
             logger.error(`Error GET /userVideos ${msg} USER ${req.user.eppn}`);
-            res.json({ message: 'Error', msg })
+            res.json({ 
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_LIST_FOR_USER, 
+                msg 
+            })
         }
     });
 
@@ -366,7 +388,10 @@ module.exports = function (router) {
                 logger.error(`Upload dir unavailable '${uploadPath}' USER: ${req.user.eppn}`);
                 res.status(500);
                 const msg = 'Upload dir unavailable.';
-                res.json({message: 'Error', msg});
+                res.json({
+                    message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO, 
+                    msg
+                });
             }
 
             req.pipe(req.busboy); // Pipe it trough busboy
@@ -400,7 +425,10 @@ module.exports = function (router) {
                                 res.status(500)
                                 const msg = `${filename} failed to resolve inboxSeries for user`;
                                 logger.error(`POST /userVideos ${msg} USER: ${req.user.eppn}`);
-                                res.json({ message: msg });
+                                res.json({ 
+                                    message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
+                                    msg 
+                                });
                             }
                         } catch (err) {
                             // Log error and throw reason
@@ -422,8 +450,12 @@ module.exports = function (router) {
                             } else {
                                 // on failure clean file from disk and return 500
                                 deleteFile(filePathOnDisk);
-                                res.json({message: `${ filename } failed.`});
                                 res.status(500);
+                                const msg = `${ filename } failed.`;
+                                res.json({
+                                    message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
+                                    msg 
+                                });
                             }
                         } catch (err) {
                             // Log error and throw reason
@@ -437,7 +469,10 @@ module.exports = function (router) {
                         res.status(500);
                         const msg = `Upload of ${filename} failed. ${err}.`;
                         logger.error(`POST /userVideos ${msg} USER: ${req.user.eppn}`);
-                        res.json({ message: 'Error', msg });
+                        res.json({ 
+                            message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO, 
+                            msg 
+                        });
                     }
                 });
             });
@@ -450,7 +485,10 @@ module.exports = function (router) {
             // TODO: ${filename} is not defined here log the file some other way
             const msg = `failed ${err}.`;
             logger.error(`POST /userVideos ${msg} USER: ${req.user.eppn}`);
-            res.json({ message: 'Error', msg });
+            res.json({ 
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO, 
+                msg 
+            });
         }
     });
 
@@ -505,20 +543,23 @@ module.exports = function (router) {
      *           description: Internal server error, an error occurred.    
      */
     router.put('/userVideos/:id', async (req, res) => {
-       try {
-           logger.info(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn}`);
-           const rawEventMetadata = req.body;
-           const modifiedMetadata = eventsService.modifyEventMetadataForOpencast(rawEventMetadata);
-           const response = await apiService.updateEventMetadata(modifiedMetadata, req.body.identifier);
+        try {
+            logger.info(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn}`);
+            const rawEventMetadata = req.body;
+            const modifiedMetadata = eventsService.modifyEventMetadataForOpencast(rawEventMetadata);
+            const response = await apiService.updateEventMetadata(modifiedMetadata, req.body.identifier);
 
-           res.status(response.status);
-           res.json({message : response.statusText});
-       } catch(error) {
-           res.status(500);
-           const msg = error.message;
-           logger.error(`Error PUT /userVideos/:id ${msg} USER ${req.user.eppn}`);
-           res.json({ message: 'Error', msg });
-       }
+            res.status(response.status);
+            res.json({message : response.statusText});
+        } catch(error) {
+            res.status(500);
+            const msg = error.message;
+            logger.error(`Error PUT /userVideos/:id ${msg} USER ${req.user.eppn}`);
+            res.json({ 
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPDATE_EVENT_DETAILS, 
+                msg 
+            });
+        }
     });
 
     /**
@@ -580,11 +621,13 @@ module.exports = function (router) {
                 const response = await apiService.createSeries(req.user, modifiedSeriesMetadata, modifiedSeriesAclMetadata);
                 res.json(response.data.identifier);
             }
-
         } catch (error) {
             res.status(500);
             const msg = error.message;
-            res.json({message: 'Error', msg});
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES, 
+                msg
+            });
         }
     });
 
@@ -614,7 +657,10 @@ module.exports = function (router) {
             res.json(iamGroups);
         } catch (error) {
             const msg = error.message;
-            res.json({message: 'Error', msg});
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_IAM_GROUPS, 
+                msg
+            });
         }
     });
 
@@ -644,7 +690,10 @@ module.exports = function (router) {
             res.json(persons);
         } catch (error) {
             const msg = error.message;
-            res.json({message: 'Error', msg});
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_PERSONS, 
+                msg
+            });
         }
     });
 };
