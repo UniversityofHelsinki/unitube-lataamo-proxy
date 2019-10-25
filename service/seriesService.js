@@ -89,6 +89,8 @@ const updateAclTemplateWriteEntry = (seriesACLTemplateWriteEntry, aclRole) => {
     }
 };
 
+const isMoodleAclRole = aclRole => aclRole.includes(constants.MOODLE_ACL_INSTRUCTOR) || aclRole.includes(constants.MOODLE_ACL_LEARNER);
+
 const updateSeriesAclList = (aclList) => {
     let seriesAclTemplate = [...constants.SERIES_ACL_TEMPLATE];
     let seriesACLTemplateReadEntry = constants.SERIES_ACL_TEMPLATE_READ_ENTRY;
@@ -98,7 +100,7 @@ const updateSeriesAclList = (aclList) => {
             seriesACLTemplateReadEntry = updateAclTemplateReadEntry(seriesACLTemplateReadEntry, aclRole);
             seriesACLTemplateWriteEntry = updateAclTemplateWriteEntry(seriesACLTemplateWriteEntry, aclRole);
             seriesAclTemplate.push(seriesACLTemplateReadEntry);
-            if (aclRole !== constants.ROLE_ANONYMOUS) {
+            if (aclRole !== constants.ROLE_ANONYMOUS && !isMoodleAclRole(aclRole)) {
                 seriesAclTemplate.push(seriesACLTemplateWriteEntry);
             }
         });
@@ -141,10 +143,6 @@ exports.addPublishedInfoInSeriesAndMoodleRoles = async (series) => {
     series.moodleNumber = "";
     series.moodleNumbers = moodleNumbersFromRoles(roles);
     return series;
-}
-
-exports.checkIfInboxSeriesExists = async (user, title) => {
-    return await apiService.getInboxSeries(user, title);
 }
 
 let instructor = new RegExp(constants.MOODLE_ACL_INSTRUCTOR, 'g');
