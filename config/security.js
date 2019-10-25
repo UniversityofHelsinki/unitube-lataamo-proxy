@@ -32,7 +32,10 @@ module.exports.shibbolethAuthentication = function (app, passport) {
 module.exports.opencastBase = axios.create({
     baseURL: host,
     maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
-    headers: {'authorization': auth}
+    headers: {'authorization': auth},
+    validateStatus: () => { // https://github.com/axios/axios/issues/1143
+        return true;        // without this axios might throw error on non 200 responses
+      }
 });
 
 module.exports.esbPersonBase = axios.create({

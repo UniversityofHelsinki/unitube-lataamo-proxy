@@ -64,9 +64,9 @@ module.exports = function (router) {
             const msg = error.message;
             logger.error(`Error GET /user ${msg} USER ${req.user.eppn}`);
             res.status(500);
-            res.json({ 
-                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_USER, 
-                msg 
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_USER,
+                msg
             });
         }
     });
@@ -111,9 +111,9 @@ module.exports = function (router) {
            const msg = error.message;
            logger.error(`Error GET /event/:id ${msg} VIDEO ${req.params.id} USER ${req.user.eppn}`);
            res.status(500);
-           res.json({ 
-               message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_DETAILS, 
-               msg 
+           res.json({
+               message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_DETAILS,
+               msg
             });
        }
     });
@@ -148,9 +148,9 @@ module.exports = function (router) {
             const msg = error.message;
             logger.error(`Error GET /videoUrl/:id ${msg} VIDEO ${req.params.id} USER ${req.user.eppn}`);
             res.status(500);
-            res.json({ 
-                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_VIDEO_URL, 
-                msg 
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_VIDEO_URL,
+                msg
             });
         }
     });
@@ -185,7 +185,7 @@ module.exports = function (router) {
         } catch (error) {
             const msg = error.message;
             res.json({
-                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_SERIES_DETAILS, 
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_SERIES_DETAILS,
                 msg
             });
         }
@@ -241,7 +241,7 @@ module.exports = function (router) {
             res.status(500);
             const msg = error.message;
             res.json({
-                message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPDATE_SERIES_DETAILS, 
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPDATE_SERIES_DETAILS,
                 msg
             })
         }
@@ -275,9 +275,9 @@ module.exports = function (router) {
             res.status(500);
             const msg = error.message;
             logger.error(`Error GET /userSeries ${msg} USER ${req.user.eppn}`);
-            res.json({ 
-                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_SERIES_LIST_FOR_USER, 
-                msg 
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_SERIES_LIST_FOR_USER,
+                msg
             })
         }
     });
@@ -315,9 +315,9 @@ module.exports = function (router) {
             res.status(500);
             const msg = error.message;
             logger.error(`Error GET /userVideos ${msg} USER ${req.user.eppn}`);
-            res.json({ 
-                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_LIST_FOR_USER, 
-                msg 
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_LIST_FOR_USER,
+                msg
             })
         }
     });
@@ -389,7 +389,7 @@ module.exports = function (router) {
                 res.status(500);
                 const msg = 'Upload dir unavailable.';
                 res.json({
-                    message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO, 
+                    message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
                     msg
                 });
             }
@@ -425,9 +425,9 @@ module.exports = function (router) {
                                 res.status(500)
                                 const msg = `${filename} failed to resolve inboxSeries for user`;
                                 logger.error(`POST /userVideos ${msg} USER: ${req.user.eppn}`);
-                                res.json({ 
+                                res.json({
                                     message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
-                                    msg 
+                                    msg
                                 });
                             }
                         } catch (err) {
@@ -454,7 +454,7 @@ module.exports = function (router) {
                                 const msg = `${ filename } failed.`;
                                 res.json({
                                     message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
-                                    msg 
+                                    msg
                                 });
                             }
                         } catch (err) {
@@ -469,9 +469,9 @@ module.exports = function (router) {
                         res.status(500);
                         const msg = `Upload of ${filename} failed. ${err}.`;
                         logger.error(`POST /userVideos ${msg} USER: ${req.user.eppn}`);
-                        res.json({ 
-                            message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO, 
-                            msg 
+                        res.json({
+                            message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
+                            msg
                         });
                     }
                 });
@@ -485,9 +485,9 @@ module.exports = function (router) {
             // TODO: ${filename} is not defined here log the file some other way
             const msg = `failed ${err}.`;
             logger.error(`POST /userVideos ${msg} USER: ${req.user.eppn}`);
-            res.json({ 
-                message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO, 
-                msg 
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
+                msg
             });
         }
     });
@@ -539,15 +539,25 @@ module.exports = function (router) {
      *           description: OK
      *         401:
      *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         403:
+     *           description: Forbidden. Event (video) has an active transaction in progress on the Opencast server.
      *         500:
      *           description: Internal server error, an error occurred.    
      */
     router.put('/userVideos/:id', async (req, res) => {
         try {
             logger.info(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn}`);
+
             const rawEventMetadata = req.body;
-            const modifiedMetadata = eventsService.modifyEventMetadataForOpencast(rawEventMetadata);
-            const response = await apiService.updateEventMetadata(modifiedMetadata, req.body.identifier);
+            const response = await apiService.updateEventMetadata(rawEventMetadata, req.body.identifier);
+
+            if (response.status === 200) {
+                logger.info(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} OK`);
+            } else if (response.status === 403){
+                logger.warn(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} ${response.statusText}`);
+            } else {
+                logger.error(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} ${response.statusText}`);
+            }
 
             res.status(response.status);
             res.json({message : response.statusText});
@@ -555,9 +565,9 @@ module.exports = function (router) {
             res.status(500);
             const msg = error.message;
             logger.error(`Error PUT /userVideos/:id ${msg} USER ${req.user.eppn}`);
-            res.json({ 
-                message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPDATE_EVENT_DETAILS, 
-                msg 
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPDATE_EVENT_DETAILS,
+                msg
             });
         }
     });
@@ -611,7 +621,7 @@ module.exports = function (router) {
             let series = req.body;
             const loggedUser = userService.getLoggedUser(req.user);
             let exists = series.title.toLowerCase().includes('inbox');
- 
+
             if(exists){
                 res.status(403);
                 res.json({message: '"inbox" not allowed in series title. Series was not created.'});
@@ -625,7 +635,7 @@ module.exports = function (router) {
             res.status(500);
             const msg = error.message;
             res.json({
-                message: messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES, 
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES,
                 msg
             });
         }
@@ -649,7 +659,7 @@ module.exports = function (router) {
      *           description: Not authenticated. Required Shibboleth headers not present in the request.
      *         default:
      *           description: Unexpected error    
-     */ 
+     */
     router.get('/iamGroups/:query', async (req, res) => {
         try {
             logger.info(`GET /iamGroups/:query ${req.params.query}`);
@@ -658,7 +668,7 @@ module.exports = function (router) {
         } catch (error) {
             const msg = error.message;
             res.json({
-                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_IAM_GROUPS, 
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_IAM_GROUPS,
                 msg
             });
         }
@@ -682,7 +692,7 @@ module.exports = function (router) {
      *           description: Not authenticated. Required Shibboleth headers not present in the request.
      *         default:
      *           description: Unexpected error    
-     */    
+     */
     router.get('/persons/:query', async (req, res) => {
         try {
             logger.info(`GET /persons/:query ${req.params.query}`);
@@ -691,7 +701,7 @@ module.exports = function (router) {
         } catch (error) {
             const msg = error.message;
             res.json({
-                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_PERSONS, 
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_PERSONS,
                 msg
             });
         }
