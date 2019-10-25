@@ -1,4 +1,5 @@
 const nock = require('nock');  // https://www.npmjs.com/package/nock
+const constPaths = require('../utils/constants');
 
 
 // mocked Opencast APIs
@@ -1226,6 +1227,75 @@ const lataamoPostSeries = () =>
         .post(CONSTANTS.OCAST_SERIES_PATH)
         .reply(200, { identifier: CONSTANTS.SUCCESSFUL_UPDATE_ID });
 
+
+const mockOpencastUpdateEventOK = (eventId) => {
+    // /api/events/d89d275a-25f6-426f-9b28-dc2607803206/metadata?type=dublincore/episode
+    const videoMetaDataUrl = constPaths.OCAST_VIDEOS_PATH + eventId + 
+        constPaths.OCAST_METADATA_PATH + constPaths.OCAST_TYPE_QUERY_PARAMETER + 
+        constPaths.OCAST_TYPE_DUBLINCORE_EPISODE;
+
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .put(videoMetaDataUrl)
+        .reply(204, {statusText: 'No Content'});
+}
+
+const mockOpencastUpdateEventNOK = (eventId) => {
+    // /api/events/d89d275a-25f6-426f-9b28-dc2607803206/metadata?type=dublincore/episode
+    const videoMetaDataUrl = constPaths.OCAST_VIDEOS_PATH + eventId + 
+        constPaths.OCAST_METADATA_PATH + constPaths.OCAST_TYPE_QUERY_PARAMETER + 
+        constPaths.OCAST_TYPE_DUBLINCORE_EPISODE;
+
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .put(videoMetaDataUrl)
+        .reply(400);
+}
+
+const mockEventTransactionStatusActive = (eventId) => {
+    const transactionStatusPath = constPaths.OCAST_EVENT_MEDIA_PATH_PREFIX + eventId + '/hasActiveTransaction'; 
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .get(transactionStatusPath)
+        .reply(200, {  
+            active: true
+        });
+}
+
+const mockEventTransactionStatusNotActive = (eventId) => {
+    const transactionStatusPath = constPaths.OCAST_EVENT_MEDIA_PATH_PREFIX + eventId + '/hasActiveTransaction';
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .get(transactionStatusPath)
+        .reply(200, {  
+            active: false
+        });
+}
+
+const mockOpencastFailedMediaPackageRequest = (eventId) => {
+    const mediapackageUrl = '/assets/episode/' + eventId;
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .get(mediapackageUrl)
+        .reply(400);
+}
+
+const mockOpencastMediaPackageRequest = (eventId) => {
+    const mediapackageUrl = '/assets/episode/' + eventId;
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .get(mediapackageUrl)
+        .reply(200);
+}
+
+const mockOpencastFailedRepublishMetadataRequest = () => {
+    const republishMetadataUrl = '/workflow/start';
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .post(republishMetadataUrl)
+        .reply(400);
+}
+
+const mockOpencastRepublishMetadataRequest = () => {
+    const republishMetadataUrl = '/workflow/start';
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .post(republishMetadataUrl)
+        .reply(200);
+}
+
 const lataamoPutSeries = () =>
     nock(CONSTANTS.OCAST_BASE_URL)
         .put(CONSTANTS.OCAST_UPDATE_SERIES_PATH)
@@ -1288,5 +1358,13 @@ module.exports.mockLataamoPutSeriesCall = lataamoPutSeries;
 module.exports.mockLataamoUpdateSeriesAcl = lataamoUpdateSeriesAcl;
 module.exports.mockLataamoUpdateSeriesMetadata = lataamoUpdateSeriesMetadata;
 module.exports.constants = CONSTANTS;
+module.exports.mockOpencastEventActiveTransaction = mockEventTransactionStatusActive;
+module.exports.mockOpencastEventNoActiveTransaction = mockEventTransactionStatusNotActive;
+module.exports.mockOpencastFailedMediaPackageRequest = mockOpencastFailedMediaPackageRequest;
+module.exports.mockOpencastMediaPackageRequest = mockOpencastMediaPackageRequest;
+module.exports.mockOpencastUpdateEventOK = mockOpencastUpdateEventOK;
+module.exports.mockOpencastUpdateEventNOK = mockOpencastUpdateEventNOK; 
+module.exports.mockOpencastFailedRepublishMetadataRequest = mockOpencastFailedRepublishMetadataRequest;
+module.exports.mockOpencastRepublishMetadataRequest = mockOpencastRepublishMetadataRequest;
 
 module.exports.cleanAll = cleanMocks;
