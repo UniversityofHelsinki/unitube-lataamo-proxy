@@ -90,6 +90,7 @@ exports.getAllEventsWithAcls = async (events) => {
         let metadata = event.metadata;
         let serie = seriesService.getSerieFromEventMetadata(metadata);
         let acls = await apiService.getEventAclsFromSerie(serie.value);
+
         return {
             ...event,
             acls : acls
