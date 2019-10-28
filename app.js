@@ -4,9 +4,9 @@ const bodyParser = require('body-parser');
 const routes = require('./api/routes');
 const security = require('./config/security');
 const passport = require('passport');
-const fs = require('fs')
-const morgan = require('morgan')
-const path = require('path')
+const fs = require('fs');
+const morgan = require('morgan');
+const path = require('path');
 const logger = require('./config/winstonLogger');
 
 const app = express();
@@ -32,7 +32,7 @@ app.use('/api', router);
 
 app.listen(port, host,  () => {
     logger.info(`lataamo proxy is listening on port ${port}!`);
-});   
+});
 
 // for the tests
 module.exports = app;
