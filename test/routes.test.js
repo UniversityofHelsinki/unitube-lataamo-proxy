@@ -581,12 +581,12 @@ describe('Fetching event from /event/id route', () => {
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
             .expect(200)
             .expect('Content-Type', /json/)
-        assert.equal(response.body.identifier, '6394a9b7-3c06-477e-841a-70862eb07bfb');
+        assert.equal(response.body.identifier, test.constants.TEST_EVENT_1_ID);
         assert.equal(response.body.description, 'TEMPORARY DESCRIPTION, PLEASE UPDATE');
         assert.equal(response.body.creator, 'Lataamo Api User');
         assert.equal(response.body.title, 'testivideo.mov');
         assert.equal(response.body.processing_state, 'SUCCEEDED');
-        assert.equal(response.body.isPartOf, '80f9ff5b-4163-48b7-b7cf-950be665de3c');
+        assert.equal(response.body.isPartOf, test.constants.TEST_SERIES_1_ID);
         expect(response.body.visibility).to.deep.equal(['status_published']);
         assert.equal(response.body.media[0].mimetype, 'video/mp4');
         assert.equal(response.body.media[0].id, '638b7ae1-0710-44df-b3db-55ee9e8b48ba');
@@ -598,6 +598,19 @@ describe('Fetching event from /event/id route', () => {
         assert.equal(response.body.mediaFileMetadata.id, '638b7ae1-0710-44df-b3db-55ee9e8b48ba');
         assert.equal(response.body.mediaFileMetadata.type, 'presenter/source');
         expect(response.body.acls).to.deep.equal(expectedAcls);
+    });
+
+
+    it('GET /event/:id with undefined id should return 500 with error message', async () => {
+
+        let response = await supertest(app)
+            .get(LATAAMO_USER_EVENT_PATH + '/' + '234234324')
+            .set('eppn', 'SeriesOwnerEppn')
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .expect(500)
+            .expect('Content-Type', /json/)
+        assert.equal(response.body.message, 'error_failed_to_get_event');
     });
 });
 
