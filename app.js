@@ -18,7 +18,7 @@ const LOG_DIRECTORY = __dirname;
 
 
 const accessLogStream = fs.createWriteStream(
-    path.join(LOG_DIRECTORY, LOG_FILE_NAME), { flags: 'a' })
+    path.join(LOG_DIRECTORY + '/logs', LOG_FILE_NAME), { flags: 'a' })
 
 routes(router);
 app.use(morgan('combined', { stream: accessLogStream }))
@@ -32,7 +32,7 @@ app.use('/api', router);
 
 app.listen(port, host,  () => {
     logger.info(`lataamo proxy is listening on port ${port}!`);
-});   
+});
 
 // for the tests
 module.exports = app;
