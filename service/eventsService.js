@@ -21,8 +21,7 @@ exports.filterEventsForClient = (ocResponseData) => {
             "creator": event.creator,
             "processing_state" : event.processing_state,
             "visibility" : calculateVisibilityPropertyForVideo(event),
-            "created": event.created,
-            "series": event.series.title
+            "created": event.created
         })
     });
     return eventArray;
@@ -86,23 +85,22 @@ exports.getAllEventsWithMediaFileMetadata = async (events) => {
     }));
 };
 
-exports.getAllEventsWithSeriesAndAcls = async (events) => {
+exports.getAllEventsWithAcls = async (events) => {
     return Promise.all(events.map(async event => {
         let metadata = event.metadata;
-        let seriesField = seriesService.getSeriesFromEventMetadata(metadata);
-        let acls = await apiService.getEventAclsFromSerie(seriesField.value);
-        let series = await apiService.getSerie(seriesField.value);
+        let serie = seriesService.getSerieFromEventMetadata(metadata);
+        let acls = await apiService.getEventAclsFromSerie(serie.value);
+
         return {
             ...event,
-            acls : acls,
-            series : series
+            acls : acls
         }
     }));
 };
 
 exports.getEventWithSerie = async (event) => {
     const metadata = await apiService.getMetadataForEvent(event);
-    const serie = seriesService.getSeriesFromEventMetadata(metadata);
+    const serie = seriesService.getSerieFromEventMetadata(metadata);
     return {
         ...event,
         isPartOf : serie.value
