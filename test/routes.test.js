@@ -574,6 +574,15 @@ describe('Fetching event from /event/id route', () => {
             { allow: true, role: 'ROLE_ADMIN', action: 'write' },
             { allow: true, role: 'ROLE_ANONYMOUS', action: 'read' } ];
 
+        const licenses = [ 'ALLRIGHTS',
+            'CC-BY',
+            'CC-BY-SA',
+            'CC-BY-ND',
+            'CC-BY-NC',
+            'CC-BY-NC-SA',
+            'CC-BY-NC-ND',
+            'CC0' ];
+
         let response = await supertest(app)
             .get(LATAAMO_USER_EVENT_PATH + '/' + test.constants.TEST_EVENT_1_ID)
             .set('eppn', 'SeriesOwnerEppn')
@@ -598,6 +607,8 @@ describe('Fetching event from /event/id route', () => {
         assert.equal(response.body.mediaFileMetadata.id, '638b7ae1-0710-44df-b3db-55ee9e8b48ba');
         assert.equal(response.body.mediaFileMetadata.type, 'presenter/source');
         expect(response.body.acls).to.deep.equal(expectedAcls);
+        expect(response.body.licenses).to.deep.equal(licenses);
+        assert.equal(response.body.license, 'ALLRIGHTS');
     });
 
 
