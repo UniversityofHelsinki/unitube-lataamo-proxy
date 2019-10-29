@@ -501,6 +501,7 @@ describe('Updating videos aka events', () => {
             .set('eppn', 'SeriesOwnerEppn')
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(403)
             .expect('Content-Type', /json/);
         assert.equal(response.body.message, 'Transaction active for given event');
@@ -516,6 +517,7 @@ describe('Updating videos aka events', () => {
             .set('eppn', 'SeriesOwnerEppn')
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(400)
             .expect('Content-Type', /json/);
     });
@@ -532,6 +534,7 @@ describe('Updating videos aka events', () => {
             .set('eppn', 'SeriesOwnerEppn')
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(400)
             .expect('Content-Type', /json/);
     });
@@ -548,6 +551,7 @@ describe('Updating videos aka events', () => {
             .set('eppn', 'SeriesOwnerEppn')
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(400)
             .expect('Content-Type', /json/);
     });
@@ -564,6 +568,7 @@ describe('Updating videos aka events', () => {
             .set('eppn', 'SeriesOwnerEppn')
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
     });
