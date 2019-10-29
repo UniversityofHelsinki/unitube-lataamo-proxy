@@ -178,7 +178,7 @@ module.exports = function (router) {
      */
      router.get('/series/:id', async (req, res) => {
         try {
-            const series = await apiService.getSerie(req.params.id);
+            const series = await apiService.getSeries(req.params.id);
             await apiService.contributorsToIamGroupsAndPersons(series);
             const userSeriesWithPublished = await seriesService.addPublishedInfoInSeriesAndMoodleRoles(series);
             res.json(userSeriesWithPublished);
