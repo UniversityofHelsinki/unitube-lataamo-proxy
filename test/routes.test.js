@@ -297,6 +297,8 @@ describe('user events (videos) returned from /userEvents route', () => {
     test.mockOCastSeriesApiCall3();
     test.mockOCastSeriesApiCall4();
     test.mockOCastSeriesApiCall5();
+    test.mockOCastSeriesApiCall9();
+    test.mockOCastSeriesApiCall10();
     test.mockOCastUserApiCall();
     test.mockOCastEvents_1_ApiCall();
     test.mockOCastEvents_2_ApiCall();
