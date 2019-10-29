@@ -29,7 +29,7 @@ exports.getEventsByIdentifier = async (identifier) => {
     return response.data;
 };
 
-exports.getSerie = async (seriesId) => {
+exports.getSeries = async (seriesId) => {
     const seriesUrl = constants.OCAST_SERIES_PATH + seriesId;
     const response = await security.opencastBase.get(seriesUrl);
     return response.data;

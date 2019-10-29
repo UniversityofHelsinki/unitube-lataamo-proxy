@@ -166,6 +166,17 @@ const mockUserSeries4 =
         title: 'title-LATAAMO-132'
      };
 
+const mockUserSeries6 =
+    { identifier: CONSTANTS.TEST_SERIES_2_ID,
+        creator: 'Opencast Project Administrator',
+        created: '2019-05-22T09:56:43Z',
+        subjects: [ 'juusto', 'makasiini', 'aamupuuro', 'salama', 'sämpylä' ],
+        organizers: [ 'organizer1' ],
+        publishers: [ '' ],
+        contributors: ['baabenom', 'grp-a9000-johto', 'e0008344', 'sys-personec-1', 'alanevax', 'hy-duunarit'],
+        title: 'title-LATAAMO-132'
+    };
+
 const mockUserSeriesEmpty = [];
 
 const mockUserEventsForSeries1 =  [
@@ -1228,11 +1239,20 @@ const lataamoPostSeries = () =>
         .post(CONSTANTS.OCAST_SERIES_PATH)
         .reply(200, { identifier: CONSTANTS.SUCCESSFUL_UPDATE_ID });
 
+const lataamoSeries9 = () =>
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .get(CONSTANTS.OCAST_SERIES_PATH + CONSTANTS.TEST_SERIES_1_ID)
+        .reply(200, mockUserSeries4).persist();
+
+const lataamoSeries10 = () =>
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .get(CONSTANTS.OCAST_SERIES_PATH + CONSTANTS.TEST_SERIES_2_ID)
+        .reply(200, mockUserSeries6).persist();
 
 const mockOpencastUpdateEventOK = (eventId) => {
     // /api/events/d89d275a-25f6-426f-9b28-dc2607803206/metadata?type=dublincore/episode
-    const videoMetaDataUrl = constPaths.OCAST_VIDEOS_PATH + eventId + 
-        constPaths.OCAST_METADATA_PATH + constPaths.OCAST_TYPE_QUERY_PARAMETER + 
+    const videoMetaDataUrl = constPaths.OCAST_VIDEOS_PATH + eventId +
+        constPaths.OCAST_METADATA_PATH + constPaths.OCAST_TYPE_QUERY_PARAMETER +
         constPaths.OCAST_TYPE_DUBLINCORE_EPISODE;
 
     nock(CONSTANTS.OCAST_BASE_URL)
@@ -1242,8 +1262,8 @@ const mockOpencastUpdateEventOK = (eventId) => {
 
 const mockOpencastUpdateEventNOK = (eventId) => {
     // /api/events/d89d275a-25f6-426f-9b28-dc2607803206/metadata?type=dublincore/episode
-    const videoMetaDataUrl = constPaths.OCAST_VIDEOS_PATH + eventId + 
-        constPaths.OCAST_METADATA_PATH + constPaths.OCAST_TYPE_QUERY_PARAMETER + 
+    const videoMetaDataUrl = constPaths.OCAST_VIDEOS_PATH + eventId +
+        constPaths.OCAST_METADATA_PATH + constPaths.OCAST_TYPE_QUERY_PARAMETER +
         constPaths.OCAST_TYPE_DUBLINCORE_EPISODE;
 
     nock(CONSTANTS.OCAST_BASE_URL)
@@ -1252,10 +1272,10 @@ const mockOpencastUpdateEventNOK = (eventId) => {
 }
 
 const mockEventTransactionStatusActive = (eventId) => {
-    const transactionStatusPath = constPaths.OCAST_EVENT_MEDIA_PATH_PREFIX + eventId + '/hasActiveTransaction'; 
+    const transactionStatusPath = constPaths.OCAST_EVENT_MEDIA_PATH_PREFIX + eventId + '/hasActiveTransaction';
     nock(CONSTANTS.OCAST_BASE_URL)
         .get(transactionStatusPath)
-        .reply(200, {  
+        .reply(200, {
             active: true
         });
 }
@@ -1264,7 +1284,7 @@ const mockEventTransactionStatusNotActive = (eventId) => {
     const transactionStatusPath = constPaths.OCAST_EVENT_MEDIA_PATH_PREFIX + eventId + '/hasActiveTransaction';
     nock(CONSTANTS.OCAST_BASE_URL)
         .get(transactionStatusPath)
-        .reply(200, {  
+        .reply(200, {
             active: false
         });
 }
@@ -1336,6 +1356,8 @@ module.exports.mockOCastSeriesApiCall5 = lataamoSeries5;
 module.exports.mockOCastSeriesApiCall6 = lataamoSeries6;
 module.exports.mockOCastSeriesApiCall7 = lataamoSeries7;
 module.exports.mockOCastSeriesApiCall8 = lataamoSeries8;
+module.exports.mockOCastSeriesApiCall9 = lataamoSeries9;
+module.exports.mockOCastSeriesApiCall10 = lataamoSeries10;
 module.exports.mockOCastUserApiCall = lataamoApiUser;
 module.exports.mockOCastUserApiCall2 = lataamoApiUser2;
 module.exports.mockOCastEvents_1_ApiCall = series1_Events;
@@ -1364,7 +1386,7 @@ module.exports.mockOpencastEventNoActiveTransaction = mockEventTransactionStatus
 module.exports.mockOpencastFailedMediaPackageRequest = mockOpencastFailedMediaPackageRequest;
 module.exports.mockOpencastMediaPackageRequest = mockOpencastMediaPackageRequest;
 module.exports.mockOpencastUpdateEventOK = mockOpencastUpdateEventOK;
-module.exports.mockOpencastUpdateEventNOK = mockOpencastUpdateEventNOK; 
+module.exports.mockOpencastUpdateEventNOK = mockOpencastUpdateEventNOK;
 module.exports.mockOpencastFailedRepublishMetadataRequest = mockOpencastFailedRepublishMetadataRequest;
 module.exports.mockOpencastRepublishMetadataRequest = mockOpencastRepublishMetadataRequest;
 
