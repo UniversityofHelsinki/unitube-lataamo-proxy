@@ -309,7 +309,7 @@ module.exports = function (router) {
             const allEventsWithMetaDatas = await eventsService.getAllEventsWithMetadatas(concatenatedEventsArray);
             const allEventsWithMedia = await eventsService.getEventsWithMedia(allEventsWithMetaDatas);
             const allEventsWithMediaFile = await eventsService.getAllEventsWithMediaFileMetadata(allEventsWithMedia);
-            const allEventsWithAcls = await eventsService.getAllEventsWithSeriesAndAcls(allEventsWithMediaFile);
+            const allEventsWithAcls = await eventsService.getAllEventsWithAcls(allEventsWithMediaFile);
             res.json(eventsService.filterEventsForClient(allEventsWithAcls));
         } catch (error) {
             res.status(500);

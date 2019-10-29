@@ -43,7 +43,8 @@ const mockApiUser =  {
 const mockTestUser = {
     eppn: 'Tester-XYZ',
     preferredlanguage: 'fi',
-    hyGroupCn: 'grp-XYZ'
+    hyGroupCn: 'grp-XYZ',
+    displayName: 'Matti Meikalainen'
 }
 
 const mockTestUser2 = {
