@@ -29,7 +29,7 @@ const getSeriesIdentifiers = (filteredSeriesByUser) => {
     return filteredSeriesByUser.map(serie => serie.identifier);
 }
 
-exports.getSerieFromEventMetadata = (metadata) => {
+exports.getSeriesFromEventMetadata = (metadata) => {
     const foundEpisodeFlavorMetadata = metadata.find(field => {
         return field.flavor === 'dublincore/episode';
     });

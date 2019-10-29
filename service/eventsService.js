@@ -89,7 +89,7 @@ exports.getAllEventsWithMediaFileMetadata = async (events) => {
 exports.getAllEventsWithAcls = async (events) => {
     return Promise.all(events.map(async event => {
         let metadata = event.metadata;
-        let seriesField = seriesService.getSerieFromEventMetadata(metadata);
+        let seriesField = seriesService.getSeriesFromEventMetadata(metadata);
         let acls = await apiService.getEventAclsFromSerie(seriesField.value);
         let series = await apiService.getSeries(seriesField.value);
         return {
@@ -102,7 +102,7 @@ exports.getAllEventsWithAcls = async (events) => {
 
 exports.getEventWithSerie = async (event) => {
     const metadata = await apiService.getMetadataForEvent(event);
-    const serie = seriesService.getSerieFromEventMetadata(metadata);
+    const serie = seriesService.getSeriesFromEventMetadata(metadata);
     return {
         ...event,
         isPartOf : serie.value
