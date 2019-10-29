@@ -25,6 +25,7 @@ describe('Authentication with shibboleth headers (eppn, preferredlanguage, hyGro
             .set('eppn', 'test_request_id')
             .set('preferredlanguage', 'test_lang')
             .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
+            .set('displayName', 'Matti Meikalainen')
             .expect(200)
             .expect('Content-Type', /json/)
     });
@@ -34,6 +35,7 @@ describe('Authentication with shibboleth headers (eppn, preferredlanguage, hyGro
             .get(LATAAMO_API_INFO_PATH)
             .set('preferredlanguage', 'test_lang')
             .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
+            .set('displayName', 'Matti Meikalainen')
             .expect(401)
     });
 
@@ -42,6 +44,7 @@ describe('Authentication with shibboleth headers (eppn, preferredlanguage, hyGro
             .get(LATAAMO_API_INFO_PATH)
             .set('eppn', 'test_request_id')
             .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
+            .set('displayName', 'Matti Meikalainen')
             .expect(401)
     });
 
@@ -56,6 +59,7 @@ describe('Authentication with shibboleth headers (eppn, preferredlanguage, hyGro
             .get(LATAAMO_API_INFO_PATH)
             .set('eppn', 'test_request_id')
             .set('preferredlanguage', 'test_lang')
+            .set('displayName', 'Matti Meikalainen')
             .expect(401)
     });
 });
@@ -69,6 +73,7 @@ describe('api info returned from / route', () => {
             .set('eppn', 'test_request_id')
             .set('preferredlanguage', 'test_lang')
             .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
+            .set('displayName', 'Matti Meikalainen')
             .expect(200)
             .expect('Content-Type', /json/);
 
@@ -87,6 +92,7 @@ describe('user eppn, preferredlanguage and hyGroupCn returned from /user route',
             .set('eppn', test.mockTestUser.eppn)
             .set('preferredLanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
 
@@ -115,6 +121,7 @@ describe('user series returned from /userSeries route', () => {
             .set('eppn', test.mockTestUser.eppn)
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
 
@@ -129,6 +136,7 @@ describe('user series returned from /userSeries route', () => {
             .set('eppn', 'SeriesOwnerEppn')
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
 
@@ -142,6 +150,7 @@ describe('user series returned from /userSeries route', () => {
             .set('eppn', test.mockTestUser.eppn)
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
+            .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
 
@@ -171,6 +180,7 @@ describe('user series returned from /userSeries route', () => {
             .set('eppn', test.mockTestUser2.eppn)
             .set('preferredlanguage', test.mockTestUser2.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser2.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
 
@@ -198,6 +208,7 @@ describe('user series person - and iamgroup administrators returned from /series
             .set('eppn', test.mockTestUser2.eppn)
             .set('preferredlanguage', test.mockTestUser2.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser2.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
 
@@ -223,6 +234,7 @@ describe('user video urls returned from /video/id events route', () => {
         .set('eppn', 'SeriesOwnerEppn')
         .set('preferredlanguage', test.mockTestUser.preferredlanguage)
         .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+        .set('displayName', test.mockTestUser.displayName)
         .expect(200)
         .expect('Content-Type', /json/);
 
@@ -237,6 +249,7 @@ describe('user video urls returned from /video/id events route', () => {
         .set('eppn', 'SeriesOwnerEppn')
         .set('preferredlanguage', test.mockTestUser.preferredlanguage)
         .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+        .set('displayName', test.mockTestUser.displayName)
         .expect(200)
         .expect('Content-Type', /json/);
 
@@ -269,6 +282,7 @@ describe('user series put', () => {
             .set('eppn', userId)
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
 
@@ -306,6 +320,7 @@ describe('user events (videos) returned from /userEvents route', () => {
             .set('eppn', 'SeriesOwnerEppn')
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
 
@@ -331,6 +346,7 @@ describe('user events (videos) returned from /userEvents route', () => {
             .set('eppn', 'SeriesOwnerEppn')
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
 
@@ -347,6 +363,7 @@ describe('user events (videos) returned from /userEvents route', () => {
             .set('eppn', userId)
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
+            .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
 
@@ -364,6 +381,7 @@ describe('user events (videos) returned from /userEvents route', () => {
             .set('eppn', userId)
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3')
+            .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
 
@@ -380,6 +398,7 @@ describe('user events (videos) returned from /userEvents route', () => {
             .set('eppn', userId)
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
 
@@ -407,6 +426,7 @@ describe('user series post', () => {
             .set('eppn', 'SeriesOwnerEppn')
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
         assert.equal(response.body, test.constants.SUCCESSFUL_UPDATE_ID);
@@ -420,6 +440,7 @@ describe('user series post', () => {
             .set('eppn', userId)
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(403)
             .expect('Content-Type', /json/);
         assert.equal(response.body.message, '"inbox" not allowed in series title. Series was not created.');
@@ -433,6 +454,7 @@ describe('user series post', () => {
             .set('eppn', userId)
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(403)
             .expect('Content-Type', /json/);
         assert.equal(response.body.message, '"inbox" not allowed in series title. Series was not created.');
@@ -446,6 +468,7 @@ describe('user series post', () => {
             .set('eppn', userId)
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(403)
             .expect('Content-Type', /json/);
         assert.equal(response.body.message, '"inbox" not allowed in series title. Series was not created.');
@@ -459,6 +482,7 @@ describe('user series post', () => {
             .set('eppn', userId)
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(403)
             .expect('Content-Type', /json/);
         assert.equal(response.body.message, '"inbox" not allowed in series title. Series was not created.');
@@ -477,6 +501,7 @@ describe('Updating videos aka events', () => {
             .set('eppn', 'SeriesOwnerEppn')
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(403)
             .expect('Content-Type', /json/);
         assert.equal(response.body.message, 'Transaction active for given event');
@@ -492,6 +517,7 @@ describe('Updating videos aka events', () => {
             .set('eppn', 'SeriesOwnerEppn')
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(400)
             .expect('Content-Type', /json/);
     });
@@ -508,6 +534,7 @@ describe('Updating videos aka events', () => {
             .set('eppn', 'SeriesOwnerEppn')
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(400)
             .expect('Content-Type', /json/);
     });
@@ -524,6 +551,7 @@ describe('Updating videos aka events', () => {
             .set('eppn', 'SeriesOwnerEppn')
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(400)
             .expect('Content-Type', /json/);
     });
@@ -540,6 +568,7 @@ describe('Updating videos aka events', () => {
             .set('eppn', 'SeriesOwnerEppn')
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
     });

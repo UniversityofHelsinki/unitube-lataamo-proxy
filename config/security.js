@@ -18,7 +18,8 @@ module.exports.shibbolethAuthentication = function (app, passport) {
             headers: {
                 'eppn': {alias: 'eppn', required: true},
                 'preferredlanguage': {alias: 'preferredLanguage', required: true},
-                'hyGroupCn': {alias: 'hyGroupCn', required: true}
+                'hyGroupCn': {alias: 'hyGroupCn', required: true},
+                'displayName': {alias: 'displayName', required: true}
             },
             whitelist: localhostIP
         })
