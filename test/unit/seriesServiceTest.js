@@ -34,7 +34,7 @@ describe('Series Service', function() {
     it('updateSeriesAclList() should return correct roles if role_katsomo and moodle roles are selected', function() {
         const seriesAclListWithRoleAnonymous = {"acl": ['ROLE_KATSOMO', "123_Instructor", "123_Learner"]};
         let aclList = SeriesService.openCastFormatSeriesAclList(seriesAclListWithRoleAnonymous);
-        expect(aclList.length).to.equal(7);
+        expect(aclList.length).to.equal(5);
         let aclRoleAnonymousReadEntry = { allow: true, action: 'read', role: constants.ROLE_KATSOMO };
         let aclRoleInstructorMoodleReadEntry = { allow: true, action: 'read', role: '123' + constants.MOODLE_ACL_INSTRUCTOR };
         let aclRoleMoodleLearnerReadEntry = { allow: true, action: 'read', role: '123' + constants.MOODLE_ACL_LEARNER };
