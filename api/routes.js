@@ -16,6 +16,7 @@ const {inboxSeriesTitleForLoggedUser} = require('../utils/helpers'); // helper f
 const swaggerUi = require('swagger-ui-express');
 const apiSpecs = require('../config/swagger'); // swagger config
 const logger = require('../config/winstonLogger');
+const videologger = require('../config/videoLogger');
 const constants = require('../utils/constants');
 const messageKeys = require('../utils/message-keys');
 
@@ -380,12 +381,12 @@ module.exports = function (router) {
      */
     router.post('/userVideos', async (req, res) => {
         try {
-            logger.info(`POST /userVideos - Upload video started. USER: ${req.user.eppn}`);
+            videologger.info(`POST /userVideos - Upload video started. USER: ${req.user.eppn}`);
             const uploadPath = path.join(__dirname, 'uploads/');
 
             if (!ensureUploadDir(uploadPath)) {
                 // upload dir failed log and return error
-                logger.error(`Upload dir unavailable '${uploadPath}' USER: ${req.user.eppn}`);
+                videologger.error(`Upload dir unavailable '${uploadPath}' USER: ${req.user.eppn}`);
                 res.status(500);
                 const msg = 'Upload dir unavailable.';
                 res.json({
@@ -400,7 +401,7 @@ module.exports = function (router) {
 
             req.busboy.on('file', (fieldname, file, filename) => {
                 startTime = new Date();
-                logger.info(`Upload of '${filename}' started  USER: ${req.user.eppn}`);
+                videologger.info(`Upload of '${filename}' started  USER: ${req.user.eppn}`);
                 const filePathOnDisk = path.join(uploadPath, filename);
 
                 // Create a write stream of the new file
@@ -413,7 +414,7 @@ module.exports = function (router) {
                     try {
                         const loggedUser = userService.getLoggedUser(req.user);
                         let timeDiff = new Date() - startTime;
-                        logger.info(`Loading time with busboy ${timeDiff} milliseconds USER: ${req.user.eppn}`);
+                        videologger.info(`Loading time with busboy ${timeDiff} milliseconds USER: ${req.user.eppn}`);
 
                         let inboxSeries;
                         try {
@@ -424,7 +425,7 @@ module.exports = function (router) {
                                 deleteFile(filePathOnDisk);
                                 res.status(500)
                                 const msg = `${filename} failed to resolve inboxSeries for user`;
-                                logger.error(`POST /userVideos ${msg} USER: ${req.user.eppn}`);
+                                videologger.error(`POST /userVideos ${msg} USER: ${req.user.eppn}`);
                                 res.json({
                                     message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
                                     msg
@@ -443,7 +444,7 @@ module.exports = function (router) {
                                 // on success clean file from disk and return 200
                                 deleteFile(filePathOnDisk);
                                 res.status(200);
-                                logger.info(`${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. 
+                                videologger.info(`${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. 
                                     Opencast event ID: ${JSON.stringify(response.data)} USER: ${req.user.eppn}`);
                                 res.json({ message: `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. 
                                     Opencast event ID: ${JSON.stringify(response.data)}`})
@@ -468,7 +469,7 @@ module.exports = function (router) {
                         deleteFile(filePathOnDisk);
                         res.status(500);
                         const msg = `Upload of ${filename} failed. ${err}.`;
-                        logger.error(`POST /userVideos ${msg} USER: ${req.user.eppn}`);
+                        videologger.error(`POST /userVideos ${msg} USER: ${req.user.eppn}`);
                         res.json({
                             message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
                             msg
@@ -484,7 +485,7 @@ module.exports = function (router) {
             res.status(500);
             // TODO: ${filename} is not defined here log the file some other way
             const msg = `failed ${err}.`;
-            logger.error(`POST /userVideos ${msg} USER: ${req.user.eppn}`);
+            videologger.error(`POST /userVideos ${msg} USER: ${req.user.eppn}`);
             res.json({
                 message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
                 msg
@@ -496,9 +497,9 @@ module.exports = function (router) {
     function deleteFile(filename) {
         fs.unlink(filename, (err) => {
             if (err) {
-                logger.error(`Failed to remove ${filename} | ${err}`);
+                videologger.error(`Failed to remove ${filename} | ${err}`);
             } else {
-                logger.info(`Removed ${filename}`);
+                videologger.info(`Removed ${filename}`);
             }
         });
     }
