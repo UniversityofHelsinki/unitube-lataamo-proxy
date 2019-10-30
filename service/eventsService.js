@@ -1,3 +1,4 @@
+const commonService = require('./commonService');
 const seriesService = require('./seriesService');
 const apiService = require('./apiService');
 const moment = require('moment');
@@ -37,13 +38,12 @@ exports.calculateVisibilityProperty = (event) => {
 
 const calculateVisibilityPropertyForVideo = (video) => {
     const visibility = [];
-    const publishedAcl = video.acls.filter(acl => acl.role === constants.ROLE_ANONYMOUS);
-    const moodleAclInstructor = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_INSTRUCTOR));
-    const moodleAclLearner = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_LEARNER));
-
-    if (publishedAcl && publishedAcl.length > 0) {
+    if (commonService.publicRoleCount(video.acls) === 2) { //video has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
         visibility.push(constants.STATUS_PUBLISHED);
     }
+
+    const moodleAclInstructor = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_INSTRUCTOR));
+    const moodleAclLearner = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_LEARNER));
 
     if (moodleAclInstructor && moodleAclLearner && moodleAclInstructor.length > 0 && moodleAclLearner.length > 0) {
         visibility.push(constants.STATUS_MOODLE);
