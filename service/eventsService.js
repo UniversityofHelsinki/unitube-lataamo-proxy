@@ -162,15 +162,20 @@ exports.getDurationFromMediaFileMetadataForEvent = (event) => {
 exports.modifyEventMetadataForOpencast = (metadata) => {
     const metadataArray = [];
 
-    metadataArray.push({
+    metadataArray.push(
+        {
             "id" : "title",
-            "value": metadata.title },
+            "value": metadata.title
+        },
         {
             "id" : "description",
             "value": metadata.description
         }, {
             "id" : "isPartOf",
             "value" : metadata.isPartOf
+        }, {
+            "id": "license",
+            "value": metadata.license
         });
 
     return metadataArray;
