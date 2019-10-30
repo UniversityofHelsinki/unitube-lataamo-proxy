@@ -1,3 +1,4 @@
+const commonService = require('./commonService');
 const constants = require('../utils/constants');
 const apiService = require('../service/apiService');
 
@@ -90,6 +91,7 @@ const updateAclTemplateWriteEntry = (seriesACLTemplateWriteEntry, aclRole) => {
 };
 
 const isMoodleAclRole = aclRole => aclRole.includes(constants.MOODLE_ACL_INSTRUCTOR) || aclRole.includes(constants.MOODLE_ACL_LEARNER);
+const publicRole = publicRole => publicRole.includes(constants.ROLE_ANONYMOUS) || publicRole.includes(constants.ROLE_KATSOMO);
 
 const updateSeriesAclList = (aclList) => {
 
@@ -106,7 +108,7 @@ const updateSeriesAclList = (aclList) => {
             seriesACLTemplateReadEntry = updateAclTemplateReadEntry(seriesACLTemplateReadEntry, aclRole);
             seriesACLTemplateWriteEntry = updateAclTemplateWriteEntry(seriesACLTemplateWriteEntry, aclRole);
             seriesAclTemplate.push(seriesACLTemplateReadEntry);
-            if (aclRole !== constants.ROLE_ANONYMOUS && !isMoodleAclRole(aclRole)) {
+            if (!publicRole(aclRole) && !isMoodleAclRole(aclRole)) {
                 seriesAclTemplate.push(seriesACLTemplateWriteEntry);
             }
         });
@@ -121,13 +123,13 @@ const concatenateArray = (data) => Array.prototype.concat.apply([], data);
 // Looping array of series elements
 //
 // Adds published value in series array for each series:
-//   if user has ROLE_ANONYMOUS --> published is true otherwise false
+//   if user has ROLE_ANONYMOUS and ROLE_KATSOMO --> published is true otherwise false
 exports.addPublishedInfoInSeries = async (seriesList) => {
 
     let seriesListWithPublished = [];
     for (const series of seriesList) {
         let roles = await apiService.getSeriesAcldata(series.identifier);
-        if (roles && roles.find((item) => item.role === constants.ROLE_ANONYMOUS)) {
+        if (commonService.publicRoleCount(roles) === 2) { //series has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
             series.published = true;
             seriesListWithPublished.push(series);
         } else {
@@ -141,7 +143,7 @@ exports.addPublishedInfoInSeries = async (seriesList) => {
 exports.addPublishedInfoInSeriesAndMoodleRoles = async (series) => {
 
     let roles = await apiService.getSeriesAcldata(series.identifier);
-    if (roles && roles.find((item) => item.role === constants.ROLE_ANONYMOUS)) {
+    if (commonService.publicRoleCount(roles) === 2) { //series has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
         series.published = constants.ROLE_ANONYMOUS;
     } else {
         series.published = "";
