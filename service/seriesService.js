@@ -92,7 +92,13 @@ const updateAclTemplateWriteEntry = (seriesACLTemplateWriteEntry, aclRole) => {
 const isMoodleAclRole = aclRole => aclRole.includes(constants.MOODLE_ACL_INSTRUCTOR) || aclRole.includes(constants.MOODLE_ACL_LEARNER);
 
 const updateSeriesAclList = (aclList) => {
-    let seriesAclTemplate = [...constants.SERIES_ACL_TEMPLATE];
+
+    let seriesAclTemplate = [];
+    if (process.env.ENVIRONMENT === 'prod') {
+        seriesAclTemplate = [...constants.SERIES_ACL_TEMPLATE_TUOTANTO];
+    } else {
+        seriesAclTemplate = [...constants.SERIES_ACL_TEMPLATE];
+    }
     let seriesACLTemplateReadEntry = constants.SERIES_ACL_TEMPLATE_READ_ENTRY;
     let seriesACLTemplateWriteEntry = constants.SERIES_ACL_TEMPLATE_WRITE_ENTRY;
     if (aclList) {

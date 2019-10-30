@@ -37,22 +37,25 @@ const SERIES_ACL_TEMPLATE = [
     {
         "action": "read",
         "allow": true,
-        "role": "ROLE_USER_ADMIN"
+        "role": "ROLE_USER_LATAAMO_TESTI"
     },
     {
         "action": "write",
         "allow": true,
-        "role": "ROLE_USER_ADMIN"
-    },
+        "role": "ROLE_USER_LATAAMO_TESTI"
+    }
+];
+
+const SERIES_ACL_TEMPLATE_TUOTANTO = [
     {
         "action": "read",
         "allow": true,
-        "role": "ROLE_ADMIN"
+        "role": "ROLE_USER_LATAAMO_TUOTANTO"
     },
     {
         "action": "write",
         "allow": true,
-        "role": "ROLE_ADMIN"
+        "role": "ROLE_USER_LATAAMO_TUOTANTO"
     }
 ];
 
@@ -139,5 +142,6 @@ module.exports = {
     ESB_IAM_GROUPS_PATH,
     CREATE_SERIES,
     ESB_PERSONS_PATH,
-    PROPERTIES_REPUBLISH_METADATA
+    PROPERTIES_REPUBLISH_METADATA,
+    SERIES_ACL_TEMPLATE_TUOTANTO
 };

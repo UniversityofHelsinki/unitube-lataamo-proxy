@@ -285,10 +285,16 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
     ];
     // these are now constant values, maybe should be editable
     const acls = constants.SERIES_ACL_TEMPLATE;
+    const acls_tuotanto = constants.SERIES_ACL_TEMPLATE_TUOTANTO;
     const processingMetadata = constants.PROCESSING_METADATA;
 
     let bodyFormData = new FormData();
     bodyFormData.append('metadata', JSON.stringify(metadataArray));
+    if (process.env.ENVIRONMENT === 'prod') {
+        bodyFormData.append('acl', JSON.stringify(acls_tuotanto));
+    } else {
+        bodyFormData.append('acl', JSON.stringify(acls));
+    }
     bodyFormData.append('acl', JSON.stringify(acls));
     bodyFormData.append('processing', JSON.stringify(processingMetadata));
     // https://nodejs.org/api/fs.html#fs_fs_createreadstream_path_options
@@ -411,11 +417,15 @@ exports.createLataamoInboxSeries = async (userId) => {
 
     // these are now constant values, maybe should be editable
     const acls = constants.SERIES_ACL_TEMPLATE;
+    const acls_tuotanto = constants.SERIES_ACL_TEMPLATE_TUOTANTO;
 
     let bodyFormData = new FormData();
     bodyFormData.append('metadata', JSON.stringify(metadataArray));
-    bodyFormData.append('acl', JSON.stringify(acls));
-
+    if (process.env.ENVIRONMENT === 'prod') {
+        bodyFormData.append('acl', JSON.stringify(acls_tuotanto));
+    } else {
+        bodyFormData.append('acl', JSON.stringify(acls));
+    }
     try {
         const headers = {
             ...bodyFormData.getHeaders(),
