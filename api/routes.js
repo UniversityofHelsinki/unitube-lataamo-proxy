@@ -17,6 +17,7 @@ const swaggerUi = require('swagger-ui-express');
 const apiSpecs = require('../config/swagger'); // swagger config
 const logger = require('../config/winstonLogger');
 const constants = require('../utils/constants');
+const messageKeys = require('../utils/message-keys');
 
 module.exports = function (router) {
     // https://www.npmjs.com/package/swagger-ui-express
@@ -63,7 +64,10 @@ module.exports = function (router) {
             const msg = error.message;
             logger.error(`Error GET /user ${msg} USER ${req.user.eppn}`);
             res.status(500);
-            res.json({ message: 'Error', msg });
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_USER,
+                msg
+            });
         }
     });
 
@@ -107,13 +111,16 @@ module.exports = function (router) {
            const msg = error.message;
            logger.error(`Error GET /event/:id ${msg} VIDEO ${req.params.id} USER ${req.user.eppn}`);
            res.status(500);
-           res.json({ message: 'Error', msg });
+           res.json({
+               message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_DETAILS,
+               msg
+            });
        }
     });
 
     /**
      * @swagger
-     *     /api/video/{id}:
+     *     /api/videoUrl/{id}:
      *     get:
      *       tags:
      *         - retrieve
@@ -130,18 +137,21 @@ module.exports = function (router) {
      *         default:
      *           description: Unexpected error
      */
-    router.get("/video/:id", async (req, res) => {
+    router.get("/videoUrl/:id", async (req, res) => {
         try {
-            logger.info(`GET video media url /video/:id VIDEO ${req.params.id} USER: ${req.user.eppn}`);
+            logger.info(`GET video media url /videoUrl/:id VIDEO ${req.params.id} USER: ${req.user.eppn}`);
             const publications = await apiService.getPublicationsForEvent(req.params.id);
             const filteredPublication = publicationService.filterApiChannelPublication(publications);
             const mediaUrls = publicationService.getMediaUrlsFromPublication(req.params.id, filteredPublication);
             res.json(mediaUrls);
         } catch (error) {
             const msg = error.message;
-            logger.error(`Error GET /video/:id ${msg} VIDEO ${req.params.id} USER ${req.user.eppn}`);
+            logger.error(`Error GET /videoUrl/:id ${msg} VIDEO ${req.params.id} USER ${req.user.eppn}`);
             res.status(500);
-            res.json({ message: 'Error', msg });
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_VIDEO_URL,
+                msg
+            });
         }
     });
 
@@ -151,16 +161,16 @@ module.exports = function (router) {
      *     get:
      *       tags:
      *         - retrieve
-     *       summary: Return serie by ID.
+     *       summary: Return series by ID.
      *       description: Returns selected series media and publish info
      *       parameters:
      *         - in: path
      *           name: id
      *           required: true
-     *           description: ID of the serie.
+     *           description: ID of the series.
      *       responses:
      *         200:
-     *           description: Serie.
+     *           description: Series.
      *         401:
      *           description: Not authenticated. Required Shibboleth headers not present in the request.
      *         default:
@@ -168,13 +178,16 @@ module.exports = function (router) {
      */
      router.get('/series/:id', async (req, res) => {
         try {
-            const series = await apiService.getSerie(req.params.id);
+            const series = await apiService.getSeries(req.params.id);
             await apiService.contributorsToIamGroupsAndPersons(series);
             const userSeriesWithPublished = await seriesService.addPublishedInfoInSeriesAndMoodleRoles(series);
             res.json(userSeriesWithPublished);
         } catch (error) {
             const msg = error.message;
-            res.json({message: 'Error', msg});
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_SERIES_DETAILS,
+                msg
+            });
         }
     });
 
@@ -199,20 +212,20 @@ module.exports = function (router) {
      *             properties:
      *               identifier:
      *                 type: string
-     *                 description: id of the serie
+     *                 description: id of the series
      *               title:
      *                 type: string
-     *                 description: title of the serie AKA the name
+     *                 description: title of the series AKA the name
      *               description:
      *                 type: string
-     *                 description: description for the serie
+     *                 description: description for the series
      *       responses:
      *         200:
      *           description: OK
      *         401:
      *           description: Not authenticated. Required Shibboleth headers not present in the request.
      *         500:
-     *           description: Internal server error, an error occured.    
+     *           description: Internal server error, an error occurred.    
      */
     router.put('/series/:id', async (req, res) => {
         try {
@@ -227,7 +240,10 @@ module.exports = function (router) {
         } catch (error) {
             res.status(500);
             const msg = error.message;
-            res.json({message: 'Error', msg})
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPDATE_SERIES_DETAILS,
+                msg
+            })
         }
     });
 
@@ -246,7 +262,7 @@ module.exports = function (router) {
      *         401:
      *           description: Not authenticated. Required Shibboleth headers not present in the request.
      *         500:
-     *           description: Internal server error, an error occured.
+     *           description: Internal server error, an error occurred.
      */
     router.get('/userSeries', async (req, res) => {
         try {
@@ -259,7 +275,10 @@ module.exports = function (router) {
             res.status(500);
             const msg = error.message;
             logger.error(`Error GET /userSeries ${msg} USER ${req.user.eppn}`);
-            res.json({ message: 'Error', msg })
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_SERIES_LIST_FOR_USER,
+                msg
+            })
         }
     });
 
@@ -277,7 +296,7 @@ module.exports = function (router) {
     *         401:
     *           description: Not authenticated. Required Shibboleth headers not present in the request.
     *         500:
-    *           description: Internal server error, an error occured.
+    *           description: Internal server error, an error occurred.
     */ 
     router.get('/userVideos', async (req, res) => {
         try {
@@ -296,7 +315,10 @@ module.exports = function (router) {
             res.status(500);
             const msg = error.message;
             logger.error(`Error GET /userVideos ${msg} USER ${req.user.eppn}`);
-            res.json({ message: 'Error', msg })
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_LIST_FOR_USER,
+                msg
+            })
         }
     });
 
@@ -366,7 +388,10 @@ module.exports = function (router) {
                 logger.error(`Upload dir unavailable '${uploadPath}' USER: ${req.user.eppn}`);
                 res.status(500);
                 const msg = 'Upload dir unavailable.';
-                res.json({message: 'Error', msg});
+                res.json({
+                    message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
+                    msg
+                });
             }
 
             req.pipe(req.busboy); // Pipe it trough busboy
@@ -374,7 +399,7 @@ module.exports = function (router) {
             let startTime;
 
             req.busboy.on('file', (fieldname, file, filename) => {
-                startTime = new Date()
+                startTime = new Date();
                 logger.info(`Upload of '${filename}' started  USER: ${req.user.eppn}`);
                 const filePathOnDisk = path.join(uploadPath, filename);
 
@@ -400,7 +425,10 @@ module.exports = function (router) {
                                 res.status(500)
                                 const msg = `${filename} failed to resolve inboxSeries for user`;
                                 logger.error(`POST /userVideos ${msg} USER: ${req.user.eppn}`);
-                                res.json({ message: msg });
+                                res.json({
+                                    message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
+                                    msg
+                                });
                             }
                         } catch (err) {
                             // Log error and throw reason
@@ -411,8 +439,8 @@ module.exports = function (router) {
                         try {
                             const response = await apiService.uploadVideo(filePathOnDisk, filename, inboxSeries.identifier);
 
-                            if (response && response.status == 201) {
-                                // on succes clean file from disk and return 200
+                            if (response && response.status === 201) {
+                                // on success clean file from disk and return 200
                                 deleteFile(filePathOnDisk);
                                 res.status(200);
                                 logger.info(`${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. 
@@ -422,8 +450,12 @@ module.exports = function (router) {
                             } else {
                                 // on failure clean file from disk and return 500
                                 deleteFile(filePathOnDisk);
-                                res.json({message: `${ filename } failed.`});
                                 res.status(500);
+                                const msg = `${ filename } failed.`;
+                                res.json({
+                                    message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
+                                    msg
+                                });
                             }
                         } catch (err) {
                             // Log error and throw reason
@@ -437,7 +469,10 @@ module.exports = function (router) {
                         res.status(500);
                         const msg = `Upload of ${filename} failed. ${err}.`;
                         logger.error(`POST /userVideos ${msg} USER: ${req.user.eppn}`);
-                        res.json({ message: 'Error', msg });
+                        res.json({
+                            message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
+                            msg
+                        });
                     }
                 });
             });
@@ -450,7 +485,10 @@ module.exports = function (router) {
             // TODO: ${filename} is not defined here log the file some other way
             const msg = `failed ${err}.`;
             logger.error(`POST /userVideos ${msg} USER: ${req.user.eppn}`);
-            res.json({ message: 'Error', msg });
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
+                msg
+            });
         }
     });
 
@@ -501,24 +539,37 @@ module.exports = function (router) {
      *           description: OK
      *         401:
      *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         403:
+     *           description: Forbidden. Event (video) has an active transaction in progress on the Opencast server.
      *         500:
-     *           description: Internal server error, an error occured.    
+     *           description: Internal server error, an error occurred.    
      */
     router.put('/userVideos/:id', async (req, res) => {
-       try {
-           logger.info(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn}`);
-           const rawEventMetadata = req.body;
-           const modifiedMetadata = eventsService.modifyEventMetadataForOpencast(rawEventMetadata);
-           const response = await apiService.updateEventMetadata(modifiedMetadata, req.body.identifier);
+        try {
+            logger.info(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn}`);
 
-           res.status(response.status);
-           res.json({message : response.statusText});
-       } catch(error) {
-           res.status(500);
-           const msg = error.message
-           logger.error(`Error PUT /userVideos/:id ${msg} USER ${req.user.eppn}`);
-           res.json({ message: 'Error', msg });
-       }
+            const rawEventMetadata = req.body;
+            const response = await apiService.updateEventMetadata(rawEventMetadata, req.body.identifier);
+
+            if (response.status === 200) {
+                logger.info(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} OK`);
+            } else if (response.status === 403){
+                logger.warn(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} ${response.statusText}`);
+            } else {
+                logger.error(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} ${response.statusText}`);
+            }
+
+            res.status(response.status);
+            res.json({message : response.statusText});
+        } catch(error) {
+            res.status(500);
+            const msg = error.message;
+            logger.error(`Error PUT /userVideos/:id ${msg} USER ${req.user.eppn}`);
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPDATE_EVENT_DETAILS,
+                msg
+            });
+        }
     });
 
     /**
@@ -560,31 +611,55 @@ module.exports = function (router) {
      *           description: OK, returns the new series identifier
      *         401:
      *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         403:
+     *           description: Forbidden. Series' name contained "inbox".
      *         500:
-     *           description: Internal server error, an error occured.    
+     *           description: Internal server error, an error occurred.    
      */
     router.post('/series', async (req, res) => {
         try {
             let series = req.body;
             const loggedUser = userService.getLoggedUser(req.user);
-            let exists = await seriesService.checkIfInboxSeriesExists(loggedUser, series.title);
+            let exists = series.title.toLowerCase().includes('inbox');
+
             if(exists){
                 res.status(403);
-                res.json({message: 'inbox ' + loggedUser.eppn + ' already exists. Series was not created.'});
+                res.json({message: '"inbox" not allowed in series title. Series was not created.'});
             }else{
                 let modifiedSeriesMetadata = seriesService.openCastFormatSeriesMetadata(series, loggedUser);
                 let modifiedSeriesAclMetadata = seriesService.openCastFormatSeriesAclList(series, constants.CREATE_SERIES);
                 const response = await apiService.createSeries(req.user, modifiedSeriesMetadata, modifiedSeriesAclMetadata);
                 res.json(response.data.identifier);
             }
-
         } catch (error) {
             res.status(500);
             const msg = error.message;
-            res.json({message: 'Error', msg});
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES,
+                msg
+            });
         }
     });
 
+    /**
+     * @swagger
+     *     /iamGroups/:query:
+     *     get:
+     *       tags:
+     *         - retrieve
+     *       summary: Return iam groups by query
+     *       description: Returns iam group(s) by query
+     *       parameters:
+     *         - in: path
+     *           name: path
+     *           required: true
+     *           description: query values.
+     *       responses:
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         default:
+     *           description: Unexpected error    
+     */
     router.get('/iamGroups/:query', async (req, res) => {
         try {
             logger.info(`GET /iamGroups/:query ${req.params.query}`);
@@ -592,10 +667,32 @@ module.exports = function (router) {
             res.json(iamGroups);
         } catch (error) {
             const msg = error.message;
-            res.json({message: 'Error', msg});
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_IAM_GROUPS,
+                msg
+            });
         }
     });
 
+    /**
+     * @swagger
+     *     /persons/:query:
+     *     get:
+     *       tags:
+     *         - retrieve
+     *       summary: Return persons by query
+     *       description: Returns person(s) by query
+     *       parameters:
+     *         - in: path
+     *           name: path
+     *           required: true
+     *           description: query values.
+     *       responses:
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         default:
+     *           description: Unexpected error    
+     */
     router.get('/persons/:query', async (req, res) => {
         try {
             logger.info(`GET /persons/:query ${req.params.query}`);
@@ -603,9 +700,10 @@ module.exports = function (router) {
             res.json(persons);
         } catch (error) {
             const msg = error.message;
-            res.json({message: 'Error', msg});
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_PERSONS,
+                msg
+            });
         }
     });
-
-
 };

@@ -13,7 +13,7 @@ const LATAAMO_USER_EVENTS_PATH = '/api/userVideos';
 const LATAAMO_SERIES_PATH = '/api/series';
 const LATAAMO_API_INFO_PATH = '/api/';
 const LATAAMO_USER_PATH = '/api/user';
-const LATAAMO_API_VIDEO_PATH = '/api/video/';
+const LATAAMO_API_VIDEO_PATH = '/api/videoUrl/';
 
 const constants = require('../utils/constants');
 
@@ -25,6 +25,7 @@ describe('Authentication with shibboleth headers (eppn, preferredlanguage, hyGro
             .set('eppn', 'test_request_id')
             .set('preferredlanguage', 'test_lang')
             .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
+            .set('displayName', 'Matti Meikalainen')
             .expect(200)
             .expect('Content-Type', /json/)
     });
@@ -34,6 +35,7 @@ describe('Authentication with shibboleth headers (eppn, preferredlanguage, hyGro
             .get(LATAAMO_API_INFO_PATH)
             .set('preferredlanguage', 'test_lang')
             .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
+            .set('displayName', 'Matti Meikalainen')
             .expect(401)
     });
 
@@ -42,6 +44,7 @@ describe('Authentication with shibboleth headers (eppn, preferredlanguage, hyGro
             .get(LATAAMO_API_INFO_PATH)
             .set('eppn', 'test_request_id')
             .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
+            .set('displayName', 'Matti Meikalainen')
             .expect(401)
     });
 
@@ -56,6 +59,7 @@ describe('Authentication with shibboleth headers (eppn, preferredlanguage, hyGro
             .get(LATAAMO_API_INFO_PATH)
             .set('eppn', 'test_request_id')
             .set('preferredlanguage', 'test_lang')
+            .set('displayName', 'Matti Meikalainen')
             .expect(401)
     });
 });
@@ -69,6 +73,7 @@ describe('api info returned from / route', () => {
             .set('eppn', 'test_request_id')
             .set('preferredlanguage', 'test_lang')
             .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
+            .set('displayName', 'Matti Meikalainen')
             .expect(200)
             .expect('Content-Type', /json/);
 
@@ -87,6 +92,7 @@ describe('user eppn, preferredlanguage and hyGroupCn returned from /user route',
             .set('eppn', test.mockTestUser.eppn)
             .set('preferredLanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
 
@@ -107,7 +113,7 @@ describe('user series returned from /userSeries route', () => {
         test.mockOCastSeriesApiCall();
         test.mockOCastEvent1AclCall();
         test.mockOcastEvent2AclCall();
-    })
+    });
 
     it("should return no series if user and users groups are not in the series contributors list", async () => {
         let response = await supertest(app)
@@ -115,6 +121,7 @@ describe('user series returned from /userSeries route', () => {
             .set('eppn', test.mockTestUser.eppn)
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
 
@@ -129,6 +136,7 @@ describe('user series returned from /userSeries route', () => {
             .set('eppn', 'SeriesOwnerEppn')
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
 
@@ -142,6 +150,7 @@ describe('user series returned from /userSeries route', () => {
             .set('eppn', test.mockTestUser.eppn)
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
+            .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
 
@@ -163,7 +172,7 @@ describe('user series returned from /userSeries route', () => {
         test.mockOCastEvent1AclCall();
         test.mockOcastEvent2AclCall();
         test.mockOcastEvent3AclCall();
-    })
+    });
 
     it("should return user's series published == true for the first and second series and published == false for the third series", async () => {
         let response = await supertest(app)
@@ -171,6 +180,7 @@ describe('user series returned from /userSeries route', () => {
             .set('eppn', test.mockTestUser2.eppn)
             .set('preferredlanguage', test.mockTestUser2.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser2.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
 
@@ -182,9 +192,6 @@ describe('user series returned from /userSeries route', () => {
     afterEach(() => {
         test.cleanAll();
     });
-  afterEach(() => {
-    test.cleanAll();
-  });
 });
 
 describe('user series person - and iamgroup administrators returned from /series route', () => {
@@ -193,7 +200,7 @@ describe('user series person - and iamgroup administrators returned from /series
         // mock needed opencast apis
         test.mockOCastSeriesApiCall7();
         test.mockOCastEvent1AclCall();
-    })
+    });
 
     it("should return user's series with three iamgroups and three persons ", async () => {
         let response = await supertest(app)
@@ -201,6 +208,7 @@ describe('user series person - and iamgroup administrators returned from /series
             .set('eppn', test.mockTestUser2.eppn)
             .set('preferredlanguage', test.mockTestUser2.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser2.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
 
@@ -208,9 +216,6 @@ describe('user series person - and iamgroup administrators returned from /series
         assert.lengthOf(response.body.iamgroups, 3, 'Three group administrators should be returned');
     });
 
-    afterEach(() => {
-        test.cleanAll();
-    });
     afterEach(() => {
         test.cleanAll();
     });
@@ -229,6 +234,7 @@ describe('user video urls returned from /video/id events route', () => {
         .set('eppn', 'SeriesOwnerEppn')
         .set('preferredlanguage', test.mockTestUser.preferredlanguage)
         .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+        .set('displayName', test.mockTestUser.displayName)
         .expect(200)
         .expect('Content-Type', /json/);
 
@@ -243,6 +249,7 @@ describe('user video urls returned from /video/id events route', () => {
         .set('eppn', 'SeriesOwnerEppn')
         .set('preferredlanguage', test.mockTestUser.preferredlanguage)
         .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+        .set('displayName', test.mockTestUser.displayName)
         .expect(200)
         .expect('Content-Type', /json/);
 
@@ -275,6 +282,7 @@ describe('user series put', () => {
             .set('eppn', userId)
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
 
@@ -289,6 +297,8 @@ describe('user events (videos) returned from /userEvents route', () => {
     test.mockOCastSeriesApiCall3();
     test.mockOCastSeriesApiCall4();
     test.mockOCastSeriesApiCall5();
+    test.mockOCastSeriesApiCall9();
+    test.mockOCastSeriesApiCall10();
     test.mockOCastUserApiCall();
     test.mockOCastEvents_1_ApiCall();
     test.mockOCastEvents_2_ApiCall();
@@ -312,6 +322,7 @@ describe('user events (videos) returned from /userEvents route', () => {
             .set('eppn', 'SeriesOwnerEppn')
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
 
@@ -337,6 +348,7 @@ describe('user events (videos) returned from /userEvents route', () => {
             .set('eppn', 'SeriesOwnerEppn')
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
 
@@ -353,6 +365,7 @@ describe('user events (videos) returned from /userEvents route', () => {
             .set('eppn', userId)
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
+            .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
 
@@ -370,6 +383,7 @@ describe('user events (videos) returned from /userEvents route', () => {
             .set('eppn', userId)
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3')
+            .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
 
@@ -386,6 +400,7 @@ describe('user events (videos) returned from /userEvents route', () => {
             .set('eppn', userId)
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
 
@@ -413,6 +428,7 @@ describe('user series post', () => {
             .set('eppn', 'SeriesOwnerEppn')
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
         assert.equal(response.body, test.constants.SUCCESSFUL_UPDATE_ID);
@@ -426,11 +442,140 @@ describe('user series post', () => {
             .set('eppn', userId)
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
             .expect(403)
             .expect('Content-Type', /json/);
-        assert.equal(response.body.message, 'inbox '+ userId + ' already exists. Series was not created.');
+        assert.equal(response.body.message, '"inbox" not allowed in series title. Series was not created.');
+    });
+
+    it('"inbox" string not allowed in series\' title', async () => {
+        const userId = 'SeriesOwnerEppn';
+        let response = await supertest(app)
+            .post(LATAAMO_SERIES_PATH)
+            .send({title: 'inbox in the title', description: 'Inbox sarja'})
+            .set('eppn', userId)
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
+            .expect(403)
+            .expect('Content-Type', /json/);
+        assert.equal(response.body.message, '"inbox" not allowed in series title. Series was not created.');
+    });
+
+    it('"INBOX" string not allowed in series\' title', async () => {
+        const userId = 'SeriesOwnerEppn';
+        let response = await supertest(app)
+            .post(LATAAMO_SERIES_PATH)
+            .send({title: 'INBOX in the title', description: 'Inbox sarja'})
+            .set('eppn', userId)
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
+            .expect(403)
+            .expect('Content-Type', /json/);
+        assert.equal(response.body.message, '"inbox" not allowed in series title. Series was not created.');
+    });
+
+    it('"InBoX" string not allowed in series\' title', async () => {
+        const userId = 'SeriesOwnerEppn';
+        let response = await supertest(app)
+            .post(LATAAMO_SERIES_PATH)
+            .send({title: 'InBoX in the title', description: 'Inbox sarja'})
+            .set('eppn', userId)
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
+            .expect(403)
+            .expect('Content-Type', /json/);
+        assert.equal(response.body.message, '"inbox" not allowed in series title. Series was not created.');
     });
 });
+
+
+describe('Updating videos aka events', () => {
+
+    it('Should fail if the event has an active transaction on opencast', async () => {
+        test.mockOpencastEventActiveTransaction('234234234');
+
+        let response = await supertest(app)
+            .put(LATAAMO_USER_EVENTS_PATH + '/234234234')
+            .send({title: 'Hieno', description: 'Hienon kuvaus', identifier: '234234234'}) // id from req body!
+            .set('eppn', 'SeriesOwnerEppn')
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
+            .expect(403)
+            .expect('Content-Type', /json/);
+        assert.equal(response.body.message, 'Transaction active for given event');
+    });
+
+    it('Should fail if update event metadata request returns something else than 204 from opencast', async () => {
+        test.mockOpencastEventNoActiveTransaction('234234234');
+        test.mockOpencastUpdateEventNOK('234234234');
+
+        await supertest(app)
+            .put(LATAAMO_USER_EVENTS_PATH + '/234234234')
+            .send({title: 'Hieno', description: 'Hienon kuvaus', identifier: '234234234'}) // id from req body!
+            .set('eppn', 'SeriesOwnerEppn')
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
+            .expect(400)
+            .expect('Content-Type', /json/);
+    });
+
+
+    it('Should fail if GET mediapackage request returns something else than 200 from opencast', async () => {
+        test.mockOpencastEventNoActiveTransaction('234234234');
+        test.mockOpencastUpdateEventOK('234234234');
+        test.mockOpencastFailedMediaPackageRequest('234234234');
+
+        let response = await supertest(app)
+            .put(LATAAMO_USER_EVENTS_PATH + '/234234234')
+            .send({title: 'Hieno', description: 'Hienon kuvaus', identifier: '234234234'}) // id from req body!
+            .set('eppn', 'SeriesOwnerEppn')
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
+            .expect(400)
+            .expect('Content-Type', /json/);
+    });
+
+    it('Should fail if republish metadata request returns something else than 204 from opencast', async () => {
+        test.mockOpencastEventNoActiveTransaction('234234234');
+        test.mockOpencastUpdateEventOK('234234234');
+        test.mockOpencastMediaPackageRequest('234234234');
+        test.mockOpencastFailedRepublishMetadataRequest('234234234');
+
+        await supertest(app)
+            .put(LATAAMO_USER_EVENTS_PATH + '/234234234')
+            .send({title: 'Hieno', description: 'Hienon kuvaus', identifier: '234234234'}) // id from req body!
+            .set('eppn', 'SeriesOwnerEppn')
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
+            .expect(400)
+            .expect('Content-Type', /json/);
+    });
+
+    it('Should update event if all OK', async () => {
+        test.mockOpencastEventNoActiveTransaction('234234234');
+        test.mockOpencastUpdateEventOK('234234234');
+        test.mockOpencastMediaPackageRequest('234234234');
+        test.mockOpencastRepublishMetadataRequest('234234234');
+
+        await supertest(app)
+            .put(LATAAMO_USER_EVENTS_PATH + '/234234234')
+            .send({title: 'Hieno', description: 'Hienon kuvaus', identifier: '234234234'}) // id from req body!
+            .set('eppn', 'SeriesOwnerEppn')
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
+            .expect(200)
+            .expect('Content-Type', /json/);
+    });
+});
+
 
 afterEach(() => {
     test.cleanAll();

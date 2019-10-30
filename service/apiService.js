@@ -5,6 +5,7 @@ const {format} = require('date-fns') // https://www.npmjs.com/package/date-fns
 const constants = require('../utils/constants');
 const {inboxSeriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
 const userService = require('./userService');
+const eventsService = require('./eventsService');
 
 //
 // This file is the façade for opencast server
@@ -28,20 +29,10 @@ exports.getEventsByIdentifier = async (identifier) => {
     return response.data;
 };
 
-exports.getSerie = async (serieId) => {
-    const seriesUrl = constants.OCAST_SERIES_PATH + serieId;
+exports.getSeries = async (seriesId) => {
+    const seriesUrl = constants.OCAST_SERIES_PATH + seriesId;
     const response = await security.opencastBase.get(seriesUrl);
     return response.data;
-};
-
-exports.getInboxSeries = async (user, seriesTitle) => {
-    const contributorParameters = userService.parseContributor(user.hyGroupCn);
-    const seriesUrl = constants.OCAST_SERIES_PATH + '?filter=contributors:' + user.eppn + ',' + contributorParameters;
-    const response = await security.opencastBase.get(seriesUrl);
-    const seriesTitles = response.data.map(series => series.title);
-
-    return seriesTitle==="inbox " + user.eppn && seriesTitles.includes(seriesTitle);
-
 };
 
 const addToIamGroups = ['grp-', 'hy-', 'sys-'];
@@ -60,10 +51,10 @@ exports.contributorsToIamGroupsAndPersons = async (series) => {
     })
     series.iamgroups = [...iamgroups];
     series.persons = [...persons];
-}
+};
 
 exports.updateSerieEventMetadata = async (metadata, id) => {
-    const serieMetaDataUrl = constants.OCAST_SERIES_PATH + id + constants.OCAST_METADATA_PATH + constants.OCAST_TYPE_QUERY_PARAMETER + constants.OCAST_TYPE_DUBLINCORE_SERIES;
+    const seriesMetaDataUrl = constants.OCAST_SERIES_PATH + id + constants.OCAST_METADATA_PATH + constants.OCAST_TYPE_QUERY_PARAMETER + constants.OCAST_TYPE_DUBLINCORE_SERIES;
 
     let bodyFormData = new FormData();
     bodyFormData.append('metadata', JSON.stringify(metadata));
@@ -72,13 +63,13 @@ exports.updateSerieEventMetadata = async (metadata, id) => {
             ...bodyFormData.getHeaders(),
             "Content-Length": bodyFormData.getLengthSync()
         };
-        return await security.opencastBase.put(serieMetaDataUrl, bodyFormData, {headers});
+        return await security.opencastBase.put(seriesMetaDataUrl, bodyFormData, {headers});
     } catch (error) {
         console.log(error);
         //return response.error;  // response is undefined here!
         throw error;
     }
-}
+};
 
 exports.updateSeriesAcldata = async (acl, id) => {
     const seriesAclUrl = constants.OCAST_SERIES_PATH + id + constants.OCAST_ACL_PATH;
@@ -97,7 +88,7 @@ exports.updateSeriesAcldata = async (acl, id) => {
         //return response.error;  // response is undefined here!
         throw error;
     }
-}
+};
 
 exports.getSeriesAcldata = async (id) => {
     const seriesAclUrl = constants.OCAST_SERIES_PATH + id + constants.OCAST_ACL_PATH;
@@ -109,12 +100,12 @@ exports.getSeriesAcldata = async (id) => {
         //return response.error;  // response is undefined here!
         throw error;
     }
-}
+};
 
 exports.getUserSeries = async (user) => {
 
-    const conributorParameters = userService.parseContributor(user.hyGroupCn);
-    const seriesUrl = constants.OCAST_SERIES_PATH + '?filter=contributors:' + user.eppn + ',' + conributorParameters;
+    const contributorParameters = userService.parseContributor(user.hyGroupCn);
+    const seriesUrl = constants.OCAST_SERIES_PATH + '?filter=contributors:' + user.eppn + ',' + contributorParameters;
     const response = await security.opencastBase.get(seriesUrl);
     return response.data;
 };
@@ -137,10 +128,10 @@ exports.getMediaFileMetadataForEvent = async (eventId, mediaId) => {
     return response.data;
 };
 
-exports.getEventAclsFromSerie = async (serie) => {
-    const serieId = serie;
-    let serieAclUrl = constants.OCAST_SERIES_PATH + serieId + constants.OCAST_ACL_PATH;
-    const response = await security.opencastBase.get(serieAclUrl);
+exports.getEventAclsFromSerie = async (series) => {
+    const seriesId = series;
+    let seriesAclUrl = constants.OCAST_SERIES_PATH + seriesId + constants.OCAST_ACL_PATH;
+    const response = await security.opencastBase.get(seriesAclUrl);
     return response.data;
 };
 
@@ -150,37 +141,63 @@ exports.getMetadataForEvent = async (event) => {
     return response.data;
 };
 
+
 exports.updateEventMetadata = async (metadata, eventId) => {
-    const videoMetaDataUrl = constants.OCAST_VIDEOS_PATH + eventId + constants.OCAST_METADATA_PATH + constants.OCAST_TYPE_QUERY_PARAMETER + constants.OCAST_TYPE_DUBLINCORE_EPISODE;
-
-    // republish paths
-    const republishMetadataUrl = '/workflow/start';
-    const mediapackageUrl = '/assets/episode/' + eventId;
-
     try {
+        // check evemt transaction status
+        // http://localhost:8080/admin-ng/event/99f13fe3-2e07-4cbf-bf1e-789e1f0c2a5e/hasActiveTransaction
+        const transactionStatusPath = constants.OCAST_EVENT_MEDIA_PATH_PREFIX + eventId + '/hasActiveTransaction';
+        const response1 = await security.opencastBase.get(transactionStatusPath);
+
+        if (response1.data && response1.data.active === true) {
+            // transaction active, return
+            return {
+                status: 403,
+                statusText: 'Transaction active for given event',
+                eventId: eventId
+            }
+        }
+        const videoMetaDataUrl = constants.OCAST_VIDEOS_PATH + eventId + constants.OCAST_METADATA_PATH + constants.OCAST_TYPE_QUERY_PARAMETER + constants.OCAST_TYPE_DUBLINCORE_EPISODE;
+        const modifiedMetadata = eventsService.modifyEventMetadataForOpencast(metadata);
+
+        // republish paths
+        const republishMetadataUrl = '/workflow/start';
+        const mediaPackageUrl = '/assets/episode/' + eventId;
+
         let bodyFormData = new FormData();
-        bodyFormData.append('metadata', JSON.stringify(metadata));
+        bodyFormData.append('metadata', JSON.stringify(modifiedMetadata));
 
         let headers = {
             ...bodyFormData.getHeaders(),
             "Content-Length": bodyFormData.getLengthSync()
         };
         // update event metadata
-        const response = await security.opencastBase.put(videoMetaDataUrl, bodyFormData, {headers});
+        const response2 = await security.opencastBase.put(videoMetaDataUrl, bodyFormData, {headers});
 
         // let's break if response from PUT not ok
-        if(response.status !== 204){
-            console.log(error);
-            throw error;
+        if(response2.status !== 204){
+            return {
+                status: response2.status,
+                statusText: response2.statusText,
+                eventId: eventId
+            }
         }
 
         // get mediapackage for the republish query
-        const mediapackageJson = await security.opencastBase.get(mediapackageUrl);
+        const response3 = await security.opencastBase.get(mediaPackageUrl);
+
+        if(response3.status !== 200){
+            return {
+                status: response3.status,
+                statusText: response3.statusText,
+                eventId: eventId
+            }
+        }
 
         // form data for the republish request
         bodyFormData = new FormData();
         bodyFormData.append('definition', 'republish-metadata');
-        bodyFormData.append('mediapackage', mediapackageJson.data);
+        bodyFormData.append('mediapackage', response3.data);
         bodyFormData.append('properties', constants.PROPERTIES_REPUBLISH_METADATA);
 
         headers = {
@@ -191,7 +208,11 @@ exports.updateEventMetadata = async (metadata, eventId) => {
         // do the republish request
         const resp = await security.opencastBase.post(republishMetadataUrl, bodyFormData, {headers});
 
-        return resp;
+        return {
+            status: resp.status,
+            statusText: resp.statusText,
+            eventId: eventId
+        }
     } catch (error) {
         console.log(error);
         throw error;
@@ -264,10 +285,16 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
     ];
     // these are now constant values, maybe should be editable
     const acls = constants.SERIES_ACL_TEMPLATE;
+    const acls_tuotanto = constants.SERIES_ACL_TEMPLATE_TUOTANTO;
     const processingMetadata = constants.PROCESSING_METADATA;
 
     let bodyFormData = new FormData();
     bodyFormData.append('metadata', JSON.stringify(metadataArray));
+    if (process.env.ENVIRONMENT === 'prod') {
+        bodyFormData.append('acl', JSON.stringify(acls_tuotanto));
+    } else {
+        bodyFormData.append('acl', JSON.stringify(acls));
+    }
     bodyFormData.append('acl', JSON.stringify(acls));
     bodyFormData.append('processing', JSON.stringify(processingMetadata));
     // https://nodejs.org/api/fs.html#fs_fs_createreadstream_path_options
@@ -285,7 +312,7 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
     } catch (err) {
         throw err;
     }
-}
+};
 
 
 // create the default lataamo INBOX series for the given userId
@@ -390,11 +417,15 @@ exports.createLataamoInboxSeries = async (userId) => {
 
     // these are now constant values, maybe should be editable
     const acls = constants.SERIES_ACL_TEMPLATE;
+    const acls_tuotanto = constants.SERIES_ACL_TEMPLATE_TUOTANTO;
 
     let bodyFormData = new FormData();
     bodyFormData.append('metadata', JSON.stringify(metadataArray));
-    bodyFormData.append('acl', JSON.stringify(acls));
-
+    if (process.env.ENVIRONMENT === 'prod') {
+        bodyFormData.append('acl', JSON.stringify(acls_tuotanto));
+    } else {
+        bodyFormData.append('acl', JSON.stringify(acls));
+    }
     try {
         const headers = {
             ...bodyFormData.getHeaders(),
