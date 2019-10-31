@@ -188,3 +188,54 @@ exports.modifySerieEventMetadataForOpencast = (metadata) => {
 exports.concatenateArray = (data) => Array.prototype.concat.apply([], data);
 
 
+exports.inboxSeriesHandling = async (req, res, loggedUser, filePathOnDisk) => {
+    try {
+        inboxSeries = await returnOrCreateUsersInboxSeries(loggedUser);
+
+        if (!inboxSeries || !inboxSeries.identifier) {
+            // on failure clean file from disk and return 500
+            deleteFile(filePathOnDisk);
+            res.status(500)
+            const msg = `${filename} failed to resolve inboxSeries for user`;
+            logger.error(`POST /userVideos ${msg} USER: ${req.user.eppn}`);
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
+                msg
+            });
+        }
+    } catch (err) {
+        // Log error and throw reason
+        console.log(err)
+        throw "Failed to resolve user's inbox series";
+    }
+}
+
+exports.uploadToOpenCast = async (req, res, inboxSeries, filePathOnDisk, filename, timeDiff) => {
+    try {
+        const response = await apiService.uploadVideo(filePathOnDisk, filename, inboxSeries.identifier);
+
+        if (response && response.status === 201) {
+            // on success clean file from disk and return 200
+            deleteFile(filePathOnDisk);
+            res.status(200);
+            logger.info(`${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. 
+                                    Opencast event ID: ${JSON.stringify(response.data)} USER: ${req.user.eppn}`);
+            res.json({ message: `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. 
+                                    Opencast event ID: ${JSON.stringify(response.data)}`})
+        } else {
+            // on failure clean file from disk and return 500
+            deleteFile(filePathOnDisk);
+            res.status(500);
+            const msg = `${ filename } failed.`;
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
+                msg
+            });
+        }
+    } catch (err) {
+        // Log error and throw reason
+        console.log(err);
+        throw 'Failed to upload video to opencast';
+    }
+}
+

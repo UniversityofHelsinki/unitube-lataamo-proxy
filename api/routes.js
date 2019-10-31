@@ -379,6 +379,9 @@ module.exports = function (router) {
      *           description: Internal server error, an error occured.
      */
     router.post('/userVideos', async (req, res) => {
+
+        let uploadFilename = "";
+
         try {
             logger.info(`POST /userVideos - Upload video started. USER: ${req.user.eppn}`);
             const uploadPath = path.join(__dirname, 'uploads/');
@@ -401,6 +404,7 @@ module.exports = function (router) {
             req.busboy.on('file', (fieldname, file, filename) => {
                 startTime = new Date();
                 logger.info(`Upload of '${filename}' started  USER: ${req.user.eppn}`);
+                uploadFilename = filename;
                 const filePathOnDisk = path.join(uploadPath, filename);
 
                 // Create a write stream of the new file
@@ -414,54 +418,8 @@ module.exports = function (router) {
                         const loggedUser = userService.getLoggedUser(req.user);
                         let timeDiff = new Date() - startTime;
                         logger.info(`Loading time with busboy ${timeDiff} milliseconds USER: ${req.user.eppn}`);
-
-                        let inboxSeries;
-                        try {
-                            inboxSeries = await returnOrCreateUsersInboxSeries(loggedUser);
-
-                            if (!inboxSeries || !inboxSeries.identifier) {
-                                // on failure clean file from disk and return 500
-                                deleteFile(filePathOnDisk);
-                                res.status(500)
-                                const msg = `${filename} failed to resolve inboxSeries for user`;
-                                logger.error(`POST /userVideos ${msg} USER: ${req.user.eppn}`);
-                                res.json({
-                                    message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
-                                    msg
-                                });
-                            }
-                        } catch (err) {
-                            // Log error and throw reason
-                            console.log(err)
-                            throw "Failed to resolve user's inbox series";
-                        }
-
-                        try {
-                            const response = await apiService.uploadVideo(filePathOnDisk, filename, inboxSeries.identifier);
-
-                            if (response && response.status === 201) {
-                                // on success clean file from disk and return 200
-                                deleteFile(filePathOnDisk);
-                                res.status(200);
-                                logger.info(`${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. 
-                                    Opencast event ID: ${JSON.stringify(response.data)} USER: ${req.user.eppn}`);
-                                res.json({ message: `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. 
-                                    Opencast event ID: ${JSON.stringify(response.data)}`})
-                            } else {
-                                // on failure clean file from disk and return 500
-                                deleteFile(filePathOnDisk);
-                                res.status(500);
-                                const msg = `${ filename } failed.`;
-                                res.json({
-                                    message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
-                                    msg
-                                });
-                            }
-                        } catch (err) {
-                            // Log error and throw reason
-                            console.log(err);
-                            throw 'Failed to upload video to opencast';
-                        }
+                        let inboxSeries = eventsService.inboxSeriesHandling (req, res, loggedUser, filePathOnDisk);
+                        eventsService.uploadToOpenCast(req, res, inboxSeries, filePathOnDisk, filename, timeDiff);
                     } catch (err) {
                         // catch and clean file from disk
                         // return response to user client
@@ -479,11 +437,10 @@ module.exports = function (router) {
         } catch(err) {
             // catch and clean file from disk
             // TODO: filePathOnDisk is not defined here, remove file some other way
-            // deleteFile(filePathOnDisk);
+            //deleteFile(filePathOnDisk);
             // log error and return 500
             res.status(500);
-            // TODO: ${filename} is not defined here log the file some other way
-            const msg = `failed ${err}.`;
+            const msg = `Upload of ${uploadFilename} failed. ${err}.`;
             logger.error(`POST /userVideos ${msg} USER: ${req.user.eppn}`);
             res.json({
                 message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
