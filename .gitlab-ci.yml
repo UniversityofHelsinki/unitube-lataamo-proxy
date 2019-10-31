@@ -18,18 +18,24 @@ stages:
 # Define the process for setup stage
 setup:
   stage: setup
+  tags:
+    - ohtu-build-1
   script:
     - npm install
 
 # Define the process for build stage
 build:
   stage: build
+  tags:
+    - ohtu-build-1
   script:
     - npm run build
 
 # Define the process for test stage
 test:
   stage: test
+  tags:
+    - ohtu-build-1
   script:
     - npm run coverage
   coverage: /All files\s*\|\s*([\d\.]+)/
@@ -37,6 +43,8 @@ test:
 # Define the process for deploy stage to development environment
 deploy_dev:
   stage: deploy
+  tags:
+    - ohtu-build-1
   environment:
     name: development
   only:
@@ -63,6 +71,8 @@ deploy_dev:
 # Define the process for deploy stage to test environment
 deploy_test:
   stage: deploy
+  tags:
+    - ohtu-build-1
   environment:
     name: test
   only:
@@ -89,6 +99,8 @@ deploy_test:
 # Define the process for deploy stage to test environment
 deploy_prod:
   stage: deploy
+  tags:
+    - ohtu-build-1
   environment:
     name: prod
   only:
