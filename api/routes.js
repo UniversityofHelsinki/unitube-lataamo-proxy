@@ -12,7 +12,6 @@ const iamGroupsApi = require('../service/iamGroupsApi');
 const busboy = require('connect-busboy');  //https://github.com/mscdex/connect-busboy
 const path = require('path');
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
-const {inboxSeriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
 const swaggerUi = require('swagger-ui-express');
 const apiSpecs = require('../config/swagger'); // swagger config
 const logger = require('../config/winstonLogger');
@@ -322,26 +321,6 @@ module.exports = function (router) {
         }
     });
 
-
-    const returnOrCreateUsersInboxSeries = async (loggedUser) => {
-        const lataamoInboxSeriesTitle = inboxSeriesTitleForLoggedUser(loggedUser.eppn);
-
-        try {
-            const userSeries = await apiService.getUserSeries(loggedUser);
-            let inboxSeries = userSeries.find(series => series.title === lataamoInboxSeriesTitle);
-
-            if (!inboxSeries) {
-                logger.info(`inbox series not found with title ${lataamoInboxSeriesTitle}`);
-                inboxSeries = await apiService.createLataamoInboxSeries(loggedUser.eppn);
-                logger.info(`Created inbox ${inboxSeries}`);
-            }
-            return inboxSeries;
-        }catch(err){
-            logger.error(`Error in returnOrCreateUsersInboxSeries ${err}`);
-            throw err
-        }
-    }
-
     // make sure the upload dir exists
     const ensureUploadDir = async (directory) => {
         try {
@@ -419,12 +398,12 @@ module.exports = function (router) {
                         const loggedUser = userService.getLoggedUser(req.user);
                         let timeDiff = new Date() - startTime;
                         logger.info(`Loading time with busboy ${timeDiff} milliseconds USER: ${req.user.eppn}`);
-                        let inboxSeries = eventsService.inboxSeriesHandling (req, res, loggedUser, filePathOnDisk);
-                        eventsService.uploadToOpenCast(req, res, inboxSeries, filePathOnDisk, filename, timeDiff);
+                        let inboxSeries = await eventsService.inboxSeriesHandling (req, res, loggedUser, filePathOnDisk);
+                        await eventsService.uploadToOpenCast(req, res, inboxSeries, filePathOnDisk, filename, timeDiff);
                     } catch (err) {
                         // catch and clean file from disk
                         // return response to user client
-                        deleteFile(filePathOnDisk);
+                        eventsService.deleteFile(filePathOnDisk);
                         res.status(500);
                         const msg = `Upload of ${filename} failed. ${err}.`;
                         logger.error(`POST /userVideos ${msg} USER: ${req.user.eppn}`);
@@ -437,7 +416,7 @@ module.exports = function (router) {
             });
         } catch(err) {
             // catch and clean file from disk
-            deleteFile(filePathOnDisk);
+            eventsService.deleteFile(filePathOnDisk);
             // log error and return 500
             res.status(500);
             const msg = `Upload of ${uploadFilename} failed. ${err}.`;
@@ -448,17 +427,6 @@ module.exports = function (router) {
             });
         }
     });
-
-    // clean after post
-    function deleteFile(filename) {
-        fs.unlink(filename, (err) => {
-            if (err) {
-                logger.error(`Failed to remove ${filename} | ${err}`);
-            } else {
-                logger.info(`Removed ${filename}`);
-            }
-        });
-    }
 
     /**
      * @swagger

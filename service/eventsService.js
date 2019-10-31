@@ -5,7 +5,9 @@ const moment = require('moment');
 const momentDurationFormatSetup = require("moment-duration-format");
 momentDurationFormatSetup(moment);
 const constants = require('../utils/constants');
-
+const {inboxSeriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
+const logger = require('../config/winstonLogger');
+const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 
 exports.filterEventsForClient = (ocResponseData) => {
 
@@ -187,11 +189,9 @@ exports.modifySerieEventMetadataForOpencast = (metadata) => {
 
 exports.concatenateArray = (data) => Array.prototype.concat.apply([], data);
 
-
 exports.inboxSeriesHandling = async (req, res, loggedUser, filePathOnDisk) => {
     try {
-        inboxSeries = await returnOrCreateUsersInboxSeries(loggedUser);
-
+        let inboxSeries = await returnOrCreateUsersInboxSeries(loggedUser);
         if (!inboxSeries || !inboxSeries.identifier) {
             // on failure clean file from disk and return 500
             deleteFile(filePathOnDisk);
@@ -203,6 +203,7 @@ exports.inboxSeriesHandling = async (req, res, loggedUser, filePathOnDisk) => {
                 msg
             });
         }
+        return inboxSeries;
     } catch (err) {
         // Log error and throw reason
         console.log(err)
@@ -239,3 +240,32 @@ exports.uploadToOpenCast = async (req, res, inboxSeries, filePathOnDisk, filenam
     }
 }
 
+// clean after post
+const deleteFile = (filename) => {
+    fs.unlink(filename, (err) => {
+        if (err) {
+            logger.error(`Failed to remove ${filename} | ${err}`);
+        } else {
+            logger.info(`Removed ${filename}`);
+        }
+    });
+}
+
+const returnOrCreateUsersInboxSeries = async (loggedUser) => {
+    const lataamoInboxSeriesTitle = inboxSeriesTitleForLoggedUser(loggedUser.eppn);
+
+    try {
+        const userSeries = await apiService.getUserSeries(loggedUser);
+        let inboxSeries = userSeries.find(series => series.title === lataamoInboxSeriesTitle);
+
+        if (!inboxSeries) {
+            logger.info(`inbox series not found with title ${lataamoInboxSeriesTitle}`);
+            inboxSeries = await apiService.createLataamoInboxSeries(loggedUser.eppn);
+            logger.info(`Created inbox ${inboxSeries}`);
+        }
+        return inboxSeries;
+    }catch(err){
+        logger.error(`Error in returnOrCreateUsersInboxSeries ${err}`);
+        throw err
+    }
+}
