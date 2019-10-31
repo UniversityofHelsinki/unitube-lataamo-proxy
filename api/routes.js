@@ -381,6 +381,7 @@ module.exports = function (router) {
     router.post('/userVideos', async (req, res) => {
 
         let uploadFilename = "";
+        let filePathOnDisk = "";
 
         try {
             logger.info(`POST /userVideos - Upload video started. USER: ${req.user.eppn}`);
@@ -405,7 +406,7 @@ module.exports = function (router) {
                 startTime = new Date();
                 logger.info(`Upload of '${filename}' started  USER: ${req.user.eppn}`);
                 uploadFilename = filename;
-                const filePathOnDisk = path.join(uploadPath, filename);
+                filePathOnDisk = path.join(uploadPath, filename);
 
                 // Create a write stream of the new file
                 const fstream = fs.createWriteStream(filePathOnDisk);
@@ -436,8 +437,7 @@ module.exports = function (router) {
             });
         } catch(err) {
             // catch and clean file from disk
-            // TODO: filePathOnDisk is not defined here, remove file some other way
-            //deleteFile(filePathOnDisk);
+            deleteFile(filePathOnDisk);
             // log error and return 500
             res.status(500);
             const msg = `Upload of ${uploadFilename} failed. ${err}.`;
