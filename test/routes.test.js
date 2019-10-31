@@ -39,13 +39,13 @@ describe('Authentication with shibboleth headers (eppn, preferredlanguage, hyGro
             .expect(401)
     });
 
-    it("should return 401 OK when preferredlanguage header not present", async () => {
+    it("should return 200 OK when preferredlanguage header not present", async () => {
         let response = await supertest(app)
             .get(LATAAMO_API_INFO_PATH)
             .set('eppn', 'test_request_id')
             .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
             .set('displayName', 'Matti Meikalainen')
-            .expect(401)
+            .expect(200)
     });
 
     it("should return 401 OK when preferredlanguage and eppn headers not present", async () => {
@@ -54,13 +54,13 @@ describe('Authentication with shibboleth headers (eppn, preferredlanguage, hyGro
             .expect(401)
     });
 
-    it("should return 401 OK when hyGroupCn header is not present", async () => {
+    it("should return 200 OK when hyGroupCn header is not present", async () => {
         let response = await supertest(app)
             .get(LATAAMO_API_INFO_PATH)
             .set('eppn', 'test_request_id')
             .set('preferredlanguage', 'test_lang')
             .set('displayName', 'Matti Meikalainen')
-            .expect(401)
+            .expect(200)
     });
 });
 

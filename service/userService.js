@@ -1,10 +1,10 @@
-const apiService = require('./apiService');
+const utf8 = require('utf8');
 
 exports.getLoggedUser = (user) => {
-    let eppn = user.eppn.split('@')[0];
-    let hyGroupCn = concatenateArray(user.hyGroupCn.split(";"));
-    let preferredLanguage = user.preferredLanguage;
-    let displayName = user.displayName;
+    let eppn = utf8.decode(user.eppn.split('@')[0]);
+    let hyGroupCn = concatenateArray(utf8.decode(user.hyGroupCn).split(";"));
+    let preferredLanguage = utf8.decode(user.preferredLanguage);
+    let displayName = utf8.decode(user.displayName);
     return {
         eppn: eppn,
         hyGroupCn: hyGroupCn,
