@@ -40,6 +40,7 @@
     "pretty-ms": "^5.0.0",
     "swagger-jsdoc": "^3.4.0",
     "swagger-ui-express": "^4.0.7",
+    "utf8": "^3.0.0",
     "winston": "^3.2.1",
     "winston-daily-rotate-file": "^4.2.1"
   },
