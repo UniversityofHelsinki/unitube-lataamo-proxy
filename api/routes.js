@@ -61,7 +61,7 @@ module.exports = function (router) {
             logger.info(`GET /user USER: ${req.user.eppn}`);
             res.json(userService.getLoggedUser(req.user));
         } catch(err) {
-            const msg = error.message;
+            const msg = err.message;
             logger.error(`Error GET /user ${msg} USER ${req.user.eppn}`);
             res.status(500);
             res.json({
