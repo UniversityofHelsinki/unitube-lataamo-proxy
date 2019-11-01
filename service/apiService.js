@@ -35,6 +35,15 @@ exports.getSeries = async (seriesId) => {
     return response.data;
 };
 
+exports.getInboxSeries = async (user, seriesTitle) => {
+    const contributorParameters = userService.parseContributor(user.hyGroupCn);
+    const seriesUrl = constants.OCAST_SERIES_PATH + '?filter=contributors:' + user.eppn + ',' + contributorParameters;
+    const response = await security.opencastBase.get(seriesUrl);
+    const seriesTitles = response.data.map(series => series.title);
+
+    return seriesTitle==="inbox " + user.eppn && seriesTitles.includes(seriesTitle);
+
+};
 const addToIamGroups = ['grp-', 'hy-', 'sys-'];
 
 exports.contributorsToIamGroupsAndPersons = async (series) => {
@@ -42,7 +51,7 @@ exports.contributorsToIamGroupsAndPersons = async (series) => {
     let persons = [];
 
     series.contributors.forEach(function (item) {
-        const match = addToIamGroups.filter(entry => item.includes(entry));
+        const match = constants.ADD_TO_IAM_GROUPS.filter(entry => item.includes(entry));
         if (match && match.length > 0) {
             iamgroups.push(item);
         } else {

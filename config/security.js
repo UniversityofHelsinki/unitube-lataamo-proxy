@@ -17,9 +17,9 @@ module.exports.shibbolethAuthentication = function (app, passport) {
     passport.use(new ReverseProxyStrategy({
             headers: {
                 'eppn': {alias: 'eppn', required: true},
-                'preferredlanguage': {alias: 'preferredLanguage', required: true},
-                'hyGroupCn': {alias: 'hyGroupCn', required: true},
-                'displayName': {alias: 'displayName', required: true}
+                'preferredlanguage': {alias: 'preferredLanguage', required: false},
+                'hyGroupCn': {alias: 'hyGroupCn', required: false},
+                'displayName': {alias: 'displayName', required: false}
             },
             whitelist: localhostIP
         })
