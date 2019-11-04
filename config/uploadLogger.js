@@ -26,16 +26,7 @@ const logger = createLogger({
     transports: [
         // https://medium.com/@davidmcintosh/winston-a-better-way-to-log-793ac19044c5
         new DailyRotateFile({
-            filename: `${LOG_DIR}/video-info-%DATE%.log`,
-            level: 'info',
-            datePattern: 'YYYY-MM-DD'}),
-        new DailyRotateFile({
-            filename: `${LOG_DIR}/video-warning-%DATE%.log`,
-            level: 'warn',
-            datePattern: 'YYYY-MM-DD'}),
-        new DailyRotateFile({
-            filename: `${LOG_DIR}/video-error-%DATE%.log`,
-            level: 'error',
+            filename: `${LOG_DIR}/lataamo-video-uploads-%DATE%.log`,
             datePattern: 'YYYY-MM-DD'})
     ]
 });

@@ -16,9 +16,13 @@ const {inboxSeriesTitleForLoggedUser} = require('../utils/helpers'); // helper f
 const swaggerUi = require('swagger-ui-express');
 const apiSpecs = require('../config/swagger'); // swagger config
 const logger = require('../config/winstonLogger');
-const videologger = require('../config/videoLogger');
+const uploadLogger = require('../config/uploadLogger');
 const constants = require('../utils/constants');
 const messageKeys = require('../utils/message-keys');
+const uuidv4 = require('uuid/v4');
+
+const ERROR_LEVEL = 'error';
+const INFO_LEVEL = 'info';
 
 module.exports = function (router) {
     // https://www.npmjs.com/package/swagger-ui-express
@@ -380,18 +384,22 @@ module.exports = function (router) {
      *           description: Internal server error, an error occured.
      */
     router.post('/userVideos', async (req, res) => {
+
+        const uploadId = uuidv4();
+
         try {
-            videologger.info(`POST /userVideos - Upload video started. USER: ${req.user.eppn}`);
+            uploadLogger.log(INFO_LEVEL, `POST /userVideos - Upload video started. USER: ${req.user.eppn} -- ${uploadId}`);
             const uploadPath = path.join(__dirname, 'uploads/');
 
             if (!ensureUploadDir(uploadPath)) {
                 // upload dir failed log and return error
-                videologger.error(`Upload dir unavailable '${uploadPath}' USER: ${req.user.eppn}`);
+                uploadLogger.log(ERROR_LEVEL, `Upload dir unavailable '${uploadPath}' USER: ${req.user.eppn} -- ${uploadId}`);
                 res.status(500);
                 const msg = 'Upload dir unavailable.';
                 res.json({
                     message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
-                    msg
+                    msg,
+                    id: uploadId
                 });
             }
 
@@ -401,7 +409,7 @@ module.exports = function (router) {
 
             req.busboy.on('file', (fieldname, file, filename) => {
                 startTime = new Date();
-                videologger.info(`Upload of '${filename}' started  USER: ${req.user.eppn}`);
+                uploadLogger.log(INFO_LEVEL, `Upload of '${filename}' started  USER: ${req.user.eppn} -- ${uploadId}`);
                 const filePathOnDisk = path.join(uploadPath, filename);
 
                 // Create a write stream of the new file
@@ -414,7 +422,8 @@ module.exports = function (router) {
                     try {
                         const loggedUser = userService.getLoggedUser(req.user);
                         let timeDiff = new Date() - startTime;
-                        videologger.info(`Loading time with busboy ${timeDiff} milliseconds USER: ${req.user.eppn}`);
+                        uploadLogger.log(INFO_LEVEL, 
+                            `Loading time with busboy ${timeDiff} milliseconds USER: ${req.user.eppn} -- ${uploadId}`);
 
                         let inboxSeries;
                         try {
@@ -422,18 +431,18 @@ module.exports = function (router) {
 
                             if (!inboxSeries || !inboxSeries.identifier) {
                                 // on failure clean file from disk and return 500
-                                deleteFile(filePathOnDisk);
+                                deleteFile(filePathOnDisk, uploadId);
                                 res.status(500)
                                 const msg = `${filename} failed to resolve inboxSeries for user`;
-                                videologger.error(`POST /userVideos ${msg} USER: ${req.user.eppn}`);
+                                uploadLogger.log(ERROR_LEVEL, `POST /userVideos ${msg} USER: ${req.user.eppn} -- ${uploadId}`);
                                 res.json({
                                     message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
-                                    msg
+                                    msg,
+                                    id: uploadId
                                 });
                             }
                         } catch (err) {
                             // Log error and throw reason
-                            console.log(err)
                             throw "Failed to resolve user's inbox series";
                         }
 
@@ -442,37 +451,37 @@ module.exports = function (router) {
 
                             if (response && response.status === 201) {
                                 // on success clean file from disk and return 200
-                                deleteFile(filePathOnDisk);
+                                deleteFile(filePathOnDisk, uploadId);
                                 res.status(200);
-                                videologger.info(`${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. 
-                                    Opencast event ID: ${JSON.stringify(response.data)} USER: ${req.user.eppn}`);
-                                res.json({ message: `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. 
-                                    Opencast event ID: ${JSON.stringify(response.data)}`})
+                                uploadLogger.log(INFO_LEVEL, 
+                                    `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)} USER: ${req.user.eppn} -- ${uploadId}`);
+                                res.json({ message: `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)}`})
                             } else {
                                 // on failure clean file from disk and return 500
-                                deleteFile(filePathOnDisk);
+                                deleteFile(filePathOnDisk, uploadId);
                                 res.status(500);
                                 const msg = `${ filename } failed.`;
                                 res.json({
                                     message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
-                                    msg
+                                    msg,
+                                    id: uploadId
                                 });
                             }
                         } catch (err) {
                             // Log error and throw reason
-                            console.log(err);
                             throw 'Failed to upload video to opencast';
                         }
                     } catch (err) {
                         // catch and clean file from disk
                         // return response to user client
-                        deleteFile(filePathOnDisk);
+                        deleteFile(filePathOnDisk, uploadId);
                         res.status(500);
                         const msg = `Upload of ${filename} failed. ${err}.`;
-                        videologger.error(`POST /userVideos ${msg} USER: ${req.user.eppn}`);
+                        uploadLogger.log(ERROR_LEVEL, `POST /userVideos ${msg} USER: ${req.user.eppn} -- ${uploadId}`);
                         res.json({
                             message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
-                            msg
+                            msg,
+                            id: uploadId
                         });
                     }
                 });
@@ -485,21 +494,22 @@ module.exports = function (router) {
             res.status(500);
             // TODO: ${filename} is not defined here log the file some other way
             const msg = `failed ${err}.`;
-            videologger.error(`POST /userVideos ${msg} USER: ${req.user.eppn}`);
+            uploadLogger.log(ERROR_LEVEL, `POST /userVideos ${msg} USER: ${req.user.eppn} -- ${uploadId}`);
             res.json({
                 message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
-                msg
+                msg,
+                id: uploadId
             });
         }
     });
 
     // clean after post
-    function deleteFile(filename) {
+    function deleteFile(filename, uploadId) {
         fs.unlink(filename, (err) => {
             if (err) {
-                videologger.error(`Failed to remove ${filename} | ${err}`);
+                uploadLogger.log(ERROR_LEVEL, `Failed to clean ${filename} | ${err} -- ${uploadId}`);
             } else {
-                videologger.info(`Removed ${filename}`);
+                uploadLogger.log(INFO_LEVEL, `Cleaning - removed ${filename} -- ${uploadId}`);
             }
         });
     }
