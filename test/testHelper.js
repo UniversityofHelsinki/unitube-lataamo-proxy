@@ -16,6 +16,8 @@ const CONSTANTS = Object.freeze({
     OCAST_EVENT_MEDIA_PATH_SUFFIX : '/asset/media/media.json',
     OCAST_EVENT_MEDIA_FILE_METADATA : '/asset/media/',
     OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER : '?filter=series:',
+    OCAST_VIDEOS_FILTER_USER_NAME: '?filter=title:',
+    TEST_INBOX_SERIES_ID : '3f9ff5b-7663-54b7-b7cf-950be665de3c',
     TEST_SERIES_1_ID : '80f9ff5b-4163-48b7-b7cf-950be665de3c',
     TEST_SERIES_2_ID : 'd72a8c9e-f854-4ba4-9ed2-89405fae214e',
     TEST_SERIES_3_ID : '604d78ac-733f-4c65-b13a-29172fbc0c6f',
@@ -26,7 +28,9 @@ const CONSTANTS = Object.freeze({
     TEST_MEDIA_2_METADATA_ID : 'e14f98b1-3c61-45e7-8bb0-4a32ef66dac8',
     TEST_MEDIA_3_METADATA_ID : '1ca70749-cb47-403f-8bd2-3484759e68c1',
     CREATOR_AKA_API_USER : 'Opencast Project Administrator',
-    SUCCESSFUL_UPDATE_ID : '123456'
+    SUCCESSFUL_UPDATE_ID : '123456',
+    SERIES_OWNER_EPPN : 'SeriesOwnerEppn',
+    INBOX: 'inbox'
 });
 
 
@@ -54,6 +58,24 @@ const mockTestUser2 = {
 }
 
 // TODO: put json into separate files
+
+const mockUserInboxSeries = [
+    { identifier: CONSTANTS.TEST_INBOX_SERIES_ID,
+        creator: 'Opencast Project Administrator',
+        created: '2019-06-11T12:59:40Z',
+        subjects:
+            [ 'subjects-järvi',
+                'subjects-laavu',
+                'subjects-aamupuuro',
+                'subjects-turve',
+                'subjects-salama',
+                'subjects-koivikko' ],
+        organizers: [ 'creator-kasitunnus' ],
+        publishers: [ 'publisher-kasitunnus' ],
+        contributors: [ 'SeriesOwnerEppn', 'contrib1', 'jaaki', 'grp-lataamo-1', 'grp-XYZ'],
+        title: 'inbox SERIES_OWNER_EPPN'
+    }
+];
 
 // these are filtered by contributor (eppn in contributor values)
 const mockUserSeries = [
@@ -179,6 +201,43 @@ const mockUserSeries6 =
 
 const mockUserSeriesEmpty = [];
 
+const mockUserEventsForInboxSeries =  [
+    {
+        identifier: CONSTANTS.TEST_EVENT_1_ID,
+        creator: 'Opencast Project Administrator',
+        presenter: [],
+        created: '2019-06-12T07:47:49Z',
+        subjects: [ 'Testin more' ],
+        start: '2019-06-12T07:47:49Z',
+        description: '',
+        title: 'LATAAMO-103 toka',
+        processing_state: 'SUCCEEDED',
+        duration: 0,
+        archive_version: 7,
+        contributor: [ 'SeriesOwnerEppn' ],
+        has_previews: true,
+        location: '',
+        publication_status: [ 'internal', 'engage-player', 'api', 'oaipmh-default' ]
+    },
+    {
+        identifier: CONSTANTS.TEST_EVENT_2_ID,
+        creator: 'Opencast Project Administrator',
+        presenter: [],
+        created: '2019-06-11T13:04:43Z',
+        subjects: [ 'testing' ],
+        start: '2019-06-11T13:04:43Z',
+        description: '',
+        title: 'LAATAMO-103',
+        processing_state: 'SUCCEEDED',
+        duration: 0,
+        archive_version: 7,
+        contributor: ['UNKNOWN_CONTRIBUTOR'],
+        has_previews: true,
+        location: '',
+        publication_status: [ 'internal', 'engage-player', 'api', 'oaipmh-default' ]
+    }
+];
+
 const mockUserEventsForSeries1 =  [
     {
         identifier: CONSTANTS.TEST_EVENT_1_ID,
@@ -236,6 +295,11 @@ const mockUserEventsForSeries2 =  [
     }
 ];
 
+
+// /api/series/3f9ff5b-7663-54b7-b7cf-950be665de3c/acl
+const inboxEventAclsFromSerie = () => nock(CONSTANTS.OCAST_BASE_URL)
+    .get(`/api/series/${CONSTANTS.TEST_INBOX_SERIES_ID}/acl`)
+    .reply(200, eventACLs).persist(); // this url will be called several times so let's persist
 
 // /api/series/80f9ff5b-4163-48b7-b7cf-950be665de3c/acl
 const eventAclsFromSerie = () => nock(CONSTANTS.OCAST_BASE_URL)
@@ -1178,6 +1242,20 @@ const eventMetadata_3 = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(`/api/${CONSTANTS.TEST_EVENT_3_ID}/metadata`)
     .reply(200, mockEventMetadata3);
 
+// inbox series by username /api/series/?filter=title:inbox%20SeriesOwnerEppn
+const inboxSeriesByUserName = () => {
+    let query = encodeURI(`${CONSTANTS.INBOX} ${CONSTANTS.SERIES_OWNER_EPPN}`);
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .get(CONSTANTS.OCAST_SERIES_PATH + '?filter=title:' + query)
+        .reply(200, mockUserInboxSeries)
+};
+
+// events for inbox series /api/events/?filter=series:3f9ff5b-7663-54b7-b7cf-950be665de3c
+const inboxSeriesEvents = () => nock(CONSTANTS.OCAST_BASE_URL)
+    .get(CONSTANTS.OCAST_VIDEOS_PATH)
+    .query({filter: `series:${CONSTANTS.TEST_INBOX_SERIES_ID}`})
+    .reply(200, mockUserEventsForInboxSeries);
+
 // events by series /api/events/?filter=series:80f9ff5b-4163-48b7-b7cf-950be665de3c
 const series1_Events = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(CONSTANTS.OCAST_VIDEOS_PATH)
@@ -1373,6 +1451,7 @@ module.exports.mockOCastEvent3MediaCall = event3Media;
 module.exports.mockOCastEvent1MediaMetadataCall = event1MediaMetadata;
 module.exports.mockOCastEvent2MediaMetadataCall = event2MediaMetadata;
 module.exports.mockOCastEvent3MediaMetadataCall = event3MediaMetadata;
+module.exports.mockOcastInboxEvent1AclCall = inboxEventAclsFromSerie;
 module.exports.mockOCastEvent1AclCall = eventAclsFromSerie;
 module.exports.mockOcastEvent2AclCall = eventAclsFromSerie2;
 module.exports.mockOcastEvent3AclCall = eventAclsFromSerie3;
@@ -1391,5 +1470,7 @@ module.exports.mockOpencastUpdateEventOK = mockOpencastUpdateEventOK;
 module.exports.mockOpencastUpdateEventNOK = mockOpencastUpdateEventNOK;
 module.exports.mockOpencastFailedRepublishMetadataRequest = mockOpencastFailedRepublishMetadataRequest;
 module.exports.mockOpencastRepublishMetadataRequest = mockOpencastRepublishMetadataRequest;
+module.exports.mockOpencastInboxSeriesRequest = inboxSeriesByUserName;
+module.exports.mockInboxSeriesEventsRequest = inboxSeriesEvents;
 
 module.exports.cleanAll = cleanMocks;

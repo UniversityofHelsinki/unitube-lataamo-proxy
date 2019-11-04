@@ -1,3 +1,4 @@
+const INBOX = 'inbox';
 const ESB_PERSONS_PATH = '/person/unitube/search/';
 // esb service paths
 const ESB_IAM_GROUPS_PATH = '/iam/group/unitube/search/';
@@ -30,6 +31,8 @@ const OCAST_TYPE_DUBLINCORE_EPISODE = 'dublincore/episode';
 const OCAST_TYPE_DUBLINCORE_SERIES = 'dublincore/series';
 
 const OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER = '?filter=series:';
+
+const OCAST_VIDEOS_FILTER_USER_NAME = '?filter=title:';
 
 const UPDATE_SERIES = 'update_series';
 const CREATE_SERIES = 'create_series';
@@ -135,6 +138,7 @@ module.exports = {
     OCAST_ACL_PATH,
     OCAST_METADATA_PATH,
     OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER,
+    OCAST_VIDEOS_FILTER_USER_NAME,
     PROCESSING_METADATA,
     OCAST_TYPE_QUERY_PARAMETER,
     OCAST_TYPE_DUBLINCORE_EPISODE,
@@ -150,5 +154,6 @@ module.exports = {
     CREATE_SERIES,
     ESB_PERSONS_PATH,
     PROPERTIES_REPUBLISH_METADATA,
-    SERIES_ACL_TEMPLATE_TUOTANTO
+    SERIES_ACL_TEMPLATE_TUOTANTO,
+    INBOX
 };

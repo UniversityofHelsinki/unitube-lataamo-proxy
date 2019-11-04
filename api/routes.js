@@ -249,6 +249,39 @@ module.exports = function (router) {
 
     /**
      * @swagger
+     *     /api/userInboxEvents:
+     *     get:
+     *       tags:
+     *         - retrieve
+     *       summary: Return user's inbox events.
+     *       description: Returns inbox series events for logged in user.
+     *       responses:
+     *         200:
+     *           description: List of inbox series events.
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         500:
+     *           description: Internal server error, an error occurred.
+     */
+    router.get('/userInboxEvents', async (req, res) => {
+        logger.info(`GET /userInboxEvents USER: ${req.user.eppn}`);
+        const loggedUser = userService.getLoggedUser(req.user);
+        const inboxSeries = await apiService.getUserInboxSeries(loggedUser);
+        if (inboxSeries && inboxSeries.length > 0) {
+            const identifier = seriesService.getInboxSeriesIdentifier(inboxSeries);
+            const inboxEvents = await apiService.getEventsByIdentifier(identifier);
+            const inboxEventsWithMetadatas = await eventsService.getAllEventsWithMetadatas(inboxEvents);
+            const inboxEventsWithMedia = await eventsService.getEventsWithMedia(inboxEventsWithMetadatas);
+            const inboxEventsWithMediaFile = await eventsService.getAllEventsWithMediaFileMetadata(inboxEventsWithMedia);
+            const inboxEventsWithAcls = await eventsService.getAllEventsWithAcls(inboxEventsWithMediaFile);
+            res.json(inboxEventsWithAcls);
+        } else {
+            res.json([])
+        }
+    });
+
+    /**
+     * @swagger
      *     /api/userSeries:
      *     get:
      *       tags:

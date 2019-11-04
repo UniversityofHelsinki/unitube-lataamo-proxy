@@ -10,6 +10,7 @@ let test = require('./testHelper');
 // Unitube-lataamo proxy APIs under the test
 const LATAAMO_USER_SERIES_PATH = '/api/userSeries';
 const LATAAMO_USER_EVENTS_PATH = '/api/userVideos';
+const LATAAMO_USER_INBOX_EVENTS_PATH = '/api/userInboxEvents';
 const LATAAMO_SERIES_PATH = '/api/series';
 const LATAAMO_API_INFO_PATH = '/api/';
 const LATAAMO_USER_PATH = '/api/user';
@@ -288,6 +289,48 @@ describe('user series put', () => {
 
         assert.equal(response.status, "200");
     });
+});
+
+describe('user inbox events returned from /userInboxEvents route', () => {
+    beforeEach(() => {
+        // mock needed opencast api calls
+        test.mockOpencastInboxSeriesRequest();
+        test.mockInboxSeriesEventsRequest();
+        test.mockOCastSeriesApiCall9();
+        test.mockOCastSeriesApiCall10();
+        test.mockOCastUserApiCall();
+        test.mockOCastEvents_1_ApiCall();
+        test.mockOCastEvents_2_ApiCall();
+        test.mockOCastEventMetadata_1Call();
+        test.mockOCastEventMetadata_2Call();
+        test.mockOCastEventMetadata_3Call();
+        test.mockOCastEvent1MediaCall();
+        test.mockOCastEvent2MediaCall();
+        test.mockOCastEvent3MediaCall();
+        test.mockOCastEvent1MediaMetadataCall();
+        test.mockOCastEvent2MediaMetadataCall();
+        test.mockOCastEvent3MediaMetadataCall();
+        test.mockOCastEvent1AclCall();
+        test.mockOcastEvent2AclCall();
+    });
+
+    it("should return inbox events from inbox series", async () => {
+        let response = await supertest(app)
+            .get(LATAAMO_USER_INBOX_EVENTS_PATH)
+            .set('eppn', 'SeriesOwnerEppn')
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
+            .expect(200)
+            .expect('Content-Type', /json/);
+
+        console.log(response.body);
+        assert.isArray(response.body, 'Response should be an array');
+    });
+});
+
+afterEach(() => {
+    test.cleanAll();
 });
 
 describe('user events (videos) returned from /userEvents route', () => {

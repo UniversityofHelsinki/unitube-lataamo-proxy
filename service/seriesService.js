@@ -8,7 +8,7 @@ exports.getSeriesIdentifiers = (series, user) => {
     const userSeries = filterSeriesByUser(series, user);
     const seriesIdentifiers = getSeriesIdentifiers(userSeries);
     return seriesIdentifiers;
-}
+};
 
 const filteredUserAttributes = (user) => {
     let filteredAttributes = [];
@@ -16,7 +16,7 @@ const filteredUserAttributes = (user) => {
     filteredAttributes.push(user.hyGroupCn);
     filteredAttributes = concatenateArray(filteredAttributes);
     return filteredAttributes;
-}
+};
 
 const filterSeriesByUser = (series, user) => {
     const filteredAttributes = filteredUserAttributes(user);
@@ -24,11 +24,11 @@ const filterSeriesByUser = (series, user) => {
         return serie.contributors.some(contributor => filteredAttributes.includes(contributor));
     });
     return filteredSeriesByUser;
-}
+};
 
 const getSeriesIdentifiers = (filteredSeriesByUser) => {
     return filteredSeriesByUser.map(serie => serie.identifier);
-}
+};
 
 exports.getSeriesFromEventMetadata = (metadata) => {
     const foundEpisodeFlavorMetadata = metadata.find(field => {
@@ -138,7 +138,7 @@ exports.addPublishedInfoInSeries = async (seriesList) => {
         }
     }
     return seriesListWithPublished;
-}
+};
 
 exports.addPublishedInfoInSeriesAndMoodleRoles = async (series) => {
 
@@ -151,7 +151,7 @@ exports.addPublishedInfoInSeriesAndMoodleRoles = async (series) => {
     series.moodleNumber = "";
     series.moodleNumbers = moodleNumbersFromRoles(roles);
     return series;
-}
+};
 
 let instructor = new RegExp(constants.MOODLE_ACL_INSTRUCTOR, 'g');
 let learner = new RegExp(constants.MOODLE_ACL_LEARNER, 'g');
@@ -169,4 +169,6 @@ const moodleNumbersFromRoles = (roles) => {
     const uniqueMoodleNumbers = Array.from(new Set(moodlenumbers));
 
     return uniqueMoodleNumbers;
-}
+};
+
+exports.getInboxSeriesIdentifier = (series) => series.find(series => series.identifier).identifier;
