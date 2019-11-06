@@ -66,7 +66,7 @@ module.exports = function (router) {
             logger.info(`GET /user USER: ${req.user.eppn}`);
             res.json(userService.getLoggedUser(req.user));
         } catch(err) {
-            const msg = error.message;
+            const msg = err.message;
             logger.error(`Error GET /user ${msg} USER ${req.user.eppn}`);
             res.status(500);
             res.json({
@@ -104,8 +104,8 @@ module.exports = function (router) {
        try {
            logger.info(`GET video details /event/:id VIDEO ${req.params.id} USER: ${req.user.eppn}`);
            const event = await apiService.getEvent(req.params.id);
-           const eventWithSerie = await eventsService.getEventWithSerie(event);
-           const eventWithAcls = await eventsService.getEventAclsFromSerie(eventWithSerie);
+           const eventWithSeries = await eventsService.getEventWithSeries(event);
+           const eventWithAcls = await eventsService.getEventAclsFromSeries(eventWithSeries);
            const eventWithVisibility = eventsService.calculateVisibilityProperty(eventWithAcls);
            const eventWithMetadata = await eventsService.getMetadataForEvent(eventWithVisibility);
            const eventWithMedia = await eventsService.getMediaForEvent(eventWithMetadata);
@@ -240,7 +240,7 @@ module.exports = function (router) {
             let modifiedMetadata = eventsService.modifySerieEventMetadataForOpencast(rawEventMetadata);
             let modifiedSeriesAclMetadata = seriesService.openCastFormatSeriesAclList(rawEventMetadata, constants.UPDATE_SERIES);
             const response = await apiService.updateSeriesAcldata(modifiedSeriesAclMetadata, req.body.identifier);
-            const data = await apiService.updateSerieEventMetadata(modifiedMetadata, req.body.identifier);
+            const data = await apiService.updateSeriesEventMetadata(modifiedMetadata, req.body.identifier);
             res.json({message: 'OK'});
         } catch (error) {
             res.status(500);
