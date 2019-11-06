@@ -122,14 +122,12 @@ exports.getPublicationsForEvent = async (eventId) => {
 exports.getMediaForEvent = async (event) => {
     const mediaUrl = constants.OCAST_EVENT_MEDIA_PATH_PREFIX + event.identifier + constants.OCAST_EVENT_MEDIA_PATH_SUFFIX;
     const response = await security.opencastBase.get(mediaUrl);
-    console.log(response.data);
     return response.data;
 };
 
 exports.getMediaFileMetadataForEvent = async (eventId, mediaId) => {
     const mediaFileMetadata = constants.OCAST_EVENT_MEDIA_PATH_PREFIX + eventId + constants.OCAST_EVENT_MEDIA_FILE_METADATA + mediaId + '.json';
     const response = await security.opencastBase.get(mediaFileMetadata);
-    console.log("HIT" ,response.data);
     return response.data;
 };
 

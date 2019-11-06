@@ -296,6 +296,7 @@ describe('user inbox events returned from /userInboxEvents route', () => {
         // mock needed opencast api calls
         test.mockOpencastInboxSeriesRequest();
         test.mockInboxSeriesEventsRequest();
+        test.mockOpencastInboxSeriesWithNoResultRequest();
         test.mockOcastInboxEvent1Call();
         test.mockOcastInboxEvent2Call();
         test.mockOCastEvent1InboxMediaMetadataCall();
@@ -315,9 +316,30 @@ describe('user inbox events returned from /userInboxEvents route', () => {
             .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
-
-        console.log(response.body);
         assert.isArray(response.body, 'Response should be an array');
+        assert.lengthOf(response.body, 2, 'Two events should be returned');
+        assert.equal(response.body[0].identifier, test.constants.TEST_INBOX_EVENT_1);
+        assert.equal(response.body[0].creator, 'Opencast Project Administrator');
+        assert.equal(response.body[0].processing_state, 'SUCCEEDED');
+        assert.equal(response.body[0].title, 'INBOX EVENT 1');
+        assert.equal(response.body[1].identifier, test.constants.TEST_INBOX_EVENT_2);
+        assert.equal(response.body[1].title, 'INBOX EVENT 2');
+        assert.equal(response.body[0].creator, 'Opencast Project Administrator');
+        assert.equal(response.body[0].processing_state, 'SUCCEEDED');
+        assert.deepEqual(response.body[0].visibility, []);
+    });
+
+    it("should return inbox events from inbox series", async () => {
+        let response = await supertest(app)
+            .get(LATAAMO_USER_INBOX_EVENTS_PATH)
+            .set('eppn', 'userWithNoInboxEvents')
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
+            .expect(200)
+            .expect('Content-Type', /json/);
+        assert.isArray(response.body, 'Response should be an array');
+        assert.lengthOf(response.body, 0, 'No events should be returned');
     });
 });
 

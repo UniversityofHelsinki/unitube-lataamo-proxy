@@ -63,6 +63,8 @@ const mockTestUser2 = {
 
 // TODO: put json into separate files
 
+const mockUserNoSeries = [];
+
 const mockUserInboxSeries = [
     { identifier: CONSTANTS.TEST_INBOX_SERIES_ID,
         creator: 'Opencast Project Administrator',
@@ -300,14 +302,21 @@ const mockUserEventsForSeries2 =  [
 ];
 
 // /api/series/3f9ff5b-7663-54b7-b7cf-950be665de3c/acl
-const inboxEventAclsFromSerie = () => nock(CONSTANTS.OCAST_BASE_URL)
+const inboxEventAclsFromSeries = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(`/api/series/${CONSTANTS.TEST_INBOX_SERIES_ID}/acl`)
-    .reply(200, eventACLs).persist(); // this url will be called several times so let's persist
+    .reply(200, inboxEventACLs).persist(); // this url will be called several times so let's persist
 
 // /api/series/80f9ff5b-4163-48b7-b7cf-950be665de3c/acl
-const eventAclsFromSerie = () => nock(CONSTANTS.OCAST_BASE_URL)
+const eventAclsFromSeries = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(`/api/series/${CONSTANTS.TEST_SERIES_1_ID}/acl`)
     .reply(200, eventACLs).persist(); // this url will be called several times so let's persist
+
+const inboxEventACLs = [
+    { allow: true, role: 'ROLE_USER_ADMIN', action: 'read' },
+    { allow: true, role: 'ROLE_USER_ADMIN', action: 'write' },
+    { allow: true, role: 'ROLE_ADMIN', action: 'read' },
+    { allow: true, role: 'ROLE_ADMIN', action: 'write' },
+];
 
 const eventACLs =  [
     { allow: true, role: 'ROLE_USER_ADMIN', action: 'read' },
@@ -1343,6 +1352,14 @@ const eventMetadata_3 = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(`/api/${CONSTANTS.TEST_EVENT_3_ID}/metadata`)
     .reply(200, mockEventMetadata3);
 
+// inbox series by username /api/series/?filter=title:inbox%20userWithNoInboxEvents
+const noInboxSeriesByUserName = () => {
+    let query = encodeURI(`${CONSTANTS.INBOX} userWithNoInboxEvents`);
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .get(CONSTANTS.OCAST_SERIES_PATH + '?filter=title:' + query)
+        .reply(200, mockUserNoSeries)
+};
+
 // inbox series by username /api/series/?filter=title:inbox%20SeriesOwnerEppn
 const inboxSeriesByUserName = () => {
     let query = encodeURI(`${CONSTANTS.INBOX} ${CONSTANTS.SERIES_OWNER_EPPN}`);
@@ -1556,8 +1573,8 @@ module.exports.mockOCastEvent2InboxMediaMetadataCall = event2InboxMediaMetadata;
 module.exports.mockOCastEvent1MediaMetadataCall = event1MediaMetadata;
 module.exports.mockOCastEvent2MediaMetadataCall = event2MediaMetadata;
 module.exports.mockOCastEvent3MediaMetadataCall = event3MediaMetadata;
-module.exports.mockOcastInboxEvent1AclCall = inboxEventAclsFromSerie;
-module.exports.mockOCastEvent1AclCall = eventAclsFromSerie;
+module.exports.mockOcastInboxEvent1AclCall = inboxEventAclsFromSeries;
+module.exports.mockOCastEvent1AclCall = eventAclsFromSeries;
 module.exports.mockOcastEvent2AclCall = eventAclsFromSerie2;
 module.exports.mockOcastEvent3AclCall = eventAclsFromSerie3;
 module.exports.mockLataamoPostSeriesCall = lataamoPostSeries;
@@ -1576,9 +1593,10 @@ module.exports.mockOpencastUpdateEventNOK = mockOpencastUpdateEventNOK;
 module.exports.mockOpencastFailedRepublishMetadataRequest = mockOpencastFailedRepublishMetadataRequest;
 module.exports.mockOpencastRepublishMetadataRequest = mockOpencastRepublishMetadataRequest;
 module.exports.mockOpencastInboxSeriesRequest = inboxSeriesByUserName;
+module.exports.mockOpencastInboxSeriesWithNoResultRequest = noInboxSeriesByUserName;
 module.exports.mockInboxSeriesEventsRequest = inboxSeriesEvents;
 module.exports.mockInboxEvent1MediaFileMetadataCall = event1InboxMediaFileMetadata;
 module.exports.mockInboxEvent2MediaFileMetadataCall = event2InboxMediaFileMetadata;
-module.exports.mockInboxSeriesAclCall = inboxEventAclsFromSerie;
+module.exports.mockInboxSeriesAclCall = inboxEventAclsFromSeries;
 module.exports.mockInboxSeriesCall = inboxUserSeries;
 module.exports.cleanAll = cleanMocks;

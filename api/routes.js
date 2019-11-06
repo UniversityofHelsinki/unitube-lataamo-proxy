@@ -274,7 +274,7 @@ module.exports = function (router) {
             const inboxEventsWithMedia = await eventsService.getEventsWithMedia(inboxEventsWithMetadatas);
             const inboxEventsWithMediaFile = await eventsService.getAllEventsWithMediaFileMetadata(inboxEventsWithMedia);
             const inboxEventsWithAcls = await eventsService.getAllEventsWithAcls(inboxEventsWithMediaFile);
-            res.json(inboxEventsWithAcls);
+            res.json(eventsService.filterEventsForClient(inboxEventsWithAcls));
         } else {
             res.json([])
         }
