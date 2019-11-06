@@ -296,22 +296,14 @@ describe('user inbox events returned from /userInboxEvents route', () => {
         // mock needed opencast api calls
         test.mockOpencastInboxSeriesRequest();
         test.mockInboxSeriesEventsRequest();
-        test.mockOCastSeriesApiCall9();
-        test.mockOCastSeriesApiCall10();
-        test.mockOCastUserApiCall();
-        test.mockOCastEvents_1_ApiCall();
-        test.mockOCastEvents_2_ApiCall();
-        test.mockOCastEventMetadata_1Call();
-        test.mockOCastEventMetadata_2Call();
-        test.mockOCastEventMetadata_3Call();
-        test.mockOCastEvent1MediaCall();
-        test.mockOCastEvent2MediaCall();
-        test.mockOCastEvent3MediaCall();
-        test.mockOCastEvent1MediaMetadataCall();
-        test.mockOCastEvent2MediaMetadataCall();
-        test.mockOCastEvent3MediaMetadataCall();
-        test.mockOCastEvent1AclCall();
-        test.mockOcastEvent2AclCall();
+        test.mockOcastInboxEvent1Call();
+        test.mockOcastInboxEvent2Call();
+        test.mockOCastEvent1InboxMediaMetadataCall();
+        test.mockOCastEvent2InboxMediaMetadataCall();
+        test.mockInboxEvent1MediaFileMetadataCall();
+        test.mockInboxEvent2MediaFileMetadataCall();
+        test.mockInboxSeriesAclCall();
+        test.mockInboxSeriesCall();
     });
 
     it("should return inbox events from inbox series", async () => {
