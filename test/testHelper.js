@@ -33,6 +33,7 @@ const CONSTANTS = Object.freeze({
     TEST_MEDIA_3_METADATA_ID : '1ca70749-cb47-403f-8bd2-3484759e68c1',
     CREATOR_AKA_API_USER : 'Opencast Project Administrator',
     SUCCESSFUL_UPDATE_ID : '123456',
+    OCAST_EVENT_PATH : '/api/event',
     SERIES_OWNER_EPPN : 'SeriesOwnerEppn',
     INBOX: 'inbox'
 });
@@ -244,6 +245,273 @@ const mockUserEventsForInboxSeries =  [
     }
 ];
 
+const mockUserEvent1 = {
+    "identifier": CONSTANTS.TEST_EVENT_1_ID,
+    "creator": "Lataamo Api User",
+    "presenter": [],
+    "created": "2019-10-28T09:03:00Z",
+    "subjects": [],
+    "start": "2019-10-28T09:03:00Z",
+    "description": "TEMPORARY DESCRIPTION, PLEASE UPDATE",
+    "title": "testivideo.mov",
+    "processing_state": "SUCCEEDED",
+    "duration": "00:00:03",
+    "archive_version": 10,
+    "contributor": [],
+    "has_previews": true,
+    "location": "",
+    "publication_status": [
+        "internal",
+        "engage-player",
+        "api",
+        "oaipmh-default"
+    ],
+    "isPartOf": "2803c188-e104-456b-8b6e-bf743dbbc158",
+    "acls": [
+        {
+            "allow": true,
+            "role": "ROLE_USER_ADMIN",
+            "action": "read"
+        },
+        {
+            "allow": true,
+            "role": "ROLE_USER_ADMIN",
+            "action": "write"
+        },
+        {
+            "allow": true,
+            "role": "ROLE_ADMIN",
+            "action": "read"
+        },
+        {
+            "allow": true,
+            "role": "ROLE_ADMIN",
+            "action": "write"
+        }
+    ],
+    "visibility": [],
+    "metadata": [
+        {
+            "flavor": "dublincore/extra",
+            "title": "UniTube Event Extended Metadata",
+            "fields": [
+                {
+                    "readOnly": false,
+                    "id": "order",
+                    "label": "Order",
+                    "type": "text",
+                    "value": "",
+                    "required": false
+                }
+            ]
+        },
+        {
+            "flavor": "dublincore/episode",
+            "title": "EVENTS.EVENTS.DETAILS.CATALOG.EPISODE",
+            "fields": [
+                {
+                    "readOnly": false,
+                    "id": "title",
+                    "label": "EVENTS.EVENTS.DETAILS.METADATA.TITLE",
+                    "type": "text",
+                    "value": "testivideo.mov",
+                    "required": true
+                },
+                {
+                    "readOnly": false,
+                    "id": "subjects",
+                    "label": "EVENTS.EVENTS.DETAILS.METADATA.SUBJECT",
+                    "type": "text",
+                    "value": [],
+                    "required": false
+                },
+                {
+                    "readOnly": false,
+                    "id": "description",
+                    "label": "EVENTS.EVENTS.DETAILS.METADATA.DESCRIPTION",
+                    "type": "text_long",
+                    "value": "TEMPORARY DESCRIPTION, PLEASE UPDATE",
+                    "required": false
+                },
+                {
+                    "translatable": true,
+                    "readOnly": false,
+                    "id": "language",
+                    "label": "EVENTS.EVENTS.DETAILS.METADATA.LANGUAGE",
+                    "type": "text",
+                    "value": "",
+                    "required": false
+                },
+                {
+                    "readOnly": false,
+                    "id": "rightsHolder",
+                    "label": "EVENTS.EVENTS.DETAILS.METADATA.RIGHTS",
+                    "type": "text",
+                    "value": "",
+                    "required": false
+                },
+                {
+                    "translatable": true,
+                    "readOnly": false,
+                    "id": "license",
+                    "label": "EVENTS.EVENTS.DETAILS.METADATA.LICENSE",
+                    "type": "text",
+                    "value": "ALLRIGHTS",
+                    "required": false
+                },
+                {
+                    "translatable": false,
+                    "readOnly": false,
+                    "id": "isPartOf",
+                    "label": "EVENTS.EVENTS.DETAILS.METADATA.SERIES",
+                    "type": "text",
+                    "value": "2803c188-e104-456b-8b6e-bf743dbbc158",
+                    "required": false
+                },
+                {
+                    "translatable": false,
+                    "readOnly": false,
+                    "id": "creator",
+                    "label": "EVENTS.EVENTS.DETAILS.METADATA.PRESENTERS",
+                    "type": "mixed_text",
+                    "value": [],
+                    "required": false
+                },
+                {
+                    "translatable": false,
+                    "readOnly": false,
+                    "id": "contributor",
+                    "label": "EVENTS.EVENTS.DETAILS.METADATA.CONTRIBUTORS",
+                    "type": "mixed_text",
+                    "value": [],
+                    "required": false
+                },
+                {
+                    "readOnly": false,
+                    "id": "startDate",
+                    "label": "EVENTS.EVENTS.DETAILS.METADATA.START_DATE",
+                    "type": "date",
+                    "value": "2019-10-28",
+                    "required": false
+                },
+                {
+                    "readOnly": false,
+                    "id": "startTime",
+                    "label": "EVENTS.EVENTS.DETAILS.METADATA.START_TIME",
+                    "type": "time",
+                    "value": "09:03",
+                    "required": false
+                },
+                {
+                    "readOnly": false,
+                    "id": "duration",
+                    "label": "EVENTS.EVENTS.DETAILS.METADATA.DURATION",
+                    "type": "text",
+                    "value": "00:00:00",
+                    "required": false
+                },
+                {
+                    "readOnly": false,
+                    "id": "location",
+                    "label": "EVENTS.EVENTS.DETAILS.METADATA.LOCATION",
+                    "type": "text",
+                    "value": "",
+                    "required": false
+                },
+                {
+                    "readOnly": false,
+                    "id": "source",
+                    "label": "EVENTS.EVENTS.DETAILS.METADATA.SOURCE",
+                    "type": "text",
+                    "value": "",
+                    "required": false
+                },
+                {
+                    "readOnly": true,
+                    "id": "created",
+                    "label": "EVENTS.EVENTS.DETAILS.METADATA.CREATED",
+                    "type": "date",
+                    "value": "2019-10-28T09:03:00.000Z",
+                    "required": false
+                },
+                {
+                    "readOnly": true,
+                    "id": "identifier",
+                    "label": "EVENTS.EVENTS.DETAILS.METADATA.ID",
+                    "type": "text",
+                    "value": "4ce5ca78-aef5-451b-b123-08aa98e961a4",
+                    "required": false
+                }
+            ]
+        }
+    ],
+    "media": [
+        {
+            "mimetype": "video/quicktime",
+            "id": "70591e4f-d091-4ad1-b5e1-63eaf8cede18",
+            "type": "presenter/source",
+            "url": "http://opencast:8080/assets/assets/4ce5ca78-aef5-451b-b123-08aa98e961a4/70591e4f-d091-4ad1-b5e1-63eaf8cede18/10/testivideo.mov",
+            "tags": [
+                "archive"
+            ]
+        }
+    ],
+    "mediaFileMetadata": {
+        "reference": "",
+        "duration": 3157,
+        "size": 4378335,
+        "has_audio": true,
+        "streams": {
+            "audio": [
+                {
+                    "bitdepth": "",
+                    "channels": 2,
+                    "framecount": 131,
+                    "rmspeakdb": "",
+                    "bitrate": 306814,
+                    "samplingrate": 44100,
+                    "id": "audio-1",
+                    "type": "AAC (Advanced Audio Coding)",
+                    "rmsleveldb": "",
+                    "peakleveldb": ""
+                }
+            ],
+            "video": [
+                {
+                    "framecount": 95,
+                    "scanorder": "",
+                    "framerate": 30.090271,
+                    "bitrate": 10788379,
+                    "id": "video-1",
+                    "type": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                    "resolution": "1280x720",
+                    "scantype": ""
+                }
+            ]
+        },
+        "checksum": "fa2362f6d6e6b147d73397a71d4f86a3",
+        "mimetype": "video/quicktime",
+        "id": "70591e4f-d091-4ad1-b5e1-63eaf8cede18",
+        "type": "presenter/source",
+        "url": "http://opencast:8080/assets/assets/4ce5ca78-aef5-451b-b123-08aa98e961a4/70591e4f-d091-4ad1-b5e1-63eaf8cede18/10/testivideo.mov",
+        "has_video": true,
+        "tags": [
+            "archive"
+        ]
+    },
+    "license": "ALLRIGHTS",
+    "licenses": [
+        "ALLRIGHTS",
+        "CC-BY",
+        "CC-BY-SA",
+        "CC-BY-ND",
+        "CC-BY-NC",
+        "CC-BY-NC-SA",
+        "CC-BY-NC-ND",
+        "CC0"
+    ]
+}
+
 const mockUserEventsForSeries1 =  [
     {
         identifier: CONSTANTS.TEST_EVENT_1_ID,
@@ -260,7 +528,8 @@ const mockUserEventsForSeries1 =  [
         contributor: [ 'SeriesOwnerEppn' ],
         has_previews: true,
         location: '',
-        publication_status: [ 'internal', 'engage-player', 'api', 'oaipmh-default' ]
+        publication_status: [ 'internal', 'engage-player', 'api', 'oaipmh-default' ],
+        isPartOf: CONSTANTS.TEST_SERIES_1_ID
     },
     {
         identifier: CONSTANTS.TEST_EVENT_2_ID,
@@ -277,7 +546,8 @@ const mockUserEventsForSeries1 =  [
         contributor: ['UNKNOWN_CONTRIBUTOR'],
         has_previews: true,
         location: '',
-        publication_status: [ 'internal', 'engage-player', 'api', 'oaipmh-default' ]
+        publication_status: [ 'internal', 'engage-player', 'api', 'oaipmh-default' ],
+        isPartOf: CONSTANTS.TEST_SERIES_1_ID
     }
 ];
 
@@ -297,7 +567,8 @@ const mockUserEventsForSeries2 =  [
         contributor: ['SeriesOwnerEppn', 'Other'],
         has_previews: true,
         location: '',
-        publication_status: [ 'internal', 'engage-player', 'api', 'oaipmh-default' ]
+        publication_status: [ 'internal', 'engage-player', 'api', 'oaipmh-default' ],
+        isPartOf: CONSTANTS.TEST_SERIES_2_ID
     }
 ];
 
@@ -499,8 +770,6 @@ const mockMediaData2 = [ {
     url: `http://opencast:8080/assets/assets/${CONSTANTS.TEST_EVENT_2_ID}/${CONSTANTS.TEST_MEDIA_2_METADATA_ID}/7/fruits_on_table.mp4`,
     tags: [ 'archive' ]
 }];
-
-
 
 const mockMediaData1 = [{
     mimetype: 'video/mp4',
@@ -1386,6 +1655,13 @@ const series2_Events = () => nock(CONSTANTS.OCAST_BASE_URL)
     .query({filter: `series:${CONSTANTS.TEST_SERIES_2_ID}`})
     .reply(200, mockUserEventsForSeries2);
 
+
+
+// event by id /api/event/6394a9b7-3c06-477e-841a-70862eb07bfb
+const event1 = () => nock(CONSTANTS.OCAST_BASE_URL)
+    .get(`${CONSTANTS.OCAST_VIDEOS_PATH}${CONSTANTS.TEST_EVENT_1_ID}`)
+    .reply(200, mockUserEvent1);
+
 const lataamoSeriesEmpty = () =>
     nock(CONSTANTS.OCAST_BASE_URL)
         .get(CONSTANTS.OCAST_SERIES_PATH + "?filter=contributors:Tester-XYZ,contributors:grp-XYZ")
@@ -1592,6 +1868,7 @@ module.exports.mockOpencastUpdateEventOK = mockOpencastUpdateEventOK;
 module.exports.mockOpencastUpdateEventNOK = mockOpencastUpdateEventNOK;
 module.exports.mockOpencastFailedRepublishMetadataRequest = mockOpencastFailedRepublishMetadataRequest;
 module.exports.mockOpencastRepublishMetadataRequest = mockOpencastRepublishMetadataRequest;
+module.exports.mockOpencastEvent1Request = event1;
 module.exports.mockOpencastInboxSeriesRequest = inboxSeriesByUserName;
 module.exports.mockOpencastInboxSeriesWithNoResultRequest = noInboxSeriesByUserName;
 module.exports.mockInboxSeriesEventsRequest = inboxSeriesEvents;
