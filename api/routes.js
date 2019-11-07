@@ -9,6 +9,7 @@ const apiService = require('../service/apiService');
 const userService = require('../service/userService');
 const publicationService = require('../service/publicationService');
 const iamGroupsApi = require('../service/iamGroupsApi');
+const licenseService = require('../service/licenseService');
 const busboy = require('connect-busboy');  //https://github.com/mscdex/connect-busboy
 const path = require('path');
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
@@ -111,7 +112,9 @@ module.exports = function (router) {
            const eventWithMedia = await eventsService.getMediaForEvent(eventWithMetadata);
            const eventWithMediaFileMetadata = await eventsService.getMediaFileMetadataForEvent(eventWithMedia);
            const eventWithDuration = eventsService.getDurationFromMediaFileMetadataForEvent(eventWithMediaFileMetadata);
-           res.json(eventWithDuration);
+           const eventWithLicense = eventsService.getLicenseFromEventMetadata(eventWithDuration);
+           const eventWithLicenseOptions = licenseService.getLicenseOptions(eventWithLicense);
+           res.json(eventWithLicenseOptions);
        } catch (error) {
            const msg = error.message;
            logger.error(`Error GET /event/:id ${msg} VIDEO ${req.params.id} USER ${req.user.eppn}`);

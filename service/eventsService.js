@@ -101,6 +101,20 @@ exports.getAllEventsWithAcls = async (events) => {
 };
 
 exports.getEventWithSeries = async (event) => {
+exports.getLicenseFromEventMetadata = (event) => {
+    const foundEpisodeFlavorMetadata = event.metadata.find(field => {
+        return field.flavor === 'dublincore/episode';
+    });
+    const foundFieldWithLicenseInfo = foundEpisodeFlavorMetadata.fields.find(field => {
+        return field.id === 'license';
+    });
+    return {
+        ...event,
+        license : foundFieldWithLicenseInfo ? foundFieldWithLicenseInfo.value : ''
+    }
+};
+
+exports.getEventWithSeries = async (event) => {
     const metadata = await apiService.getMetadataForEvent(event);
     const serie = seriesService.getSeriesFromEventMetadata(metadata);
     return {
@@ -152,15 +166,20 @@ exports.getDurationFromMediaFileMetadataForEvent = (event) => {
 exports.modifyEventMetadataForOpencast = (metadata) => {
     const metadataArray = [];
 
-    metadataArray.push({
+    metadataArray.push(
+        {
             "id" : "title",
-            "value": metadata.title },
+            "value": metadata.title
+        },
         {
             "id" : "description",
             "value": metadata.description
         }, {
             "id" : "isPartOf",
             "value" : metadata.isPartOf
+        }, {
+            "id": "license",
+            "value": metadata.license
         });
 
     return metadataArray;
