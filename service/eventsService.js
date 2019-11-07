@@ -90,7 +90,7 @@ exports.getAllEventsWithAcls = async (events) => {
     return Promise.all(events.map(async event => {
         let metadata = event.metadata;
         let seriesField = seriesService.getSeriesFromEventMetadata(metadata);
-        let acls = await apiService.getEventAclsFromSerie(seriesField.value);
+        let acls = await apiService.getEventAclsFromSeries(seriesField.value);
         let series = await apiService.getSeries(seriesField.value);
         return {
             ...event,
@@ -100,7 +100,20 @@ exports.getAllEventsWithAcls = async (events) => {
     }));
 };
 
-exports.getEventWithSerie = async (event) => {
+exports.getLicenseFromEventMetadata = (event) => {
+    const foundEpisodeFlavorMetadata = event.metadata.find(field => {
+        return field.flavor === 'dublincore/episode';
+    });
+    const foundFieldWithLicenseInfo = foundEpisodeFlavorMetadata.fields.find(field => {
+        return field.id === 'license';
+    });
+    return {
+        ...event,
+        license : foundFieldWithLicenseInfo ? foundFieldWithLicenseInfo.value : ''
+    }
+};
+
+exports.getEventWithSeries = async (event) => {
     const metadata = await apiService.getMetadataForEvent(event);
     const serie = seriesService.getSeriesFromEventMetadata(metadata);
     return {
@@ -109,8 +122,8 @@ exports.getEventWithSerie = async (event) => {
     }
 };
 
-exports.getEventAclsFromSerie = async (eventWithSerie) => {
-    const eventAcls = await apiService.getEventAclsFromSerie(eventWithSerie.isPartOf);
+exports.getEventAclsFromSeries = async (eventWithSerie) => {
+    const eventAcls = await apiService.getEventAclsFromSeries(eventWithSerie.isPartOf);
     return {
         ...eventWithSerie,
         acls : eventAcls
@@ -152,15 +165,20 @@ exports.getDurationFromMediaFileMetadataForEvent = (event) => {
 exports.modifyEventMetadataForOpencast = (metadata) => {
     const metadataArray = [];
 
-    metadataArray.push({
+    metadataArray.push(
+        {
             "id" : "title",
-            "value": metadata.title },
+            "value": metadata.title
+        },
         {
             "id" : "description",
             "value": metadata.description
         }, {
             "id" : "isPartOf",
             "value" : metadata.isPartOf
+        }, {
+            "id": "license",
+            "value": metadata.license
         });
 
     return metadataArray;

@@ -9,6 +9,7 @@ const apiService = require('../service/apiService');
 const userService = require('../service/userService');
 const publicationService = require('../service/publicationService');
 const iamGroupsApi = require('../service/iamGroupsApi');
+const licenseService = require('../service/licenseService');
 const busboy = require('connect-busboy');  //https://github.com/mscdex/connect-busboy
 const path = require('path');
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
@@ -16,8 +17,13 @@ const {inboxSeriesTitleForLoggedUser} = require('../utils/helpers'); // helper f
 const swaggerUi = require('swagger-ui-express');
 const apiSpecs = require('../config/swagger'); // swagger config
 const logger = require('../config/winstonLogger');
+const uploadLogger = require('../config/uploadLogger');
 const constants = require('../utils/constants');
 const messageKeys = require('../utils/message-keys');
+const uuidv4 = require('uuid/v4');
+
+const ERROR_LEVEL = 'error';
+const INFO_LEVEL = 'info';
 
 module.exports = function (router) {
     // https://www.npmjs.com/package/swagger-ui-express
@@ -99,14 +105,16 @@ module.exports = function (router) {
        try {
            logger.info(`GET video details /event/:id VIDEO ${req.params.id} USER: ${req.user.eppn}`);
            const event = await apiService.getEvent(req.params.id);
-           const eventWithSerie = await eventsService.getEventWithSerie(event);
-           const eventWithAcls = await eventsService.getEventAclsFromSerie(eventWithSerie);
+           const eventWithSeries = await eventsService.getEventWithSeries(event);
+           const eventWithAcls = await eventsService.getEventAclsFromSeries(eventWithSeries);
            const eventWithVisibility = eventsService.calculateVisibilityProperty(eventWithAcls);
            const eventWithMetadata = await eventsService.getMetadataForEvent(eventWithVisibility);
            const eventWithMedia = await eventsService.getMediaForEvent(eventWithMetadata);
            const eventWithMediaFileMetadata = await eventsService.getMediaFileMetadataForEvent(eventWithMedia);
            const eventWithDuration = eventsService.getDurationFromMediaFileMetadataForEvent(eventWithMediaFileMetadata);
-           res.json(eventWithDuration);
+           const eventWithLicense = eventsService.getLicenseFromEventMetadata(eventWithDuration);
+           const eventWithLicenseOptions = licenseService.getLicenseOptions(eventWithLicense);
+           res.json(eventWithLicenseOptions);
        } catch (error) {
            const msg = error.message;
            logger.error(`Error GET /event/:id ${msg} VIDEO ${req.params.id} USER ${req.user.eppn}`);
@@ -235,7 +243,7 @@ module.exports = function (router) {
             let modifiedMetadata = eventsService.modifySerieEventMetadataForOpencast(rawEventMetadata);
             let modifiedSeriesAclMetadata = seriesService.openCastFormatSeriesAclList(rawEventMetadata, constants.UPDATE_SERIES);
             const response = await apiService.updateSeriesAcldata(modifiedSeriesAclMetadata, req.body.identifier);
-            const data = await apiService.updateSerieEventMetadata(modifiedMetadata, req.body.identifier);
+            const data = await apiService.updateSeriesEventMetadata(modifiedMetadata, req.body.identifier);
             res.json({message: 'OK'});
         } catch (error) {
             res.status(500);
@@ -379,18 +387,22 @@ module.exports = function (router) {
      *           description: Internal server error, an error occured.
      */
     router.post('/userVideos', async (req, res) => {
+
+        const uploadId = uuidv4();
+
         try {
-            logger.info(`POST /userVideos - Upload video started. USER: ${req.user.eppn}`);
+            uploadLogger.log(INFO_LEVEL, `POST /userVideos - Upload video started. USER: ${req.user.eppn} -- ${uploadId}`);
             const uploadPath = path.join(__dirname, 'uploads/');
 
             if (!ensureUploadDir(uploadPath)) {
                 // upload dir failed log and return error
-                logger.error(`Upload dir unavailable '${uploadPath}' USER: ${req.user.eppn}`);
+                uploadLogger.log(ERROR_LEVEL, `Upload dir unavailable '${uploadPath}' USER: ${req.user.eppn} -- ${uploadId}`);
                 res.status(500);
                 const msg = 'Upload dir unavailable.';
                 res.json({
                     message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
-                    msg
+                    msg,
+                    id: uploadId
                 });
             }
 
@@ -400,7 +412,7 @@ module.exports = function (router) {
 
             req.busboy.on('file', (fieldname, file, filename) => {
                 startTime = new Date();
-                logger.info(`Upload of '${filename}' started  USER: ${req.user.eppn}`);
+                uploadLogger.log(INFO_LEVEL, `Upload of '${filename}' started  USER: ${req.user.eppn} -- ${uploadId}`);
                 const filePathOnDisk = path.join(uploadPath, filename);
 
                 // Create a write stream of the new file
@@ -413,7 +425,8 @@ module.exports = function (router) {
                     try {
                         const loggedUser = userService.getLoggedUser(req.user);
                         let timeDiff = new Date() - startTime;
-                        logger.info(`Loading time with busboy ${timeDiff} milliseconds USER: ${req.user.eppn}`);
+                        uploadLogger.log(INFO_LEVEL, 
+                            `Loading time with busboy ${timeDiff} milliseconds USER: ${req.user.eppn} -- ${uploadId}`);
 
                         let inboxSeries;
                         try {
@@ -421,18 +434,18 @@ module.exports = function (router) {
 
                             if (!inboxSeries || !inboxSeries.identifier) {
                                 // on failure clean file from disk and return 500
-                                deleteFile(filePathOnDisk);
+                                deleteFile(filePathOnDisk, uploadId);
                                 res.status(500)
                                 const msg = `${filename} failed to resolve inboxSeries for user`;
-                                logger.error(`POST /userVideos ${msg} USER: ${req.user.eppn}`);
+                                uploadLogger.log(ERROR_LEVEL, `POST /userVideos ${msg} USER: ${req.user.eppn} -- ${uploadId}`);
                                 res.json({
                                     message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
-                                    msg
+                                    msg,
+                                    id: uploadId
                                 });
                             }
                         } catch (err) {
                             // Log error and throw reason
-                            console.log(err)
                             throw "Failed to resolve user's inbox series";
                         }
 
@@ -441,37 +454,37 @@ module.exports = function (router) {
 
                             if (response && response.status === 201) {
                                 // on success clean file from disk and return 200
-                                deleteFile(filePathOnDisk);
+                                deleteFile(filePathOnDisk, uploadId);
                                 res.status(200);
-                                logger.info(`${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. 
-                                    Opencast event ID: ${JSON.stringify(response.data)} USER: ${req.user.eppn}`);
-                                res.json({ message: `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. 
-                                    Opencast event ID: ${JSON.stringify(response.data)}`})
+                                uploadLogger.log(INFO_LEVEL, 
+                                    `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)} USER: ${req.user.eppn} -- ${uploadId}`);
+                                res.json({ message: `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)}`})
                             } else {
                                 // on failure clean file from disk and return 500
-                                deleteFile(filePathOnDisk);
+                                deleteFile(filePathOnDisk, uploadId);
                                 res.status(500);
                                 const msg = `${ filename } failed.`;
                                 res.json({
                                     message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
-                                    msg
+                                    msg,
+                                    id: uploadId
                                 });
                             }
                         } catch (err) {
                             // Log error and throw reason
-                            console.log(err);
                             throw 'Failed to upload video to opencast';
                         }
                     } catch (err) {
                         // catch and clean file from disk
                         // return response to user client
-                        deleteFile(filePathOnDisk);
+                        deleteFile(filePathOnDisk, uploadId);
                         res.status(500);
                         const msg = `Upload of ${filename} failed. ${err}.`;
-                        logger.error(`POST /userVideos ${msg} USER: ${req.user.eppn}`);
+                        uploadLogger.log(ERROR_LEVEL, `POST /userVideos ${msg} USER: ${req.user.eppn} -- ${uploadId}`);
                         res.json({
                             message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
-                            msg
+                            msg,
+                            id: uploadId
                         });
                     }
                 });
@@ -484,21 +497,22 @@ module.exports = function (router) {
             res.status(500);
             // TODO: ${filename} is not defined here log the file some other way
             const msg = `failed ${err}.`;
-            logger.error(`POST /userVideos ${msg} USER: ${req.user.eppn}`);
+            uploadLogger.log(ERROR_LEVEL, `POST /userVideos ${msg} USER: ${req.user.eppn} -- ${uploadId}`);
             res.json({
                 message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
-                msg
+                msg,
+                id: uploadId
             });
         }
     });
 
     // clean after post
-    function deleteFile(filename) {
+    function deleteFile(filename, uploadId) {
         fs.unlink(filename, (err) => {
             if (err) {
-                logger.error(`Failed to remove ${filename} | ${err}`);
+                uploadLogger.log(ERROR_LEVEL, `Failed to clean ${filename} | ${err} -- ${uploadId}`);
             } else {
-                logger.info(`Removed ${filename}`);
+                uploadLogger.log(INFO_LEVEL, `Cleaning - removed ${filename} -- ${uploadId}`);
             }
         });
     }

@@ -35,17 +35,6 @@ exports.getSeries = async (seriesId) => {
     return response.data;
 };
 
-exports.getInboxSeries = async (user, seriesTitle) => {
-    const contributorParameters = userService.parseContributor(user.hyGroupCn);
-    const seriesUrl = constants.OCAST_SERIES_PATH + '?filter=contributors:' + user.eppn + ',' + contributorParameters;
-    const response = await security.opencastBase.get(seriesUrl);
-    const seriesTitles = response.data.map(series => series.title);
-
-    return seriesTitle==="inbox " + user.eppn && seriesTitles.includes(seriesTitle);
-
-};
-const addToIamGroups = ['grp-', 'hy-', 'sys-'];
-
 exports.contributorsToIamGroupsAndPersons = async (series) => {
     let iamgroups = [];
     let persons = [];
@@ -62,7 +51,7 @@ exports.contributorsToIamGroupsAndPersons = async (series) => {
     series.persons = [...persons];
 };
 
-exports.updateSerieEventMetadata = async (metadata, id) => {
+exports.updateSeriesEventMetadata = async (metadata, id) => {
     const seriesMetaDataUrl = constants.OCAST_SERIES_PATH + id + constants.OCAST_METADATA_PATH + constants.OCAST_TYPE_QUERY_PARAMETER + constants.OCAST_TYPE_DUBLINCORE_SERIES;
 
     let bodyFormData = new FormData();
@@ -137,7 +126,7 @@ exports.getMediaFileMetadataForEvent = async (eventId, mediaId) => {
     return response.data;
 };
 
-exports.getEventAclsFromSerie = async (series) => {
+exports.getEventAclsFromSeries = async (series) => {
     const seriesId = series;
     let seriesAclUrl = constants.OCAST_SERIES_PATH + seriesId + constants.OCAST_ACL_PATH;
     const response = await security.opencastBase.get(seriesAclUrl);
