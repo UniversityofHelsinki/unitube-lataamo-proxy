@@ -326,7 +326,7 @@ describe('user inbox events returned from /userInboxEvents route', () => {
         assert.equal(response.body[1].title, 'INBOX EVENT 2');
         assert.equal(response.body[0].creator, 'Opencast Project Administrator');
         assert.equal(response.body[0].processing_state, 'SUCCEEDED');
-        assert.deepEqual(response.body[0].visibility, []);
+        assert.deepEqual(response.body[0].visibility, ["status_private"]);
     });
 
     it("should return inbox events from inbox series", async () => {

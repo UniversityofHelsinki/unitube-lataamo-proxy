@@ -10,6 +10,7 @@ const ROLE_KATSOMO = 'ROLE_KATSOMO';
 const MOODLE_ACL_INSTRUCTOR = '_Instructor';
 const MOODLE_ACL_LEARNER = '_Learner';
 const STATUS_PUBLISHED = 'status_published';
+const STATUS_PRIVATE = 'status_private';
 const STATUS_MOODLE = 'status_moodle';
 
 const VIDEO_PRESENTER_DELIVERY = 'presenter/delivery';
@@ -123,6 +124,7 @@ module.exports = {
     ADD_TO_IAM_GROUPS,
     PUBLIC_ROLES,
     STATUS_PUBLISHED,
+    STATUS_PRIVATE,
     STATUS_MOODLE,
     MOODLE_ACL_INSTRUCTOR,
     MOODLE_ACL_LEARNER,
