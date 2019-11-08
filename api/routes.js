@@ -2,28 +2,15 @@
 require('dotenv').config();
 
 const api = require('./apiInfo');
-const eventsService = require('../service/eventsService');
-const seriesService = require('../service/seriesService');
-const personApiService = require('../service/personApiService');
-const apiService = require('../service/apiService');
-const userService = require('../service/userService');
-const publicationService = require('../service/publicationService');
-const iamGroupsApi = require('../service/iamGroupsApi');
-const licenseService = require('../service/licenseService');
-const busboy = require('connect-busboy');  //https://github.com/mscdex/connect-busboy
-const path = require('path');
-const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
-const {inboxSeriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
+const user = require('./user');
+const event = require('./event');
+const video = require('./video');
+const series = require('./series');
+const videoUpload = require('./videoUpload');
+const iamGroups = require('./iamGroups');
+const persons = require('./persons');
 const swaggerUi = require('swagger-ui-express');
 const apiSpecs = require('../config/swagger'); // swagger config
-const logger = require('../config/winstonLogger');
-const uploadLogger = require('../config/uploadLogger');
-const constants = require('../utils/constants');
-const messageKeys = require('../utils/message-keys');
-const uuidv4 = require('uuid/v4');
-
-const ERROR_LEVEL = 'error';
-const INFO_LEVEL = 'info';
 
 module.exports = function (router) {
     // https://www.npmjs.com/package/swagger-ui-express
@@ -62,25 +49,7 @@ module.exports = function (router) {
      *         default:
      *           description: Unexpected error     
      */
-    router.get("/user", (req, res) => {
-        try {
-            logger.info(`GET /user USER: ${req.user.eppn}`);
-            res.json(userService.getLoggedUser(req.user));
-        } catch(err) {
-            const msg = err.message;
-            logger.error(`Error GET /user ${msg} USER ${req.user.eppn}`);
-            res.status(500);
-            res.json({
-                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_USER,
-                msg
-            });
-        }
-    });
-
-    // busboy middle-ware
-    router.use(busboy({
-        highWaterMark: 2 * 1024 * 1024, // Set 2MiB buffer
-    }));
+    router.get("/user", user.userInfo);
 
     /**
      * @swagger
@@ -101,30 +70,7 @@ module.exports = function (router) {
      *         default:
      *           description: Unexpected error    
      */
-    router.get("/event/:id", async (req, res) => {
-       try {
-           logger.info(`GET video details /event/:id VIDEO ${req.params.id} USER: ${req.user.eppn}`);
-           const event = await apiService.getEvent(req.params.id);
-           const eventWithSeries = await eventsService.getEventWithSeries(event);
-           const eventWithAcls = await eventsService.getEventAclsFromSeries(eventWithSeries);
-           const eventWithVisibility = eventsService.calculateVisibilityProperty(eventWithAcls);
-           const eventWithMetadata = await eventsService.getMetadataForEvent(eventWithVisibility);
-           const eventWithMedia = await eventsService.getMediaForEvent(eventWithMetadata);
-           const eventWithMediaFileMetadata = await eventsService.getMediaFileMetadataForEvent(eventWithMedia);
-           const eventWithDuration = eventsService.getDurationFromMediaFileMetadataForEvent(eventWithMediaFileMetadata);
-           const eventWithLicense = eventsService.getLicenseFromEventMetadata(eventWithDuration);
-           const eventWithLicenseOptions = licenseService.getLicenseOptions(eventWithLicense);
-           res.json(eventWithLicenseOptions);
-       } catch (error) {
-           const msg = error.message;
-           logger.error(`Error GET /event/:id ${msg} VIDEO ${req.params.id} USER ${req.user.eppn}`);
-           res.status(500);
-           res.json({
-               message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_DETAILS,
-               msg
-            });
-       }
-    });
+    router.get("/event/:id", event.getEvent);
 
     /**
      * @swagger
@@ -145,23 +91,7 @@ module.exports = function (router) {
      *         default:
      *           description: Unexpected error
      */
-    router.get("/videoUrl/:id", async (req, res) => {
-        try {
-            logger.info(`GET video media url /videoUrl/:id VIDEO ${req.params.id} USER: ${req.user.eppn}`);
-            const publications = await apiService.getPublicationsForEvent(req.params.id);
-            const filteredPublication = publicationService.filterApiChannelPublication(publications);
-            const mediaUrls = publicationService.getMediaUrlsFromPublication(req.params.id, filteredPublication);
-            res.json(mediaUrls);
-        } catch (error) {
-            const msg = error.message;
-            logger.error(`Error GET /videoUrl/:id ${msg} VIDEO ${req.params.id} USER ${req.user.eppn}`);
-            res.status(500);
-            res.json({
-                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_VIDEO_URL,
-                msg
-            });
-        }
-    });
+    router.get("/videoUrl/:id", video.getVideoUrl);
 
     /**
      * @swagger
@@ -184,20 +114,7 @@ module.exports = function (router) {
      *         default:
      *           description: Unexpected error
      */
-     router.get('/series/:id', async (req, res) => {
-        try {
-            const series = await apiService.getSeries(req.params.id);
-            await apiService.contributorsToIamGroupsAndPersons(series);
-            const userSeriesWithPublished = await seriesService.addPublishedInfoInSeriesAndMoodleRoles(series);
-            res.json(userSeriesWithPublished);
-        } catch (error) {
-            const msg = error.message;
-            res.json({
-                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_SERIES_DETAILS,
-                msg
-            });
-        }
-    });
+     router.get('/series/:id', series.getSeries);
 
     /**
      * @swagger
@@ -235,25 +152,7 @@ module.exports = function (router) {
      *         500:
      *           description: Internal server error, an error occurred.    
      */
-    router.put('/series/:id', async (req, res) => {
-        try {
-            const rawEventMetadata = req.body;
-            const loggedUser = userService.getLoggedUser(req.user);
-            seriesService.addUserToEmptyContributorsList(rawEventMetadata, loggedUser);
-            let modifiedMetadata = eventsService.modifySerieEventMetadataForOpencast(rawEventMetadata);
-            let modifiedSeriesAclMetadata = seriesService.openCastFormatSeriesAclList(rawEventMetadata, constants.UPDATE_SERIES);
-            const response = await apiService.updateSeriesAcldata(modifiedSeriesAclMetadata, req.body.identifier);
-            const data = await apiService.updateSeriesEventMetadata(modifiedMetadata, req.body.identifier);
-            res.json({message: 'OK'});
-        } catch (error) {
-            res.status(500);
-            const msg = error.message;
-            res.json({
-                message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPDATE_SERIES_DETAILS,
-                msg
-            })
-        }
-    });
+    router.put('/series/:id', series.updateSeries);
 
     /**
      * @swagger
@@ -305,23 +204,7 @@ module.exports = function (router) {
      *         500:
      *           description: Internal server error, an error occurred.
      */
-    router.get('/userSeries', async (req, res) => {
-        try {
-            logger.info(`GET /userSeries USER: ${req.user.eppn}`);
-            const loggedUser = userService.getLoggedUser(req.user);
-            const userSeries = await apiService.getUserSeries(loggedUser);
-            const userSeriesWithPublished = await seriesService.addPublishedInfoInSeries(userSeries);
-            res.json(userSeriesWithPublished);
-        } catch (error) {
-            res.status(500);
-            const msg = error.message;
-            logger.error(`Error GET /userSeries ${msg} USER ${req.user.eppn}`);
-            res.json({
-                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_SERIES_LIST_FOR_USER,
-                msg
-            })
-        }
-    });
+    router.get('/userSeries', series.getUserSeries);
 
    /**
     * @swagger
@@ -339,62 +222,8 @@ module.exports = function (router) {
     *         500:
     *           description: Internal server error, an error occurred.
     */ 
-    router.get('/userVideos', async (req, res) => {
-        try {
-            logger.info(`GET /userVideos USER: ${req.user.eppn}`);
-            const loggedUser = userService.getLoggedUser(req.user);
-            const ownSeries = await apiService.getUserSeries(loggedUser);
-            const seriesIdentifiers = seriesService.getSeriesIdentifiers(ownSeries, loggedUser);
-            const allEvents = await eventsService.getAllEvents(seriesIdentifiers);
-            const concatenatedEventsArray = eventsService.concatenateArray(allEvents);
-            const allEventsWithMetaDatas = await eventsService.getAllEventsWithMetadatas(concatenatedEventsArray);
-            const allEventsWithMedia = await eventsService.getEventsWithMedia(allEventsWithMetaDatas);
-            const allEventsWithMediaFile = await eventsService.getAllEventsWithMediaFileMetadata(allEventsWithMedia);
-            const allEventsWithAcls = await eventsService.getAllEventsWithAcls(allEventsWithMediaFile);
-            res.json(eventsService.filterEventsForClient(allEventsWithAcls));
-        } catch (error) {
-            res.status(500);
-            const msg = error.message;
-            logger.error(`Error GET /userVideos ${msg} USER ${req.user.eppn}`);
-            res.json({
-                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_LIST_FOR_USER,
-                msg
-            })
-        }
-    });
+    router.get('/userVideos', video.getUserVideos);
 
-
-    const returnOrCreateUsersInboxSeries = async (loggedUser) => {
-        const lataamoInboxSeriesTitle = inboxSeriesTitleForLoggedUser(loggedUser.eppn);
-
-        try {
-            const userSeries = await apiService.getUserSeries(loggedUser);
-            let inboxSeries = userSeries.find(series => series.title === lataamoInboxSeriesTitle);
-
-            if (!inboxSeries) {
-                logger.info(`inbox series not found with title ${lataamoInboxSeriesTitle}`);
-                inboxSeries = await apiService.createLataamoInboxSeries(loggedUser.eppn);
-                logger.info(`Created inbox ${inboxSeries}`);
-            }
-            return inboxSeries;
-        }catch(err){
-            logger.error(`Error in returnOrCreateUsersInboxSeries ${err}`);
-            throw err
-        }
-    }
-
-    // make sure the upload dir exists
-    const ensureUploadDir = async (directory) => {
-        try {
-            // https://github.com/jprichardson/node-fs-extra/blob/HEAD/docs/ensureDir.md
-            await fs.ensureDir(directory)
-            logger.info(`Using uploadPath ${directory}`);
-            return true;
-        } catch (err) {
-            logger.error(`Error in ensureUploadDir ${err}`);
-            return false;
-        }
-    }
 
     /**
      * @swagger
@@ -419,136 +248,7 @@ module.exports = function (router) {
      *         500:
      *           description: Internal server error, an error occured.
      */
-    router.post('/userVideos', async (req, res) => {
-
-        const uploadId = uuidv4();
-
-        try {
-            uploadLogger.log(INFO_LEVEL, `POST /userVideos - Upload video started. USER: ${req.user.eppn} -- ${uploadId}`);
-            const uploadPath = path.join(__dirname, 'uploads/');
-
-            if (!ensureUploadDir(uploadPath)) {
-                // upload dir failed log and return error
-                uploadLogger.log(ERROR_LEVEL, `Upload dir unavailable '${uploadPath}' USER: ${req.user.eppn} -- ${uploadId}`);
-                res.status(500);
-                const msg = 'Upload dir unavailable.';
-                res.json({
-                    message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
-                    msg,
-                    id: uploadId
-                });
-            }
-
-            req.pipe(req.busboy); // Pipe it trough busboy
-
-            let startTime;
-
-            req.busboy.on('file', (fieldname, file, filename) => {
-                startTime = new Date();
-                uploadLogger.log(INFO_LEVEL, `Upload of '${filename}' started  USER: ${req.user.eppn} -- ${uploadId}`);
-                const filePathOnDisk = path.join(uploadPath, filename);
-
-                // Create a write stream of the new file
-                const fstream = fs.createWriteStream(filePathOnDisk);
-                // Pipe it trough
-                file.pipe(fstream);
-
-                // On finish of the file write to disk
-                fstream.on('close', async () => {
-                    try {
-                        const loggedUser = userService.getLoggedUser(req.user);
-                        let timeDiff = new Date() - startTime;
-                        uploadLogger.log(INFO_LEVEL, 
-                            `Loading time with busboy ${timeDiff} milliseconds USER: ${req.user.eppn} -- ${uploadId}`);
-
-                        let inboxSeries;
-                        try {
-                            inboxSeries = await returnOrCreateUsersInboxSeries(loggedUser);
-
-                            if (!inboxSeries || !inboxSeries.identifier) {
-                                // on failure clean file from disk and return 500
-                                deleteFile(filePathOnDisk, uploadId);
-                                res.status(500)
-                                const msg = `${filename} failed to resolve inboxSeries for user`;
-                                uploadLogger.log(ERROR_LEVEL, `POST /userVideos ${msg} USER: ${req.user.eppn} -- ${uploadId}`);
-                                res.json({
-                                    message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
-                                    msg,
-                                    id: uploadId
-                                });
-                            }
-                        } catch (err) {
-                            // Log error and throw reason
-                            throw "Failed to resolve user's inbox series";
-                        }
-
-                        try {
-                            const response = await apiService.uploadVideo(filePathOnDisk, filename, inboxSeries.identifier);
-
-                            if (response && response.status === 201) {
-                                // on success clean file from disk and return 200
-                                deleteFile(filePathOnDisk, uploadId);
-                                res.status(200);
-                                uploadLogger.log(INFO_LEVEL, 
-                                    `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)} USER: ${req.user.eppn} -- ${uploadId}`);
-                                res.json({ message: `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)}`})
-                            } else {
-                                // on failure clean file from disk and return 500
-                                deleteFile(filePathOnDisk, uploadId);
-                                res.status(500);
-                                const msg = `${ filename } failed.`;
-                                res.json({
-                                    message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
-                                    msg,
-                                    id: uploadId
-                                });
-                            }
-                        } catch (err) {
-                            // Log error and throw reason
-                            throw 'Failed to upload video to opencast';
-                        }
-                    } catch (err) {
-                        // catch and clean file from disk
-                        // return response to user client
-                        deleteFile(filePathOnDisk, uploadId);
-                        res.status(500);
-                        const msg = `Upload of ${filename} failed. ${err}.`;
-                        uploadLogger.log(ERROR_LEVEL, `POST /userVideos ${msg} USER: ${req.user.eppn} -- ${uploadId}`);
-                        res.json({
-                            message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
-                            msg,
-                            id: uploadId
-                        });
-                    }
-                });
-            });
-        } catch(err) {
-            // catch and clean file from disk
-            // TODO: filePathOnDisk is not defined here, remove file some other way
-            // deleteFile(filePathOnDisk);
-            // log error and return 500
-            res.status(500);
-            // TODO: ${filename} is not defined here log the file some other way
-            const msg = `failed ${err}.`;
-            uploadLogger.log(ERROR_LEVEL, `POST /userVideos ${msg} USER: ${req.user.eppn} -- ${uploadId}`);
-            res.json({
-                message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
-                msg,
-                id: uploadId
-            });
-        }
-    });
-
-    // clean after post
-    function deleteFile(filename, uploadId) {
-        fs.unlink(filename, (err) => {
-            if (err) {
-                uploadLogger.log(ERROR_LEVEL, `Failed to clean ${filename} | ${err} -- ${uploadId}`);
-            } else {
-                uploadLogger.log(INFO_LEVEL, `Cleaning - removed ${filename} -- ${uploadId}`);
-            }
-        });
-    }
+    router.post('/userVideos', videoUpload.upload);
 
     /**
      * @swagger
@@ -591,33 +291,7 @@ module.exports = function (router) {
      *         500:
      *           description: Internal server error, an error occurred.    
      */
-    router.put('/userVideos/:id', async (req, res) => {
-        try {
-            logger.info(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn}`);
-
-            const rawEventMetadata = req.body;
-            const response = await apiService.updateEventMetadata(rawEventMetadata, req.body.identifier);
-
-            if (response.status === 200) {
-                logger.info(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} OK`);
-            } else if (response.status === 403){
-                logger.warn(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} ${response.statusText}`);
-            } else {
-                logger.error(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} ${response.statusText}`);
-            }
-
-            res.status(response.status);
-            res.json({message : response.statusText});
-        } catch(error) {
-            res.status(500);
-            const msg = error.message;
-            logger.error(`Error PUT /userVideos/:id ${msg} USER ${req.user.eppn}`);
-            res.json({
-                message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPDATE_EVENT_DETAILS,
-                msg
-            });
-        }
-    });
+    router.put('/userVideos/:id', video.updateVideo);
 
     /**
      * @swagger
@@ -663,30 +337,7 @@ module.exports = function (router) {
      *         500:
      *           description: Internal server error, an error occurred.    
      */
-    router.post('/series', async (req, res) => {
-        try {
-            let series = req.body;
-            const loggedUser = userService.getLoggedUser(req.user);
-            let exists = series.title.toLowerCase().includes('inbox');
-
-            if(exists){
-                res.status(403);
-                res.json({message: '"inbox" not allowed in series title. Series was not created.'});
-            }else{
-                let modifiedSeriesMetadata = seriesService.openCastFormatSeriesMetadata(series, loggedUser);
-                let modifiedSeriesAclMetadata = seriesService.openCastFormatSeriesAclList(series, constants.CREATE_SERIES);
-                const response = await apiService.createSeries(req.user, modifiedSeriesMetadata, modifiedSeriesAclMetadata);
-                res.json(response.data.identifier);
-            }
-        } catch (error) {
-            res.status(500);
-            const msg = error.message;
-            res.json({
-                message: messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES,
-                msg
-            });
-        }
-    });
+    router.post('/series', series.createSeries);
 
     /**
      * @swagger
@@ -707,19 +358,7 @@ module.exports = function (router) {
      *         default:
      *           description: Unexpected error    
      */
-    router.get('/iamGroups/:query', async (req, res) => {
-        try {
-            logger.info(`GET /iamGroups/:query ${req.params.query}`);
-            const iamGroups = await iamGroupsApi.getIamGroups(req.params.query);
-            res.json(iamGroups);
-        } catch (error) {
-            const msg = error.message;
-            res.json({
-                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_IAM_GROUPS,
-                msg
-            });
-        }
-    });
+    router.get('/iamGroups/:query', iamGroups.getIamGroups);
 
     /**
      * @swagger
@@ -740,17 +379,5 @@ module.exports = function (router) {
      *         default:
      *           description: Unexpected error    
      */
-    router.get('/persons/:query', async (req, res) => {
-        try {
-            logger.info(`GET /persons/:query ${req.params.query}`);
-            const persons = await personApiService.getPersons(req.params.query);
-            res.json(persons);
-        } catch (error) {
-            const msg = error.message;
-            res.json({
-                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_PERSONS,
-                msg
-            });
-        }
-    });
+    router.get('/persons/:query', persons.getPersons);
 };
