@@ -16,6 +16,8 @@ const router = express.Router();
 const LOG_FILE_NAME = 'access.log';
 const LOG_DIRECTORY = __dirname;
 
+const xss = require('xss-clean');
+
 
 const accessLogStream = fs.createWriteStream(
     path.join(LOG_DIRECTORY + '/logs', LOG_FILE_NAME), { flags: 'a' })
@@ -27,6 +29,7 @@ app.use(cors());
 security.shibbolethAuthentication(app, passport);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(xss());
 app.use('/api', router);
 
 
