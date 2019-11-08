@@ -170,22 +170,7 @@ module.exports = function (router) {
      *         500:
      *           description: Internal server error, an error occurred.
      */
-    router.get('/userInboxEvents', async (req, res) => {
-        logger.info(`GET /userInboxEvents USER: ${req.user.eppn}`);
-        const loggedUser = userService.getLoggedUser(req.user);
-        const inboxSeries = await apiService.getUserInboxSeries(loggedUser);
-        if (inboxSeries && inboxSeries.length > 0) {
-            const identifier = seriesService.getInboxSeriesIdentifier(inboxSeries);
-            const inboxEvents = await apiService.getEventsByIdentifier(identifier);
-            const inboxEventsWithMetadatas = await eventsService.getAllEventsWithMetadatas(inboxEvents);
-            const inboxEventsWithMedia = await eventsService.getEventsWithMedia(inboxEventsWithMetadatas);
-            const inboxEventsWithMediaFile = await eventsService.getAllEventsWithMediaFileMetadata(inboxEventsWithMedia);
-            const inboxEventsWithAcls = await eventsService.getAllEventsWithAcls(inboxEventsWithMediaFile);
-            res.json(eventsService.filterEventsForClient(inboxEventsWithAcls));
-        } else {
-            res.json([])
-        }
-    });
+    router.get('/userInboxEvents', event.getInboxEvents);
 
     /**
      * @swagger

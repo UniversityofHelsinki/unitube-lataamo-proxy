@@ -7,7 +7,6 @@ const app = require('../app');
 
 let test = require('./testHelper');
 
-
 // Unitube-lataamo proxy APIs under the test
 const LATAAMO_USER_SERIES_PATH = '/api/userSeries';
 const LATAAMO_USER_EVENTS_PATH = '/api/userVideos';

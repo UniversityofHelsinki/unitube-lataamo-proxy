@@ -1,7 +1,6 @@
 const nock = require('nock');  // https://www.npmjs.com/package/nock
 const constPaths = require('../utils/constants');
 
-
 // mocked Opencast APIs
 const CONSTANTS = Object.freeze({
     OCAST_BASE_URL : process.env.LATAAMO_OPENCAST_HOST,
