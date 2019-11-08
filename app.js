@@ -8,6 +8,7 @@ const fs = require('fs');
 const morgan = require('morgan');
 const path = require('path');
 const logger = require('./config/winstonLogger');
+const compression = require('compression');
 
 const app = express();
 const port = 3000;
@@ -25,7 +26,7 @@ const accessLogStream = fs.createWriteStream(
 routes(router);
 app.use(morgan('combined', { stream: accessLogStream }))
 app.use(cors());
-
+app.use(compression());
 security.shibbolethAuthentication(app, passport);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
