@@ -12,7 +12,8 @@ exports.getSeries = async (req, res) => {
     try {
         const series = await apiService.getSeries(req.params.id);
         await apiService.contributorsToIamGroupsAndPersons(series);
-        const userSeriesWithPublished = await seriesService.addPublishedInfoInSeriesAndMoodleRoles(series);
+        const seriesWithAllEventsCount = await eventsService.getAllEventsCountForSeries(series);
+        const userSeriesWithPublished = await seriesService.addPublishedInfoInSeriesAndMoodleRoles(seriesWithAllEventsCount);
         res.json(userSeriesWithPublished);
     } catch (error) {
         const msg = error.message;

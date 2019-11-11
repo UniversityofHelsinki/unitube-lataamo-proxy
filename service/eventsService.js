@@ -62,6 +62,8 @@ const getAllEventsWithSeries = async (series) => await Promise.all(series.map(se
 
 exports.getAllSeriesEventsCount = async (series) => await getAllEventsWithSeries(series);
 
+exports.getAllEventsCountForSeries = async (series) => await apiService.getEventsWithSeriesByIdentifier(series);
+
 exports.getAllEventsWithMetadatas = async (events) => {
     return Promise.all(events.map(async event => {
         const metadata = await apiService.getMetadataForEvent(event);
