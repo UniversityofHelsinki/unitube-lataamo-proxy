@@ -145,7 +145,9 @@ describe('user series returned from /userSeries route', () => {
             .expect('Content-Type', /json/);
 
         assert.isArray(response.body, 'Response should be an array');
+        assert.equal(response.body[0].eventsCount, 2);
         assert.lengthOf(response.body, 2, 'Two series should be returned');
+        assert.equal(response.body[1].eventsCount, 1);
     });
 
     it("should return user's series if users group is in the series contributors list", async () => {
@@ -161,6 +163,7 @@ describe('user series returned from /userSeries route', () => {
         assert.isArray(response.body, 'Response should be an array');
         assert.lengthOf(response.body, 1, 'One series should be returned');
         assert.equal(response.body[0].identifier, test.constants.TEST_SERIES_1_ID);
+        assert.equal(response.body[0].eventsCount, 2);
     });
 
     afterEach(() => {
@@ -192,8 +195,11 @@ describe('user series returned from /userSeries route', () => {
             .expect('Content-Type', /json/);
 
         assert.equal(response.body[0].published, true, 'Response should be an array');
+        assert.equal(response.body[0].eventsCount, 2);
         assert.equal(response.body[1].published, true, 'Two series should be returned');
+        assert.equal(response.body[1].eventsCount, 1);
         assert.equal(response.body[2].published, false, 'Two series should be returned');
+        assert.equal(response.body[2].eventsCount, 1);
     });
 
     afterEach(() => {
