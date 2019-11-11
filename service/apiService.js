@@ -308,7 +308,10 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
         const response = await security.opencastBase.post(videoUploadUrl, bodyFormData, {headers});
         return response;
     } catch (err) {
-        throw err;
+        return {
+            status: 500,
+            message: err.message
+        };
     }
 };
 
