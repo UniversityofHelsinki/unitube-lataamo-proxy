@@ -115,6 +115,8 @@ describe('user series returned from /userSeries route', () => {
         test.mockOCastSeriesApiCall();
         test.mockOCastEvent1AclCall();
         test.mockOcastEvent2AclCall();
+        test.mockOCastEvents_2_ApiCall();
+        test.mockOCastEvents_1_ApiCall();
     });
 
     it("should return no series if user and users groups are not in the series contributors list", async () => {
@@ -174,6 +176,9 @@ describe('user series returned from /userSeries route', () => {
         test.mockOCastEvent1AclCall();
         test.mockOcastEvent2AclCall();
         test.mockOcastEvent3AclCall();
+        test.mockOCastEvents_1_ApiCall();
+        test.mockOCastEvents_2_ApiCall();
+        test.mockOcastEvetns_3_ApiCall();
     });
 
     it("should return user's series published == true for the first and second series and published == false for the third series", async () => {
