@@ -103,6 +103,7 @@ const updateSeriesAclList = (aclList) => {
     }
     let seriesACLTemplateReadEntry = constants.SERIES_ACL_TEMPLATE_READ_ENTRY;
     let seriesACLTemplateWriteEntry = constants.SERIES_ACL_TEMPLATE_WRITE_ENTRY;
+    let public_series = false;
     if (aclList) {
         aclList.forEach(aclRole => {
             seriesACLTemplateReadEntry = updateAclTemplateReadEntry(seriesACLTemplateReadEntry, aclRole);
@@ -111,7 +112,13 @@ const updateSeriesAclList = (aclList) => {
             if (!publicRole(aclRole) && !isMoodleAclRole(aclRole)) {
                 seriesAclTemplate.push(seriesACLTemplateWriteEntry);
             }
+            if (aclRole.includes(constants.ROLE_ANONYMOUS)) {
+                public_series = true;
+            }
         });
+    }
+    if (process.env.ENVIRONMENT !== 'prod' && public_series) { //jos public
+        seriesAclTemplate = seriesAclTemplate.concat([...constants.SERIES_ACL_TEST_TEMPLATE]);
     }
     return seriesAclTemplate;
 };

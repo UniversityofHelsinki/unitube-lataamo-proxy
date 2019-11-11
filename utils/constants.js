@@ -51,6 +51,14 @@ const SERIES_ACL_TEMPLATE = [
     }
 ];
 
+const SERIES_ACL_TEST_TEMPLATE = [
+    {
+        "action": "read",
+        "allow": true,
+        "role": "ROLE_USER_KATSOMO_TESTI"
+    }
+];
+
 const SERIES_ACL_TEMPLATE_TUOTANTO = [
     {
         "action": "read",
@@ -157,5 +165,6 @@ module.exports = {
     ESB_PERSONS_PATH,
     PROPERTIES_REPUBLISH_METADATA,
     SERIES_ACL_TEMPLATE_TUOTANTO,
+    SERIES_ACL_TEST_TEMPLATE,
     INBOX
 };
