@@ -195,12 +195,16 @@ describe('user series returned from /userSeries route', () => {
             .expect('Content-Type', /json/);
 
         assert.equal(response.body[0].published, true, 'Response should be an array');
+        assert.deepEqual(response.body[0].visibility, ['status_published']);
         assert.equal(response.body[0].eventsCount, 2);
         assert.equal(response.body[1].published, true, 'Two series should be returned');
+        assert.deepEqual(response.body[1].visibility, ['status_published', 'status_moodle']);
         assert.equal(response.body[1].eventsCount, 1);
         assert.equal(response.body[2].published, false, 'Two series should be returned');
         assert.equal(response.body[2].eventsCount, 1);
+        assert.deepEqual(response.body[2].visibility, ['status_private']);
     });
+
 
     afterEach(() => {
         test.cleanAll();

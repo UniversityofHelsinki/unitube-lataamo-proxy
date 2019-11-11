@@ -49,8 +49,8 @@ exports.getUserSeries = async (req, res) => {
         const loggedUser = userService.getLoggedUser(req.user);
         const userSeries = await apiService.getUserSeries(loggedUser);
         const seriesWithAllEventsCount = await eventsService.getAllSeriesEventsCount(userSeries);
-        const userSeriesWithPublished = await seriesService.addPublishedInfoInSeries(seriesWithAllEventsCount);
-        res.json(userSeriesWithPublished);
+        const userSeriesWithPublicity = await seriesService.addPublicityStatusToSeries(seriesWithAllEventsCount);
+        res.json(userSeriesWithPublicity);
     } catch (error) {
         res.status(500);
         const msg = error.message;
