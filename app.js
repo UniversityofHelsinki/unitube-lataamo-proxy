@@ -10,6 +10,8 @@ const morgan = require('morgan');
 const path = require('path');
 const logger = require('./config/winstonLogger');
 const busboy = require('connect-busboy');  //https://github.com/mscdex/connect-busboy
+const compression = require('compression');
+const xss = require('xss-clean');
 
 const app = express();
 app.use(helmet());
@@ -24,11 +26,12 @@ const accessLogStream = fs.createWriteStream(
 
 app.use(morgan('combined', { stream: accessLogStream }))
 app.use(cors());
-
+app.use(compression());
 security.shibbolethAuthentication(app, passport);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
+app.use(xss());
+app.use('/api', router);
 
 // busboy middle-ware
 router.use(busboy({
