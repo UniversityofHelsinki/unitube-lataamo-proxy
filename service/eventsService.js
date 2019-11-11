@@ -49,11 +49,15 @@ const calculateVisibilityPropertyForVideo = (video) => {
         visibility.push(constants.STATUS_MOODLE);
     }
     return [...new Set(visibility)]
-}
+};
 
-exports.getAllEvents  = async (seriesIdentifiers) => {
+exports.getAllEvents = async (seriesIdentifiers) => {
     return await Promise.all(seriesIdentifiers.map(identifier => apiService.getEventsByIdentifier(identifier)));
 };
+
+const getAllEventsWithSeries = async (series) => await Promise.all(series.map(series => apiService.getEventsWithSeriesByIdentifier(series)));
+
+exports.getAllSeriesEventsCount = async (series) => await getAllEventsWithSeries(series);
 
 exports.getAllEventsWithMetadatas = async (events) => {
     return Promise.all(events.map(async event => {
@@ -63,7 +67,7 @@ exports.getAllEventsWithMetadatas = async (events) => {
             metadata: metadata
         }
     }));
-}
+};
 
 exports.getEventsWithMedia = async (events) => {
     return Promise.all(events.map(async event => {

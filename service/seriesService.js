@@ -169,4 +169,5 @@ const moodleNumbersFromRoles = (roles) => {
     const uniqueMoodleNumbers = Array.from(new Set(moodlenumbers));
 
     return uniqueMoodleNumbers;
-}
+};
+
