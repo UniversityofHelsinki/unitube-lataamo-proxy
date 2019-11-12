@@ -29,6 +29,17 @@ exports.getEventsByIdentifier = async (identifier) => {
     return response.data;
 };
 
+exports.getEventsWithSeriesByIdentifier = async (series) => {
+    let userEventsUrl = constants.OCAST_VIDEOS_PATH + constants.OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER;
+    userEventsUrl = userEventsUrl + series.identifier;
+    const response = await security.opencastBase.get(userEventsUrl);
+    const events = response.data;
+    return {
+        ...series,
+        eventsCount: events.length
+    }
+};
+
 exports.getSeries = async (seriesId) => {
     const seriesUrl = constants.OCAST_SERIES_PATH + seriesId;
     const response = await security.opencastBase.get(seriesUrl);
@@ -100,8 +111,13 @@ exports.getSeriesAcldata = async (id) => {
     }
 };
 
-exports.getUserSeries = async (user) => {
+exports.getUserInboxSeries = async (user) => {
+    const seriesUrl = constants.OCAST_SERIES_PATH + constants.OCAST_VIDEOS_FILTER_USER_NAME + encodeURI(constants.INBOX + ' ' + user.eppn);
+    const response = await security.opencastBase.get(seriesUrl);
+    return response.data;
+};
 
+exports.getUserSeries = async (user) => {
     const contributorParameters = userService.parseContributor(user.hyGroupCn);
     const seriesUrl = constants.OCAST_SERIES_PATH + '?filter=contributors:' + user.eppn + ',' + contributorParameters;
     const response = await security.opencastBase.get(seriesUrl);

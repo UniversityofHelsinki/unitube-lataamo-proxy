@@ -38,8 +38,11 @@ exports.calculateVisibilityProperty = (event) => {
 
 const calculateVisibilityPropertyForVideo = (video) => {
     const visibility = [];
+
     if (commonService.publicRoleCount(video.acls) === 2) { //video has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
         visibility.push(constants.STATUS_PUBLISHED);
+    } else {
+        visibility.push(constants.STATUS_PRIVATE);
     }
 
     const moodleAclInstructor = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_INSTRUCTOR));
@@ -49,11 +52,17 @@ const calculateVisibilityPropertyForVideo = (video) => {
         visibility.push(constants.STATUS_MOODLE);
     }
     return [...new Set(visibility)]
-}
+};
 
-exports.getAllEvents  = async (seriesIdentifiers) => {
+exports.getAllEvents = async (seriesIdentifiers) => {
     return await Promise.all(seriesIdentifiers.map(identifier => apiService.getEventsByIdentifier(identifier)));
 };
+
+const getAllEventsWithSeries = async (series) => await Promise.all(series.map(series => apiService.getEventsWithSeriesByIdentifier(series)));
+
+exports.getAllSeriesEventsCount = async (series) => await getAllEventsWithSeries(series);
+
+exports.getAllEventsCountForSeries = async (series) => await apiService.getEventsWithSeriesByIdentifier(series);
 
 exports.getAllEventsWithMetadatas = async (events) => {
     return Promise.all(events.map(async event => {
@@ -63,7 +72,7 @@ exports.getAllEventsWithMetadatas = async (events) => {
             metadata: metadata
         }
     }));
-}
+};
 
 exports.getEventsWithMedia = async (events) => {
     return Promise.all(events.map(async event => {
