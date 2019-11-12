@@ -112,13 +112,13 @@ const updateSeriesAclList = (aclList) => {
             if (!publicRole(aclRole) && !isMoodleAclRole(aclRole)) {
                 seriesAclTemplate.push(seriesACLTemplateWriteEntry);
             }
-            if (aclRole.includes(constants.ROLE_ANONYMOUS)) {
+            if (publicRole(aclRole)) {
                 public_series = true;
             }
         });
     }
-    if (process.env.ENVIRONMENT !== 'prod' && public_series) { //jos public
-        seriesAclTemplate = seriesAclTemplate.concat([...constants.SERIES_ACL_TEST_TEMPLATE]);
+    if (process.env.ENVIRONMENT !== 'prod' && public_series) { //if  public series
+        seriesAclTemplate = seriesAclTemplate.concat([...constants.SERIES_ACL_TEMPLATE_TEST]);
     }
     return seriesAclTemplate;
 };

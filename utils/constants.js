@@ -51,7 +51,7 @@ const SERIES_ACL_TEMPLATE = [
     }
 ];
 
-const SERIES_ACL_TEST_TEMPLATE = [
+const SERIES_ACL_TEMPLATE_TEST = [
     {
         "action": "read",
         "allow": true,
@@ -165,6 +165,6 @@ module.exports = {
     ESB_PERSONS_PATH,
     PROPERTIES_REPUBLISH_METADATA,
     SERIES_ACL_TEMPLATE_TUOTANTO,
-    SERIES_ACL_TEST_TEMPLATE,
+    SERIES_ACL_TEMPLATE_TEST,
     INBOX
 };
