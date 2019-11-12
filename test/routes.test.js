@@ -18,6 +18,7 @@ const LATAAMO_USER_PATH = '/api/user';
 const LATAAMO_API_VIDEO_PATH = '/api/videoUrl/';
 
 const constants = require('../utils/constants');
+const messageKeys = require('../utils/message-keys');
 
 describe('Authentication with shibboleth headers (eppn, preferredlanguage, hyGroupCn)', () => {
 
@@ -503,7 +504,7 @@ describe('user series post', () => {
             .set('displayName', test.mockTestUser.displayName)
             .expect(403)
             .expect('Content-Type', /json/);
-        assert.equal(response.body.message, '"inbox" not allowed in series title. Series was not created.');
+        assert.equal(response.body.message, messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED);
     });
 
     it('"inbox" string not allowed in series\' title', async () => {
@@ -517,7 +518,7 @@ describe('user series post', () => {
             .set('displayName', test.mockTestUser.displayName)
             .expect(403)
             .expect('Content-Type', /json/);
-        assert.equal(response.body.message, '"inbox" not allowed in series title. Series was not created.');
+        assert.equal(response.body.message, messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED);
     });
 
     it('"INBOX" string not allowed in series\' title', async () => {
@@ -531,7 +532,7 @@ describe('user series post', () => {
             .set('displayName', test.mockTestUser.displayName)
             .expect(403)
             .expect('Content-Type', /json/);
-        assert.equal(response.body.message, '"inbox" not allowed in series title. Series was not created.');
+        assert.equal(response.body.message, messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED);
     });
 
     it('"InBoX" string not allowed in series\' title', async () => {
@@ -545,7 +546,7 @@ describe('user series post', () => {
             .set('displayName', test.mockTestUser.displayName)
             .expect(403)
             .expect('Content-Type', /json/);
-        assert.equal(response.body.message, '"inbox" not allowed in series title. Series was not created.');
+        assert.equal(response.body.message, messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED);
     });
 });
 
