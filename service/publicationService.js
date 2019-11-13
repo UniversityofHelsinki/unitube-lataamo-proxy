@@ -1,4 +1,5 @@
 const constants = require('../utils/constants');
+const moment = require('moment');
 
 exports.filterApiChannelPublication = (publications) => {
     const filteredPublications = publications.filter(publication => {
@@ -63,11 +64,11 @@ exports.getMediaUrlsFromPublication = (eventId , publication) => {
         filteredMedias = filterOnlyHighestQualityPublications(publication[0].media);
         if (filteredMedias && filteredMedias.length > 0) {
             filteredMedias.some(media =>  {
-                mediaUrls.push({id: eventId, url: media.url})
+                mediaUrls.push({id: eventId, url: media.url, duration: moment.duration(media.duration, 'milliseconds').format("hh:mm:ss", {trim:false}), quality: media.height})
             });
         }
     } else {
-        mediaUrls.push({id: eventId, url: ''})
+        mediaUrls.push({id: eventId, url: '', duration: '', quality: ''})
     }
     return mediaUrls;
 }
