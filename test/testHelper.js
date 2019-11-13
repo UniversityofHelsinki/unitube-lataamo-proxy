@@ -571,6 +571,26 @@ const mockUserEventsForSeries2 =  [
     }
 ];
 
+const mockUserEventsForSeries3 =  [
+    {
+        identifier: CONSTANTS.TEST_EVENT_3_ID,
+        creator: 'lataamo_testi',
+        presenter: [],
+        created: '2016-06-22T13:30:00Z',
+        subjects: [ 'John Clark', 'Thiago Melo Costa' ],
+        start: '2016-06-22T13:30:00Z',
+        description: 'A great description',
+        title: 'Captivating title',
+        processing_state: 'SUCCEEDED',
+        duration: 0,
+        archive_version: 7,
+        contributor: ['SeriesOwnerEppn', 'Other'],
+        has_previews: true,
+        location: '',
+        publication_status: [ 'internal', 'engage-player', 'api', 'oaipmh-default' ],
+        isPartOf: CONSTANTS.TEST_SERIES_3_ID
+    }
+];
 // /api/series/3f9ff5b-7663-54b7-b7cf-950be665de3c/acl
 const inboxEventAclsFromSeries = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(`/api/series/${CONSTANTS.TEST_INBOX_SERIES_ID}/acl`)
@@ -1654,6 +1674,12 @@ const series2_Events = () => nock(CONSTANTS.OCAST_BASE_URL)
     .query({filter: `series:${CONSTANTS.TEST_SERIES_2_ID}`})
     .reply(200, mockUserEventsForSeries2);
 
+// events by series /api/events/?filter=series:series:604d78ac-733f-4c65-b13a-29172fbc0c6f
+const series3_Events = () => nock(CONSTANTS.OCAST_BASE_URL)
+    .get(CONSTANTS.OCAST_VIDEOS_PATH)
+    .query({filter: `series:${CONSTANTS.TEST_SERIES_3_ID}`})
+    .reply(200, mockUserEventsForSeries3);
+
 
 
 // event by id /api/event/6394a9b7-3c06-477e-841a-70862eb07bfb
@@ -1835,6 +1861,7 @@ module.exports.mockOCastUserApiCall = lataamoApiUser;
 module.exports.mockOCastUserApiCall2 = lataamoApiUser2;
 module.exports.mockOCastEvents_1_ApiCall = series1_Events;
 module.exports.mockOCastEvents_2_ApiCall = series2_Events;
+module.exports.mockOcastEvetns_3_ApiCall = series3_Events;
 module.exports.mockOCastEventMetadata_1Call = eventMetadata_1;
 module.exports.mockOCastEventMetadata_2Call = eventMetadata_2;
 module.exports.mockOCastEventMetadata_3Call = eventMetadata_3;

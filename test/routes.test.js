@@ -115,6 +115,8 @@ describe('user series returned from /userSeries route', () => {
         test.mockOCastSeriesApiCall();
         test.mockOCastEvent1AclCall();
         test.mockOcastEvent2AclCall();
+        test.mockOCastEvents_2_ApiCall();
+        test.mockOCastEvents_1_ApiCall();
     });
 
     it("should return no series if user and users groups are not in the series contributors list", async () => {
@@ -143,7 +145,9 @@ describe('user series returned from /userSeries route', () => {
             .expect('Content-Type', /json/);
 
         assert.isArray(response.body, 'Response should be an array');
+        assert.equal(response.body[0].eventsCount, 2);
         assert.lengthOf(response.body, 2, 'Two series should be returned');
+        assert.equal(response.body[1].eventsCount, 1);
     });
 
     it("should return user's series if users group is in the series contributors list", async () => {
@@ -159,6 +163,7 @@ describe('user series returned from /userSeries route', () => {
         assert.isArray(response.body, 'Response should be an array');
         assert.lengthOf(response.body, 1, 'One series should be returned');
         assert.equal(response.body[0].identifier, test.constants.TEST_SERIES_1_ID);
+        assert.equal(response.body[0].eventsCount, 2);
     });
 
     afterEach(() => {
@@ -174,6 +179,9 @@ describe('user series returned from /userSeries route', () => {
         test.mockOCastEvent1AclCall();
         test.mockOcastEvent2AclCall();
         test.mockOcastEvent3AclCall();
+        test.mockOCastEvents_1_ApiCall();
+        test.mockOCastEvents_2_ApiCall();
+        test.mockOcastEvetns_3_ApiCall();
     });
 
     it("should return user's series published == true for the first and second series and published == false for the third series", async () => {
@@ -187,9 +195,16 @@ describe('user series returned from /userSeries route', () => {
             .expect('Content-Type', /json/);
 
         assert.equal(response.body[0].published, true, 'Response should be an array');
+        assert.deepEqual(response.body[0].visibility, ['status_published']);
+        assert.equal(response.body[0].eventsCount, 2);
         assert.equal(response.body[1].published, true, 'Two series should be returned');
+        assert.deepEqual(response.body[1].visibility, ['status_published', 'status_moodle']);
+        assert.equal(response.body[1].eventsCount, 1);
         assert.equal(response.body[2].published, false, 'Two series should be returned');
+        assert.equal(response.body[2].eventsCount, 1);
+        assert.deepEqual(response.body[2].visibility, ['status_private']);
     });
+
 
     afterEach(() => {
         test.cleanAll();
@@ -202,6 +217,7 @@ describe('user series person - and iamgroup administrators returned from /series
         // mock needed opencast apis
         test.mockOCastSeriesApiCall7();
         test.mockOCastEvent1AclCall();
+        test.mockOCastEvents_1_ApiCall();
     });
 
     it("should return user's series with three iamgroups and three persons ", async () => {
