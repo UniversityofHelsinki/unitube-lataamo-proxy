@@ -581,7 +581,7 @@ describe('Updating videos aka events', () => {
             .set('displayName', test.mockTestUser.displayName)
             .expect(403)
             .expect('Content-Type', /json/);
-        assert.equal(response.body.message, 'Transaction active for given event');
+        assert.equal(response.body.message, 'error-failed-to-update-event-details');
     });
 
     it('Should fail if update event metadata request returns something else than 204 from opencast', async () => {
