@@ -36,16 +36,26 @@ exports.getEvent = async (req, res) => {
 exports.getInboxEvents = async (req, res) => {
     logger.info(`GET /userInboxEvents USER: ${req.user.eppn}`);
     const loggedUser = userService.getLoggedUser(req.user);
-    const inboxSeries = await apiService.getUserInboxSeries(loggedUser);
-    if (inboxSeries && inboxSeries.length > 0) {
-        const identifier = seriesService.getInboxSeriesIdentifier(inboxSeries);
-        const inboxEvents = await apiService.getEventsByIdentifier(identifier);
-        const inboxEventsWithMetadatas = await eventsService.getAllEventsWithMetadatas(inboxEvents);
-        const inboxEventsWithMedia = await eventsService.getEventsWithMedia(inboxEventsWithMetadatas);
-        const inboxEventsWithMediaFile = await eventsService.getAllEventsWithMediaFileMetadata(inboxEventsWithMedia);
-        const inboxEventsWithAcls = await eventsService.getAllEventsWithAcls(inboxEventsWithMediaFile);
-        res.json(eventsService.filterEventsForClient(inboxEventsWithAcls));
-    } else {
-        res.json([])
+    try{
+        const inboxSeries = await apiService.getUserInboxSeries(loggedUser);
+        if (inboxSeries && inboxSeries.length > 0) {
+            const identifier = seriesService.getInboxSeriesIdentifier(inboxSeries);
+            const inboxEvents = await apiService.getEventsByIdentifier(identifier);
+            const inboxEventsWithMetadatas = await eventsService.getAllEventsWithMetadatas(inboxEvents);
+            const inboxEventsWithMedia = await eventsService.getEventsWithMedia(inboxEventsWithMetadatas);
+            const inboxEventsWithMediaFile = await eventsService.getAllEventsWithMediaFileMetadata(inboxEventsWithMedia);
+            const inboxEventsWithAcls = await eventsService.getAllEventsWithAcls(inboxEventsWithMediaFile);
+            res.json(eventsService.filterEventsForClient(inboxEventsWithAcls));
+        } else {
+            res.json([])
+        }
+    }catch(error){
+        const msg = error.message;
+        logger.error(`Error GET /userInboxEvents ${msg} USER ${req.user.eppn}`);
+        res.status(500);
+        return res.json({
+            message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_INBOX_EVENTS,
+            msg
+        });
     }
 };

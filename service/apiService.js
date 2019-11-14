@@ -67,48 +67,31 @@ exports.updateSeriesEventMetadata = async (metadata, id) => {
 
     let bodyFormData = new FormData();
     bodyFormData.append('metadata', JSON.stringify(metadata));
-    try {
-        const headers = {
-            ...bodyFormData.getHeaders(),
-            "Content-Length": bodyFormData.getLengthSync()
-        };
-        return await security.opencastBase.put(seriesMetaDataUrl, bodyFormData, {headers});
-    } catch (error) {
-        console.log(error);
-        //return response.error;  // response is undefined here!
-        throw error;
-    }
+
+    const headers = {
+        ...bodyFormData.getHeaders(),
+        "Content-Length": bodyFormData.getLengthSync()
+    };
+    return await security.opencastBase.put(seriesMetaDataUrl, bodyFormData, {headers});
 };
 
 exports.updateSeriesAcldata = async (acl, id) => {
     const seriesAclUrl = constants.OCAST_SERIES_PATH + id + constants.OCAST_ACL_PATH;
-
     let bodyFormData = new FormData();
     bodyFormData.append('acl', JSON.stringify(acl));
-    try {
-        const headers = {
-            ...bodyFormData.getHeaders(),
-            "Content-Length": bodyFormData.getLengthSync()
-        };
-        const response = await security.opencastBase.put(seriesAclUrl, bodyFormData, {headers});
-        return response.data;
-    } catch (error) {
-        console.log(error);
-        //return response.error;  // response is undefined here!
-        throw error;
-    }
+
+    const headers = {
+        ...bodyFormData.getHeaders(),
+        "Content-Length": bodyFormData.getLengthSync()
+    };
+    const response = await security.opencastBase.put(seriesAclUrl, bodyFormData, {headers});
+    return response.data;
 };
 
 exports.getSeriesAcldata = async (id) => {
     const seriesAclUrl = constants.OCAST_SERIES_PATH + id + constants.OCAST_ACL_PATH;
-    try {
-        const response = await security.opencastBase.get(seriesAclUrl);
-        return response.data;
-    } catch (error) {
-        console.log(error);
-        //return response.error;  // response is undefined here!
-        throw error;
-    }
+    const response = await security.opencastBase.get(seriesAclUrl);
+    return response.data;
 };
 
 exports.getUserInboxSeries = async (user) => {
@@ -157,79 +140,74 @@ exports.getMetadataForEvent = async (event) => {
 
 
 exports.updateEventMetadata = async (metadata, eventId) => {
-    try {
-        // check evemt transaction status
-        // http://localhost:8080/admin-ng/event/99f13fe3-2e07-4cbf-bf1e-789e1f0c2a5e/hasActiveTransaction
-        const transactionStatusPath = constants.OCAST_EVENT_MEDIA_PATH_PREFIX + eventId + '/hasActiveTransaction';
-        const response1 = await security.opencastBase.get(transactionStatusPath);
+    // check evemt transaction status
+    // http://localhost:8080/admin-ng/event/99f13fe3-2e07-4cbf-bf1e-789e1f0c2a5e/hasActiveTransaction
+    const transactionStatusPath = constants.OCAST_EVENT_MEDIA_PATH_PREFIX + eventId + '/hasActiveTransaction';
+    const response1 = await security.opencastBase.get(transactionStatusPath);
 
-        if (response1.data && response1.data.active === true) {
-            // transaction active, return
-            return {
-                status: 403,
-                statusText: 'Transaction active for given event',
-                eventId: eventId
-            }
-        }
-        const videoMetaDataUrl = constants.OCAST_VIDEOS_PATH + eventId + constants.OCAST_METADATA_PATH + constants.OCAST_TYPE_QUERY_PARAMETER + constants.OCAST_TYPE_DUBLINCORE_EPISODE;
-        const modifiedMetadata = eventsService.modifyEventMetadataForOpencast(metadata);
-
-        // republish paths
-        const republishMetadataUrl = '/workflow/start';
-        const mediaPackageUrl = '/assets/episode/' + eventId;
-
-        let bodyFormData = new FormData();
-        bodyFormData.append('metadata', JSON.stringify(modifiedMetadata));
-
-        let headers = {
-            ...bodyFormData.getHeaders(),
-            "Content-Length": bodyFormData.getLengthSync()
-        };
-        // update event metadata
-        const response2 = await security.opencastBase.put(videoMetaDataUrl, bodyFormData, {headers});
-
-        // let's break if response from PUT not ok
-        if(response2.status !== 204){
-            return {
-                status: response2.status,
-                statusText: response2.statusText,
-                eventId: eventId
-            }
-        }
-
-        // get mediapackage for the republish query
-        const response3 = await security.opencastBase.get(mediaPackageUrl);
-
-        if(response3.status !== 200){
-            return {
-                status: response3.status,
-                statusText: response3.statusText,
-                eventId: eventId
-            }
-        }
-
-        // form data for the republish request
-        bodyFormData = new FormData();
-        bodyFormData.append('definition', 'republish-metadata');
-        bodyFormData.append('mediapackage', response3.data);
-        bodyFormData.append('properties', constants.PROPERTIES_REPUBLISH_METADATA);
-
-        headers = {
-            ...bodyFormData.getHeaders(),
-            "Content-Length": bodyFormData.getLengthSync()
-        };
-
-        // do the republish request
-        const resp = await security.opencastBase.post(republishMetadataUrl, bodyFormData, {headers});
-
+    if (response1.data && response1.data.active === true) {
+        // transaction active, return
         return {
-            status: resp.status,
-            statusText: resp.statusText,
+            status: 403,
+            statusText: 'Transaction active for given event',
             eventId: eventId
         }
-    } catch (error) {
-        console.log(error);
-        throw error;
+    }
+    const videoMetaDataUrl = constants.OCAST_VIDEOS_PATH + eventId + constants.OCAST_METADATA_PATH + constants.OCAST_TYPE_QUERY_PARAMETER + constants.OCAST_TYPE_DUBLINCORE_EPISODE;
+    const modifiedMetadata = eventsService.modifyEventMetadataForOpencast(metadata);
+
+    // republish paths
+    const republishMetadataUrl = '/workflow/start';
+    const mediaPackageUrl = '/assets/episode/' + eventId;
+
+    let bodyFormData = new FormData();
+    bodyFormData.append('metadata', JSON.stringify(modifiedMetadata));
+
+    let headers = {
+        ...bodyFormData.getHeaders(),
+        "Content-Length": bodyFormData.getLengthSync()
+    };
+    // update event metadata
+    const response2 = await security.opencastBase.put(videoMetaDataUrl, bodyFormData, {headers});
+
+    // let's break if response from PUT not ok
+    if(response2.status !== 204){
+        return {
+            status: response2.status,
+            statusText: response2.statusText,
+            eventId: eventId
+        }
+    }
+
+    // get mediapackage for the republish query
+    const response3 = await security.opencastBase.get(mediaPackageUrl);
+
+    if(response3.status !== 200){
+        return {
+            status: response3.status,
+            statusText: response3.statusText,
+            eventId: eventId
+        }
+    }
+
+    // form data for the republish request
+    bodyFormData = new FormData();
+    bodyFormData.append('definition', 'republish-metadata');
+    bodyFormData.append('mediapackage', response3.data);
+    bodyFormData.append('properties', constants.PROPERTIES_REPUBLISH_METADATA);
+
+    headers = {
+        ...bodyFormData.getHeaders(),
+        "Content-Length": bodyFormData.getLengthSync()
+    };
+
+    // do the republish request
+    const resp = await security.opencastBase.post(republishMetadataUrl, bodyFormData, {headers});
+
+    return {
+        status: resp.status,
+        statusText: resp.statusText,
+        eventId: eventId
     }
 };
 
@@ -238,17 +216,13 @@ exports.createSeries = async (user, seriesMetadata, seriesAcl) => {
     let bodyFormData = new FormData();
     bodyFormData.append('metadata', JSON.stringify(seriesMetadata));
     bodyFormData.append('acl', JSON.stringify(seriesAcl));
-    try {
-        const headers = {
-            ...bodyFormData.getHeaders(),
-            "Content-Length": bodyFormData.getLengthSync()
-        };
-        const response = await security.opencastBase.post(seriesUploadUrl, bodyFormData, {headers});
-        return response;
-    } catch (err) {
-        throw err;
-    }
 
+    const headers = {
+        ...bodyFormData.getHeaders(),
+        "Content-Length": bodyFormData.getLengthSync()
+    };
+    const response = await security.opencastBase.post(seriesUploadUrl, bodyFormData, {headers});
+    return response;
 };
 
 
@@ -314,18 +288,14 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
     // https://nodejs.org/api/fs.html#fs_fs_createreadstream_path_options
     bodyFormData.append('presenter', fs.createReadStream(filePathOnDisk));
 
-    try {
-        const headers = {
-            ...bodyFormData.getHeaders(),
-            "Content-Disposition": "multipart/form-data",
-            "Content-Type": "application/x-www-form-urlencoded"
-        };
-        // do we want to wait ocast's reponse?
-        const response = await security.opencastBase.post(videoUploadUrl, bodyFormData, {headers});
-        return response;
-    } catch (err) {
-        throw err;
-    }
+    const headers = {
+        ...bodyFormData.getHeaders(),
+        "Content-Disposition": "multipart/form-data",
+        "Content-Type": "application/x-www-form-urlencoded"
+    };
+    // do we want to wait ocast's reponse?
+    const response = await security.opencastBase.post(videoUploadUrl, bodyFormData, {headers});
+    return response;
 };
 
 
@@ -440,15 +410,11 @@ exports.createLataamoInboxSeries = async (userId) => {
     } else {
         bodyFormData.append('acl', JSON.stringify(acls));
     }
-    try {
-        const headers = {
-            ...bodyFormData.getHeaders(),
-            "Content-Type": "application/x-www-form-urlencoded"
-        };
-        const response = await security.opencastBase.post(seriesUrl, bodyFormData, {headers});
-        return response.data;
-    } catch (err) {
-        throw err;
-    }
 
+    const headers = {
+        ...bodyFormData.getHeaders(),
+        "Content-Type": "application/x-www-form-urlencoded"
+    };
+    const response = await security.opencastBase.post(seriesUrl, bodyFormData, {headers});
+    return response.data;
 };
