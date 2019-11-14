@@ -661,6 +661,7 @@ describe('Fetching event from /event/id route', () => {
         test.mockOCastEventMetadata_1Call();
         test.mockOpencastEvent1Request();
         test.mockOCastSeriesApiCall();
+        test.mockOCastSeriesApiCall9();
         test.mockOCastUserApiCall();
         test.mockOCastEvents_1_ApiCall();
         test.mockOCastEventMetadata_1Call();

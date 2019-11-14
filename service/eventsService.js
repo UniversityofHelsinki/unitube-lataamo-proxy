@@ -124,10 +124,12 @@ exports.getLicenseFromEventMetadata = (event) => {
 
 exports.getEventWithSeries = async (event) => {
     const metadata = await apiService.getMetadataForEvent(event);
-    const serie = seriesService.getSeriesFromEventMetadata(metadata);
+    const seriesMetadata = seriesService.getSeriesFromEventMetadata(metadata);
+    const series = await apiService.getSeries(seriesMetadata.value);
     return {
         ...event,
-        isPartOf : serie.value
+        isPartOf : seriesMetadata.value,
+        series: series
     }
 };
 
