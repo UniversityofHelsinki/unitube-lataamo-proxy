@@ -20,3 +20,26 @@ exports.publicRoleCount = (roles) => {
     }
     return countPublicRoles;
 }
+/*
+
+exports.getAcl = (aclList, acl) => {
+    return aclList.map(elem => {
+        if (elem === acl) {
+            console.log('elem:', elem)
+            return elem;
+        }
+        return null;
+    })
+}
+===============================================================
+Jotain tällasta tohon ylle: tää on SeriesDetailsForm.js sivulta
+===============================================================
+try {
+    await actionUpdateSerieDetails(seriesId, updatedSeries);
+    setSuccessMessage('JUST A PLACE HOLDER TEXT');
+    // update the serieslist to redux state
+    props.onSerieDetailsEdit(props.series.map(
+        series => series.identifier !== seriesId ? series : updatedSeries));
+} catch (err) {
+    setErrorMessage('JUST A PLACE HOLDER TEXT');
+}*/

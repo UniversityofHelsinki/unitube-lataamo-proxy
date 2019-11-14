@@ -100,6 +100,11 @@ const updateSeriesAclList = (aclList) => {
         seriesAclTemplate = [...constants.SERIES_ACL_TEMPLATE_TUOTANTO];
     } else {
         seriesAclTemplate = [...constants.SERIES_ACL_TEMPLATE];
+
+// kutsu tässä commonService.js getAcl = (aclList, "ROLE_KATSOMO");
+
+
+
     }
     let seriesACLTemplateReadEntry = constants.SERIES_ACL_TEMPLATE_READ_ENTRY;
     let seriesACLTemplateWriteEntry = constants.SERIES_ACL_TEMPLATE_WRITE_ENTRY;
