@@ -6,6 +6,7 @@ const constants = require('../utils/constants');
 const {inboxSeriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
 const userService = require('./userService');
 const eventsService = require('./eventsService');
+const messageKeys = require('../utils/message-keys');
 
 //
 // This file is the façade for opencast server
@@ -149,7 +150,7 @@ exports.updateEventMetadata = async (metadata, eventId) => {
         // transaction active, return
         return {
             status: 403,
-            statusText: 'Transaction active for given event',
+            statusText: messageKeys.ERROR_MESSAGE_FAILED_TO_UPDATE_EVENT_DETAILS,
             eventId: eventId
         }
     }
@@ -233,9 +234,9 @@ exports.createSeries = async (user, seriesMetadata, seriesAcl) => {
 // from opencast server
 exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) => {
     const videoUploadUrl = constants.OCAST_VIDEOS_PATH;
-    const videoDescription = 'TEMPORARY DESCRIPTION, PLEASE UPDATE'
-    const startDate = format(new Date(), 'yyyy-MM-dd') // '2016-06-22'
-    const startTime = format(new Date(), 'pp') // '10:03:52 AM'
+    const videoDescription = '';
+    const startDate = format(new Date(), 'yyyy-MM-dd'); // '2016-06-22'
+    const startTime = format(new Date(), 'pp'); // '10:03:52 AM'
     const inboxSeriesId = inboxUserSeriesId;  // User's INBOX series id
 
     // refactor this array to constants.js
@@ -303,7 +304,7 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
 exports.createLataamoInboxSeries = async (userId) => {
     const lataamoInboxSeriesTitle = inboxSeriesTitleForLoggedUser(userId);
     const lataamoInboxSeriesDescription = `Lataamo-INBOX series for ${ userId }`;
-    const lataamoInboxSeriesLicense = 'PUT HERE THE DEFAULT INBOX SERIES LICENSE';
+    const lataamoInboxSeriesLicense = '';
     const lataamoInboxSeriesLanguage = 'en';
     const lataamoInboxSeriesCreator = 'Lataamo-proxy-service';
     const lataamoInboxSeriesSubject = 'Lataamo-INBOX';

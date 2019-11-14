@@ -1,5 +1,5 @@
 
-// error message keys 
+// error message keys
 const ERROR_MESSAGE_FAILED_TO_GET_USER = 'error_failed_to_get_user';
 const ERROR_MESSAGE_FAILED_TO_GET_EVENT_DETAILS = 'error_failed_to_get_event';
 const ERROR_MESSAGE_FAILED_TO_GET_EVENT_VIDEO_URL = 'error-failed-to-get-event-video-url';
@@ -7,13 +7,13 @@ const ERROR_MESSAGE_FAILED_TO_GET_SERIES_DETAILS = 'error-failed-to-get-series-d
 const ERROR_MESSAGE_FAILED_TO_UPDATE_SERIES_DETAILS = 'error-failed-to-update-series-details';
 const ERROR_MESSAGE_FAILED_TO_GET_SERIES_LIST_FOR_USER = 'error-failed-to-get-series-list-for-user';
 const ERROR_MESSAGE_FAILED_TO_GET_EVENT_LIST_FOR_USER = 'error-failed-to-get-event-list-for-user';
-const ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO = 'error-failed-to-upload-video';  
+const ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO = 'error-failed-to-upload-video';
 const ERROR_MESSAGE_FAILED_TO_UPDATE_EVENT_DETAILS = 'error-failed-to-update-event-details';
 const ERROR_MESSAGE_FAILED_TO_SAVE_SERIES = 'error-failed-to-save-series';
 const ERROR_MESSAGE_FAILED_TO_GET_IAM_GROUPS = 'error-failed-to-get-iam-groups';
 const ERROR_MESSAGE_FAILED_TO_GET_PERSONS = 'error-failed-to-get-iam-persons';
 const ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED = 'error-failed-to-save-series-inbox-not-allowed';
-const ERROR_MESSAGE_FAILED_TO_GET_INBOX_EVENTS = 'error-failed-to-get-inbox-events'
+const ERROR_MESSAGE_FAILED_TO_GET_INBOX_EVENTS = 'error-failed-to-get-inbox-events';
 
 module.exports = {
     ERROR_MESSAGE_FAILED_TO_GET_USER,
