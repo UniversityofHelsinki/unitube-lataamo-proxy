@@ -18,18 +18,24 @@ stages:
 # Define the process for setup stage
 setup:
   stage: setup
+  tags:
+    - ohtu-build-1
   script:
     - npm install
 
 # Define the process for build stage
 build:
   stage: build
+  tags:
+    - ohtu-build-1
   script:
     - npm run build
 
 # Define the process for test stage
 test:
   stage: test
+  tags:
+    - ohtu-build-1
   script:
     - npm run coverage
   coverage: /All files\s*\|\s*([\d\.]+)/
@@ -37,6 +43,8 @@ test:
 # Define the process for deploy stage to development environment
 deploy_dev:
   stage: deploy
+  tags:
+    - ohtu-build-1
   environment:
     name: development
   only:
@@ -57,12 +65,14 @@ deploy_dev:
     - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-dev.it.helsinki.fi "mkdir -p /home/lataamo/proxy"
     - echo "====== Sync local and remote directory ======"
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
-    - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --exclude=".env" --exclude="/api/uploads" --exclude="/logs" --delete ./ lataamo@lataamo-dev.it.helsinki.fi:/home/lataamo/proxy
+    - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --exclude=".env" --exclude="/api/uploads" --exclude="/logs" --exclude="/files" --delete ./ lataamo@lataamo-dev.it.helsinki.fi:/home/lataamo/proxy
     - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-dev.it.helsinki.fi "pm2 restart app"
 
 # Define the process for deploy stage to test environment
 deploy_test:
   stage: deploy
+  tags:
+    - ohtu-build-1
   environment:
     name: test
   only:
@@ -83,12 +93,14 @@ deploy_test:
     - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-test.it.helsinki.fi "mkdir -p /home/lataamo/proxy"
     - echo "====== Sync local and remote directory ======"
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
-    - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --exclude=".env" --exclude="/api/uploads" --exclude="/logs"  --delete ./ lataamo@lataamo-test.it.helsinki.fi:/home/lataamo/proxy
+    - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --exclude=".env" --exclude="/api/uploads" --exclude="/logs" --exclude="/files"  --delete ./ lataamo@lataamo-test.it.helsinki.fi:/home/lataamo/proxy
     - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-test.it.helsinki.fi "pm2 restart app"
 
 # Define the process for deploy stage to test environment
 deploy_prod:
   stage: deploy
+  tags:
+    - ohtu-build-1
   environment:
     name: prod
   only:
@@ -110,5 +122,5 @@ deploy_prod:
     - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-prod.it.helsinki.fi "mkdir -p /home/lataamo/proxy"
     - echo "====== Sync local and remote directory ======"
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
-    - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --exclude=".env" --exclude="/api/uploads" --exclude="/logs"  --delete ./ lataamo@lataamo-prod.it.helsinki.fi:/home/lataamo/proxy
-    - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-prod.it.helsinki.fi "pm2 restart app"
+    - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --exclude=".env" --exclude="/api/uploads" --exclude="/logs" --exclude="/files"  --delete ./ lataamo@lataamo-prod.it.helsinki.fi:/home/lataamo/proxy
+    - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-prod.it.helsinki.fi "NODE_ENV=production pm2 restart app"
