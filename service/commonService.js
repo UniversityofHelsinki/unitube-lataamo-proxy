@@ -64,7 +64,7 @@ exports.removeRoleWhenTestEnvironment = (roleList, roleToRemove) => {
 
     if (roleList && process.env.ENVIRONMENT !== 'prod') {
         roleList.map(role => {
-            role === roleToRemove ? roleElem : newRoles.push(role)
+            role === roleToRemove ? role : newRoles.push(role)
         })
     }
     return newRoles;
