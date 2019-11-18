@@ -44,6 +44,23 @@ exports.updateSeries = async (req, res) => {
     }
 };
 
+exports.getUserSeriesDropDownList = async (req, res) => {
+    try {
+        logger.info(`GET /userSeries USER: ${req.user.eppn}`);
+        const loggedUser = userService.getLoggedUser(req.user);
+        const userSeries = await apiService.getUserSeries(loggedUser);
+        res.json(userSeries);
+    } catch (error) {
+        res.status(500);
+        const msg = error.message;
+        logger.error(`Error GET /userSeries ${msg} USER ${req.user.eppn}`);
+        res.json({
+            message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_SERIES_LIST_FOR_USER,
+            msg
+        })
+    }
+};
+
 exports.getUserSeries = async (req, res) => {
     try {
         logger.info(`GET /userSeries USER: ${req.user.eppn}`);
