@@ -71,7 +71,10 @@ exports.createSeries = async (req, res) => {
 
         if(exists){
             res.status(403);
-            res.json({message: '"inbox" not allowed in series title. Series was not created.'});
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED,
+                msg: 'Inbox word is not allowed in series title'
+            });
         }else{
             let modifiedSeriesMetadata = seriesService.openCastFormatSeriesMetadata(series, loggedUser);
             let modifiedSeriesAclMetadata = seriesService.openCastFormatSeriesAclList(series, constants.CREATE_SERIES);
