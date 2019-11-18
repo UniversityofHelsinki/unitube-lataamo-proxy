@@ -59,6 +59,13 @@ const SERIES_ACL_TEMPLATE_TEST = [
     }
 ];
 
+const SERIES_ACL_ROLE_KATSOMO =
+    {
+        "action": "read",
+        "allow": true,
+        "role": "ROLE_KATSOMO"
+    };
+
 const SERIES_ACL_TEMPLATE_TUOTANTO = [
     {
         "action": "read",
@@ -128,6 +135,7 @@ const PROPERTIES_REPUBLISH_METADATA =
 
 module.exports = {
     ROLE_ANONYMOUS,
+    SERIES_ACL_ROLE_KATSOMO,
     ROLE_KATSOMO,
     ADD_TO_IAM_GROUPS,
     PUBLIC_ROLES,

@@ -1,4 +1,4 @@
-const commonService = require('./commonService');
+const commonService = require('../service/commonService');
 const constants = require('../utils/constants');
 const apiService = require('../service/apiService');
 
@@ -100,11 +100,7 @@ const updateSeriesAclList = (aclList) => {
         seriesAclTemplate = [...constants.SERIES_ACL_TEMPLATE_TUOTANTO];
     } else {
         seriesAclTemplate = [...constants.SERIES_ACL_TEMPLATE];
-
-// kutsu tässä commonService.js getAcl = (aclList, "ROLE_KATSOMO");
-
-
-
+        aclList = commonService.removeRoleWhenTestEnvironment(aclList, constants.ROLE_KATSOMO);
     }
     let seriesACLTemplateReadEntry = constants.SERIES_ACL_TEMPLATE_READ_ENTRY;
     let seriesACLTemplateWriteEntry = constants.SERIES_ACL_TEMPLATE_WRITE_ENTRY;
@@ -170,18 +166,6 @@ exports.addPublicityStatusToSeries = async (seriesList) => {
         });
     }
     return seriesWithRolesAndVisibility;
-};
-
-exports.addPublishedInfoInSeries = async (seriesList) => {
-    for (const series of seriesList) {
-        let roles = await apiService.getSeriesAcldata(series.identifier);
-        if (commonService.publicRoleCount(roles) === 2) { //series has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
-            series.published = true;
-        } else {
-            series.published = false;
-        }
-    }
-    return seriesList;
 };
 
 exports.addPublishedInfoInSeriesAndMoodleRoles = async (series) => {
