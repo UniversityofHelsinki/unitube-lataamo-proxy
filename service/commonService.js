@@ -11,7 +11,7 @@ exports.publicRoleCount = (roles) => {
                               //both of the roles has only READ rights (so they appear only once in roles list) so
                               //countPublicRoles value 2 means that series/video is published
     if (roles) {
-        this.addGivenRoleWhenTestEnvironment(roles, constants.ROLE_ANONYMOUS);
+        this.addRoleWhenTestEnvironment(roles, constants.ROLE_ANONYMOUS);
         roles.forEach(item => {
             const match = constants.PUBLIC_ROLES.filter(entry => item.role.includes(entry));
             if (match && match.length > 0) {
@@ -29,7 +29,7 @@ exports.publicRoleCount = (roles) => {
  * @param roleList
  * @param roleToCompare
  */
-exports.addGivenRoleWhenTestEnvironment = (roleList, roleToCompare) => {
+exports.addRoleWhenTestEnvironment = (roleList, roleToCompare) => {
 
     if (roleList && process.env.ENVIRONMENT !== 'prod') {
         let found = false;
