@@ -23,10 +23,19 @@ exports.filterEventsForClient = (ocResponseData) => {
             "processing_state" : event.processing_state,
             "visibility" : calculateVisibilityPropertyForVideo(event),
             "created": event.created,
-            "series": event.series.title
+            "series": event.series.title,
+            "media" : calculateMediaProperty(event)
         })
     });
     return eventArray;
+};
+
+const calculateMediaProperty = (event) => {
+    let mediaUlrs = [];
+    event.media.forEach(media => {
+       mediaUlrs.push(media.url);
+    });
+    return mediaUlrs;
 };
 
 exports.calculateVisibilityProperty = (event) => {

@@ -299,6 +299,12 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
     return response;
 };
 
+exports.downloadVideo = async (videoUrl) => {
+    const url = 'http://localhost:8080/assets/assets/d47304d6-30db-44b1-94a7-ede78cf58ca0/9e4de2b2-2831-46c2-b1cf-99b4ba7b621e/6/fruits_on_table.mp4';
+    const response = await security.opencastBaseStream.get(url);
+    return response;
+};
+
 
 // create the default lataamo INBOX series for the given userId
 exports.createLataamoInboxSeries = async (userId) => {

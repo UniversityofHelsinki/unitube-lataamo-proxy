@@ -14,6 +14,7 @@ const ERROR_MESSAGE_FAILED_TO_GET_IAM_GROUPS = 'error-failed-to-get-iam-groups';
 const ERROR_MESSAGE_FAILED_TO_GET_PERSONS = 'error-failed-to-get-iam-persons';
 const ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED = 'error-failed-to-save-series-inbox-not-allowed';
 const ERROR_MESSAGE_FAILED_TO_GET_INBOX_EVENTS = 'error-failed-to-get-inbox-events';
+const ERROR_MESSAGE_FAILED_TO_DOWNLOAD_VIDEO = 'error-failed-to-download-video';
 
 module.exports = {
     ERROR_MESSAGE_FAILED_TO_GET_USER,
@@ -29,5 +30,6 @@ module.exports = {
     ERROR_MESSAGE_FAILED_TO_GET_IAM_GROUPS,
     ERROR_MESSAGE_FAILED_TO_GET_PERSONS,
     ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED,
-    ERROR_MESSAGE_FAILED_TO_GET_INBOX_EVENTS
+    ERROR_MESSAGE_FAILED_TO_GET_INBOX_EVENTS,
+    ERROR_MESSAGE_FAILED_TO_DOWNLOAD_VIDEO
 };

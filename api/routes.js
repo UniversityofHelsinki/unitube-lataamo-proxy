@@ -365,4 +365,6 @@ module.exports = function (router) {
      *           description: Unexpected error    
      */
     router.get('/persons/:query', persons.getPersons);
+
+    router.post('/download' , video.downloadVideo);
 };
