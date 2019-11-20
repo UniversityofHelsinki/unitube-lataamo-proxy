@@ -12,7 +12,8 @@ exports.getSeries = async (req, res) => {
     try {
         const series = await apiService.getSeries(req.params.id);
         await apiService.contributorsToIamGroupsAndPersons(series);
-        const userSeriesWithPublished = await seriesService.addPublishedInfoInSeriesAndMoodleRoles(series);
+        const seriesWithAllEventsCount = await eventsService.getAllEventsCountForSeries(series);
+        const userSeriesWithPublished = await seriesService.addPublishedInfoInSeriesAndMoodleRoles(seriesWithAllEventsCount);
         res.json(userSeriesWithPublished);
     } catch (error) {
         const msg = error.message;
@@ -48,8 +49,9 @@ exports.getUserSeries = async (req, res) => {
         logger.info(`GET /userSeries USER: ${req.user.eppn}`);
         const loggedUser = userService.getLoggedUser(req.user);
         const userSeries = await apiService.getUserSeries(loggedUser);
-        const userSeriesWithPublished = await seriesService.addPublishedInfoInSeries(userSeries);
-        res.json(userSeriesWithPublished);
+        const seriesWithAllEventsCount = await eventsService.getAllSeriesEventsCount(userSeries);
+        const userSeriesWithPublicity = await seriesService.addPublicityStatusToSeries(seriesWithAllEventsCount);
+        res.json(userSeriesWithPublicity);
     } catch (error) {
         res.status(500);
         const msg = error.message;
@@ -69,7 +71,10 @@ exports.createSeries = async (req, res) => {
 
         if(exists){
             res.status(403);
-            res.json({message: '"inbox" not allowed in series title. Series was not created.'});
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED,
+                msg: 'Inbox word is not allowed in series title'
+            });
         }else{
             let modifiedSeriesMetadata = seriesService.openCastFormatSeriesMetadata(series, loggedUser);
             let modifiedSeriesAclMetadata = seriesService.openCastFormatSeriesAclList(series, constants.CREATE_SERIES);

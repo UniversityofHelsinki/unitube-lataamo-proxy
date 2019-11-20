@@ -18,6 +18,7 @@ const LATAAMO_USER_PATH = '/api/user';
 const LATAAMO_API_VIDEO_PATH = '/api/videoUrl/';
 
 const constants = require('../utils/constants');
+const messageKeys = require('../utils/message-keys');
 
 describe('Authentication with shibboleth headers (eppn, preferredlanguage, hyGroupCn)', () => {
 
@@ -115,6 +116,8 @@ describe('user series returned from /userSeries route', () => {
         test.mockOCastSeriesApiCall();
         test.mockOCastEvent1AclCall();
         test.mockOcastEvent2AclCall();
+        test.mockOCastEvents_2_ApiCall();
+        test.mockOCastEvents_1_ApiCall();
     });
 
     it("should return no series if user and users groups are not in the series contributors list", async () => {
@@ -143,7 +146,9 @@ describe('user series returned from /userSeries route', () => {
             .expect('Content-Type', /json/);
 
         assert.isArray(response.body, 'Response should be an array');
+        assert.equal(response.body[0].eventsCount, 2);
         assert.lengthOf(response.body, 2, 'Two series should be returned');
+        assert.equal(response.body[1].eventsCount, 1);
     });
 
     it("should return user's series if users group is in the series contributors list", async () => {
@@ -159,6 +164,7 @@ describe('user series returned from /userSeries route', () => {
         assert.isArray(response.body, 'Response should be an array');
         assert.lengthOf(response.body, 1, 'One series should be returned');
         assert.equal(response.body[0].identifier, test.constants.TEST_SERIES_1_ID);
+        assert.equal(response.body[0].eventsCount, 2);
     });
 
     afterEach(() => {
@@ -174,6 +180,9 @@ describe('user series returned from /userSeries route', () => {
         test.mockOCastEvent1AclCall();
         test.mockOcastEvent2AclCall();
         test.mockOcastEvent3AclCall();
+        test.mockOCastEvents_1_ApiCall();
+        test.mockOCastEvents_2_ApiCall();
+        test.mockOcastEvetns_3_ApiCall();
     });
 
     it("should return user's series published == true for the first and second series and published == false for the third series", async () => {
@@ -187,9 +196,16 @@ describe('user series returned from /userSeries route', () => {
             .expect('Content-Type', /json/);
 
         assert.equal(response.body[0].published, true, 'Response should be an array');
+        assert.deepEqual(response.body[0].visibility, ['status_published']);
+        assert.equal(response.body[0].eventsCount, 2);
         assert.equal(response.body[1].published, true, 'Two series should be returned');
+        assert.deepEqual(response.body[1].visibility, ['status_published', 'status_moodle']);
+        assert.equal(response.body[1].eventsCount, 1);
         assert.equal(response.body[2].published, false, 'Two series should be returned');
+        assert.equal(response.body[2].eventsCount, 1);
+        assert.deepEqual(response.body[2].visibility, ['status_private']);
     });
+
 
     afterEach(() => {
         test.cleanAll();
@@ -202,6 +218,7 @@ describe('user series person - and iamgroup administrators returned from /series
         // mock needed opencast apis
         test.mockOCastSeriesApiCall7();
         test.mockOCastEvent1AclCall();
+        test.mockOCastEvents_1_ApiCall();
     });
 
     it("should return user's series with three iamgroups and three persons ", async () => {
@@ -503,7 +520,7 @@ describe('user series post', () => {
             .set('displayName', test.mockTestUser.displayName)
             .expect(403)
             .expect('Content-Type', /json/);
-        assert.equal(response.body.message, '"inbox" not allowed in series title. Series was not created.');
+        assert.equal(response.body.message, messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED);
     });
 
     it('"inbox" string not allowed in series\' title', async () => {
@@ -517,7 +534,7 @@ describe('user series post', () => {
             .set('displayName', test.mockTestUser.displayName)
             .expect(403)
             .expect('Content-Type', /json/);
-        assert.equal(response.body.message, '"inbox" not allowed in series title. Series was not created.');
+        assert.equal(response.body.message, messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED);
     });
 
     it('"INBOX" string not allowed in series\' title', async () => {
@@ -531,7 +548,7 @@ describe('user series post', () => {
             .set('displayName', test.mockTestUser.displayName)
             .expect(403)
             .expect('Content-Type', /json/);
-        assert.equal(response.body.message, '"inbox" not allowed in series title. Series was not created.');
+        assert.equal(response.body.message, messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED);
     });
 
     it('"InBoX" string not allowed in series\' title', async () => {
@@ -545,7 +562,7 @@ describe('user series post', () => {
             .set('displayName', test.mockTestUser.displayName)
             .expect(403)
             .expect('Content-Type', /json/);
-        assert.equal(response.body.message, '"inbox" not allowed in series title. Series was not created.');
+        assert.equal(response.body.message, messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED);
     });
 });
 
@@ -564,7 +581,7 @@ describe('Updating videos aka events', () => {
             .set('displayName', test.mockTestUser.displayName)
             .expect(403)
             .expect('Content-Type', /json/);
-        assert.equal(response.body.message, 'Transaction active for given event');
+        assert.equal(response.body.message, 'error-failed-to-update-event-details');
     });
 
     it('Should fail if update event metadata request returns something else than 204 from opencast', async () => {
@@ -644,6 +661,7 @@ describe('Fetching event from /event/id route', () => {
         test.mockOCastEventMetadata_1Call();
         test.mockOpencastEvent1Request();
         test.mockOCastSeriesApiCall();
+        test.mockOCastSeriesApiCall9();
         test.mockOCastUserApiCall();
         test.mockOCastEvents_1_ApiCall();
         test.mockOCastEventMetadata_1Call();
