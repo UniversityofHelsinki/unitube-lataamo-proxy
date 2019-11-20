@@ -41,7 +41,8 @@ module.exports.opencastBase = axios.create({
 
 module.exports.opencastBaseStream = axios.create({
     maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
-    headers: {'authorization': auth, 'responseType': "stream"},
+    headers: {'authorization': auth},
+    responseType: "arraybuffer",
     validateStatus: () => { // https://github.com/axios/axios/issues/1143
         return true;        // without this axios might throw error on non 200 responses
     }

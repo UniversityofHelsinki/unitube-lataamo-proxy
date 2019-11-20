@@ -86,11 +86,13 @@ exports.downloadVideo = async (req, res) => {
         const response = await apiService.downloadVideo(req.body.mediaUrl);
         let contentType = response.headers['content-type'];
         let contentLength = response.headers['content-length'];
-        res.setHeader('Content-Transfer-Encoding', 'binary');
+        console.log(contentType);
+        console.log(contentLength);
         res.setHeader('Content-Type', contentType);
         res.setHeader('Content-Length', contentLength);
-        res.send(new Buffer.from(response.data, 'binary'))
+        res.end(new Buffer.from(response.data, 'binary'));
     } catch(error) {
+        console.log("ERROR", error.message);
         res.status(500);
         const msg = error.message;
         logger.error(`Error PUT /userVideos/:id ${msg} USER ${req.user.eppn}`);
