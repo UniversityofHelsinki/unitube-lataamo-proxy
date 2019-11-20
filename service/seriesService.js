@@ -8,7 +8,7 @@ exports.getSeriesIdentifiers = (series, user) => {
     const userSeries = filterSeriesByUser(series, user);
     const seriesIdentifiers = getSeriesIdentifiers(userSeries);
     return seriesIdentifiers;
-}
+};
 
 const filteredUserAttributes = (user) => {
     let filteredAttributes = [];
@@ -16,7 +16,7 @@ const filteredUserAttributes = (user) => {
     filteredAttributes.push(user.hyGroupCn);
     filteredAttributes = concatenateArray(filteredAttributes);
     return filteredAttributes;
-}
+};
 
 const filterSeriesByUser = (series, user) => {
     const filteredAttributes = filteredUserAttributes(user);
@@ -24,11 +24,11 @@ const filterSeriesByUser = (series, user) => {
         return serie.contributors.some(contributor => filteredAttributes.includes(contributor));
     });
     return filteredSeriesByUser;
-}
+};
 
 const getSeriesIdentifiers = (filteredSeriesByUser) => {
     return filteredSeriesByUser.map(serie => serie.identifier);
-}
+};
 
 exports.getSeriesFromEventMetadata = (metadata) => {
     const foundEpisodeFlavorMetadata = metadata.find(field => {
@@ -120,28 +120,59 @@ exports.openCastFormatSeriesAclList = (metadata) => updateSeriesAclList(metadata
 
 const concatenateArray = (data) => Array.prototype.concat.apply([], data);
 
+const getSeriesRolesLists = async (series) => {
+    return Promise.all(series.map(async series => {
+        let roles = await apiService.getSeriesAcldata(series.identifier);
+        return {
+            ...series,
+            roles: roles
+        }
+    }));
+};
+
+const updateSeriesPublicity = (series) => {
+    let published = false;
+    if (commonService.publicRoleCount(series.roles) === 2) { //series has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
+        published = true;
+    } else {
+        published = false;
+    }
+    return {
+        ...series,
+        published : published
+    }
+};
+
 // Looping array of series elements
 //
 // Adds published value in series array for each series:
 //   if user has ROLE_ANONYMOUS and ROLE_KATSOMO --> published is true otherwise false
-exports.addPublishedInfoInSeries = async (seriesList) => {
+exports.addPublicityStatusToSeries = async (seriesList) => {
+    let seriesWithRoles = await getSeriesRolesLists(seriesList);
+    let seriesWithRolesAndVisibility = [];
+    if (seriesWithRoles) {
+        seriesWithRoles.forEach(series => {
+            seriesWithRoles = updateSeriesPublicity(series);
+            seriesWithRoles = calculateVisibilityProperty(seriesWithRoles);
+            seriesWithRolesAndVisibility.push(seriesWithRoles);
+        });
+    }
+    return seriesWithRolesAndVisibility;
+};
 
-    let seriesListWithPublished = [];
+exports.addPublishedInfoInSeries = async (seriesList) => {
     for (const series of seriesList) {
         let roles = await apiService.getSeriesAcldata(series.identifier);
         if (commonService.publicRoleCount(roles) === 2) { //series has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
             series.published = true;
-            seriesListWithPublished.push(series);
         } else {
             series.published = false;
-            seriesListWithPublished.push(series);
         }
     }
-    return seriesListWithPublished;
-}
+    return seriesList;
+};
 
 exports.addPublishedInfoInSeriesAndMoodleRoles = async (series) => {
-
     let roles = await apiService.getSeriesAcldata(series.identifier);
     if (commonService.publicRoleCount(roles) === 2) { //series has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
         series.published = constants.ROLE_ANONYMOUS;
@@ -151,13 +182,12 @@ exports.addPublishedInfoInSeriesAndMoodleRoles = async (series) => {
     series.moodleNumber = "";
     series.moodleNumbers = moodleNumbersFromRoles(roles);
     return series;
-}
+};
 
 let instructor = new RegExp(constants.MOODLE_ACL_INSTRUCTOR, 'g');
 let learner = new RegExp(constants.MOODLE_ACL_LEARNER, 'g');
 
 const moodleNumbersFromRoles = (roles) => {
-
     let moodlenumbers = [];
     for (const item of roles) {
         if (item.role.match(instructor) || item.role.match(learner)) {
@@ -169,4 +199,33 @@ const moodleNumbersFromRoles = (roles) => {
     const uniqueMoodleNumbers = Array.from(new Set(moodlenumbers));
 
     return uniqueMoodleNumbers;
-}
+};
+
+const calculateVisibilityProperty = (series) => {
+    return {
+        ...series,
+        visibility: calculateVisibilityPropertyForSeries(series)
+    }
+};
+
+const setVisibilityForSeries = (series) => {
+    const visibility = [];
+
+    if (commonService.publicRoleCount(series.roles) === 2) { //video has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
+        visibility.push(constants.STATUS_PUBLISHED);
+    } else {
+        visibility.push(constants.STATUS_PRIVATE);
+    }
+
+    const moodleAclInstructor = series.roles.filter(role => role.role.includes(constants.MOODLE_ACL_INSTRUCTOR));
+    const moodleAclLearner = series.roles.filter(role => role.role.includes(constants.MOODLE_ACL_LEARNER));
+
+    if (moodleAclInstructor && moodleAclLearner && moodleAclInstructor.length > 0 && moodleAclLearner.length > 0) {
+        visibility.push(constants.STATUS_MOODLE);
+    }
+    return [...new Set(visibility)]
+};
+
+const calculateVisibilityPropertyForSeries = (series) => setVisibilityForSeries(series);
+
+exports.getInboxSeriesIdentifier = (series) => series.find(series => series.identifier).identifier;
