@@ -33,7 +33,9 @@ exports.filterEventsForClient = (ocResponseData) => {
 const calculateMediaPropertyForVideo = (event) => {
     let mediaUlrs = [];
     event.media.forEach(media => {
-        mediaUlrs.push(media.url);
+        if (event.processing_state === constants.OPENCAST_STATE_SUCCEEDED) {
+            mediaUlrs.push(media.url);
+        }
     });
     return [...new Set(mediaUlrs)];
 };
