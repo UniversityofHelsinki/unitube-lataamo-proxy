@@ -37,8 +37,17 @@ exports.getEventsWithSeriesByIdentifier = async (series) => {
     const events = response.data;
     return {
         ...series,
-        eventsCount: events.length
+        eventsCount: events.length,
+        eventColumns: someEventColumns(events)
     }
+};
+
+const someEventColumns = (events) => {
+    let eventData = [];
+    events.map(({title, identifier}) => {
+        eventData.push({"title": title, "id": identifier});
+    })
+    return eventData;
 };
 
 exports.getSeries = async (seriesId) => {
