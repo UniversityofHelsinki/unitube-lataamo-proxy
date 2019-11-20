@@ -212,6 +212,37 @@ describe('user series returned from /userSeries route', () => {
     });
 });
 
+describe('user inbox series should not return from /userSeries route', () => {
+
+    beforeEach(() => {
+        // mock needed opencast apis
+        test.mockSeriesWithInboxCall();
+        test.mockOCastEvent1AclCall();
+        test.mockOcastEvent2AclCall();
+        test.mockOcastEvent3AclCall();
+        test.mockOCastEvents_1_ApiCall();
+        test.mockOCastEvents_2_ApiCall();
+        test.mockOcastEvetns_3_ApiCall();
+    });
+
+    it("should not return inbox series", async () => {
+        let response = await supertest(app)
+            .get(LATAAMO_USER_SERIES_PATH)
+            .set('eppn', test.mockTestUser3.eppn)
+            .set('preferredlanguage', test.mockTestUser3.preferredlanguage)
+            .expect(200)
+            .expect('Content-Type', /json/);
+        assert.equal(response.body[0].identifier, 'd72a8c9e-f854-4ba4-9ed2-89405fae214e' );
+        assert.deepEqual(response.body[0].visibility, ['status_published', 'status_moodle']);
+        assert.equal(response.body[0].title , 'SERIES_OWNER_EPPN');
+    });
+
+
+    afterEach(() => {
+        test.cleanAll();
+    });
+});
+
 describe('user series person - and iamgroup administrators returned from /series route', () => {
 
     beforeEach(() => {
