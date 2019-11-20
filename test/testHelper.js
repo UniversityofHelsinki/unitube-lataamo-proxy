@@ -46,21 +46,25 @@ const mockApiUser =  {
     userrole: 'ROLE_USER_ADMIN',
     email: 'admin@localhost',
     username: 'admin'
-}
+};
 
 const mockTestUser = {
     eppn: 'Tester-XYZ',
     preferredlanguage: 'fi',
     hyGroupCn: 'grp-XYZ',
     displayName: 'Matti Meikalainen'
-}
+};
 
 const mockTestUser2 = {
     eppn: 'Tester-XYZ',
     preferredlanguage: 'fi',
     hyGroupCn: 'grp-lataamo-6'
-}
+};
 
+const mockTestUser3 = {
+    eppn: 'Tester-XYZ',
+    preferredlanguage: 'fi'
+};
 // TODO: put json into separate files
 
 const mockUserNoSeries = [];
@@ -80,6 +84,39 @@ const mockUserInboxSeries = [
         publishers: [ 'publisher-kasitunnus' ],
         contributors: [ 'SeriesOwnerEppn', 'contrib1', 'jaaki', 'grp-lataamo-1', 'grp-XYZ'],
         title: 'inbox SERIES_OWNER_EPPN'
+    }
+];
+
+const mockUserInboxSeries2 = [
+    { identifier: CONSTANTS.TEST_INBOX_SERIES_ID,
+        creator: 'Opencast Project Administrator',
+        created: '2019-06-11T12:59:40Z',
+        subjects:
+            [ 'subjects-järvi',
+                'subjects-laavu',
+                'subjects-aamupuuro',
+                'subjects-turve',
+                'subjects-salama',
+                'subjects-koivikko' ],
+        organizers: [ 'creator-kasitunnus' ],
+        publishers: [ 'publisher-kasitunnus' ],
+        contributors: [ 'SeriesOwnerEppn', 'contrib1', 'jaaki', 'grp-lataamo-1', 'grp-XYZ'],
+        title: 'inbox SERIES_OWNER_EPPN'
+    },
+    { identifier: CONSTANTS.TEST_SERIES_2_ID,
+        creator: 'Opencast Project Administrator',
+        created: '2019-06-11T12:59:40Z',
+        subjects:
+            [ 'subjects-järvi',
+                'subjects-laavu',
+                'subjects-aamupuuro',
+                'subjects-turve',
+                'subjects-salama',
+                'subjects-koivikko' ],
+        organizers: [ 'creator-kasitunnus' ],
+        publishers: [ 'publisher-kasitunnus' ],
+        contributors: [ 'SeriesOwnerEppn', 'contrib1', 'jaaki', 'grp-lataamo-1', 'grp-XYZ'],
+        title: 'SERIES_OWNER_EPPN'
     }
 ];
 
@@ -1733,6 +1770,11 @@ const lataamoSeries8 = () =>
         .get(CONSTANTS.OCAST_SERIES_PATH + "?filter=contributors:SeriesOwnerEppn,contributors:grp-XYZ")
         .reply(200, mockUserSeries5);
 
+const lataamoWithInboxSeries = () =>
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .get(CONSTANTS.OCAST_SERIES_PATH + "?filter=contributors:Tester-XYZ,contributors:")
+        .reply(200, mockUserInboxSeries2);
+
 const lataamoPostSeries = () =>
     nock(CONSTANTS.OCAST_BASE_URL)
         .post(CONSTANTS.OCAST_SERIES_PATH)
@@ -1846,6 +1888,7 @@ const cleanMocks = () => nock.cleanAll();
 module.exports.mockApiUser = mockApiUser;
 module.exports.mockTestUser = mockTestUser;
 module.exports.mockTestUser2 = mockTestUser2;
+module.exports.mockTestUser3 = mockTestUser3;
 module.exports.mockOCastSeriesApiCallEmpty = lataamoSeriesEmpty;
 module.exports.mockOCastSeriesApiCall = lataamoSeries;
 module.exports.mockOCastSeriesApiCall2 = lataamoSeries2;
@@ -1902,4 +1945,5 @@ module.exports.mockInboxEvent1MediaFileMetadataCall = event1InboxMediaFileMetada
 module.exports.mockInboxEvent2MediaFileMetadataCall = event2InboxMediaFileMetadata;
 module.exports.mockInboxSeriesAclCall = inboxEventAclsFromSeries;
 module.exports.mockInboxSeriesCall = inboxUserSeries;
+module.exports.mockSeriesWithInboxCall = lataamoWithInboxSeries;
 module.exports.cleanAll = cleanMocks;
