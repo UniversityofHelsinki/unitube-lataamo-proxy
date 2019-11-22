@@ -5,9 +5,9 @@ const seriesService = require('../service/seriesService');
 const eventsService = require('../service/eventsService');
 const apiService = require('../service/apiService');
 const publicationService = require('../service/publicationService');
-const path = require('path');
 const logger = require('../config/winstonLogger');
 const messageKeys = require('../utils/message-keys');
+const fs = require('fs');
 
 exports.getVideoUrl = async (req, res) => {
     try {
@@ -74,6 +74,24 @@ exports.updateVideo = async (req, res) => {
         logger.error(`Error PUT /userVideos/:id ${msg} USER ${req.user.eppn}`);
         res.json({
             message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPDATE_EVENT_DETAILS,
+            msg
+        });
+    }
+};
+
+exports.downloadVideo = async (req, res) => {
+    try {
+        console.log(req.body.mediaUrl);
+        logger.info(`POST download VIDEO ${req.body.mediaUrl} USER ${req.user.eppn}`);
+        const response = await apiService.downloadVideo(req.body.mediaUrl);
+        response.data.pipe(res);
+    } catch(error) {
+        console.log("ERROR", error.message);
+        res.status(500);
+        const msg = error.message;
+        logger.error(`Error PUT /userVideos/:id ${msg} USER ${req.user.eppn}`);
+        res.json({
+            message: messageKeys.ERROR_MESSAGE_FAILED_TO_DOWNLOAD_VIDEO,
             msg
         });
     }
