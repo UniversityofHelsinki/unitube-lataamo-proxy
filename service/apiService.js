@@ -332,6 +332,10 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
     }
 };
 
+exports.downloadVideo = async (videoUrl) => {
+    const response = await security.opencastBaseStream.get(encodeURI(videoUrl));
+    return response;
+};
 
 // create the default lataamo INBOX series for the given userId
 exports.createLataamoInboxSeries = async (userId) => {
