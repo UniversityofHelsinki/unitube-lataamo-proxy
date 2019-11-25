@@ -64,7 +64,9 @@ const addUserInContributorsList = (contributors, user) => {
 
 exports.addUserToEmptyContributorsList = (metadata, user) => {
     !metadata.contributors || metadata.contributors.length === 0 ? metadata.contributors = [user.eppn] : metadata.contributors;
-}
+};
+
+exports.filterInboxSeries = (series) => series.filter(series => !series.title.toLowerCase().includes('inbox'));
 
 exports.openCastFormatSeriesMetadata = (metadata, user) => {
     let seriesMetadataTemplate = constants.SERIES_METADATA;

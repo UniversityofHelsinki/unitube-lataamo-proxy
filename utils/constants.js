@@ -13,6 +13,8 @@ const STATUS_PUBLISHED = 'status_published';
 const STATUS_PRIVATE = 'status_private';
 const STATUS_MOODLE = 'status_moodle';
 
+const OPENCAST_STATE_SUCCEEDED = 'SUCCEEDED';
+
 const VIDEO_PRESENTER_DELIVERY = 'presenter/delivery';
 const VIDEO_PRESENTATION_DELIVERY = 'presentation/delivery';
 
@@ -174,5 +176,6 @@ module.exports = {
     PROPERTIES_REPUBLISH_METADATA,
     SERIES_ACL_TEMPLATE_TUOTANTO,
     SERIES_ACL_TEMPLATE_TEST,
-    INBOX
+    INBOX,
+    OPENCAST_STATE_SUCCEEDED
 };
