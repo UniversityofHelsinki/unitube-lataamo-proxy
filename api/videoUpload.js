@@ -45,7 +45,7 @@ const returnOrCreateUsersInboxSeries = async (loggedUser) => {
 
     try {
         const userSeries = await apiService.getUserSeries(loggedUser);
-        const inboxSeries = userSeries.find(series => series.title === lataamoInboxSeriesTitle);
+        let inboxSeries = userSeries.find(series => series.title === lataamoInboxSeriesTitle);
 
         if (!inboxSeries) {
             logger.info(`inbox series not found with title ${lataamoInboxSeriesTitle}`);
@@ -108,7 +108,7 @@ exports.upload = async (req, res) => {
 
         // On finish of the file write to disk
         fstream.on('close', async () => {
-            
+
             const timeDiff = new Date() - startTime;
             uploadLogger.log(INFO_LEVEL,
                 `Loading time with busboy ${timeDiff} milliseconds USER: ${req.user.eppn} -- ${uploadId}`);
