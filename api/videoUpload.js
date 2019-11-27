@@ -113,17 +113,6 @@ exports.upload = async (req, res) => {
             uploadLogger.log(INFO_LEVEL,
                 `Loading time with busboy ${timeDiff} milliseconds USER: ${req.user.eppn} -- ${uploadId}`);
 
-            const respMsg = `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Started to send file to Opencast`;
-
-            // Sending message to user: video is on proxy server.
-            res.status(200);
-            const jsonmsg =
-            res.send(JSON.stringify({
-                message: messageKeys.SUCCESS_MESSAGE_VIDEO_ON_PROXY,
-                respMsg,
-                id: uploadId
-            }));
-
             // try to send the file to opencast
             const response = await apiService.uploadVideo(filePathOnDisk, filename, inboxSeries.identifier);
 
@@ -133,25 +122,23 @@ exports.upload = async (req, res) => {
                 res.status(200);
                 uploadLogger.log(INFO_LEVEL,
                     `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)} USER: ${req.user.eppn} -- ${uploadId}`);
-                // Can't anymore send this message to user
-                /*const msg = `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)}`;
+                const msg = `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)}`;
                 return res.json({
                     message: messageKeys.SUCCESS_MESSAGE_VIDEO_UPLOAD,
                     msg,
                     id: uploadId
-                })*/
+                })
             } else {
                 // on failure clean file from disk and return 500
                 deleteFile(filePathOnDisk, uploadId);
                 res.status(500);
                 const msg = `${filename} failed to upload to opencast.`;
                 uploadLogger.log(ERROR_LEVEL, `POST /userVideos ${msg} USER: ${req.user.eppn} -- ${uploadId} ${response}`);
-                // Can't anymore send this message to user
-                /*return res.json({
+                return res.json({
                     message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
                     msg,
                     id: uploadId
-                });*/
+                });
             }
         });
     });
