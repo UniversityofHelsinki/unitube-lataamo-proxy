@@ -2,7 +2,7 @@ const commonService = require('./commonService');
 const seriesService = require('./seriesService');
 const apiService = require('./apiService');
 const moment = require('moment');
-const momentDurationFormatSetup = require("moment-duration-format");
+const momentDurationFormatSetup = require('moment-duration-format');
 momentDurationFormatSetup(moment);
 const constants = require('../utils/constants');
 const {inboxSeriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
@@ -15,19 +15,19 @@ exports.filterEventsForClient = (ocResponseData) => {
         return [];
     }
 
-    const eventArray = []
+    const eventArray = [];
     ocResponseData.forEach(event => {
         eventArray.push({
-            "identifier": event.identifier,
-            "title": event.title,
-            "duration": moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format("hh:mm:ss", {trim:false}),
-            "creator": event.creator,
-            "processing_state" : event.processing_state,
-            "visibility" : calculateVisibilityPropertyForVideo(event),
-            "created": event.created,
-            "series": event.series.title,
-            "media" : calculateMediaPropertyForVideo(event)
-        })
+            'identifier': event.identifier,
+            'title': event.title,
+            'duration': moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format('hh:mm:ss', {trim:false}),
+            'creator': event.creator,
+            'processing_state' : event.processing_state,
+            'visibility' : calculateVisibilityPropertyForVideo(event),
+            'created': event.created,
+            'series': event.series.title,
+            'media' : calculateMediaPropertyForVideo(event)
+        });
     });
     return eventArray;
 };
@@ -46,7 +46,7 @@ exports.calculateVisibilityProperty = (event) => {
     return {
         ...event,
         visibility: calculateVisibilityPropertyForVideo(event)
-    }
+    };
 };
 
 const calculateVisibilityPropertyForVideo = (video) => {
@@ -64,7 +64,7 @@ const calculateVisibilityPropertyForVideo = (video) => {
     if (moodleAclInstructor && moodleAclLearner && moodleAclInstructor.length > 0 && moodleAclLearner.length > 0) {
         visibility.push(constants.STATUS_MOODLE);
     }
-    return [...new Set(visibility)]
+    return [...new Set(visibility)];
 };
 
 exports.getAllEvents = async (seriesIdentifiers) => {
@@ -83,7 +83,7 @@ exports.getAllEventsWithMetadatas = async (events) => {
         return {
             ...event,
             metadata: metadata
-        }
+        };
     }));
 };
 
@@ -104,7 +104,7 @@ exports.getAllEventsWithMediaFileMetadata = async (events) => {
         return {
             ...event,
             mediaFileMetadata : mediaFileMetadata
-        }
+        };
     }));
 };
 
@@ -118,7 +118,7 @@ exports.getAllEventsWithAcls = async (events) => {
             ...event,
             acls : acls,
             series : series
-        }
+        };
     }));
 };
 
@@ -132,7 +132,7 @@ exports.getLicenseFromEventMetadata = (event) => {
     return {
         ...event,
         license : foundFieldWithLicenseInfo ? foundFieldWithLicenseInfo.value : ''
-    }
+    };
 };
 
 exports.getEventWithSeries = async (event) => {
@@ -143,7 +143,7 @@ exports.getEventWithSeries = async (event) => {
         ...event,
         isPartOf : seriesMetadata.value,
         series: series
-    }
+    };
 };
 
 exports.getEventAclsFromSeries = async (eventWithSerie) => {
@@ -151,7 +151,7 @@ exports.getEventAclsFromSeries = async (eventWithSerie) => {
     return {
         ...eventWithSerie,
         acls : eventAcls
-    }
+    };
 };
 
 exports.getMetadataForEvent = async (event) => {
@@ -159,7 +159,7 @@ exports.getMetadataForEvent = async (event) => {
     return {
         ...event,
         metadata: metadata
-    }
+    };
 };
 
 exports.getMediaForEvent = async (event) => {
@@ -167,7 +167,7 @@ exports.getMediaForEvent = async (event) => {
     return {
         ...event,
         media: media
-    }
+    };
 };
 
 exports.getMediaFileMetadataForEvent = async (event) => {
@@ -176,33 +176,33 @@ exports.getMediaFileMetadataForEvent = async (event) => {
     return {
         ...event,
         mediaFileMetadata : mediaFileMetaData
-    }
+    };
 };
 
 exports.getDurationFromMediaFileMetadataForEvent = (event) => {
     return {
         ...event,
-        duration: moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format("hh:mm:ss", {trim:false})
-    }
-}
+        duration: moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format('hh:mm:ss', {trim:false})
+    };
+};
 
 exports.modifyEventMetadataForOpencast = (metadata) => {
     const metadataArray = [];
 
     metadataArray.push(
         {
-            "id" : "title",
-            "value": metadata.title
+            'id' : 'title',
+            'value': metadata.title
         },
         {
-            "id" : "description",
-            "value": metadata.description
+            'id' : 'description',
+            'value': metadata.description
         }, {
-            "id" : "isPartOf",
-            "value" : metadata.isPartOf
+            'id' : 'isPartOf',
+            'value' : metadata.isPartOf
         }, {
-            "id": "license",
-            "value": metadata.license
+            'id': 'license',
+            'value': metadata.license
         });
 
     return metadataArray;
@@ -212,16 +212,16 @@ exports.modifySerieEventMetadataForOpencast = (metadata) => {
     const metadataArray = [];
 
     metadataArray.push({
-            "id" : "title",
-            "value": metadata.title },
-        {
-            "id" : "description",
-            "value": metadata.description
-        },
-        {
-            "id" : "contributor",
-            "value": metadata.contributors
-        }
+        'id' : 'title',
+        'value': metadata.title },
+    {
+        'id' : 'description',
+        'value': metadata.description
+    },
+    {
+        'id' : 'contributor',
+        'value': metadata.contributors
+    }
     );
 
     return metadataArray;
@@ -235,7 +235,7 @@ exports.inboxSeriesHandling = async (req, res, loggedUser, filePathOnDisk) => {
         if (!inboxSeries || !inboxSeries.identifier) {
             // on failure clean file from disk and return 500
             deleteFile(filePathOnDisk);
-            res.status(500)
+            res.status(500);
             const msg = `${filename} failed to resolve inboxSeries for user`;
             logger.error(`POST /userVideos ${msg} USER: ${req.user.eppn}`);
             res.json({
@@ -246,10 +246,10 @@ exports.inboxSeriesHandling = async (req, res, loggedUser, filePathOnDisk) => {
         return inboxSeries;
     } catch (err) {
         // Log error and throw reason
-        console.log(err)
-        throw "Failed to resolve user's inbox series";
+        console.log(err);
+        throw 'Failed to resolve user\'s inbox series';
     }
-}
+};
 
 exports.uploadToOpenCast = async (req, res, inboxSeries, filePathOnDisk, filename, timeDiff) => {
     try {
@@ -262,7 +262,7 @@ exports.uploadToOpenCast = async (req, res, inboxSeries, filePathOnDisk, filenam
             logger.info(`${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. 
                                     Opencast event ID: ${JSON.stringify(response.data)} USER: ${req.user.eppn}`);
             res.json({ message: `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. 
-                                    Opencast event ID: ${JSON.stringify(response.data)}`})
+                                    Opencast event ID: ${JSON.stringify(response.data)}`});
         } else {
             // on failure clean file from disk and return 500
             deleteFile(filePathOnDisk);
@@ -278,7 +278,7 @@ exports.uploadToOpenCast = async (req, res, inboxSeries, filePathOnDisk, filenam
         console.log(err);
         throw 'Failed to upload video to opencast';
     }
-}
+};
 
 // clean after post
 const deleteFile = (filename) => {
@@ -289,7 +289,7 @@ const deleteFile = (filename) => {
             logger.info(`Removed ${filename}`);
         }
     });
-}
+};
 
 const returnOrCreateUsersInboxSeries = async (loggedUser) => {
     const lataamoInboxSeriesTitle = inboxSeriesTitleForLoggedUser(loggedUser.eppn);
@@ -306,6 +306,6 @@ const returnOrCreateUsersInboxSeries = async (loggedUser) => {
         return inboxSeries;
     }catch(err){
         logger.error(`Error in returnOrCreateUsersInboxSeries ${err}`);
-        throw err
+        throw err;
     }
-}
+};

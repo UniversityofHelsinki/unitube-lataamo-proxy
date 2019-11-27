@@ -1,7 +1,7 @@
 const security = require('../config/security');
 const FormData = require('form-data'); // https://www.npmjs.com/package/form-data
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
-const {format} = require('date-fns') // https://www.npmjs.com/package/date-fns
+const {format} = require('date-fns'); // https://www.npmjs.com/package/date-fns
 const constants = require('../utils/constants');
 const {inboxSeriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
 const userService = require('./userService');
@@ -39,14 +39,14 @@ exports.getEventsWithSeriesByIdentifier = async (series) => {
         ...series,
         eventsCount: events.length,
         eventColumns: someEventColumns(events)
-    }
+    };
 };
 
 const someEventColumns = (events) => {
     let eventData = [];
     events.map(({title, identifier}) => {
-        eventData.push({"title": title, "id": identifier});
-    })
+        eventData.push({'title': title, 'id': identifier});
+    });
     return eventData;
 };
 
@@ -67,7 +67,7 @@ exports.contributorsToIamGroupsAndPersons = async (series) => {
         } else {
             persons.push(item);
         }
-    })
+    });
     series.iamgroups = [...iamgroups];
     series.persons = [...persons];
 };
@@ -80,7 +80,7 @@ exports.updateSeriesEventMetadata = async (metadata, id) => {
     try {
         const headers = {
             ...bodyFormData.getHeaders(),
-            "Content-Length": bodyFormData.getLengthSync()
+            'Content-Length': bodyFormData.getLengthSync()
         };
         return await security.opencastBase.put(seriesMetaDataUrl, bodyFormData, {headers});
     } catch (error) {
@@ -97,7 +97,7 @@ exports.updateSeriesAcldata = async (acl, id) => {
     try {
         const headers = {
             ...bodyFormData.getHeaders(),
-            "Content-Length": bodyFormData.getLengthSync()
+            'Content-Length': bodyFormData.getLengthSync()
         };
         const response = await security.opencastBase.put(seriesAclUrl, bodyFormData, {headers});
         return response.data;
@@ -178,7 +178,7 @@ exports.updateEventMetadata = async (metadata, eventId) => {
                 status: 403,
                 statusText: messageKeys.ERROR_MESSAGE_FAILED_TO_UPDATE_EVENT_DETAILS,
                 eventId: eventId
-            }
+            };
         }
         const videoMetaDataUrl = constants.OCAST_VIDEOS_PATH + eventId + constants.OCAST_METADATA_PATH + constants.OCAST_TYPE_QUERY_PARAMETER + constants.OCAST_TYPE_DUBLINCORE_EPISODE;
         const modifiedMetadata = eventsService.modifyEventMetadataForOpencast(metadata);
@@ -192,7 +192,7 @@ exports.updateEventMetadata = async (metadata, eventId) => {
 
         let headers = {
             ...bodyFormData.getHeaders(),
-            "Content-Length": bodyFormData.getLengthSync()
+            'Content-Length': bodyFormData.getLengthSync()
         };
         // update event metadata
         const response2 = await security.opencastBase.put(videoMetaDataUrl, bodyFormData, {headers});
@@ -203,7 +203,7 @@ exports.updateEventMetadata = async (metadata, eventId) => {
                 status: response2.status,
                 statusText: response2.statusText,
                 eventId: eventId
-            }
+            };
         }
 
         // get mediapackage for the republish query
@@ -214,7 +214,7 @@ exports.updateEventMetadata = async (metadata, eventId) => {
                 status: response3.status,
                 statusText: response3.statusText,
                 eventId: eventId
-            }
+            };
         }
 
         // form data for the republish request
@@ -225,7 +225,7 @@ exports.updateEventMetadata = async (metadata, eventId) => {
 
         headers = {
             ...bodyFormData.getHeaders(),
-            "Content-Length": bodyFormData.getLengthSync()
+            'Content-Length': bodyFormData.getLengthSync()
         };
 
         // do the republish request
@@ -235,7 +235,7 @@ exports.updateEventMetadata = async (metadata, eventId) => {
             status: resp.status,
             statusText: resp.statusText,
             eventId: eventId
-        }
+        };
     } catch (error) {
         console.log(error);
         throw error;
@@ -250,7 +250,7 @@ exports.createSeries = async (user, seriesMetadata, seriesAcl) => {
     try {
         const headers = {
             ...bodyFormData.getHeaders(),
-            "Content-Length": bodyFormData.getLengthSync()
+            'Content-Length': bodyFormData.getLengthSync()
         };
         const response = await security.opencastBase.post(seriesUploadUrl, bodyFormData, {headers});
         return response;
@@ -276,32 +276,32 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
     // refactor this array to constants.js
     const metadataArray = [
         {
-            "flavor": "dublincore/episode",
-            "fields": [
+            'flavor': 'dublincore/episode',
+            'fields': [
                 {
-                    "id": "title",
-                    "value": videoFilename
+                    'id': 'title',
+                    'value': videoFilename
                 },
                 {
-                    "id": "subjects",
-                    "value": []
+                    'id': 'subjects',
+                    'value': []
                 },
                 {
-                    "id": "description",
-                    "value": videoDescription
+                    'id': 'description',
+                    'value': videoDescription
                 },
                 {
-                    "id": "startDate",
-                    "value": startDate
+                    'id': 'startDate',
+                    'value': startDate
                 },
                 {
-                    "id": "startTime",
-                    "value": startTime
+                    'id': 'startTime',
+                    'value': startTime
                 },
                 {
-                    "id": "isPartOf",
-                    "type": "text",
-                    "value": inboxSeriesId
+                    'id': 'isPartOf',
+                    'type': 'text',
+                    'value': inboxSeriesId
                 }
             ]
         }
@@ -326,8 +326,8 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
     try {
         const headers = {
             ...bodyFormData.getHeaders(),
-            "Content-Disposition": "multipart/form-data",
-            "Content-Type": "application/x-www-form-urlencoded"
+            'Content-Disposition': 'multipart/form-data',
+            'Content-Type': 'application/x-www-form-urlencoded'
         };
         // do we want to wait ocast's reponse?
         const response = await security.opencastBase.post(videoUploadUrl, bodyFormData, {headers});
@@ -357,89 +357,89 @@ exports.createLataamoInboxSeries = async (userId) => {
 
     metadataArray = [
         {
-            "flavor": "dublincore/series",
-            "title": "Opencast Series DublinCore",
-            "fields": [
+            'flavor': 'dublincore/series',
+            'title': 'Opencast Series DublinCore',
+            'fields': [
                 {
-                    "readOnly": false,
-                    "id": "title",
-                    "label": "EVENTS.SERIES.DETAILS.METADATA.TITLE",
-                    "type": "text",
-                    "value": lataamoInboxSeriesTitle,
-                    "required": true
+                    'readOnly': false,
+                    'id': 'title',
+                    'label': 'EVENTS.SERIES.DETAILS.METADATA.TITLE',
+                    'type': 'text',
+                    'value': lataamoInboxSeriesTitle,
+                    'required': true
                 },
                 {
-                    "readOnly": false,
-                    "id": "subjects",
-                    "label": "EVENTS.SERIES.DETAILS.METADATA.SUBJECT",
-                    "type": "text",
-                    "value": [
+                    'readOnly': false,
+                    'id': 'subjects',
+                    'label': 'EVENTS.SERIES.DETAILS.METADATA.SUBJECT',
+                    'type': 'text',
+                    'value': [
                         lataamoInboxSeriesSubject
                     ],
-                    "required": false
+                    'required': false
                 },
                 {
-                    "readOnly": false,
-                    "id": "description",
-                    "label": "EVENTS.SERIES.DETAILS.METADATA.DESCRIPTION",
-                    "type": "text",
-                    "value": lataamoInboxSeriesDescription,
-                    "required": false
+                    'readOnly': false,
+                    'id': 'description',
+                    'label': 'EVENTS.SERIES.DETAILS.METADATA.DESCRIPTION',
+                    'type': 'text',
+                    'value': lataamoInboxSeriesDescription,
+                    'required': false
                 },
                 {
-                    "translatable": true,
-                    "readOnly": false,
-                    "id": "language",
-                    "label": "EVENTS.SERIES.DETAILS.METADATA.LANGUAGE",
-                    "type": "text",
-                    "value": lataamoInboxSeriesLanguage,
-                    "required": false
+                    'translatable': true,
+                    'readOnly': false,
+                    'id': 'language',
+                    'label': 'EVENTS.SERIES.DETAILS.METADATA.LANGUAGE',
+                    'type': 'text',
+                    'value': lataamoInboxSeriesLanguage,
+                    'required': false
                 },
                 {
-                    "readOnly": false,
-                    "id": "rightsHolder",
-                    "label": "EVENTS.SERIES.DETAILS.METADATA.RIGHTS",
-                    "type": "text",
-                    "value": userId,
-                    "required": false
+                    'readOnly': false,
+                    'id': 'rightsHolder',
+                    'label': 'EVENTS.SERIES.DETAILS.METADATA.RIGHTS',
+                    'type': 'text',
+                    'value': userId,
+                    'required': false
                 },
                 {
-                    "translatable": true,
-                    "readOnly": false,
-                    "id": "license",
-                    "label": "EVENTS.SERIES.DETAILS.METADATA.LICENSE",
-                    "type": "text",
-                    "value": lataamoInboxSeriesLicense,
-                    "required": false
+                    'translatable': true,
+                    'readOnly': false,
+                    'id': 'license',
+                    'label': 'EVENTS.SERIES.DETAILS.METADATA.LICENSE',
+                    'type': 'text',
+                    'value': lataamoInboxSeriesLicense,
+                    'required': false
                 },
                 {
-                    "translatable": false,
-                    "readOnly": false,
-                    "id": "creator",
-                    "label": "EVENTS.SERIES.DETAILS.METADATA.CREATED_BY",
-                    "type": "mixed_text",
-                    "value": [
+                    'translatable': false,
+                    'readOnly': false,
+                    'id': 'creator',
+                    'label': 'EVENTS.SERIES.DETAILS.METADATA.CREATED_BY',
+                    'type': 'mixed_text',
+                    'value': [
                         lataamoInboxSeriesCreator, userId
                     ],
-                    "required": false
+                    'required': false
                 },
                 {
-                    "translatable": false,
-                    "readOnly": false,
-                    "id": "contributor",
-                    "label": "EVENTS.SERIES.DETAILS.METADATA.CONTRIBUTORS",
-                    "type": "mixed_text",
-                    "value": [userId],
-                    "required": false
+                    'translatable': false,
+                    'readOnly': false,
+                    'id': 'contributor',
+                    'label': 'EVENTS.SERIES.DETAILS.METADATA.CONTRIBUTORS',
+                    'type': 'mixed_text',
+                    'value': [userId],
+                    'required': false
                 },
                 {
-                    "translatable": false,
-                    "readOnly": false,
-                    "id": "publisher",
-                    "label": "EVENTS.SERIES.DETAILS.METADATA.PUBLISHERS",
-                    "type": "mixed_text",
-                    "value": [userId],
-                    "required": false
+                    'translatable': false,
+                    'readOnly': false,
+                    'id': 'publisher',
+                    'label': 'EVENTS.SERIES.DETAILS.METADATA.PUBLISHERS',
+                    'type': 'mixed_text',
+                    'value': [userId],
+                    'required': false
                 }
             ]
         }
@@ -459,7 +459,7 @@ exports.createLataamoInboxSeries = async (userId) => {
     try {
         const headers = {
             ...bodyFormData.getHeaders(),
-            "Content-Type": "application/x-www-form-urlencoded"
+            'Content-Type': 'application/x-www-form-urlencoded'
         };
         const response = await security.opencastBase.post(seriesUrl, bodyFormData, {headers});
         return response.data;
