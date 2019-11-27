@@ -15,12 +15,12 @@ exports.filterEventsForClient = (ocResponseData) => {
         return [];
     }
 
-    const eventArray = []
+    const eventArray = [];
     ocResponseData.forEach(event => {
         eventArray.push({
             "identifier": event.identifier,
             "title": event.title,
-            "duration": moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format("hh:mm:ss", {trim:false}),
+            "duration": moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format("HH:mm:ss", {trim:false}),
             "creator": event.creator,
             "processing_state" : event.processing_state,
             "visibility" : calculateVisibilityPropertyForVideo(event),
@@ -182,9 +182,9 @@ exports.getMediaFileMetadataForEvent = async (event) => {
 exports.getDurationFromMediaFileMetadataForEvent = (event) => {
     return {
         ...event,
-        duration: moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format("hh:mm:ss", {trim:false})
+        duration: moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format("HH:mm:ss", {trim:false})
     }
-}
+};
 
 exports.modifyEventMetadataForOpencast = (metadata) => {
     const metadataArray = [];
@@ -235,7 +235,7 @@ exports.inboxSeriesHandling = async (req, res, loggedUser, filePathOnDisk) => {
         if (!inboxSeries || !inboxSeries.identifier) {
             // on failure clean file from disk and return 500
             deleteFile(filePathOnDisk);
-            res.status(500)
+            res.status(500);
             const msg = `${filename} failed to resolve inboxSeries for user`;
             logger.error(`POST /userVideos ${msg} USER: ${req.user.eppn}`);
             res.json({
@@ -246,10 +246,10 @@ exports.inboxSeriesHandling = async (req, res, loggedUser, filePathOnDisk) => {
         return inboxSeries;
     } catch (err) {
         // Log error and throw reason
-        console.log(err)
+        console.log(err);
         throw "Failed to resolve user's inbox series";
     }
-}
+};
 
 exports.uploadToOpenCast = async (req, res, inboxSeries, filePathOnDisk, filename, timeDiff) => {
     try {
@@ -278,7 +278,7 @@ exports.uploadToOpenCast = async (req, res, inboxSeries, filePathOnDisk, filenam
         console.log(err);
         throw 'Failed to upload video to opencast';
     }
-}
+};
 
 // clean after post
 const deleteFile = (filename) => {
@@ -289,7 +289,7 @@ const deleteFile = (filename) => {
             logger.info(`Removed ${filename}`);
         }
     });
-}
+};
 
 const returnOrCreateUsersInboxSeries = async (loggedUser) => {
     const lataamoInboxSeriesTitle = inboxSeriesTitleForLoggedUser(loggedUser.eppn);
@@ -308,4 +308,4 @@ const returnOrCreateUsersInboxSeries = async (loggedUser) => {
         logger.error(`Error in returnOrCreateUsersInboxSeries ${err}`);
         throw err
     }
-}
+};
