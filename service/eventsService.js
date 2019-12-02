@@ -25,10 +25,21 @@ exports.filterEventsForClient = (ocResponseData) => {
             "processing_state" : event.processing_state,
             "visibility" : calculateVisibilityPropertyForVideo(event),
             "created": event.created,
-            "series": event.series.title
+            "series": event.series.title,
+            "media" : calculateMediaPropertyForVideo(event)
         })
     });
     return eventArray;
+};
+
+const calculateMediaPropertyForVideo = (event) => {
+    let mediaUlrs = [];
+    event.media.forEach(media => {
+        if (event.processing_state === constants.OPENCAST_STATE_SUCCEEDED) {
+            mediaUlrs.push(media.url);
+        }
+    });
+    return [...new Set(mediaUlrs)];
 };
 
 exports.calculateVisibilityProperty = (event) => {

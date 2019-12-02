@@ -1,4 +1,4 @@
-const commonService = require('./commonService');
+const commonService = require('../service/commonService');
 const constants = require('../utils/constants');
 const apiService = require('../service/apiService');
 
@@ -64,7 +64,9 @@ const addUserInContributorsList = (contributors, user) => {
 
 exports.addUserToEmptyContributorsList = (metadata, user) => {
     !metadata.contributors || metadata.contributors.length === 0 ? metadata.contributors = [user.eppn] : metadata.contributors;
-}
+};
+
+exports.filterInboxSeries = (series) => series.filter(series => !series.title.toLowerCase().includes('inbox'));
 
 exports.openCastFormatSeriesMetadata = (metadata, user) => {
     let seriesMetadataTemplate = constants.SERIES_METADATA;
@@ -100,9 +102,11 @@ const updateSeriesAclList = (aclList) => {
         seriesAclTemplate = [...constants.SERIES_ACL_TEMPLATE_TUOTANTO];
     } else {
         seriesAclTemplate = [...constants.SERIES_ACL_TEMPLATE];
+        aclList = commonService.removeRoleWhenTestEnvironment(aclList, constants.ROLE_KATSOMO);
     }
     let seriesACLTemplateReadEntry = constants.SERIES_ACL_TEMPLATE_READ_ENTRY;
     let seriesACLTemplateWriteEntry = constants.SERIES_ACL_TEMPLATE_WRITE_ENTRY;
+    let public_series = false;
     if (aclList) {
         aclList.forEach(aclRole => {
             seriesACLTemplateReadEntry = updateAclTemplateReadEntry(seriesACLTemplateReadEntry, aclRole);
@@ -111,7 +115,13 @@ const updateSeriesAclList = (aclList) => {
             if (!publicRole(aclRole) && !isMoodleAclRole(aclRole)) {
                 seriesAclTemplate.push(seriesACLTemplateWriteEntry);
             }
+            if (publicRole(aclRole)) {
+                public_series = true;
+            }
         });
+    }
+    if (process.env.ENVIRONMENT !== 'prod' && public_series) { //if  public series
+        seriesAclTemplate = seriesAclTemplate.concat([...constants.SERIES_ACL_TEMPLATE_TEST]);
     }
     return seriesAclTemplate;
 };
@@ -158,18 +168,6 @@ exports.addPublicityStatusToSeries = async (seriesList) => {
         });
     }
     return seriesWithRolesAndVisibility;
-};
-
-exports.addPublishedInfoInSeries = async (seriesList) => {
-    for (const series of seriesList) {
-        let roles = await apiService.getSeriesAcldata(series.identifier);
-        if (commonService.publicRoleCount(roles) === 2) { //series has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
-            series.published = true;
-        } else {
-            series.published = false;
-        }
-    }
-    return seriesList;
 };
 
 exports.addPublishedInfoInSeriesAndMoodleRoles = async (series) => {

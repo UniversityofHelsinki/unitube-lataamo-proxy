@@ -9,16 +9,7 @@ const series = require('./series');
 const videoUpload = require('./videoUpload');
 const iamGroups = require('./iamGroups');
 const persons = require('./persons');
-const eventsService = require('../service/eventsService');
-const seriesService = require('../service/seriesService');
-const personApiService = require('../service/personApiService');
-const apiService = require('../service/apiService');
-const userService = require('../service/userService');
-const publicationService = require('../service/publicationService');
-const iamGroupsApi = require('../service/iamGroupsApi');
-const busboy = require('connect-busboy');  //https://github.com/mscdex/connect-busboy
-const path = require('path');
-const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
+
 const swaggerUi = require('swagger-ui-express');
 const apiSpecs = require('../config/swagger'); // swagger config
 
@@ -188,7 +179,7 @@ module.exports = function (router) {
      *     get:
      *       tags:
      *         - retrieve
-     *       summary: Return user's series.
+     *       summary: Return user's series without inbox series.
      *       description: Returns series for logged in user. These series are the ones user is listed as contributor.
      *                    Published info of series is also returned.
      *       responses:
@@ -200,6 +191,26 @@ module.exports = function (router) {
      *           description: Internal server error, an error occurred.
      */
     router.get('/userSeries', series.getUserSeries);
+
+
+    /**
+     * @swagger
+     *     /api/userSeries:
+     *     get:
+     *       tags:
+     *         - retrieve
+     *       summary: Return user's series.
+     *       description: Returns series for logged in user. These series are the ones user is listed as contributor.
+     *                    Published info of series is also returned.
+     *       responses:
+     *         200:
+     *           description: List of series.
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         500:
+     *           description: Internal server error, an error occurred.
+     */
+    router.get('/getUserSeriesDropDownList', series.getUserSeriesDropDownList);
 
    /**
     * @swagger
@@ -218,19 +229,6 @@ module.exports = function (router) {
     *           description: Internal server error, an error occurred.
     */ 
     router.get('/userVideos', video.getUserVideos);
-
-    // make sure the upload dir exists
-    const ensureUploadDir = async (directory) => {
-        try {
-            // https://github.com/jprichardson/node-fs-extra/blob/HEAD/docs/ensureDir.md
-            await fs.ensureDir(directory)
-            logger.info(`Using uploadPath ${directory}`);
-            return true;
-        } catch (err) {
-            logger.error(`Error in ensureUploadDir ${err}`);
-            return false;
-        }
-    }
 
     /**
      * @swagger
@@ -387,4 +385,6 @@ module.exports = function (router) {
      *           description: Unexpected error    
      */
     router.get('/persons/:query', persons.getPersons);
+
+    router.post('/download' , video.downloadVideo);
 };

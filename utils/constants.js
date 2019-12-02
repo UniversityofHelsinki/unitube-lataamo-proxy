@@ -13,6 +13,8 @@ const STATUS_PUBLISHED = 'status_published';
 const STATUS_PRIVATE = 'status_private';
 const STATUS_MOODLE = 'status_moodle';
 
+const OPENCAST_STATE_SUCCEEDED = 'SUCCEEDED';
+
 const VIDEO_PRESENTER_DELIVERY = 'presenter/delivery';
 const VIDEO_PRESENTATION_DELIVERY = 'presentation/delivery';
 
@@ -50,6 +52,21 @@ const SERIES_ACL_TEMPLATE = [
         "role": "ROLE_USER_LATAAMO_TESTI"
     }
 ];
+
+const SERIES_ACL_TEMPLATE_TEST = [
+    {
+        "action": "read",
+        "allow": true,
+        "role": "ROLE_USER_KATSOMO_TESTI"
+    }
+];
+
+const SERIES_ACL_ROLE_KATSOMO =
+    {
+        "action": "read",
+        "allow": true,
+        "role": "ROLE_KATSOMO"
+    };
 
 const SERIES_ACL_TEMPLATE_TUOTANTO = [
     {
@@ -120,6 +137,7 @@ const PROPERTIES_REPUBLISH_METADATA =
 
 module.exports = {
     ROLE_ANONYMOUS,
+    SERIES_ACL_ROLE_KATSOMO,
     ROLE_KATSOMO,
     ADD_TO_IAM_GROUPS,
     PUBLIC_ROLES,
@@ -157,5 +175,7 @@ module.exports = {
     ESB_PERSONS_PATH,
     PROPERTIES_REPUBLISH_METADATA,
     SERIES_ACL_TEMPLATE_TUOTANTO,
-    INBOX
+    SERIES_ACL_TEMPLATE_TEST,
+    INBOX,
+    OPENCAST_STATE_SUCCEEDED
 };
