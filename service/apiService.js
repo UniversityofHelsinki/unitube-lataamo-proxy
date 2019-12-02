@@ -271,6 +271,10 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
     const videoDescription = '';
     const startDate = format(new Date(), 'yyyy-MM-dd'); // '2016-06-22'
     const startTime = format(new Date(), 'pp'); // '10:03:52 AM'
+    //const startTime = format(new Date(), 'HH:mm:ss z');
+    //let startTime = format(new Date(), 'HH:mm:ss');
+    //startTime = startTime; // + joku näistä. 'UTC+2'; //'+00'; //'+02'; //'Z'; //'GMT +02:00'; //'EET 2019'; //'Europe/Helsinki'; //'GMT+0200 (Eastern European Standard Time)';
+
     const inboxSeriesId = inboxUserSeriesId;  // User's INBOX series id
 
     // refactor this array to constants.js
