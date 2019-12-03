@@ -34,7 +34,8 @@ const CONSTANTS = Object.freeze({
     SUCCESSFUL_UPDATE_ID : '123456',
     OCAST_EVENT_PATH : '/api/event',
     SERIES_OWNER_EPPN : 'SeriesOwnerEppn',
-    INBOX: 'inbox'
+    INBOX: 'inbox',
+    TRASH: 'trash'
 });
 
 
@@ -119,6 +120,17 @@ const mockUserInboxSeries2 = [
         title: 'SERIES_OWNER_EPPN'
     }
 ];
+
+const mockUserTrashSeries =
+    { identifier: CONSTANTS.TEST_INBOX_SERIES_ID,
+        creator: 'Opencast Project Administrator',
+        created: '2019-05-22T09:56:43Z',
+        subjects: [''],
+        organizers: [ 'SeriesOwnerEppn' ],
+        publishers: [ 'SeriesOwnerEppn' ],
+        contributors: [ 'SeriesOwnerEppn'],
+        title: 'trash SERIES_OWNER_EPPN'
+    };
 
 // these are filtered by contributor (eppn in contributor values)
 const mockUserSeries = [
@@ -1693,6 +1705,14 @@ const inboxSeriesByUserName = () => {
         .reply(200, mockUserInboxSeries)
 };
 
+// trash series by username /api/series/?filter=title:trash%20SeriesOwnerEppn
+const trashSeriesByUserName = () => {
+    let query = encodeURI(`${CONSTANTS.TRASH} ${CONSTANTS.SERIES_OWNER_EPPN}`);
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .get(CONSTANTS.OCAST_SERIES_PATH + '?filter=title:' + query)
+        .reply(200, mockUserTrashSeries).persist();
+};
+
 // events for inbox series /api/events/?filter=series:3f9ff5b-7663-54b7-b7cf-950be665de3c
 const inboxSeriesEvents = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(CONSTANTS.OCAST_VIDEOS_PATH)
@@ -1938,6 +1958,7 @@ module.exports.mockOpencastUpdateEventNOK = mockOpencastUpdateEventNOK;
 module.exports.mockOpencastFailedRepublishMetadataRequest = mockOpencastFailedRepublishMetadataRequest;
 module.exports.mockOpencastRepublishMetadataRequest = mockOpencastRepublishMetadataRequest;
 module.exports.mockOpencastEvent1Request = event1;
+module.exports.mockOcastTrashEventCall = trashSeriesByUserName;
 module.exports.mockOpencastInboxSeriesRequest = inboxSeriesByUserName;
 module.exports.mockOpencastInboxSeriesWithNoResultRequest = noInboxSeriesByUserName;
 module.exports.mockInboxSeriesEventsRequest = inboxSeriesEvents;
