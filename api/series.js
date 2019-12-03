@@ -29,7 +29,7 @@ exports.updateSeries = async (req, res) => {
         const rawEventMetadata = req.body;
         const loggedUser = userService.getLoggedUser(req.user);
         seriesService.addUserToEmptyContributorsList(rawEventMetadata, loggedUser);
-        let modifiedMetadata = eventsService.modifySerieEventMetadataForOpencast(rawEventMetadata);
+        let modifiedMetadata = eventsService.modifySeriesEventMetadataForOpencast(rawEventMetadata);
         let modifiedSeriesAclMetadata = seriesService.openCastFormatSeriesAclList(rawEventMetadata, constants.UPDATE_SERIES);
         const response = await apiService.updateSeriesAcldata(modifiedSeriesAclMetadata, req.body.identifier);
         const data = await apiService.updateSeriesEventMetadata(modifiedMetadata, req.body.identifier);

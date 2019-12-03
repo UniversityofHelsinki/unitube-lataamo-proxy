@@ -242,6 +242,91 @@ exports.updateEventMetadata = async (metadata, eventId) => {
     }
 };
 
+exports.moveEventToTrashSeries = async (metadata, eventId, user) => {
+    try {
+        const transactionStatusPath = constants.OCAST_EVENT_MEDIA_PATH_PREFIX + eventId + '/hasActiveTransaction';
+        const response1 = await security.opencastBase.get(transactionStatusPath);
+
+        if (response1.data && response1.data.active === true) {
+            // transaction active, return
+            return {
+                status: 403,
+                statusText: messageKeys.ERROR_MESSAGE_FAILED_TO_MOVE_EVENT_TO_TRASH,
+                eventId: eventId
+            }
+        }
+        const videoMetaDataUrl = constants.OCAST_VIDEOS_PATH + eventId + constants.OCAST_METADATA_PATH + constants.OCAST_TYPE_QUERY_PARAMETER + constants.OCAST_TYPE_DUBLINCORE_EPISODE;
+        let modifiedMetadata = metadata;
+        //should only be one trash series
+
+        const trashSeriesUrl = constants.OCAST_SERIES_PATH + constants.OCAST_VIDEOS_FILTER_USER_NAME + encodeURI(constants.TRASH + ' ' + user.eppn);
+        const response = await security.opencastBase.get(trashSeriesUrl);
+
+        let trashSeriesList = response.data;
+        if(trashSeriesList && trashSeriesList.length > 0){
+            let trashSeries = trashSeriesList[0];
+            modifiedMetadata = eventsService.modifyEventMetadataForTrashSeriesOpencast(metadata,trashSeries);
+        }
+
+        // republish paths
+        const republishMetadataUrl = '/workflow/start';
+        const mediaPackageUrl = '/assets/episode/' + eventId;
+
+        let bodyFormData = new FormData();
+        bodyFormData.append('metadata', JSON.stringify(modifiedMetadata));
+
+        let headers = {
+            ...bodyFormData.getHeaders(),
+            "Content-Length": bodyFormData.getLengthSync()
+        };
+        // update event metadata
+        const response2 = await security.opencastBase.put(videoMetaDataUrl, bodyFormData, {headers});
+
+        // let's break if response from PUT not ok
+        if(response2.status !== 204){
+            return {
+                status: response2.status,
+                statusText: response2.statusText,
+                eventId: eventId
+            }
+        }
+
+        // get mediapackage for the republish query
+        const response3 = await security.opencastBase.get(mediaPackageUrl);
+
+        if(response3.status !== 200){
+            return {
+                status: response3.status,
+                statusText: response3.statusText,
+                eventId: eventId
+            }
+        }
+
+        // form data for the republish request
+        bodyFormData = new FormData();
+        bodyFormData.append('definition', 'republish-metadata');
+        bodyFormData.append('mediapackage', response3.data);
+        bodyFormData.append('properties', constants.PROPERTIES_REPUBLISH_METADATA);
+
+        headers = {
+            ...bodyFormData.getHeaders(),
+            "Content-Length": bodyFormData.getLengthSync()
+        };
+
+        // do the republish request
+        const resp = await security.opencastBase.post(republishMetadataUrl, bodyFormData, {headers});
+
+        return {
+            status: resp.status,
+            statusText: resp.statusText,
+            eventId: eventId
+        }
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};
+
 exports.createSeries = async (user, seriesMetadata, seriesAcl) => {
     const seriesUploadUrl = constants.OCAST_SERIES_PATH;
     let bodyFormData = new FormData();

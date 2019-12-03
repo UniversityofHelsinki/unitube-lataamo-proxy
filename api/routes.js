@@ -300,6 +300,49 @@ module.exports = function (router) {
 
     /**
      * @swagger
+     *     /api/moveEventToTrash/{id}:
+     *     put:
+     *       tags:
+     *         - update
+     *       summary: Updates video's series by ID.
+     *       consumes:
+     *         - application/json
+     *       parameters:
+     *         - in: body
+     *           description: The video to be updated.
+     *           schema:
+     *             type: object
+     *             required:
+     *               - identifier
+     *               - title
+     *               - isPartOf
+     *             properties:
+     *               identifier:
+     *                 type: string
+     *                 description: id of the video
+     *               title:
+     *                 type: string
+     *                 description: title of the video AKA the name
+     *               description:
+     *                 type: string
+     *                 description: description for the video
+     *               isPartOf:
+     *                 type: string
+     *                 description: id of the series the video belongs to
+     *       responses:
+     *         200:
+     *           description: OK
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         403:
+     *           description: Forbidden. Event (video) has an active transaction in progress on the Opencast server.
+     *         500:
+     *           description: Internal server error, an error occurred.    
+     */
+    router.put('/moveEventToTrash/:id', event.moveToTrash);
+
+    /**
+     * @swagger
      *     /api/series:
      *     post:
      *       tags:
