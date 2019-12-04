@@ -55,12 +55,7 @@ exports.getInboxEvents = async (req, res) => {
         // get inbox series for user
         const inboxSeries = await apiService.returnOrCreateUsersSeries(constants.INBOX, loggedUser);
         if (inboxSeries && inboxSeries.length > 0) {
-            const identifier = seriesService.getSeriesIdentifier(inboxSeries);
-            const inboxEvents = await apiService.getEventsByIdentifier(identifier);
-            const inboxEventsWithMetadatas = await eventsService.getAllEventsWithMetadatas(inboxEvents);
-            const inboxEventsWithMedia = await eventsService.getEventsWithMedia(inboxEventsWithMetadatas);
-            const inboxEventsWithMediaFile = await eventsService.getAllEventsWithMediaFileMetadata(inboxEventsWithMedia);
-            const inboxEventsWithAcls = await eventsService.getAllEventsWithAcls(inboxEventsWithMediaFile);
+            const inboxEventsWithAcls = await fetchEventMetadata(inboxSeries);
             res.json(eventsService.filterEventsForClient(inboxEventsWithAcls));
         } else {
             res.json([])
@@ -82,12 +77,7 @@ exports.getTrashEvents = async (req, res) => {
     try{
         const trashSeries = await apiService.getUserTrashSeries(loggedUser);
         if(trashSeries && trashSeries.length > 0){
-            const identifier = seriesService.getSeriesIdentifier(trashSeries);
-            const trashEvents = await apiService.getEventsByIdentifier(identifier);
-            const trashEventsWithMetadatas = await eventsService.getAllEventsWithMetadatas(trashEvents);
-            const trashEventsWithMedia = await eventsService.getEventsWithMedia(trashEventsWithMetadatas);
-            const trashEventsWithMediaFile = await eventsService.getAllEventsWithMediaFileMetadata(trashEventsWithMedia);
-            const trashEventsWithAcls = await eventsService.getAllEventsWithAcls(trashEventsWithMediaFile);
+            const trashEventsWithAcls = await fetchEventMetadata(trashSeries);
             res.json(eventsService.filterEventsForClient(trashEventsWithAcls));
         }else{
             res.json([]);
@@ -101,6 +91,16 @@ exports.getTrashEvents = async (req, res) => {
             msg
         });
     }
+};
+
+const fetchEventMetadata = async (series) => {
+    const identifier = seriesService.getSeriesIdentifier(series);
+    const events = await apiService.getEventsByIdentifier(identifier);
+    const eventsWithMetadatas = await eventsService.getAllEventsWithMetadatas(events);
+    const eventsWithMedia = await eventsService.getEventsWithMedia(eventsWithMetadatas);
+    const eventsWithMediaFile = await eventsService.getAllEventsWithMediaFileMetadata(eventsWithMedia);
+    const eventsWithAcls = await eventsService.getAllEventsWithAcls(eventsWithMediaFile);
+    return eventsWithAcls;
 };
 
 exports.moveToTrash = async (req, res) =>{
