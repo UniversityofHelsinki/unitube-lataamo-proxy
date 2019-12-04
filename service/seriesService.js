@@ -228,4 +228,4 @@ const setVisibilityForSeries = (series) => {
 
 const calculateVisibilityPropertyForSeries = (series) => setVisibilityForSeries(series);
 
-exports.getInboxSeriesIdentifier = (series) => series.find(series => series.identifier).identifier;
+exports.getSeriesIdentifier = (series) => series.find(series => series.identifier).identifier;

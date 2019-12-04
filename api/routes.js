@@ -175,6 +175,24 @@ module.exports = function (router) {
 
     /**
      * @swagger
+     *     /api/userTrashEvents:
+     *     get:
+     *       tags:
+     *         - retrieve
+     *       summary: Return user's trash events.
+     *       description: Returns trash series events for logged in user.
+     *       responses:
+     *         200:
+     *           description: List of trash series events.
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         500:
+     *           description: Internal server error, an error occurred.
+     */
+    router.get('/userTrashEvents', event.getTrashEvents);
+
+    /**
+     * @swagger
      *     /api/userSeries:
      *     get:
      *       tags:

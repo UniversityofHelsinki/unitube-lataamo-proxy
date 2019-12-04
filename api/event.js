@@ -55,7 +55,7 @@ exports.getInboxEvents = async (req, res) => {
         // get inbox series for user
         const inboxSeries = await apiService.returnOrCreateUsersSeries(constants.INBOX, loggedUser);
         if (inboxSeries && inboxSeries.length > 0) {
-            const identifier = seriesService.getInboxSeriesIdentifier(inboxSeries);
+            const identifier = seriesService.getSeriesIdentifier(inboxSeries);
             const inboxEvents = await apiService.getEventsByIdentifier(identifier);
             const inboxEventsWithMetadatas = await eventsService.getAllEventsWithMetadatas(inboxEvents);
             const inboxEventsWithMedia = await eventsService.getEventsWithMedia(inboxEventsWithMetadatas);
@@ -68,6 +68,33 @@ exports.getInboxEvents = async (req, res) => {
     }catch(error){
         const msg = error.message;
         logger.error(`Error GET /userInboxEvents ${msg} USER ${req.user.eppn}`);
+        res.status(500);
+        return res.json({
+            message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_INBOX_EVENTS,
+            msg
+        });
+    }
+};
+
+exports.getTrashEvents = async (req, res) => {
+    logger.info(`GET /userTrashEvents USER: ${req.user.eppn}`);
+    const loggedUser = userService.getLoggedUser(req.user);
+    try{
+        const trashSeries = await apiService.getUserTrashSeries(loggedUser);
+        if(trashSeries && trashSeries.length > 0){
+            const identifier = seriesService.getSeriesIdentifier(trashSeries);
+            const trashEvents = await apiService.getEventsByIdentifier(identifier);
+            const trashEventsWithMetadatas = await eventsService.getAllEventsWithMetadatas(trashEvents);
+            const trashEventsWithMedia = await eventsService.getEventsWithMedia(trashEventsWithMetadatas);
+            const trashEventsWithMediaFile = await eventsService.getAllEventsWithMediaFileMetadata(trashEventsWithMedia);
+            const trashEventsWithAcls = await eventsService.getAllEventsWithAcls(trashEventsWithMediaFile);
+            res.json(eventsService.filterEventsForClient(trashEventsWithAcls));
+        }else{
+            res.json([]);
+        }
+    }catch(error){
+        const msg = error.message;
+        logger.error(`Error GET /userTrashEvents ${msg} USER ${req.user.eppn}`);
         res.status(500);
         return res.json({
             message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_INBOX_EVENTS,
