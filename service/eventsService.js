@@ -184,7 +184,7 @@ exports.getDurationFromMediaFileMetadataForEvent = (event) => {
         ...event,
         duration: moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format("hh:mm:ss", {trim:false})
     }
-}
+};
 
 exports.modifyEventMetadataForOpencast = (metadata) => {
     const metadataArray = [];
@@ -208,7 +208,7 @@ exports.modifyEventMetadataForOpencast = (metadata) => {
     return metadataArray;
 };
 
-exports.modifySerieEventMetadataForOpencast = (metadata) => {
+exports.modifySeriesEventMetadataForOpencast = (metadata) => {
     const metadataArray = [];
 
     metadataArray.push({
@@ -280,7 +280,7 @@ exports.uploadToOpenCast = async (req, res, inboxSeries, filePathOnDisk, filenam
         console.log(err);
         throw 'Failed to upload video to opencast';
     }
-}
+};
 
 // clean after post
 const deleteFile = (filename) => {
@@ -291,11 +291,11 @@ const deleteFile = (filename) => {
             logger.info(`Removed ${filename}`);
         }
     });
-}
+};
 
 /* Not in use
 const returnOrCreateUsersInboxSeries = async (loggedUser) => {
-    const lataamoInboxSeriesTitle = seriesTitleForLoggedUser(constants.INBOX, loggedUser.eppn);
+    const lataamoInboxSeriesTitle = inboxSeriesTitleForLoggedUser(loggedUser.eppn);
 
     try {
         const userSeries = await apiService.getUserSeries(loggedUser);

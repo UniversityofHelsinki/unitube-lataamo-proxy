@@ -75,3 +75,30 @@ exports.getInboxEvents = async (req, res) => {
         });
     }
 };
+
+exports.moveToTrash = async (req, res) =>{
+    try{
+        logger.info(`PUT /moveEventToTrash/:id VIDEO ${req.body.identifier} USER ${req.user.eppn}`);
+        const rawEventMetadata = req.body;
+        const response = await apiService.moveEventToTrashSeries(rawEventMetadata, req.body.identifier, req.user);
+
+        if (response.status === 200) {
+            logger.info(`PUT /moveEventToTrash/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} OK`);
+        } else if (response.status === 403){
+            logger.warn(`PUT /moveEventToTrash/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} ${response.statusText}`);
+        } else {
+            logger.error(`PUT /moveEventToTrash/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} ${response.statusText}`);
+        }
+
+        res.status(response.status);
+        res.json({message : response.statusText});
+    }catch (error) {
+        res.status(500);
+        const msg = error.message;
+        logger.error(`Error PUT /moveEventToTrash/:id ${msg} USER ${req.user.eppn}`);
+        res.json({
+            message: messageKeys.ERROR_MESSAGE_FAILED_TO_MOVE_EVENT_TO_TRASH,
+            msg
+        });
+    }
+};

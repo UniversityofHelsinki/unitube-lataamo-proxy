@@ -10,6 +10,7 @@ let test = require('./testHelper');
 // Unitube-lataamo proxy APIs under the test
 const LATAAMO_USER_SERIES_PATH = '/api/userSeries';
 const LATAAMO_USER_EVENTS_PATH = '/api/userVideos';
+const LATAAMO_MOVE_EVENT_TO_TRASH_SERIES = '/api/moveEventToTrash';
 const LATAAMO_USER_INBOX_EVENTS_PATH = '/api/userInboxEvents';
 const LATAAMO_USER_EVENT_PATH = '/api/event';
 const LATAAMO_SERIES_PATH = '/api/series';
@@ -683,6 +684,24 @@ describe('Updating videos aka events', () => {
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
             .set('displayName', test.mockTestUser.displayName)
+            .expect(200)
+            .expect('Content-Type', /json/);
+    });
+
+    it('Should move event to trash series when deleted', async () => {
+
+        test.mockOpencastEventNoActiveTransaction('234234234');
+        test.mockOpencastUpdateEventOK('234234234');
+        test.mockOpencastMediaPackageRequest('234234234');
+        test.mockOpencastRepublishMetadataRequest('234234234');
+        test.mockOcastTrashEventCall();
+
+        await supertest(app)
+            .put(LATAAMO_MOVE_EVENT_TO_TRASH_SERIES + '/234234234')
+            .send({title: 'Delete this', description: 'Can be deleted', identifier: '234234234'})
+            .set('eppn', 'SeriesOwnerEppn')
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
     });
