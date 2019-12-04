@@ -694,7 +694,7 @@ describe('Updating videos aka events', () => {
         test.mockOpencastUpdateEventOK('234234234');
         test.mockOpencastMediaPackageRequest('234234234');
         test.mockOpencastRepublishMetadataRequest('234234234');
-        test.mockOcastTrashEventCall();
+        test.mockOpencastTrashSeriesRequest();
 
         await supertest(app)
             .put(LATAAMO_MOVE_EVENT_TO_TRASH_SERIES + '/234234234')
