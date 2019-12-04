@@ -343,8 +343,10 @@ describe('user series put', () => {
 describe('user inbox events returned from /userInboxEvents route', () => {
     beforeEach(() => {
         // mock needed opencast api calls
+        test.mockOpencastTrashSeriesRequest();
         test.mockOpencastInboxSeriesRequest();
         test.mockInboxSeriesEventsRequest();
+        test.mockOpencastTrashSeriesWithNoResultRequest();
         test.mockOpencastInboxSeriesWithNoResultRequest();
         test.mockOcastInboxEvent1Call();
         test.mockOcastInboxEvent2Call();
@@ -354,6 +356,10 @@ describe('user inbox events returned from /userInboxEvents route', () => {
         test.mockInboxEvent2MediaFileMetadataCall();
         test.mockInboxSeriesAclCall();
         test.mockInboxSeriesCall();
+
+        test.mockLataamoPostSeriesCall();
+        test.mockLataamoPostSeriesCall();
+
     });
 
     it("should return inbox events from inbox series", async () => {

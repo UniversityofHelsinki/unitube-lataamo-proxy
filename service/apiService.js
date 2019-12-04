@@ -3,7 +3,8 @@ const FormData = require('form-data'); // https://www.npmjs.com/package/form-dat
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 const {format} = require('date-fns') // https://www.npmjs.com/package/date-fns
 const constants = require('../utils/constants');
-const {inboxSeriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
+const {seriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
+const logger = require('../config/winstonLogger');
 const userService = require('./userService');
 const eventsService = require('./eventsService');
 const messageKeys = require('../utils/message-keys');
@@ -120,8 +121,8 @@ exports.getSeriesAcldata = async (id) => {
     }
 };
 
-exports.getUserInboxSeries = async (user) => {
-    const seriesUrl = constants.OCAST_SERIES_PATH + constants.OCAST_VIDEOS_FILTER_USER_NAME + encodeURI(constants.INBOX + ' ' + user.eppn);
+exports.getUserSeriesWithPrefix = async (seriesPrefix, user ) => {
+    const seriesUrl = constants.OCAST_SERIES_PATH + constants.OCAST_VIDEOS_FILTER_USER_NAME + encodeURI(seriesPrefix + ' ' + user.eppn);
     const response = await security.opencastBase.get(seriesUrl);
     return response.data;
 };
@@ -345,14 +346,35 @@ exports.downloadVideo = async (videoUrl) => {
     return response;
 };
 
-// create the default lataamo INBOX series for the given userId
-exports.createLataamoInboxSeries = async (userId) => {
-    const lataamoInboxSeriesTitle = inboxSeriesTitleForLoggedUser(userId);
-    const lataamoInboxSeriesDescription = `Lataamo-INBOX series for ${ userId }`;
-    const lataamoInboxSeriesLicense = '';
-    const lataamoInboxSeriesLanguage = 'en';
-    const lataamoInboxSeriesCreator = 'Lataamo-proxy-service';
-    const lataamoInboxSeriesSubject = 'Lataamo-INBOX';
+// get or creates series for user with given 'seriesName'
+exports.returnOrCreateUsersSeries = async (seriesName, loggedUser) => {
+    let lataamoSeriesTitle = seriesTitleForLoggedUser(seriesName, loggedUser.eppn);
+
+    try {
+        const userSeries = await this.getUserSeriesWithPrefix(seriesName, loggedUser);
+        let series = userSeries.find(series => series.title === lataamoSeriesTitle);
+
+        if (!series) {
+            logger.info(seriesName + ` series not found with title ${lataamoSeriesTitle}`);
+            series = await this.createLataamoSeries(seriesName, loggedUser.eppn);
+            logger.info(`Created ` + seriesName + ` ${series}`);
+            return series;
+        }
+        return userSeries;
+    }catch(err){
+        logger.error(`Error in returnOrCreateUsersSeries USER: ${loggedUser.eppn} ${err}`);
+        return false;
+    }
+};
+
+// create the default lataamo series for the given seriesName + userId
+exports.createLataamoSeries = async (seriesName, userId) => {
+    const lataamoSeriesTitle = seriesTitleForLoggedUser(seriesName, userId);
+    const lataamoSeriesDescription = `Lataamo-` + seriesName + ` series for ${ userId }`;
+    const lataamoSeriesLicense = '';
+    const lataamoSeriesLanguage = 'en';
+    const lataamoSeriesCreator = 'Lataamo-proxy-service';
+    const lataamoSeriesSubject = 'Lataamo-' + seriesName;
     const seriesUrl = constants.OCAST_SERIES_PATH;
 
     metadataArray = [
@@ -365,7 +387,7 @@ exports.createLataamoInboxSeries = async (userId) => {
                     "id": "title",
                     "label": "EVENTS.SERIES.DETAILS.METADATA.TITLE",
                     "type": "text",
-                    "value": lataamoInboxSeriesTitle,
+                    "value": lataamoSeriesTitle,
                     "required": true
                 },
                 {
@@ -374,7 +396,7 @@ exports.createLataamoInboxSeries = async (userId) => {
                     "label": "EVENTS.SERIES.DETAILS.METADATA.SUBJECT",
                     "type": "text",
                     "value": [
-                        lataamoInboxSeriesSubject
+                        lataamoSeriesSubject
                     ],
                     "required": false
                 },
@@ -383,7 +405,7 @@ exports.createLataamoInboxSeries = async (userId) => {
                     "id": "description",
                     "label": "EVENTS.SERIES.DETAILS.METADATA.DESCRIPTION",
                     "type": "text",
-                    "value": lataamoInboxSeriesDescription,
+                    "value": lataamoSeriesDescription,
                     "required": false
                 },
                 {
@@ -392,7 +414,7 @@ exports.createLataamoInboxSeries = async (userId) => {
                     "id": "language",
                     "label": "EVENTS.SERIES.DETAILS.METADATA.LANGUAGE",
                     "type": "text",
-                    "value": lataamoInboxSeriesLanguage,
+                    "value": lataamoSeriesLanguage,
                     "required": false
                 },
                 {
@@ -409,7 +431,7 @@ exports.createLataamoInboxSeries = async (userId) => {
                     "id": "license",
                     "label": "EVENTS.SERIES.DETAILS.METADATA.LICENSE",
                     "type": "text",
-                    "value": lataamoInboxSeriesLicense,
+                    "value": lataamoSeriesLicense,
                     "required": false
                 },
                 {
@@ -419,7 +441,7 @@ exports.createLataamoInboxSeries = async (userId) => {
                     "label": "EVENTS.SERIES.DETAILS.METADATA.CREATED_BY",
                     "type": "mixed_text",
                     "value": [
-                        lataamoInboxSeriesCreator, userId
+                        lataamoSeriesCreator, userId
                     ],
                     "required": false
                 },

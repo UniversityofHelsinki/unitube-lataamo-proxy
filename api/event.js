@@ -7,6 +7,7 @@ const userService = require('../service/userService');
 const seriesService = require('../service/seriesService');
 const messageKeys = require('../utils/message-keys');
 const logger = require('../config/winstonLogger');
+const constants = require('../utils/constants');
 
 exports.getEvent = async (req, res) => {
     try {
@@ -36,8 +37,23 @@ exports.getEvent = async (req, res) => {
 exports.getInboxEvents = async (req, res) => {
     logger.info(`GET /userInboxEvents USER: ${req.user.eppn}`);
     const loggedUser = userService.getLoggedUser(req.user);
+
     try{
-        const inboxSeries = await apiService.getUserInboxSeries(loggedUser);
+        // get or create trash series for user
+        const trashSeries = await apiService.returnOrCreateUsersSeries(constants.TRASH, loggedUser);
+    }catch(error){
+        const msg = error.message;
+        logger.error(`Error GET/CREATE userTrashEvents ${msg} USER ${req.user.eppn}`);
+        res.status(500);
+        return res.json({
+            message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_TRASH_EVENTS,
+            msg
+        });
+    }
+
+    try{
+        // get inbox series for user
+        const inboxSeries = await apiService.returnOrCreateUsersSeries(constants.INBOX, loggedUser);
         if (inboxSeries && inboxSeries.length > 0) {
             const identifier = seriesService.getInboxSeriesIdentifier(inboxSeries);
             const inboxEvents = await apiService.getEventsByIdentifier(identifier);

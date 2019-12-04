@@ -229,6 +229,7 @@ exports.modifySerieEventMetadataForOpencast = (metadata) => {
 
 exports.concatenateArray = (data) => Array.prototype.concat.apply([], data);
 
+/* Not in use
 exports.inboxSeriesHandling = async (req, res, loggedUser, filePathOnDisk) => {
     try {
         let inboxSeries = await returnOrCreateUsersInboxSeries(loggedUser);
@@ -250,6 +251,7 @@ exports.inboxSeriesHandling = async (req, res, loggedUser, filePathOnDisk) => {
         throw "Failed to resolve user's inbox series";
     }
 }
+*/
 
 exports.uploadToOpenCast = async (req, res, inboxSeries, filePathOnDisk, filename, timeDiff) => {
     try {
@@ -291,8 +293,9 @@ const deleteFile = (filename) => {
     });
 }
 
+/* Not in use
 const returnOrCreateUsersInboxSeries = async (loggedUser) => {
-    const lataamoInboxSeriesTitle = inboxSeriesTitleForLoggedUser(loggedUser.eppn);
+    const lataamoInboxSeriesTitle = seriesTitleForLoggedUser(constants.INBOX, loggedUser.eppn);
 
     try {
         const userSeries = await apiService.getUserSeries(loggedUser);
@@ -308,4 +311,4 @@ const returnOrCreateUsersInboxSeries = async (loggedUser) => {
         logger.error(`Error in returnOrCreateUsersInboxSeries ${err}`);
         throw err
     }
-}
+}*/

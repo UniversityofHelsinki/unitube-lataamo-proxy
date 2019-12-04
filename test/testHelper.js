@@ -34,7 +34,8 @@ const CONSTANTS = Object.freeze({
     SUCCESSFUL_UPDATE_ID : '123456',
     OCAST_EVENT_PATH : '/api/event',
     SERIES_OWNER_EPPN : 'SeriesOwnerEppn',
-    INBOX: 'inbox'
+    INBOX: 'inbox',
+    TRASH: 'trash'
 });
 
 
@@ -69,6 +70,24 @@ const mockTestUser3 = {
 
 const mockUserNoSeries = [];
 
+const mockUserTrashSeries = [
+    { identifier: CONSTANTS.TEST_INBOX_SERIES_ID,
+        creator: 'Opencast Project Administrator',
+        created: '2019-06-11T12:59:40Z',
+        subjects:
+            [ 'subjects-järvi',
+                'subjects-laavu',
+                'subjects-aamupuuro',
+                'subjects-turve',
+                'subjects-salama',
+                'subjects-koivikko' ],
+        organizers: [ 'creator-kasitunnus' ],
+        publishers: [ 'publisher-kasitunnus' ],
+        contributors: [ 'SeriesOwnerEppn', 'contrib1', 'jaaki', 'grp-lataamo-1', 'grp-XYZ'],
+        title: 'trash SeriesOwnerEppn'
+    }
+];
+
 const mockUserInboxSeries = [
     { identifier: CONSTANTS.TEST_INBOX_SERIES_ID,
         creator: 'Opencast Project Administrator',
@@ -83,7 +102,7 @@ const mockUserInboxSeries = [
         organizers: [ 'creator-kasitunnus' ],
         publishers: [ 'publisher-kasitunnus' ],
         contributors: [ 'SeriesOwnerEppn', 'contrib1', 'jaaki', 'grp-lataamo-1', 'grp-XYZ'],
-        title: 'inbox SERIES_OWNER_EPPN'
+        title: 'inbox SeriesOwnerEppn'
     }
 ];
 
@@ -101,7 +120,7 @@ const mockUserInboxSeries2 = [
         organizers: [ 'creator-kasitunnus' ],
         publishers: [ 'publisher-kasitunnus' ],
         contributors: [ 'SeriesOwnerEppn', 'contrib1', 'jaaki', 'grp-lataamo-1', 'grp-XYZ'],
-        title: 'inbox SERIES_OWNER_EPPN'
+        title: 'inbox SeriesOwnerEppn'
     },
     { identifier: CONSTANTS.TEST_SERIES_2_ID,
         creator: 'Opencast Project Administrator',
@@ -1677,12 +1696,28 @@ const eventMetadata_3 = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(`/api/${CONSTANTS.TEST_EVENT_3_ID}/metadata`)
     .reply(200, mockEventMetadata3);
 
+
+// inbox series by username /api/series/?filter=title:trash%20userWithNoInboxEvents
+const noTrashSeriesByUserName = () => {
+    let query = encodeURI(`${CONSTANTS.TRASH} userWithNoInboxEvents`);
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .get(CONSTANTS.OCAST_SERIES_PATH + '?filter=title:' + query)
+        .reply(200, mockUserNoSeries)
+};
 // inbox series by username /api/series/?filter=title:inbox%20userWithNoInboxEvents
 const noInboxSeriesByUserName = () => {
     let query = encodeURI(`${CONSTANTS.INBOX} userWithNoInboxEvents`);
     nock(CONSTANTS.OCAST_BASE_URL)
         .get(CONSTANTS.OCAST_SERIES_PATH + '?filter=title:' + query)
         .reply(200, mockUserNoSeries)
+};
+
+// trash series by username /api/series/?filter=title:trash%20SeriesOwnerEppn
+const trashSeriesByUserName = () => {
+    let query = encodeURI(`${CONSTANTS.TRASH} ${CONSTANTS.SERIES_OWNER_EPPN}`);
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .get(CONSTANTS.OCAST_SERIES_PATH + '?filter=title:' + query)
+        .reply(200, mockUserTrashSeries)
 };
 
 // inbox series by username /api/series/?filter=title:inbox%20SeriesOwnerEppn
@@ -1939,7 +1974,9 @@ module.exports.mockOpencastFailedRepublishMetadataRequest = mockOpencastFailedRe
 module.exports.mockOpencastRepublishMetadataRequest = mockOpencastRepublishMetadataRequest;
 module.exports.mockOpencastEvent1Request = event1;
 module.exports.mockOpencastInboxSeriesRequest = inboxSeriesByUserName;
+module.exports.mockOpencastTrashSeriesRequest = trashSeriesByUserName;
 module.exports.mockOpencastInboxSeriesWithNoResultRequest = noInboxSeriesByUserName;
+module.exports.mockOpencastTrashSeriesWithNoResultRequest = noTrashSeriesByUserName;
 module.exports.mockInboxSeriesEventsRequest = inboxSeriesEvents;
 module.exports.mockInboxEvent1MediaFileMetadataCall = event1InboxMediaFileMetadata;
 module.exports.mockInboxEvent2MediaFileMetadataCall = event2InboxMediaFileMetadata;
