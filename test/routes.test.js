@@ -12,6 +12,7 @@ const LATAAMO_USER_SERIES_PATH = '/api/userSeries';
 const LATAAMO_USER_EVENTS_PATH = '/api/userVideos';
 const LATAAMO_MOVE_EVENT_TO_TRASH_SERIES = '/api/moveEventToTrash';
 const LATAAMO_USER_INBOX_EVENTS_PATH = '/api/userInboxEvents';
+const LATAAMO_USER_TRASH_EVENTS_PATH = '/api/userTrashEvents';
 const LATAAMO_USER_EVENT_PATH = '/api/event';
 const LATAAMO_SERIES_PATH = '/api/series';
 const LATAAMO_API_INFO_PATH = '/api/';
@@ -385,7 +386,7 @@ describe('user inbox events returned from /userInboxEvents route', () => {
         assert.deepEqual(response.body[0].visibility, ["status_private"]);
     });
 
-    it("should return inbox events from inbox series", async () => {
+    it("should return no inbox events from inbox series", async () => {
         let response = await supertest(app)
             .get(LATAAMO_USER_INBOX_EVENTS_PATH)
             .set('eppn', 'userWithNoInboxEvents')
@@ -402,6 +403,68 @@ describe('user inbox events returned from /userInboxEvents route', () => {
 afterEach(() => {
     test.cleanAll();
 });
+
+describe('user trash events returned from /userTrashEvents route', () => {
+    beforeEach(() => {
+         // mock needed opencast api calls
+          test.mockOpencastTrashSeriesRequest();
+          test.mockOpencastTrashSeriesWithNoResultRequest();
+          test.mockTrashSeriesEventsRequest();
+          test.mockOcastTrashEvent1Call();
+          test.mockOcastTrashEvent2Call();
+          test.mockOCastEvent1TrashMediaMetadataCall();
+          test.mockOCastEvent2TrashMediaMetadataCall();
+          test.mockTrashEvent1MediaFileMetadataCall();
+          test.mockTrashEvent2MediaFileMetadataCall();
+          test.mockTrashSeriesAclCall();
+          test.mockTrashSeriesCall();
+        //
+        // test.mockLataamoPostSeriesCall();
+        // test.mockLataamoPostSeriesCall();
+
+    });
+
+    it("should return trash events from trash series", async () => {
+         let response = await supertest(app)
+             .get(LATAAMO_USER_TRASH_EVENTS_PATH)
+             .set('eppn', 'SeriesOwnerEppn')
+             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+             .set('displayName', test.mockTestUser.displayName)
+             .expect(200)
+             .expect('Content-Type', /json/);
+         assert.isArray(response.body, 'Response should be an array');
+         assert.lengthOf(response.body, 2, 'Two events should be returned');
+         assert.equal(response.body[0].identifier, test.constants.TEST_TRASH_EVENT_1);
+         assert.equal(response.body[0].creator, 'Opencast Project Administrator');
+         assert.equal(response.body[0].processing_state, 'SUCCEEDED');
+         assert.equal(response.body[0].title, 'TRASH EVENT 1');
+         assert.equal(response.body[1].identifier, test.constants.TEST_TRASH_EVENT_2);
+         assert.equal(response.body[1].title, 'TRASH EVENT 2');
+         assert.equal(response.body[0].creator, 'Opencast Project Administrator');
+         assert.equal(response.body[0].processing_state, 'SUCCEEDED');
+         assert.deepEqual(response.body[0].visibility, ["status_private"]);
+    });
+
+    it("should return no trash events from trash series", async () => {
+         let response = await supertest(app)
+             .get(LATAAMO_USER_TRASH_EVENTS_PATH)
+             .set('eppn', 'userWithNoTrashEvents')
+             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+             .set('displayName', test.mockTestUser.displayName)
+             .expect(200)
+             .expect('Content-Type', /json/);
+         assert.isArray(response.body, 'Response should be an array');
+         assert.lengthOf(response.body, 0, 'No events should be returned');
+    });
+});
+
+afterEach(() => {
+    test.cleanAll();
+});
+
+
 
 describe('user events (videos) returned from /userEvents route', () => {
   beforeEach(() => {

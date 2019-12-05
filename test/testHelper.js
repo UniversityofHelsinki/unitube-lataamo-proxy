@@ -17,8 +17,11 @@ const CONSTANTS = Object.freeze({
     OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER : '?filter=series:',
     OCAST_VIDEOS_FILTER_USER_NAME: '?filter=title:',
     TEST_INBOX_SERIES_ID : '3f9ff5b-7663-54b7-b7cf-950be665de3c',
+    TEST_TRASH_SERIES_ID : '3f9ff5b-7663-54b7-b7cf-950be665de3c',
     TEST_INBOX_EVENT_1: '11111',
     TEST_INBOX_EVENT_2: '22222',
+    TEST_TRASH_EVENT_1: '33333',
+    TEST_TRASH_EVENT_2: '44444',
     TEST_SERIES_1_ID : '80f9ff5b-4163-48b7-b7cf-950be665de3c',
     TEST_SERIES_2_ID : 'd72a8c9e-f854-4ba4-9ed2-89405fae214e',
     TEST_SERIES_3_ID : '604d78ac-733f-4c65-b13a-29172fbc0c6f',
@@ -27,6 +30,8 @@ const CONSTANTS = Object.freeze({
     TEST_EVENT_3_ID : '23af4ad3-6726-4f3d-bf21-c02b34753c32',
     TEST_MEDIA_1_INBOX_METADATA_ID : '333333',
     TEST_MEDIA_2_INBOX_METADATA_ID : '444444',
+    TEST_MEDIA_1_TRASH_METADATA_ID : '333333',
+    TEST_MEDIA_2_TRASH_METADATA_ID : '444444',
     TEST_MEDIA_1_METADATA_ID : '638b7ae1-0710-44df-b3db-55ee9e8b48ba',
     TEST_MEDIA_2_METADATA_ID : 'e14f98b1-3c61-45e7-8bb0-4a32ef66dac8',
     TEST_MEDIA_3_METADATA_ID : '1ca70749-cb47-403f-8bd2-3484759e68c1',
@@ -70,16 +75,16 @@ const mockTestUser3 = {
 
 const mockUserNoSeries = [];
 
-const mockUserTrashSeries =
-    { identifier: CONSTANTS.TEST_INBOX_SERIES_ID,
+const mockUserTrashSeries = [
+    { identifier: CONSTANTS.TEST_TRASH_SERIES_ID,
         creator: 'Opencast Project Administrator',
         created: '2019-05-22T09:56:43Z',
         subjects: [''],
         organizers: [ 'SeriesOwnerEppn' ],
         publishers: [ 'SeriesOwnerEppn' ],
         contributors: [ 'SeriesOwnerEppn'],
-        title: 'trash SERIES_OWNER_EPPN'
-    };
+        title: 'trash SeriesOwnerEppn'
+    }];
 
 const mockUserInboxSeries = [
     { identifier: CONSTANTS.TEST_INBOX_SERIES_ID,
@@ -131,19 +136,6 @@ const mockUserInboxSeries2 = [
         title: 'SERIES_OWNER_EPPN'
     }
 ];
-/*
-
-const mockUserTrashSeries =
-    { identifier: CONSTANTS.TEST_INBOX_SERIES_ID,
-        creator: 'Opencast Project Administrator',
-        created: '2019-05-22T09:56:43Z',
-        subjects: [''],
-        organizers: [ 'SeriesOwnerEppn' ],
-        publishers: [ 'SeriesOwnerEppn' ],
-        contributors: [ 'SeriesOwnerEppn'],
-        title: 'trash SERIES_OWNER_EPPN'
-    };
-*/
 
 // these are filtered by contributor (eppn in contributor values)
 const mockUserSeries = [
@@ -296,6 +288,43 @@ const mockUserEventsForInboxSeries =  [
         start: '2019-06-11T13:04:43Z',
         description: '',
         title: 'INBOX EVENT 2',
+        processing_state: 'SUCCEEDED',
+        duration: 0,
+        archive_version: 7,
+        contributor: ['SeriesOwnerEppn'],
+        has_previews: true,
+        location: '',
+        publication_status: [ 'internal', 'engage-player', 'api', 'oaipmh-default' ]
+    }
+];
+
+const mockUserEventsForTrashSeries =  [
+    {
+        identifier: CONSTANTS.TEST_TRASH_EVENT_1,
+        creator: 'Opencast Project Administrator',
+        presenter: [],
+        created: '2019-06-12T07:47:49Z',
+        subjects: [ 'Trash' ],
+        start: '2019-06-12T07:47:49Z',
+        description: '',
+        title: 'TRASH EVENT 1',
+        processing_state: 'SUCCEEDED',
+        duration: 0,
+        archive_version: 7,
+        contributor: [ 'SeriesOwnerEppn' ],
+        has_previews: true,
+        location: '',
+        publication_status: [ 'internal', 'engage-player', 'api', 'oaipmh-default' ]
+    },
+    {
+        identifier: CONSTANTS.TEST_TRASH_EVENT_2,
+        creator: 'Opencast Project Administrator',
+        presenter: [],
+        created: '2019-06-11T13:04:43Z',
+        subjects: [ 'More trash' ],
+        start: '2019-06-11T13:04:43Z',
+        description: '',
+        title: 'TRASH EVENT 2',
         processing_state: 'SUCCEEDED',
         duration: 0,
         archive_version: 7,
@@ -658,12 +687,24 @@ const inboxEventAclsFromSeries = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(`/api/series/${CONSTANTS.TEST_INBOX_SERIES_ID}/acl`)
     .reply(200, inboxEventACLs).persist(); // this url will be called several times so let's persist
 
+// /api/series/3f9ff5b-7663-54b7-b7cf-950be665de3c/acl
+const trashEventAclsFromSeries = () => nock(CONSTANTS.OCAST_BASE_URL)
+    .get(`/api/series/${CONSTANTS.TEST_TRASH_SERIES_ID}/acl`)
+    .reply(200, trashEventACLs).persist(); // this url will be called several times so let's persist
+
 // /api/series/80f9ff5b-4163-48b7-b7cf-950be665de3c/acl
 const eventAclsFromSeries = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(`/api/series/${CONSTANTS.TEST_SERIES_1_ID}/acl`)
     .reply(200, eventACLs).persist(); // this url will be called several times so let's persist
 
 const inboxEventACLs = [
+    { allow: true, role: 'ROLE_USER_ADMIN', action: 'read' },
+    { allow: true, role: 'ROLE_USER_ADMIN', action: 'write' },
+    { allow: true, role: 'ROLE_ADMIN', action: 'read' },
+    { allow: true, role: 'ROLE_ADMIN', action: 'write' },
+];
+
+const trashEventACLs = [
     { allow: true, role: 'ROLE_USER_ADMIN', action: 'read' },
     { allow: true, role: 'ROLE_USER_ADMIN', action: 'write' },
     { allow: true, role: 'ROLE_ADMIN', action: 'read' },
@@ -721,6 +762,16 @@ const event2InboxMediaMetadata = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(`/admin-ng/event/${CONSTANTS.TEST_INBOX_EVENT_2}/asset/media/media.json`)
     .reply(200, mediaInboxMetadata2);
 
+//    /admin-ng/event/3333/asset/media/media.json
+const event1TrashMediaMetadata = () => nock(CONSTANTS.OCAST_BASE_URL)
+    .get(`/admin-ng/event/${CONSTANTS.TEST_TRASH_EVENT_1}/asset/media/media.json`)
+    .reply(200, mediaTrashMetadata1);
+
+//    /admin-ng/event/4444/asset/media/media.json
+const event2TrashMediaMetadata = () => nock(CONSTANTS.OCAST_BASE_URL)
+    .get(`/admin-ng/event/${CONSTANTS.TEST_TRASH_EVENT_2}/asset/media/media.json`)
+    .reply(200, mediaTrashMetadata2);
+
 // /admin-ng/event/11111/asset/media/333333.json
 const event1InboxMediaFileMetadata = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(`/admin-ng/event/${CONSTANTS.TEST_INBOX_EVENT_1}/asset/media/${CONSTANTS.TEST_MEDIA_1_INBOX_METADATA_ID}.json`)
@@ -730,6 +781,17 @@ const event1InboxMediaFileMetadata = () => nock(CONSTANTS.OCAST_BASE_URL)
 const event2InboxMediaFileMetadata = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(`/admin-ng/event/${CONSTANTS.TEST_INBOX_EVENT_2}/asset/media/${CONSTANTS.TEST_MEDIA_2_INBOX_METADATA_ID}.json`)
     .reply(200, mediaInboxMetadataFile2);
+
+// /admin-ng/event/3333/asset/media/333333.json
+const event1TrashMediaFileMetadata = () => nock(CONSTANTS.OCAST_BASE_URL)
+    .get(`/admin-ng/event/${CONSTANTS.TEST_TRASH_EVENT_1}/asset/media/${CONSTANTS.TEST_MEDIA_1_TRASH_METADATA_ID}.json`)
+    .reply(200, mediaTrashMetadataFile1);
+
+// /admin-ng/event/4444/asset/media/44444.json
+const event2TrashMediaFileMetadata = () => nock(CONSTANTS.OCAST_BASE_URL)
+    .get(`/admin-ng/event/${CONSTANTS.TEST_TRASH_EVENT_2}/asset/media/${CONSTANTS.TEST_MEDIA_2_TRASH_METADATA_ID}.json`)
+    .reply(200, mediaTrashMetadataFile2);
+
 
 // /admin-ng/event/6394a9b7-3c06-477e-841a-70862eb07bfb/asset/media/638b7ae1-0710-44df-b3db-55ee9e8b48ba.json
 const event1MediaMetadata = () => nock(CONSTANTS.OCAST_BASE_URL)
@@ -767,6 +829,26 @@ const mediaInboxMetadata2 = [
     }
 ];
 
+const mediaTrashMetadata1 = [
+    {
+        mimetype: 'video/mp4',
+        id: CONSTANTS.TEST_MEDIA_1_TRASH_METADATA_ID,
+        type: 'presenter/source',
+        url: `http://opencast:8080/assets/assets/${CONSTANTS.TEST_TRASH_EVENT_1}/${CONSTANTS.TEST_MEDIA_1_TRASH_METADATA_ID}/7/fruits_on_table.mp4`,
+        tags: [ 'archive' ]
+    }
+];
+
+const mediaTrashMetadata2 = [
+    {
+        mimetype: 'video/mp4',
+        id: CONSTANTS.TEST_MEDIA_2_TRASH_METADATA_ID,
+        type: 'presenter/source',
+        url: `http://opencast:8080/assets/assets/${CONSTANTS.TEST_TRASH_EVENT_2}/${CONSTANTS.TEST_MEDIA_2_TRASH_METADATA_ID}/7/fruits_on_table.mp4`,
+        tags: [ 'archive' ]
+    }
+];
+
 const mediaInboxMetadataFile1 = {
     reference: '',
     duration: 14721,
@@ -798,6 +880,36 @@ const mediaInboxMetadataFile2 = {
     tags: [ 'archive' ]
 };
 
+const mediaTrashMetadataFile1 = {
+    reference: '',
+    duration: 14721,
+    size: 38321839,
+    has_audio: true,
+    streams: { audio: [ [Object] ], video: [ [Object] ] },
+    checksum: 'bcdcde376469378a034c2e0dad33e497',
+    mimetype: 'video/mp4',
+    id: '5c8ab233-6710-49f7-935d-fa6b7f733dce',
+    type: 'presenter/source',
+    url: `http://opencast:8080/assets/assets/${CONSTANTS.TEST_TRASH_EVENT_1}/${CONSTANTS.TEST_MEDIA_1_TRASH_METADATA_ID}/3/fruits_on_table.mp4`,
+    has_video: true,
+    tags: [ 'archive' ]
+};
+
+
+const mediaTrashMetadataFile2 = {
+    reference: '',
+    duration: 14721,
+    size: 38321839,
+    has_audio: true,
+    streams: { audio: [ [Object] ], video: [ [Object] ] },
+    checksum: 'bcdcde376469378a034c2e0dad33e497',
+    mimetype: 'video/mp4',
+    id: '5c8ab233-6710-49f7-935d-fa6b7f733dce',
+    type: 'presenter/source',
+    url: `http://opencast:8080/assets/assets/${CONSTANTS.TEST_TRASH_EVENT_2}/${CONSTANTS.TEST_MEDIA_2_TRASH_METADATA_ID}/3/fruits_on_table.mp4`,
+    has_video: true,
+    tags: [ 'archive' ]
+};
 
 const mediaMetadata1 = {
     reference: '',
@@ -1642,6 +1754,11 @@ const inboxUserSeries = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(`/api/series/${CONSTANTS.TEST_INBOX_SERIES_ID}`)
     .reply(200, mockUserInboxSeries).persist();
 
+// /api/series/3f9ff5b-7663-54b7-b7cf-950be665de3c
+const trashUserSeries = () => nock(CONSTANTS.OCAST_BASE_URL)
+    .get(`/api/series/${CONSTANTS.TEST_TRASH_SERIES_ID}`)
+    .reply(200, mockUserTrashSeries).persist();
+
 // /admin-ng/event/6394a9b7-3c06-477e-841a-70862eb07bfb/asset/media/media.json
 const event1Media = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(`/admin-ng/event/${CONSTANTS.TEST_EVENT_1_ID}/asset/media/media.json`)
@@ -1668,6 +1785,9 @@ const event2Publications = () => nock(CONSTANTS.OCAST_BASE_URL)
 const mockInboxEventMetadata1 = [{"flavor":"dublincore\/episode","title":"EVENTS.EVENTS.DETAILS.CATALOG.EPISODE","fields":[{"readOnly":false,"id":"title","label":"EVENTS.EVENTS.DETAILS.METADATA.TITLE","type":"text","value":"INBOX EVENT 1","required":true},{"readOnly":false,"id":"subjects","label":"EVENTS.EVENTS.DETAILS.METADATA.SUBJECT","type":"text","value":["Testin more"],"required":false},{"readOnly":false,"id":"description","label":"EVENTS.EVENTS.DETAILS.METADATA.DESCRIPTION","type":"text_long","value":"","required":false},{"translatable":true,"readOnly":false,"id":"language","label":"EVENTS.EVENTS.DETAILS.METADATA.LANGUAGE","type":"text","value":"","required":false},{"readOnly":false,"id":"rightsHolder","label":"EVENTS.EVENTS.DETAILS.METADATA.RIGHTS","type":"text","value":"","required":false},{"translatable":true,"readOnly":false,"id":"license","label":"EVENTS.EVENTS.DETAILS.METADATA.LICENSE","type":"text","value":"ALLRIGHTS","required":false},{"translatable":false,"readOnly":false,"id":"isPartOf","label":"EVENTS.EVENTS.DETAILS.METADATA.SERIES","type":"text","value":CONSTANTS.TEST_INBOX_SERIES_ID,"required":false},{"translatable":false,"readOnly":false,"id":"creator","label":"EVENTS.EVENTS.DETAILS.METADATA.PRESENTERS","type":"mixed_text","value":[],"required":false},{"translatable":false,"readOnly":false,"id":"contributor","label":"EVENTS.EVENTS.DETAILS.METADATA.CONTRIBUTORS","type":"mixed_text","value":["tzrasane"],"required":false},{"readOnly":false,"id":"startDate","label":"EVENTS.EVENTS.DETAILS.METADATA.START_DATE","type":"date","value":"2019-06-12","required":false},{"readOnly":false,"id":"startTime","label":"EVENTS.EVENTS.DETAILS.METADATA.START_TIME","type":"time","value":"07:47","required":false},{"readOnly":false,"id":"duration","label":"EVENTS.EVENTS.DETAILS.METADATA.DURATION","type":"text","value":"00:00:00","required":false},{"readOnly":false,"id":"location","label":"EVENTS.EVENTS.DETAILS.METADATA.LOCATION","type":"text","value":"","required":false},{"readOnly":false,"id":"source","label":"EVENTS.EVENTS.DETAILS.METADATA.SOURCE","type":"text","value":"","required":false},{"readOnly":true,"id":"created","label":"EVENTS.EVENTS.DETAILS.METADATA.CREATED","type":"date","value":"2019-06-12T07:47:49.000Z","required":false},{"readOnly":true,"id":"identifier","label":"EVENTS.EVENTS.DETAILS.METADATA.ID","type":"text","value":CONSTANTS.TEST_INBOX_EVENT_1,"required":false}]}]
 const mockInboxEventMetadata2= [{"flavor":"dublincore\/episode","title":"EVENTS.EVENTS.DETAILS.CATALOG.EPISODE","fields":[{"readOnly":false,"id":"title","label":"EVENTS.EVENTS.DETAILS.METADATA.TITLE","type":"text","value":"INBOX EVENT 2","required":true},{"readOnly":false,"id":"subjects","label":"EVENTS.EVENTS.DETAILS.METADATA.SUBJECT","type":"text","value":["Testin more"],"required":false},{"readOnly":false,"id":"description","label":"EVENTS.EVENTS.DETAILS.METADATA.DESCRIPTION","type":"text_long","value":"","required":false},{"translatable":true,"readOnly":false,"id":"language","label":"EVENTS.EVENTS.DETAILS.METADATA.LANGUAGE","type":"text","value":"","required":false},{"readOnly":false,"id":"rightsHolder","label":"EVENTS.EVENTS.DETAILS.METADATA.RIGHTS","type":"text","value":"","required":false},{"translatable":true,"readOnly":false,"id":"license","label":"EVENTS.EVENTS.DETAILS.METADATA.LICENSE","type":"text","value":"ALLRIGHTS","required":false},{"translatable":false,"readOnly":false,"id":"isPartOf","label":"EVENTS.EVENTS.DETAILS.METADATA.SERIES","type":"text","value":CONSTANTS.TEST_INBOX_SERIES_ID,"required":false},{"translatable":false,"readOnly":false,"id":"creator","label":"EVENTS.EVENTS.DETAILS.METADATA.PRESENTERS","type":"mixed_text","value":[],"required":false},{"translatable":false,"readOnly":false,"id":"contributor","label":"EVENTS.EVENTS.DETAILS.METADATA.CONTRIBUTORS","type":"mixed_text","value":["tzrasane"],"required":false},{"readOnly":false,"id":"startDate","label":"EVENTS.EVENTS.DETAILS.METADATA.START_DATE","type":"date","value":"2019-06-12","required":false},{"readOnly":false,"id":"startTime","label":"EVENTS.EVENTS.DETAILS.METADATA.START_TIME","type":"time","value":"07:47","required":false},{"readOnly":false,"id":"duration","label":"EVENTS.EVENTS.DETAILS.METADATA.DURATION","type":"text","value":"00:00:00","required":false},{"readOnly":false,"id":"location","label":"EVENTS.EVENTS.DETAILS.METADATA.LOCATION","type":"text","value":"","required":false},{"readOnly":false,"id":"source","label":"EVENTS.EVENTS.DETAILS.METADATA.SOURCE","type":"text","value":"","required":false},{"readOnly":true,"id":"created","label":"EVENTS.EVENTS.DETAILS.METADATA.CREATED","type":"date","value":"2019-06-12T07:47:49.000Z","required":false},{"readOnly":true,"id":"identifier","label":"EVENTS.EVENTS.DETAILS.METADATA.ID","type":"text","value":CONSTANTS.TEST_INBOX_EVENT_2,"required":false}]}]
 
+const mockTrashEventMetadata1 = [{"flavor":"dublincore\/episode","title":"EVENTS.EVENTS.DETAILS.CATALOG.EPISODE","fields":[{"readOnly":false,"id":"title","label":"EVENTS.EVENTS.DETAILS.METADATA.TITLE","type":"text","value":"TRASH EVENT 1","required":true},{"readOnly":false,"id":"subjects","label":"EVENTS.EVENTS.DETAILS.METADATA.SUBJECT","type":"text","value":["Testing trash"],"required":false},{"readOnly":false,"id":"description","label":"EVENTS.EVENTS.DETAILS.METADATA.DESCRIPTION","type":"text_long","value":"","required":false},{"translatable":true,"readOnly":false,"id":"language","label":"EVENTS.EVENTS.DETAILS.METADATA.LANGUAGE","type":"text","value":"","required":false},{"readOnly":false,"id":"rightsHolder","label":"EVENTS.EVENTS.DETAILS.METADATA.RIGHTS","type":"text","value":"","required":false},{"translatable":true,"readOnly":false,"id":"license","label":"EVENTS.EVENTS.DETAILS.METADATA.LICENSE","type":"text","value":"ALLRIGHTS","required":false},{"translatable":false,"readOnly":false,"id":"isPartOf","label":"EVENTS.EVENTS.DETAILS.METADATA.SERIES","type":"text","value":CONSTANTS.TEST_TRASH_SERIES_ID,"required":false},{"translatable":false,"readOnly":false,"id":"creator","label":"EVENTS.EVENTS.DETAILS.METADATA.PRESENTERS","type":"mixed_text","value":[],"required":false},{"translatable":false,"readOnly":false,"id":"contributor","label":"EVENTS.EVENTS.DETAILS.METADATA.CONTRIBUTORS","type":"mixed_text","value":["hpalva"],"required":false},{"readOnly":false,"id":"startDate","label":"EVENTS.EVENTS.DETAILS.METADATA.START_DATE","type":"date","value":"2019-06-12","required":false},{"readOnly":false,"id":"startTime","label":"EVENTS.EVENTS.DETAILS.METADATA.START_TIME","type":"time","value":"07:47","required":false},{"readOnly":false,"id":"duration","label":"EVENTS.EVENTS.DETAILS.METADATA.DURATION","type":"text","value":"00:00:00","required":false},{"readOnly":false,"id":"location","label":"EVENTS.EVENTS.DETAILS.METADATA.LOCATION","type":"text","value":"","required":false},{"readOnly":false,"id":"source","label":"EVENTS.EVENTS.DETAILS.METADATA.SOURCE","type":"text","value":"","required":false},{"readOnly":true,"id":"created","label":"EVENTS.EVENTS.DETAILS.METADATA.CREATED","type":"date","value":"2019-06-12T07:47:49.000Z","required":false},{"readOnly":true,"id":"identifier","label":"EVENTS.EVENTS.DETAILS.METADATA.ID","type":"text","value":CONSTANTS.TEST_TRASH_EVENT_1,"required":false}]}]
+const mockTrashEventMetadata2= [{"flavor":"dublincore\/episode","title":"EVENTS.EVENTS.DETAILS.CATALOG.EPISODE","fields":[{"readOnly":false,"id":"title","label":"EVENTS.EVENTS.DETAILS.METADATA.TITLE","type":"text","value":"TRASH EVENT 2","required":true},{"readOnly":false,"id":"subjects","label":"EVENTS.EVENTS.DETAILS.METADATA.SUBJECT","type":"text","value":["Testing trash"],"required":false},{"readOnly":false,"id":"description","label":"EVENTS.EVENTS.DETAILS.METADATA.DESCRIPTION","type":"text_long","value":"","required":false},{"translatable":true,"readOnly":false,"id":"language","label":"EVENTS.EVENTS.DETAILS.METADATA.LANGUAGE","type":"text","value":"","required":false},{"readOnly":false,"id":"rightsHolder","label":"EVENTS.EVENTS.DETAILS.METADATA.RIGHTS","type":"text","value":"","required":false},{"translatable":true,"readOnly":false,"id":"license","label":"EVENTS.EVENTS.DETAILS.METADATA.LICENSE","type":"text","value":"ALLRIGHTS","required":false},{"translatable":false,"readOnly":false,"id":"isPartOf","label":"EVENTS.EVENTS.DETAILS.METADATA.SERIES","type":"text","value":CONSTANTS.TEST_TRASH_SERIES_ID,"required":false},{"translatable":false,"readOnly":false,"id":"creator","label":"EVENTS.EVENTS.DETAILS.METADATA.PRESENTERS","type":"mixed_text","value":[],"required":false},{"translatable":false,"readOnly":false,"id":"contributor","label":"EVENTS.EVENTS.DETAILS.METADATA.CONTRIBUTORS","type":"mixed_text","value":["hpalva"],"required":false},{"readOnly":false,"id":"startDate","label":"EVENTS.EVENTS.DETAILS.METADATA.START_DATE","type":"date","value":"2019-06-12","required":false},{"readOnly":false,"id":"startTime","label":"EVENTS.EVENTS.DETAILS.METADATA.START_TIME","type":"time","value":"07:47","required":false},{"readOnly":false,"id":"duration","label":"EVENTS.EVENTS.DETAILS.METADATA.DURATION","type":"text","value":"00:00:00","required":false},{"readOnly":false,"id":"location","label":"EVENTS.EVENTS.DETAILS.METADATA.LOCATION","type":"text","value":"","required":false},{"readOnly":false,"id":"source","label":"EVENTS.EVENTS.DETAILS.METADATA.SOURCE","type":"text","value":"","required":false},{"readOnly":true,"id":"created","label":"EVENTS.EVENTS.DETAILS.METADATA.CREATED","type":"date","value":"2019-06-12T07:47:49.000Z","required":false},{"readOnly":true,"id":"identifier","label":"EVENTS.EVENTS.DETAILS.METADATA.ID","type":"text","value":CONSTANTS.TEST_TRASH_EVENT_2,"required":false}]}]
+
 const mockEventMetadata1 = [{"flavor":"dublincore\/episode","title":"EVENTS.EVENTS.DETAILS.CATALOG.EPISODE","fields":[{"readOnly":false,"id":"title","label":"EVENTS.EVENTS.DETAILS.METADATA.TITLE","type":"text","value":"LATAAMO-103 toka","required":true},{"readOnly":false,"id":"subjects","label":"EVENTS.EVENTS.DETAILS.METADATA.SUBJECT","type":"text","value":["Testin more"],"required":false},{"readOnly":false,"id":"description","label":"EVENTS.EVENTS.DETAILS.METADATA.DESCRIPTION","type":"text_long","value":"","required":false},{"translatable":true,"readOnly":false,"id":"language","label":"EVENTS.EVENTS.DETAILS.METADATA.LANGUAGE","type":"text","value":"","required":false},{"readOnly":false,"id":"rightsHolder","label":"EVENTS.EVENTS.DETAILS.METADATA.RIGHTS","type":"text","value":"","required":false},{"translatable":true,"readOnly":false,"id":"license","label":"EVENTS.EVENTS.DETAILS.METADATA.LICENSE","type":"text","value":"ALLRIGHTS","required":false},{"translatable":false,"readOnly":false,"id":"isPartOf","label":"EVENTS.EVENTS.DETAILS.METADATA.SERIES","type":"text","value":"80f9ff5b-4163-48b7-b7cf-950be665de3c","required":false},{"translatable":false,"readOnly":false,"id":"creator","label":"EVENTS.EVENTS.DETAILS.METADATA.PRESENTERS","type":"mixed_text","value":[],"required":false},{"translatable":false,"readOnly":false,"id":"contributor","label":"EVENTS.EVENTS.DETAILS.METADATA.CONTRIBUTORS","type":"mixed_text","value":["tzrasane"],"required":false},{"readOnly":false,"id":"startDate","label":"EVENTS.EVENTS.DETAILS.METADATA.START_DATE","type":"date","value":"2019-06-12","required":false},{"readOnly":false,"id":"startTime","label":"EVENTS.EVENTS.DETAILS.METADATA.START_TIME","type":"time","value":"07:47","required":false},{"readOnly":false,"id":"duration","label":"EVENTS.EVENTS.DETAILS.METADATA.DURATION","type":"text","value":"00:00:00","required":false},{"readOnly":false,"id":"location","label":"EVENTS.EVENTS.DETAILS.METADATA.LOCATION","type":"text","value":"","required":false},{"readOnly":false,"id":"source","label":"EVENTS.EVENTS.DETAILS.METADATA.SOURCE","type":"text","value":"","required":false},{"readOnly":true,"id":"created","label":"EVENTS.EVENTS.DETAILS.METADATA.CREATED","type":"date","value":"2019-06-12T07:47:49.000Z","required":false},{"readOnly":true,"id":"identifier","label":"EVENTS.EVENTS.DETAILS.METADATA.ID","type":"text","value":CONSTANTS.TEST_EVENT_1_ID,"required":false}]}]
 const mockEventMetadata2 = [{"flavor":"dublincore\/episode","title":"EVENTS.EVENTS.DETAILS.CATALOG.EPISODE","fields":[{"readOnly":false,"id":"title","label":"EVENTS.EVENTS.DETAILS.METADATA.TITLE","type":"text","value":"LAATAMO-103","required":true},{"readOnly":false,"id":"subjects","label":"EVENTS.EVENTS.DETAILS.METADATA.SUBJECT","type":"text","value":["testing"],"required":false},{"readOnly":false,"id":"description","label":"EVENTS.EVENTS.DETAILS.METADATA.DESCRIPTION","type":"text_long","value":"","required":false},{"translatable":true,"readOnly":false,"id":"language","label":"EVENTS.EVENTS.DETAILS.METADATA.LANGUAGE","type":"text","value":"","required":false},{"readOnly":false,"id":"rightsHolder","label":"EVENTS.EVENTS.DETAILS.METADATA.RIGHTS","type":"text","value":"","required":false},{"translatable":true,"readOnly":false,"id":"license","label":"EVENTS.EVENTS.DETAILS.METADATA.LICENSE","type":"text","value":"ALLRIGHTS","required":false},{"translatable":false,"readOnly":false,"id":"isPartOf","label":"EVENTS.EVENTS.DETAILS.METADATA.SERIES","type":"text","value":"80f9ff5b-4163-48b7-b7cf-950be665de3c","required":false},{"translatable":false,"readOnly":false,"id":"creator","label":"EVENTS.EVENTS.DETAILS.METADATA.PRESENTERS","type":"mixed_text","value":[],"required":false},{"translatable":false,"readOnly":false,"id":"contributor","label":"EVENTS.EVENTS.DETAILS.METADATA.CONTRIBUTORS","type":"mixed_text","value":["tzrasane"],"required":false},{"readOnly":false,"id":"startDate","label":"EVENTS.EVENTS.DETAILS.METADATA.START_DATE","type":"date","value":"2019-06-11","required":false},{"readOnly":false,"id":"startTime","label":"EVENTS.EVENTS.DETAILS.METADATA.START_TIME","type":"time","value":"13:04","required":false},{"readOnly":false,"id":"duration","label":"EVENTS.EVENTS.DETAILS.METADATA.DURATION","type":"text","value":"00:00:00","required":false},{"readOnly":false,"id":"location","label":"EVENTS.EVENTS.DETAILS.METADATA.LOCATION","type":"text","value":"","required":false},{"readOnly":false,"id":"source","label":"EVENTS.EVENTS.DETAILS.METADATA.SOURCE","type":"text","value":"","required":false},{"readOnly":true,"id":"created","label":"EVENTS.EVENTS.DETAILS.METADATA.CREATED","type":"date","value":"2019-06-11T13:04:43.000Z","required":false},{"readOnly":true,"id":"identifier","label":"EVENTS.EVENTS.DETAILS.METADATA.ID","type":"text","value":CONSTANTS.TEST_EVENT_2_ID,"required":false}]}]
 const mockEventMetadata3 = [{"flavor":"dublincore\/episode","title":"EVENTS.EVENTS.DETAILS.CATALOG.EPISODE","fields":[{"readOnly":false,"id":"title","label":"EVENTS.EVENTS.DETAILS.METADATA.TITLE","type":"text","value":"Captivating title","required":true},{"readOnly":false,"id":"subjects","label":"EVENTS.EVENTS.DETAILS.METADATA.SUBJECT","type":"text","value":["John Clark","Thiago Melo Costa"],"required":false},{"readOnly":false,"id":"description","label":"EVENTS.EVENTS.DETAILS.METADATA.DESCRIPTION","type":"text_long","value":"A great description","required":false},{"translatable":true,"readOnly":false,"id":"language","label":"EVENTS.EVENTS.DETAILS.METADATA.LANGUAGE","type":"text","value":"","required":false},{"readOnly":false,"id":"rightsHolder","label":"EVENTS.EVENTS.DETAILS.METADATA.RIGHTS","type":"text","value":"","required":false},{"translatable":true,"readOnly":false,"id":"license","label":"EVENTS.EVENTS.DETAILS.METADATA.LICENSE","type":"text","value":"","required":false},{"translatable":false,"readOnly":false,"id":"isPartOf","label":"EVENTS.EVENTS.DETAILS.METADATA.SERIES","type":"text","value":"d72a8c9e-f854-4ba4-9ed2-89405fae214e","required":false},{"translatable":false,"readOnly":false,"id":"creator","label":"EVENTS.EVENTS.DETAILS.METADATA.PRESENTERS","type":"mixed_text","value":[],"required":false},{"translatable":false,"readOnly":false,"id":"contributor","label":"EVENTS.EVENTS.DETAILS.METADATA.CONTRIBUTORS","type":"mixed_text","value":[],"required":false},{"readOnly":false,"id":"startDate","label":"EVENTS.EVENTS.DETAILS.METADATA.START_DATE","type":"date","value":"2016-06-22","required":false},{"readOnly":false,"id":"startTime","label":"EVENTS.EVENTS.DETAILS.METADATA.START_TIME","type":"time","value":"13:30","required":false},{"readOnly":false,"id":"duration","label":"EVENTS.EVENTS.DETAILS.METADATA.DURATION","type":"text","value":"00:00:00","required":false},{"readOnly":false,"id":"location","label":"EVENTS.EVENTS.DETAILS.METADATA.LOCATION","type":"text","value":"","required":false},{"readOnly":false,"id":"source","label":"EVENTS.EVENTS.DETAILS.METADATA.SOURCE","type":"text","value":"","required":false},{"readOnly":true,"id":"created","label":"EVENTS.EVENTS.DETAILS.METADATA.CREATED","type":"date","value":"2016-06-22T13:30:00.000Z","required":false},{"readOnly":true,"id":"identifier","label":"EVENTS.EVENTS.DETAILS.METADATA.ID","type":"text","value":CONSTANTS.TEST_EVENT_3_ID,"required":false}]}]
@@ -1681,6 +1801,16 @@ const inboxEventMetadata_1 = () => nock(CONSTANTS.OCAST_BASE_URL)
 const inboxEventMetadata_2 = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(`/api/${CONSTANTS.TEST_INBOX_EVENT_2}/metadata`)
     .reply(200, mockInboxEventMetadata2);
+
+// /api/3333/metadata
+const trashEventMetadata_1 = () => nock(CONSTANTS.OCAST_BASE_URL)
+    .get(`/api/${CONSTANTS.TEST_TRASH_EVENT_1}/metadata`)
+    .reply(200, mockTrashEventMetadata1);
+
+// /api/4444/metadata
+const trashEventMetadata_2 = () => nock(CONSTANTS.OCAST_BASE_URL)
+    .get(`/api/${CONSTANTS.TEST_TRASH_EVENT_2}/metadata`)
+    .reply(200, mockTrashEventMetadata2);
 
 // /admin-ng/event/22222/asset/media/444444.json
 const inboxEventMediaFile1 = () => nock(CONSTANTS.OCAST_BASE_URL)
@@ -1705,7 +1835,7 @@ const eventMetadata_3 = () => nock(CONSTANTS.OCAST_BASE_URL)
 
 // inbox series by username /api/series/?filter=title:trash%20userWithNoInboxEvents
 const noTrashSeriesByUserName = () => {
-    let query = encodeURI(`${CONSTANTS.TRASH} userWithNoInboxEvents`);
+    let query = encodeURI(`${CONSTANTS.TRASH} userWithNoTrashEvents`);
     nock(CONSTANTS.OCAST_BASE_URL)
         .get(CONSTANTS.OCAST_SERIES_PATH + '?filter=title:' + query)
         .reply(200, mockUserNoSeries)
@@ -1739,6 +1869,12 @@ const inboxSeriesEvents = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(CONSTANTS.OCAST_VIDEOS_PATH)
     .query({filter: `series:${CONSTANTS.TEST_INBOX_SERIES_ID}`})
     .reply(200, mockUserEventsForInboxSeries);
+
+// events for trash series /api/events/?filter=series:3f9ff5b-7663-54b7-b7cf-950be665de3c
+const trashSeriesEvents = () => nock(CONSTANTS.OCAST_BASE_URL)
+    .get(CONSTANTS.OCAST_VIDEOS_PATH)
+    .query({filter: `series:${CONSTANTS.TEST_TRASH_SERIES_ID}`})
+    .reply(200, mockUserEventsForTrashSeries);
 
 // events by series /api/events/?filter=series:80f9ff5b-4163-48b7-b7cf-950be665de3c
 const series1_Events = () => nock(CONSTANTS.OCAST_BASE_URL)
@@ -1840,7 +1976,7 @@ const mockOpencastUpdateEventOK = (eventId) => {
     nock(CONSTANTS.OCAST_BASE_URL)
         .put(videoMetaDataUrl)
         .reply(204, {statusText: 'No Content'});
-}
+};
 
 const mockOpencastUpdateEventNOK = (eventId) => {
     // /api/events/d89d275a-25f6-426f-9b28-dc2607803206/metadata?type=dublincore/episode
@@ -1851,7 +1987,7 @@ const mockOpencastUpdateEventNOK = (eventId) => {
     nock(CONSTANTS.OCAST_BASE_URL)
         .put(videoMetaDataUrl)
         .reply(400);
-}
+};
 
 const mockEventTransactionStatusActive = (eventId) => {
     const transactionStatusPath = constPaths.OCAST_EVENT_MEDIA_PATH_PREFIX + eventId + '/hasActiveTransaction';
@@ -1860,7 +1996,7 @@ const mockEventTransactionStatusActive = (eventId) => {
         .reply(200, {
             active: true
         });
-}
+};
 
 const mockEventTransactionStatusNotActive = (eventId) => {
     const transactionStatusPath = constPaths.OCAST_EVENT_MEDIA_PATH_PREFIX + eventId + '/hasActiveTransaction';
@@ -1869,35 +2005,35 @@ const mockEventTransactionStatusNotActive = (eventId) => {
         .reply(200, {
             active: false
         });
-}
+};
 
 const mockOpencastFailedMediaPackageRequest = (eventId) => {
     const mediapackageUrl = '/assets/episode/' + eventId;
     nock(CONSTANTS.OCAST_BASE_URL)
         .get(mediapackageUrl)
         .reply(400);
-}
+};
 
 const mockOpencastMediaPackageRequest = (eventId) => {
     const mediapackageUrl = '/assets/episode/' + eventId;
     nock(CONSTANTS.OCAST_BASE_URL)
         .get(mediapackageUrl)
         .reply(200);
-}
+};
 
 const mockOpencastFailedRepublishMetadataRequest = () => {
     const republishMetadataUrl = '/workflow/start';
     nock(CONSTANTS.OCAST_BASE_URL)
         .post(republishMetadataUrl)
         .reply(400);
-}
+};
 
 const mockOpencastRepublishMetadataRequest = () => {
     const republishMetadataUrl = '/workflow/start';
     nock(CONSTANTS.OCAST_BASE_URL)
         .post(republishMetadataUrl)
         .reply(200);
-}
+};
 
 const lataamoPutSeries = () =>
     nock(CONSTANTS.OCAST_BASE_URL)
@@ -1951,15 +2087,20 @@ module.exports.mockOCastEventMetadata_2Call = eventMetadata_2;
 module.exports.mockOCastEventMetadata_3Call = eventMetadata_3;
 module.exports.mockOcastInboxEvent1Call = inboxEventMetadata_1;
 module.exports.mockOcastInboxEvent2Call = inboxEventMetadata_2;
+module.exports.mockOcastTrashEvent1Call = trashEventMetadata_1;
+module.exports.mockOcastTrashEvent2Call = trashEventMetadata_2;
 module.exports.mockOCastEvent1MediaCall = event1Media;
 module.exports.mockOCastEvent2MediaCall = event2Media;
 module.exports.mockOCastEvent3MediaCall = event3Media;
 module.exports.mockOCastEvent1InboxMediaMetadataCall = event1InboxMediaMetadata;
 module.exports.mockOCastEvent2InboxMediaMetadataCall = event2InboxMediaMetadata;
+module.exports.mockOCastEvent1TrashMediaMetadataCall = event1TrashMediaMetadata;
+module.exports.mockOCastEvent2TrashMediaMetadataCall = event2TrashMediaMetadata;
 module.exports.mockOCastEvent1MediaMetadataCall = event1MediaMetadata;
 module.exports.mockOCastEvent2MediaMetadataCall = event2MediaMetadata;
 module.exports.mockOCastEvent3MediaMetadataCall = event3MediaMetadata;
 module.exports.mockOcastInboxEvent1AclCall = inboxEventAclsFromSeries;
+module.exports.mockOcastTrashEvent1AclCall = trashEventAclsFromSeries;
 module.exports.mockOCastEvent1AclCall = eventAclsFromSeries;
 module.exports.mockOcastEvent2AclCall = eventAclsFromSerie2;
 module.exports.mockOcastEvent3AclCall = eventAclsFromSerie3;
@@ -1984,9 +2125,14 @@ module.exports.mockOpencastTrashSeriesRequest = trashSeriesByUserName;
 module.exports.mockOpencastInboxSeriesWithNoResultRequest = noInboxSeriesByUserName;
 module.exports.mockOpencastTrashSeriesWithNoResultRequest = noTrashSeriesByUserName;
 module.exports.mockInboxSeriesEventsRequest = inboxSeriesEvents;
+module.exports.mockTrashSeriesEventsRequest = trashSeriesEvents;
 module.exports.mockInboxEvent1MediaFileMetadataCall = event1InboxMediaFileMetadata;
 module.exports.mockInboxEvent2MediaFileMetadataCall = event2InboxMediaFileMetadata;
+module.exports.mockTrashEvent1MediaFileMetadataCall = event1TrashMediaFileMetadata;
+module.exports.mockTrashEvent2MediaFileMetadataCall = event2TrashMediaFileMetadata;
 module.exports.mockInboxSeriesAclCall = inboxEventAclsFromSeries;
+module.exports.mockTrashSeriesAclCall = trashEventAclsFromSeries;
 module.exports.mockInboxSeriesCall = inboxUserSeries;
+module.exports.mockTrashSeriesCall = trashUserSeries;
 module.exports.mockSeriesWithInboxCall = lataamoWithInboxSeries;
 module.exports.cleanAll = cleanMocks;
