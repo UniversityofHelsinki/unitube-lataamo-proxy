@@ -13,7 +13,8 @@ const ERROR_MESSAGE_FAILED_TO_MOVE_EVENT_TO_TRASH ='error-failed-to-move-event-t
 const ERROR_MESSAGE_FAILED_TO_SAVE_SERIES = 'error-failed-to-save-series';
 const ERROR_MESSAGE_FAILED_TO_GET_IAM_GROUPS = 'error-failed-to-get-iam-groups';
 const ERROR_MESSAGE_FAILED_TO_GET_PERSONS = 'error-failed-to-get-iam-persons';
-const ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED = 'error-failed-to-save-series-inbox-not-allowed';
+const ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED = 'error_failed_to_save_series_inbox_not_allowed';
+const ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_TRASH_NOT_ALLOWED = 'error_failed_to_save_series_trash_not_allowed';
 const ERROR_MESSAGE_FAILED_TO_GET_INBOX_EVENTS = 'error-failed-to-get-inbox-events';
 const ERROR_MESSAGE_FAILED_TO_GET_TRASH_EVENTS = 'error-failed-to-get-trash-events';
 const ERROR_MESSAGE_FAILED_TO_DOWNLOAD_VIDEO = 'error-failed-to-download-video';
@@ -36,6 +37,7 @@ module.exports = {
     SUCCESS_MESSAGE_VIDEO_UPLOAD,
     ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED,
     ERROR_MESSAGE_FAILED_TO_GET_INBOX_EVENTS,
+    ERROR_MESSAGE_FAILED_TO_DOWNLOAD_VIDEO,
     ERROR_MESSAGE_FAILED_TO_GET_TRASH_EVENTS,
-    ERROR_MESSAGE_FAILED_TO_DOWNLOAD_VIDEO
+    ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_TRASH_NOT_ALLOWED
 };

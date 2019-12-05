@@ -86,13 +86,20 @@ exports.createSeries = async (req, res) => {
     try {
         let series = req.body;
         const loggedUser = userService.getLoggedUser(req.user);
-        let exists = series.title.toLowerCase().includes('inbox');
+        let existsInbox = series.title.toLowerCase().includes(constants.INBOX);
+        let existsTrash = series.title.toLowerCase().includes(constants.TRASH);
 
-        if(exists){
-            res.status(403);
+        if(existsInbox) {
+            res.status(500);
             res.json({
                 message: messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED,
                 msg: 'Inbox word is not allowed in series title'
+            });
+        }  else if(existsTrash){
+            res.status(500);
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_TRASH_NOT_ALLOWED,
+                msg: 'trash word is not allowed in series title'
             });
         }else{
             let modifiedSeriesMetadata = seriesService.openCastFormatSeriesMetadata(series, loggedUser);
