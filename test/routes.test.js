@@ -547,7 +547,21 @@ describe('user series post', () => {
         assert.equal(response.body, test.constants.SUCCESSFUL_UPDATE_ID);
     });
 
-    it("Unsuccessful series update should return 403", async () => {
+    it("Unsuccessful series update should return 500", async () => {
+        const userId = 'SeriesOwnerEppn';
+        let response = await supertest(app)
+            .post(LATAAMO_SERIES_PATH)
+            .send({title: 'trash SeriesOwnerEppn', description: 'Trash sarja'})
+            .set('eppn', userId)
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
+            .expect(500)
+            .expect('Content-Type', /json/);
+        assert.equal(response.body.message, messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_TRASH_NOT_ALLOWED);
+    });
+
+    it("Unsuccessful series update should return 500", async () => {
         const userId = 'SeriesOwnerEppn';
         let response = await supertest(app)
             .post(LATAAMO_SERIES_PATH)
@@ -556,9 +570,23 @@ describe('user series post', () => {
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
             .set('displayName', test.mockTestUser.displayName)
-            .expect(403)
+            .expect(500)
             .expect('Content-Type', /json/);
         assert.equal(response.body.message, messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED);
+    });
+
+    it('"trash" string not allowed in series\' title', async () => {
+        const userId = 'SeriesOwnerEppn';
+        let response = await supertest(app)
+            .post(LATAAMO_SERIES_PATH)
+            .send({title: 'trash in the title', description: 'Trash sarja'})
+            .set('eppn', userId)
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
+            .expect(500)
+            .expect('Content-Type', /json/);
+        assert.equal(response.body.message, messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_TRASH_NOT_ALLOWED);
     });
 
     it('"inbox" string not allowed in series\' title', async () => {
@@ -570,9 +598,23 @@ describe('user series post', () => {
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
             .set('displayName', test.mockTestUser.displayName)
-            .expect(403)
+            .expect(500)
             .expect('Content-Type', /json/);
         assert.equal(response.body.message, messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED);
+    });
+
+    it('"TRASH" string not allowed in series\' title', async () => {
+        const userId = 'SeriesOwnerEppn';
+        let response = await supertest(app)
+            .post(LATAAMO_SERIES_PATH)
+            .send({title: 'TRASH in the title', description: 'Trash sarja'})
+            .set('eppn', userId)
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
+            .expect(500)
+            .expect('Content-Type', /json/);
+        assert.equal(response.body.message, messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_TRASH_NOT_ALLOWED);
     });
 
     it('"INBOX" string not allowed in series\' title', async () => {
@@ -584,9 +626,23 @@ describe('user series post', () => {
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
             .set('displayName', test.mockTestUser.displayName)
-            .expect(403)
+            .expect(500)
             .expect('Content-Type', /json/);
         assert.equal(response.body.message, messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED);
+    });
+
+    it('"TrAsH" string not allowed in series\' title', async () => {
+        const userId = 'SeriesOwnerEppn';
+        let response = await supertest(app)
+            .post(LATAAMO_SERIES_PATH)
+            .send({title: 'TrAsH in the title', description: 'Trash sarja'})
+            .set('eppn', userId)
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
+            .expect(500)
+            .expect('Content-Type', /json/);
+        assert.equal(response.body.message, messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_TRASH_NOT_ALLOWED);
     });
 
     it('"InBoX" string not allowed in series\' title', async () => {
@@ -598,7 +654,7 @@ describe('user series post', () => {
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
             .set('displayName', test.mockTestUser.displayName)
-            .expect(403)
+            .expect(500)
             .expect('Content-Type', /json/);
         assert.equal(response.body.message, messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED);
     });
