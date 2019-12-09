@@ -8,8 +8,8 @@ const constants = require('../utils/constants');
  */
 exports.publicRoleCount = (roles) => {
     let countPublicRoles = 0; //count of public roles ROLE_ANONYMOUS and ROLE_KATSOMO
-                              //both of the roles has only READ rights (so they appear only once in roles list) so
-                              //countPublicRoles value 2 means that series/video is published
+    //both of the roles has only READ rights (so they appear only once in roles list) so
+    //countPublicRoles value 2 means that series/video is published
     if (roles) {
         this.addRoleWhenTestEnvironment(roles, constants.ROLE_ANONYMOUS);
         roles.forEach(item => {
@@ -17,10 +17,10 @@ exports.publicRoleCount = (roles) => {
             if (match && match.length > 0) {
                 ++countPublicRoles;
             }
-        })
+        });
     }
     return countPublicRoles;
-}
+};
 
 /**
  * if NOT prod environment and has roleToCompare role (=ROLE_ANONYMOUS)
@@ -43,13 +43,13 @@ exports.addRoleWhenTestEnvironment = (roleList, roleToCompare) => {
                 if (elem.role === constants.ROLE_KATSOMO) {
                     alreadyInRoleList = true;
                 }
-            })
+            });
             if (!alreadyInRoleList && found) {
                 roleList.push(constants.SERIES_ACL_ROLE_KATSOMO);
             }
         }
     }
-}
+};
 
 /**
  * if NOT prod environment
@@ -64,9 +64,9 @@ exports.removeRoleWhenTestEnvironment = (roleList, roleToRemove) => {
 
     if (roleList && process.env.ENVIRONMENT !== 'prod') {
         roleList.map(role => {
-            role === roleToRemove ? role : newRoles.push(role)
-        })
+            role === roleToRemove ? role : newRoles.push(role);
+        });
     }
     return newRoles;
-}
+};
 
