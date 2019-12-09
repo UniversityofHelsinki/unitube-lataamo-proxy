@@ -251,7 +251,7 @@ module.exports = function (router) {
      *         401:
      *           description: Not authenticated. Required Shibboleth headers not present in the request.
      *         500:
-     *           description: Internal server error, an error occured.
+     *           description: Internal server error, an error occurred.
      */
     router.post('/userVideos', videoUpload.upload);
 

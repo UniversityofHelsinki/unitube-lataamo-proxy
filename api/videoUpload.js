@@ -83,7 +83,7 @@ exports.upload = async (req, res) => {
     const inboxSeries = await returnOrCreateUsersInboxSeries(loggedUser);
 
     if (!inboxSeries) {
-        res.status(500)
+        res.status(500);
         const msg = `Failed to resolve inboxSeries for user.`;
         uploadLogger.log(ERROR_LEVEL, `POST /userVideos ${msg} USER: ${req.user.eppn} -- ${uploadId}`);
         return res.json({
