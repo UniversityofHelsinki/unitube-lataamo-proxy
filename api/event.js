@@ -104,10 +104,11 @@ const fetchEventMetadata = async (series) => {
 };
 
 exports.moveToTrash = async (req, res) =>{
-    try{
+    try {
         logger.info(`PUT /moveEventToTrash/:id VIDEO ${req.body.identifier} USER ${req.user.eppn}`);
         const rawEventMetadata = req.body;
-        const response = await apiService.moveEventToTrashSeries(rawEventMetadata, req.body.identifier, req.user);
+        const loggedUser = userService.getLoggedUser(req.user);
+        const response = await apiService.updateEventMetadata(rawEventMetadata, req.body.identifier, true, loggedUser);
 
         if (response.status === 200) {
             logger.info(`PUT /moveEventToTrash/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} OK`);
@@ -119,7 +120,7 @@ exports.moveToTrash = async (req, res) =>{
 
         res.status(response.status);
         res.json({message : response.statusText});
-    }catch (error) {
+    } catch (error) {
         res.status(500);
         const msg = error.message;
         logger.error(`Error PUT /moveEventToTrash/:id ${msg} USER ${req.user.eppn}`);

@@ -208,29 +208,6 @@ exports.modifyEventMetadataForOpencast = (metadata) => {
     return metadataArray;
 };
 
-exports.modifyEventMetadataForTrashSeriesOpencast = (metadata, trashSeries) => {
-    const metadataArray = [];
-
-    metadataArray.push(
-        {
-            'id' : 'title',
-            'value': metadata.title
-        },
-        {
-            'id' : 'description',
-            'value': metadata.description
-        }, {
-            'id' : 'isPartOf',
-            'value' : trashSeries.identifier
-        }, {
-            'id': 'license',
-            'value': metadata.license
-        }
-    );
-
-    return metadataArray;
-};
-
 exports.modifySeriesEventMetadataForOpencast = (metadata) => {
     const metadataArray = [];
 
