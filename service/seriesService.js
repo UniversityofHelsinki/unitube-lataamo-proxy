@@ -66,7 +66,9 @@ exports.addUserToEmptyContributorsList = (metadata, user) => {
     !metadata.contributors || metadata.contributors.length === 0 ? metadata.contributors = [user.eppn] : metadata.contributors;
 };
 
-exports.filterInboxSeries = (series) => series.filter(series => !series.title.toLowerCase().includes('inbox'));
+exports.filterInboxSeries = (series) => series.filter(series => !series.title.toLowerCase().includes(constants.INBOX));
+
+exports.filterTrashSeries = (series) => series.filter(series => !series.title.toLowerCase().includes(constants.TRASH));
 
 exports.openCastFormatSeriesMetadata = (metadata, user) => {
     let seriesMetadataTemplate = constants.SERIES_METADATA;
@@ -226,4 +228,4 @@ const setVisibilityForSeries = (series) => {
 
 const calculateVisibilityPropertyForSeries = (series) => setVisibilityForSeries(series);
 
-exports.getInboxSeriesIdentifier = (series) => series.find(series => series.identifier).identifier;
+exports.getSeriesIdentifier = (series) => series.find(series => series.identifier).identifier;

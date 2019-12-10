@@ -1,6 +1,6 @@
 
-// returns title for user's inbox series, 
+// returns title for user's series,
 // uses same naming convention with salitallenninjärjestelmä
-exports.inboxSeriesTitleForLoggedUser = (userId) => {
-    return `inbox ${userId}`;
+exports.seriesTitleForLoggedUser = (seriesName, userId) => {
+    return  seriesName + ` ${userId}`;
 }

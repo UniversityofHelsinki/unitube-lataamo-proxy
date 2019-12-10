@@ -208,7 +208,30 @@ exports.modifyEventMetadataForOpencast = (metadata) => {
     return metadataArray;
 };
 
-exports.modifySerieEventMetadataForOpencast = (metadata) => {
+exports.modifyEventMetadataForTrashSeriesOpencast = (metadata, trashSeries) => {
+    const metadataArray = [];
+
+    metadataArray.push(
+        {
+            'id' : 'title',
+            'value': metadata.title
+        },
+        {
+            'id' : 'description',
+            'value': metadata.description
+        }, {
+            'id' : 'isPartOf',
+            'value' : trashSeries.identifier
+        }, {
+            'id': 'license',
+            'value': metadata.license
+        }
+    );
+
+    return metadataArray;
+};
+
+exports.modifySeriesEventMetadataForOpencast = (metadata) => {
     const metadataArray = [];
 
     metadataArray.push({
@@ -229,6 +252,7 @@ exports.modifySerieEventMetadataForOpencast = (metadata) => {
 
 exports.concatenateArray = (data) => Array.prototype.concat.apply([], data);
 
+/* Not in use
 exports.inboxSeriesHandling = async (req, res, loggedUser, filePathOnDisk) => {
     try {
         let inboxSeries = await returnOrCreateUsersInboxSeries(loggedUser);
@@ -250,6 +274,7 @@ exports.inboxSeriesHandling = async (req, res, loggedUser, filePathOnDisk) => {
         throw 'Failed to resolve user\'s inbox series';
     }
 };
+*/
 
 exports.uploadToOpenCast = async (req, res, inboxSeries, filePathOnDisk, filename, timeDiff) => {
     try {
@@ -291,6 +316,7 @@ const deleteFile = (filename) => {
     });
 };
 
+/* Not in use
 const returnOrCreateUsersInboxSeries = async (loggedUser) => {
     const lataamoInboxSeriesTitle = inboxSeriesTitleForLoggedUser(loggedUser.eppn);
 
@@ -308,4 +334,4 @@ const returnOrCreateUsersInboxSeries = async (loggedUser) => {
         logger.error(`Error in returnOrCreateUsersInboxSeries ${err}`);
         throw err;
     }
-};
+};*/
