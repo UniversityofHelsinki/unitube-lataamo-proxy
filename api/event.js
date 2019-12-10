@@ -107,7 +107,8 @@ exports.moveToTrash = async (req, res) =>{
     try{
         logger.info(`PUT /moveEventToTrash/:id VIDEO ${req.body.identifier} USER ${req.user.eppn}`);
         const rawEventMetadata = req.body;
-        const response = await apiService.updateEventMetadata(rawEventMetadata, req.body.identifier, true, req.user);
+        const loggedUser = userService.getLoggedUser(req.user);
+        const response = await apiService.updateEventMetadata(rawEventMetadata, req.body.identifier, true, loggedUser);
 
         if (response.status === 200) {
             logger.info(`PUT /moveEventToTrash/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} OK`);
