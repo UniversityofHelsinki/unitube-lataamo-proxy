@@ -188,13 +188,13 @@ exports.updateEventMetadata = async (metadata, eventId, isTrash, user) => {
             };
         }
         const videoMetaDataUrl = constants.OCAST_VIDEOS_PATH + eventId + constants.OCAST_METADATA_PATH + constants.OCAST_TYPE_QUERY_PARAMETER + constants.OCAST_TYPE_DUBLINCORE_EPISODE;
-        if(isTrash){
+        if (isTrash) {
             const trashSeriesUrl = constants.OCAST_SERIES_PATH + constants.OCAST_VIDEOS_FILTER_USER_NAME + encodeURI(constants.TRASH + ' ' + user.eppn);
             const response = await security.opencastBase.get(trashSeriesUrl);
+            const trashSeriesList = response.data;
 
-            let trashSeriesList = response.data;
-            if(trashSeriesList && trashSeriesList.length > 0){
-                let trashSeries = trashSeriesList[0];
+            if (trashSeriesList && trashSeriesList.length > 0) {
+                const trashSeries = trashSeriesList[0];
                 metadata.isPartOf = trashSeries.identifier;
             }
         }
@@ -226,7 +226,7 @@ exports.updateEventMetadata = async (metadata, eventId, isTrash, user) => {
         // get mediapackage for the republish query
         const response3 = await security.opencastBase.get(mediaPackageUrl);
 
-        if(response3.status !== 200){
+        if (response3.status !== 200) {
             return {
                 status: response3.status,
                 statusText: response3.statusText,
@@ -254,7 +254,6 @@ exports.updateEventMetadata = async (metadata, eventId, isTrash, user) => {
             eventId: eventId
         };
     } catch (error) {
-        console.log(error);
         throw error;
     }
 };
