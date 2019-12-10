@@ -20,7 +20,7 @@ exports.filterEventsForClient = (ocResponseData) => {
         eventArray.push({
             'identifier': event.identifier,
             'title': event.title,
-            'duration': moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format('hh:mm:ss', {trim:false}),
+            'duration': moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format('HH:mm:ss', {trim:false}),
             'creator': event.creator,
             'processing_state' : event.processing_state,
             'visibility' : calculateVisibilityPropertyForVideo(event),
@@ -182,7 +182,7 @@ exports.getMediaFileMetadataForEvent = async (event) => {
 exports.getDurationFromMediaFileMetadataForEvent = (event) => {
     return {
         ...event,
-        duration: moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format('hh:mm:ss', {trim:false})
+        duration: moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format('HH:mm:ss', {trim:false})
     };
 };
 

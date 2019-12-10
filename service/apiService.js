@@ -362,7 +362,7 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
     const videoUploadUrl = constants.OCAST_VIDEOS_PATH;
     const videoDescription = '';
     const startDate = format(new Date(), 'yyyy-MM-dd'); // '2016-06-22'
-    const startTime = format(new Date(), 'pp'); // '10:03:52 AM'
+    const startTime = format(new Date(), 'HH:mm:ss'); // '10:03:52'
     const inboxSeriesId = inboxUserSeriesId;  // User's INBOX series id
 
     // refactor this array to constants.js
