@@ -20,7 +20,7 @@ exports.filterEventsForClient = (ocResponseData) => {
         eventArray.push({
             'identifier': event.identifier,
             'title': event.title,
-            'duration': moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format('hh:mm:ss', {trim:false}),
+            'duration': moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format('HH:mm:ss', {trim:false}),
             'creator': event.creator,
             'processing_state' : event.processing_state,
             'visibility' : calculateVisibilityPropertyForVideo(event),
@@ -182,7 +182,7 @@ exports.getMediaFileMetadataForEvent = async (event) => {
 exports.getDurationFromMediaFileMetadataForEvent = (event) => {
     return {
         ...event,
-        duration: moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format('hh:mm:ss', {trim:false})
+        duration: moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format('HH:mm:ss', {trim:false})
     };
 };
 
@@ -208,7 +208,7 @@ exports.modifyEventMetadataForOpencast = (metadata) => {
     return metadataArray;
 };
 
-exports.modifySerieEventMetadataForOpencast = (metadata) => {
+exports.modifySeriesEventMetadataForOpencast = (metadata) => {
     const metadataArray = [];
 
     metadataArray.push({
@@ -229,6 +229,7 @@ exports.modifySerieEventMetadataForOpencast = (metadata) => {
 
 exports.concatenateArray = (data) => Array.prototype.concat.apply([], data);
 
+/* Not in use
 exports.inboxSeriesHandling = async (req, res, loggedUser, filePathOnDisk) => {
     try {
         let inboxSeries = await returnOrCreateUsersInboxSeries(loggedUser);
@@ -250,6 +251,7 @@ exports.inboxSeriesHandling = async (req, res, loggedUser, filePathOnDisk) => {
         throw 'Failed to resolve user\'s inbox series';
     }
 };
+*/
 
 exports.uploadToOpenCast = async (req, res, inboxSeries, filePathOnDisk, filename, timeDiff) => {
     try {
@@ -291,6 +293,7 @@ const deleteFile = (filename) => {
     });
 };
 
+/* Not in use
 const returnOrCreateUsersInboxSeries = async (loggedUser) => {
     const lataamoInboxSeriesTitle = inboxSeriesTitleForLoggedUser(loggedUser.eppn);
 
@@ -308,4 +311,4 @@ const returnOrCreateUsersInboxSeries = async (loggedUser) => {
         logger.error(`Error in returnOrCreateUsersInboxSeries ${err}`);
         throw err;
     }
-};
+};*/

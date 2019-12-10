@@ -10,7 +10,9 @@ let test = require('./testHelper');
 // Unitube-lataamo proxy APIs under the test
 const LATAAMO_USER_SERIES_PATH = '/api/userSeries';
 const LATAAMO_USER_EVENTS_PATH = '/api/userVideos';
+const LATAAMO_MOVE_EVENT_TO_TRASH_SERIES = '/api/moveEventToTrash';
 const LATAAMO_USER_INBOX_EVENTS_PATH = '/api/userInboxEvents';
+const LATAAMO_USER_TRASH_EVENTS_PATH = '/api/userTrashEvents';
 const LATAAMO_USER_EVENT_PATH = '/api/event';
 const LATAAMO_SERIES_PATH = '/api/series';
 const LATAAMO_API_INFO_PATH = '/api/';
@@ -343,8 +345,10 @@ describe('user series put', () => {
 describe('user inbox events returned from /userInboxEvents route', () => {
     beforeEach(() => {
         // mock needed opencast api calls
+        test.mockOpencastTrashSeriesRequest();
         test.mockOpencastInboxSeriesRequest();
         test.mockInboxSeriesEventsRequest();
+        test.mockOpencastTrashSeriesWithNoResultRequest();
         test.mockOpencastInboxSeriesWithNoResultRequest();
         test.mockOcastInboxEvent1Call();
         test.mockOcastInboxEvent2Call();
@@ -354,6 +358,10 @@ describe('user inbox events returned from /userInboxEvents route', () => {
         test.mockInboxEvent2MediaFileMetadataCall();
         test.mockInboxSeriesAclCall();
         test.mockInboxSeriesCall();
+
+        test.mockLataamoPostSeriesCall();
+        test.mockLataamoPostSeriesCall();
+
     });
 
     it("should return inbox events from inbox series", async () => {
@@ -378,7 +386,7 @@ describe('user inbox events returned from /userInboxEvents route', () => {
         assert.deepEqual(response.body[0].visibility, ["status_private"]);
     });
 
-    it("should return inbox events from inbox series", async () => {
+    it("should return no inbox events from inbox series", async () => {
         let response = await supertest(app)
             .get(LATAAMO_USER_INBOX_EVENTS_PATH)
             .set('eppn', 'userWithNoInboxEvents')
@@ -395,6 +403,68 @@ describe('user inbox events returned from /userInboxEvents route', () => {
 afterEach(() => {
     test.cleanAll();
 });
+
+describe('user trash events returned from /userTrashEvents route', () => {
+    beforeEach(() => {
+         // mock needed opencast api calls
+          test.mockOpencastTrashSeriesRequest();
+          test.mockOpencastTrashSeriesWithNoResultRequest();
+          test.mockTrashSeriesEventsRequest();
+          test.mockOcastTrashEvent1Call();
+          test.mockOcastTrashEvent2Call();
+          test.mockOCastEvent1TrashMediaMetadataCall();
+          test.mockOCastEvent2TrashMediaMetadataCall();
+          test.mockTrashEvent1MediaFileMetadataCall();
+          test.mockTrashEvent2MediaFileMetadataCall();
+          test.mockTrashSeriesAclCall();
+          test.mockTrashSeriesCall();
+        //
+        // test.mockLataamoPostSeriesCall();
+        // test.mockLataamoPostSeriesCall();
+
+    });
+
+    it("should return trash events from trash series", async () => {
+         let response = await supertest(app)
+             .get(LATAAMO_USER_TRASH_EVENTS_PATH)
+             .set('eppn', 'SeriesOwnerEppn')
+             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+             .set('displayName', test.mockTestUser.displayName)
+             .expect(200)
+             .expect('Content-Type', /json/);
+         assert.isArray(response.body, 'Response should be an array');
+         assert.lengthOf(response.body, 2, 'Two events should be returned');
+         assert.equal(response.body[0].identifier, test.constants.TEST_TRASH_EVENT_1);
+         assert.equal(response.body[0].creator, 'Opencast Project Administrator');
+         assert.equal(response.body[0].processing_state, 'SUCCEEDED');
+         assert.equal(response.body[0].title, 'TRASH EVENT 1');
+         assert.equal(response.body[1].identifier, test.constants.TEST_TRASH_EVENT_2);
+         assert.equal(response.body[1].title, 'TRASH EVENT 2');
+         assert.equal(response.body[0].creator, 'Opencast Project Administrator');
+         assert.equal(response.body[0].processing_state, 'SUCCEEDED');
+         assert.deepEqual(response.body[0].visibility, ["status_private"]);
+    });
+
+    it("should return no trash events from trash series", async () => {
+         let response = await supertest(app)
+             .get(LATAAMO_USER_TRASH_EVENTS_PATH)
+             .set('eppn', 'userWithNoTrashEvents')
+             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+             .set('displayName', test.mockTestUser.displayName)
+             .expect(200)
+             .expect('Content-Type', /json/);
+         assert.isArray(response.body, 'Response should be an array');
+         assert.lengthOf(response.body, 0, 'No events should be returned');
+    });
+});
+
+afterEach(() => {
+    test.cleanAll();
+});
+
+
 
 describe('user events (videos) returned from /userEvents route', () => {
   beforeEach(() => {
@@ -540,7 +610,21 @@ describe('user series post', () => {
         assert.equal(response.body, test.constants.SUCCESSFUL_UPDATE_ID);
     });
 
-    it("Unsuccessful series update should return 403", async () => {
+    it("Unsuccessful series update should return 500", async () => {
+        const userId = 'SeriesOwnerEppn';
+        let response = await supertest(app)
+            .post(LATAAMO_SERIES_PATH)
+            .send({title: 'trash SeriesOwnerEppn', description: 'Trash sarja'})
+            .set('eppn', userId)
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
+            .expect(500)
+            .expect('Content-Type', /json/);
+        assert.equal(response.body.message, messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_TRASH_NOT_ALLOWED);
+    });
+
+    it("Unsuccessful series update should return 500", async () => {
         const userId = 'SeriesOwnerEppn';
         let response = await supertest(app)
             .post(LATAAMO_SERIES_PATH)
@@ -549,9 +633,23 @@ describe('user series post', () => {
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
             .set('displayName', test.mockTestUser.displayName)
-            .expect(403)
+            .expect(500)
             .expect('Content-Type', /json/);
         assert.equal(response.body.message, messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED);
+    });
+
+    it('"trash" string not allowed in series\' title', async () => {
+        const userId = 'SeriesOwnerEppn';
+        let response = await supertest(app)
+            .post(LATAAMO_SERIES_PATH)
+            .send({title: 'trash in the title', description: 'Trash sarja'})
+            .set('eppn', userId)
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
+            .expect(500)
+            .expect('Content-Type', /json/);
+        assert.equal(response.body.message, messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_TRASH_NOT_ALLOWED);
     });
 
     it('"inbox" string not allowed in series\' title', async () => {
@@ -563,9 +661,23 @@ describe('user series post', () => {
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
             .set('displayName', test.mockTestUser.displayName)
-            .expect(403)
+            .expect(500)
             .expect('Content-Type', /json/);
         assert.equal(response.body.message, messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED);
+    });
+
+    it('"TRASH" string not allowed in series\' title', async () => {
+        const userId = 'SeriesOwnerEppn';
+        let response = await supertest(app)
+            .post(LATAAMO_SERIES_PATH)
+            .send({title: 'TRASH in the title', description: 'Trash sarja'})
+            .set('eppn', userId)
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
+            .expect(500)
+            .expect('Content-Type', /json/);
+        assert.equal(response.body.message, messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_TRASH_NOT_ALLOWED);
     });
 
     it('"INBOX" string not allowed in series\' title', async () => {
@@ -577,9 +689,23 @@ describe('user series post', () => {
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
             .set('displayName', test.mockTestUser.displayName)
-            .expect(403)
+            .expect(500)
             .expect('Content-Type', /json/);
         assert.equal(response.body.message, messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED);
+    });
+
+    it('"TrAsH" string not allowed in series\' title', async () => {
+        const userId = 'SeriesOwnerEppn';
+        let response = await supertest(app)
+            .post(LATAAMO_SERIES_PATH)
+            .send({title: 'TrAsH in the title', description: 'Trash sarja'})
+            .set('eppn', userId)
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
+            .expect(500)
+            .expect('Content-Type', /json/);
+        assert.equal(response.body.message, messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_TRASH_NOT_ALLOWED);
     });
 
     it('"InBoX" string not allowed in series\' title', async () => {
@@ -591,7 +717,7 @@ describe('user series post', () => {
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
             .set('displayName', test.mockTestUser.displayName)
-            .expect(403)
+            .expect(500)
             .expect('Content-Type', /json/);
         assert.equal(response.body.message, messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED);
     });
@@ -677,6 +803,24 @@ describe('Updating videos aka events', () => {
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
             .set('displayName', test.mockTestUser.displayName)
+            .expect(200)
+            .expect('Content-Type', /json/);
+    });
+
+    it('Should move event to trash series when deleted', async () => {
+
+        test.mockOpencastEventNoActiveTransaction('234234234');
+        test.mockOpencastUpdateEventOK('234234234');
+        test.mockOpencastMediaPackageRequest('234234234');
+        test.mockOpencastRepublishMetadataRequest('234234234');
+        test.mockOpencastTrashSeriesRequest();
+
+        await supertest(app)
+            .put(LATAAMO_MOVE_EVENT_TO_TRASH_SERIES + '/234234234')
+            .send({title: 'Delete this', description: 'Can be deleted', identifier: '234234234'})
+            .set('eppn', 'SeriesOwnerEppn')
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
     });

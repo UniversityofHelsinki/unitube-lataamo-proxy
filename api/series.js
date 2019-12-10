@@ -29,7 +29,7 @@ exports.updateSeries = async (req, res) => {
         const rawEventMetadata = req.body;
         const loggedUser = userService.getLoggedUser(req.user);
         seriesService.addUserToEmptyContributorsList(rawEventMetadata, loggedUser);
-        let modifiedMetadata = eventsService.modifySerieEventMetadataForOpencast(rawEventMetadata);
+        let modifiedMetadata = eventsService.modifySeriesEventMetadataForOpencast(rawEventMetadata);
         let modifiedSeriesAclMetadata = seriesService.openCastFormatSeriesAclList(rawEventMetadata, constants.UPDATE_SERIES);
         const response = await apiService.updateSeriesAcldata(modifiedSeriesAclMetadata, req.body.identifier);
         const data = await apiService.updateSeriesEventMetadata(modifiedMetadata, req.body.identifier);
@@ -49,7 +49,8 @@ exports.getUserSeriesDropDownList = async (req, res) => {
         logger.info(`GET /userSeries USER: ${req.user.eppn}`);
         const loggedUser = userService.getLoggedUser(req.user);
         const userSeries = await apiService.getUserSeries(loggedUser);
-        res.json(userSeries);
+        const userSeriesWithoutTrash = await seriesService.filterTrashSeries(userSeries);
+        res.json(userSeriesWithoutTrash);
     } catch (error) {
         res.status(500);
         const msg = error.message;
@@ -66,7 +67,8 @@ exports.getUserSeries = async (req, res) => {
         logger.info(`GET /userSeries USER: ${req.user.eppn}`);
         const loggedUser = userService.getLoggedUser(req.user);
         const userSeries = await apiService.getUserSeries(loggedUser);
-        const userSeriesWithoutInbox = await seriesService.filterInboxSeries(userSeries);
+        const userSeriesWithoutTrash = await seriesService.filterTrashSeries(userSeries);
+        const userSeriesWithoutInbox = await seriesService.filterInboxSeries(userSeriesWithoutTrash);
         const seriesWithAllEventsCount = await eventsService.getAllSeriesEventsCount(userSeriesWithoutInbox);
         const userSeriesWithPublicity = await seriesService.addPublicityStatusToSeries(seriesWithAllEventsCount);
         res.json(userSeriesWithPublicity);
@@ -85,13 +87,20 @@ exports.createSeries = async (req, res) => {
     try {
         let series = req.body;
         const loggedUser = userService.getLoggedUser(req.user);
-        let exists = series.title.toLowerCase().includes('inbox');
+        let existsInbox = series.title.toLowerCase().includes(constants.INBOX);
+        let existsTrash = series.title.toLowerCase().includes(constants.TRASH);
 
-        if(exists){
-            res.status(403);
+        if(existsInbox) {
+            res.status(500);
             res.json({
                 message: messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED,
                 msg: 'Inbox word is not allowed in series title'
+            });
+        }  else if(existsTrash){
+            res.status(500);
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_TRASH_NOT_ALLOWED,
+                msg: 'trash word is not allowed in series title'
             });
         }else{
             let modifiedSeriesMetadata = seriesService.openCastFormatSeriesMetadata(series, loggedUser);
