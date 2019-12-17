@@ -7,5 +7,5 @@ exports.getLicenseOptions = (event) => {
     return {
         ...event,
         licenses : licenses
-    }
+    };
 };

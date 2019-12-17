@@ -1,4 +1,5 @@
 const INBOX = 'inbox';
+const TRASH = 'trash';
 const ESB_PERSONS_PATH = '/person/unitube/search/';
 // esb service paths
 const ESB_IAM_GROUPS_PATH = '/iam/group/unitube/search/';
@@ -177,5 +178,6 @@ module.exports = {
     SERIES_ACL_TEMPLATE_TUOTANTO,
     SERIES_ACL_TEMPLATE_TEST,
     INBOX,
-    OPENCAST_STATE_SUCCEEDED
+    OPENCAST_STATE_SUCCEEDED,
+    TRASH
 };

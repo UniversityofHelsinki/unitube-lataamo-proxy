@@ -42,7 +42,7 @@ exports.getSeriesFromEventMetadata = (metadata) => {
 
 const updateSeriesEntryById = (seriesMetadataTemplate, id, value) => {
     return seriesMetadataTemplate[0].fields.filter(field => {
-        return field.id === id ? field.value = value : ''
+        return field.id === id ? field.value = value : '';
     });
 };
 
@@ -66,12 +66,14 @@ exports.addUserToEmptyContributorsList = (metadata, user) => {
     !metadata.contributors || metadata.contributors.length === 0 ? metadata.contributors = [user.eppn] : metadata.contributors;
 };
 
-exports.filterInboxSeries = (series) => series.filter(series => !series.title.toLowerCase().includes('inbox'));
+exports.filterInboxSeries = (series) => series.filter(series => !series.title.toLowerCase().includes(constants.INBOX));
+
+exports.filterTrashSeries = (series) => series.filter(series => !series.title.toLowerCase().includes(constants.TRASH));
 
 exports.openCastFormatSeriesMetadata = (metadata, user) => {
     let seriesMetadataTemplate = constants.SERIES_METADATA;
-    updateSeriesEntryById(seriesMetadataTemplate, "title", metadata.title);
-    updateSeriesEntryById(seriesMetadataTemplate, "description", metadata.description);
+    updateSeriesEntryById(seriesMetadataTemplate, 'title', metadata.title);
+    updateSeriesEntryById(seriesMetadataTemplate, 'description', metadata.description);
     exports.addUserToEmptyContributorsList(metadata, user);
     addUserInContributorsList(metadata.contributors, user);
     updateSeriesContributorsList(seriesMetadataTemplate, metadata.contributors);
@@ -82,14 +84,14 @@ const updateAclTemplateReadEntry = (seriesACLTemplateReadEntry, aclRole) => {
     return {
         ...seriesACLTemplateReadEntry,
         role: aclRole
-    }
+    };
 };
 
 const updateAclTemplateWriteEntry = (seriesACLTemplateWriteEntry, aclRole) => {
     return {
         ...seriesACLTemplateWriteEntry,
         role: aclRole
-    }
+    };
 };
 
 const isMoodleAclRole = aclRole => aclRole.includes(constants.MOODLE_ACL_INSTRUCTOR) || aclRole.includes(constants.MOODLE_ACL_LEARNER);
@@ -136,7 +138,7 @@ const getSeriesRolesLists = async (series) => {
         return {
             ...series,
             roles: roles
-        }
+        };
     }));
 };
 
@@ -150,7 +152,7 @@ const updateSeriesPublicity = (series) => {
     return {
         ...series,
         published : published
-    }
+    };
 };
 
 // Looping array of series elements
@@ -175,9 +177,9 @@ exports.addPublishedInfoInSeriesAndMoodleRoles = async (series) => {
     if (commonService.publicRoleCount(roles) === 2) { //series has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
         series.published = constants.ROLE_ANONYMOUS;
     } else {
-        series.published = "";
+        series.published = '';
     }
-    series.moodleNumber = "";
+    series.moodleNumber = '';
     series.moodleNumbers = moodleNumbersFromRoles(roles);
     return series;
 };
@@ -189,7 +191,7 @@ const moodleNumbersFromRoles = (roles) => {
     let moodlenumbers = [];
     for (const item of roles) {
         if (item.role.match(instructor) || item.role.match(learner)) {
-            let ind = item.role.indexOf("_");
+            let ind = item.role.indexOf('_');
             let val = item.role.substring(0, ind);
             moodlenumbers.push(val);
         }
@@ -203,7 +205,7 @@ const calculateVisibilityProperty = (series) => {
     return {
         ...series,
         visibility: calculateVisibilityPropertyForSeries(series)
-    }
+    };
 };
 
 const setVisibilityForSeries = (series) => {
@@ -221,9 +223,9 @@ const setVisibilityForSeries = (series) => {
     if (moodleAclInstructor && moodleAclLearner && moodleAclInstructor.length > 0 && moodleAclLearner.length > 0) {
         visibility.push(constants.STATUS_MOODLE);
     }
-    return [...new Set(visibility)]
+    return [...new Set(visibility)];
 };
 
 const calculateVisibilityPropertyForSeries = (series) => setVisibilityForSeries(series);
 
-exports.getInboxSeriesIdentifier = (series) => series.find(series => series.identifier).identifier;
+exports.getSeriesIdentifier = (series) => series.find(series => series.identifier).identifier;

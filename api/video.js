@@ -32,7 +32,8 @@ exports.getUserVideos = async (req, res) => {
         logger.info(`GET /userVideos USER: ${req.user.eppn}`);
         const loggedUser = userService.getLoggedUser(req.user);
         const ownSeries = await apiService.getUserSeries(loggedUser);
-        const seriesIdentifiers = seriesService.getSeriesIdentifiers(ownSeries, loggedUser);
+        const ownSeriesWithoutTrash = await seriesService.filterTrashSeries(ownSeries);
+        const seriesIdentifiers = seriesService.getSeriesIdentifiers(ownSeriesWithoutTrash, loggedUser);
         const allEvents = await eventsService.getAllEvents(seriesIdentifiers);
         const concatenatedEventsArray = eventsService.concatenateArray(allEvents);
         const allEventsWithMetaDatas = await eventsService.getAllEventsWithMetadatas(concatenatedEventsArray);
@@ -56,7 +57,7 @@ exports.updateVideo = async (req, res) => {
         logger.info(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn}`);
 
         const rawEventMetadata = req.body;
-        const response = await apiService.updateEventMetadata(rawEventMetadata, req.body.identifier);
+        const response = await apiService.updateEventMetadata(rawEventMetadata, req.body.identifier, false, req.user);
 
         if (response.status === 200) {
             logger.info(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} OK`);

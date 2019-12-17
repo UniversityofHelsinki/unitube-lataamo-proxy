@@ -8,6 +8,8 @@ const uuidv4 = require('uuid/v4');
 const logger = require('../config/winstonLogger');
 const messageKeys = require('../utils/message-keys');
 const {inboxSeriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
+const constants = require('../utils/constants');
+const {seriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
 
 const ERROR_LEVEL = 'error';
 const INFO_LEVEL = 'info';
@@ -39,25 +41,23 @@ const deleteFile = async (filename, uploadId) => {
     }
 };
 
-// get inbox series for user
-const returnOrCreateUsersInboxSeries = async (loggedUser) => {
-    const lataamoInboxSeriesTitle = inboxSeriesTitleForLoggedUser(loggedUser.eppn);
+const returnUsersInboxSeries = async (loggedUser) => {
+    const lataamoInboxSeriesTitle = seriesTitleForLoggedUser(constants.INBOX, loggedUser.eppn);
 
     try {
         const userSeries = await apiService.getUserSeries(loggedUser);
         let inboxSeries = userSeries.find(series => series.title === lataamoInboxSeriesTitle);
 
         if (!inboxSeries) {
-            logger.info(`inbox series not found with title ${lataamoInboxSeriesTitle}`);
-            inboxSeries = await apiService.createLataamoInboxSeries(loggedUser.eppn);
-            logger.info(`Created inbox ${inboxSeries}`);
+            logger.info(`inbox series not found with title ${ lataamoInboxSeriesTitle }`);
+            logger.info(`Created inbox ${ inboxSeries }`);
         }
         return inboxSeries;
-    }catch(err){
-        logger.error(`Error in returnOrCreateUsersInboxSeries USER: ${loggedUser.eppn} ${err}`);
+    } catch (err) {
+        logger.error(`Error in returnOrCreateUsersInboxSeries USER: ${ loggedUser.eppn } ${ err }`);
         return false;
     }
-};
+}
 
 
 exports.upload = async (req, res) => {
@@ -80,10 +80,10 @@ exports.upload = async (req, res) => {
     }
 
     // get inbox series for user
-    const inboxSeries = await returnOrCreateUsersInboxSeries(loggedUser);
+    const inboxSeries = await returnUsersInboxSeries(loggedUser);
 
     if (!inboxSeries) {
-        res.status(500)
+        res.status(500);
         const msg = `Failed to resolve inboxSeries for user.`;
         uploadLogger.log(ERROR_LEVEL, `POST /userVideos ${msg} USER: ${req.user.eppn} -- ${uploadId}`);
         return res.json({

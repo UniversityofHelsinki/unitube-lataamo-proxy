@@ -175,6 +175,24 @@ module.exports = function (router) {
 
     /**
      * @swagger
+     *     /api/userTrashEvents:
+     *     get:
+     *       tags:
+     *         - retrieve
+     *       summary: Return user's trash events.
+     *       description: Returns trash series events for logged in user.
+     *       responses:
+     *         200:
+     *           description: List of trash series events.
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         500:
+     *           description: Internal server error, an error occurred.
+     */
+    router.get('/userTrashEvents', event.getTrashEvents);
+
+    /**
+     * @swagger
      *     /api/userSeries:
      *     get:
      *       tags:
@@ -251,7 +269,7 @@ module.exports = function (router) {
      *         401:
      *           description: Not authenticated. Required Shibboleth headers not present in the request.
      *         500:
-     *           description: Internal server error, an error occured.
+     *           description: Internal server error, an error occurred.
      */
     router.post('/userVideos', videoUpload.upload);
 
@@ -297,6 +315,49 @@ module.exports = function (router) {
      *           description: Internal server error, an error occurred.    
      */
     router.put('/userVideos/:id', video.updateVideo);
+
+    /**
+     * @swagger
+     *     /api/moveEventToTrash/{id}:
+     *     put:
+     *       tags:
+     *         - update
+     *       summary: Updates video's series by ID.
+     *       consumes:
+     *         - application/json
+     *       parameters:
+     *         - in: body
+     *           description: The video to be updated.
+     *           schema:
+     *             type: object
+     *             required:
+     *               - identifier
+     *               - title
+     *               - isPartOf
+     *             properties:
+     *               identifier:
+     *                 type: string
+     *                 description: id of the video
+     *               title:
+     *                 type: string
+     *                 description: title of the video AKA the name
+     *               description:
+     *                 type: string
+     *                 description: description for the video
+     *               isPartOf:
+     *                 type: string
+     *                 description: id of the series the video belongs to
+     *       responses:
+     *         200:
+     *           description: OK
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         403:
+     *           description: Forbidden. Event (video) has an active transaction in progress on the Opencast server.
+     *         500:
+     *           description: Internal server error, an error occurred.    
+     */
+    router.put('/moveEventToTrash/:id', event.moveToTrash);
 
     /**
      * @swagger
