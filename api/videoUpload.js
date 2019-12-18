@@ -63,7 +63,7 @@ const returnUsersInboxSeries = async (loggedUser) => {
 exports.upload = async (req, res) => {
     const uploadId = uuidv4();
     const loggedUser = userService.getLoggedUser(req.user);
-    const uploadPath = path.join(__dirname, 'uploads/');
+    const uploadPath = path.join(__dirname, `uploads/${loggedUser.eppn}/`);
 
     uploadLogger.log(INFO_LEVEL, `POST /userVideos - Upload video started. USER: ${req.user.eppn} -- ${uploadId}`);
 
@@ -118,7 +118,7 @@ exports.upload = async (req, res) => {
 
             if (response && response.status === 201) {
                 // on success clean file from disk and return 200
-                deleteFile(filePathOnDisk, uploadId);
+                deleteFile(uploadPath, uploadId);
                 res.status(200);
                 uploadLogger.log(INFO_LEVEL,
                     `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)} USER: ${req.user.eppn} -- ${uploadId}`);
@@ -130,7 +130,7 @@ exports.upload = async (req, res) => {
                 })
             } else {
                 // on failure clean file from disk and return 500
-                deleteFile(filePathOnDisk, uploadId);
+                deleteFile(uploadPath, uploadId);
                 res.status(500);
                 const msg = `${filename} failed to upload to opencast.`;
                 uploadLogger.log(ERROR_LEVEL, `POST /userVideos ${msg} USER: ${req.user.eppn} -- ${uploadId} ${response}`);
