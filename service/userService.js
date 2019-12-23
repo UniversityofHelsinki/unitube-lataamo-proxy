@@ -29,7 +29,7 @@ exports.logoutUser = (req, res, url) => {
     Object.keys(req.cookies).forEach(cookie => {
         if (cookie.includes(constants.SHIBBOLETH_COOKIE_NAME)) {
             console.log("HIT");
-            console.log(res.cookie);
+            console.log(cookie);
             res.clearCookie(cookie);
         }
     });
