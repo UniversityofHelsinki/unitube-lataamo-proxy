@@ -18,3 +18,12 @@ exports.userInfo = (req, res) => {
         });
     }
 };
+
+exports.logout = (req, res) => {
+    logger.info(`GET /logout USER: ${req.user.eppn} redirect url: ${req.query.return}` );
+    const action = req.query.action;
+    const redirectUrl = req.query.return;
+    if (action === 'logout') {
+        res.json(userService.logoutUser(req, res, redirectUrl));
+    }
+};

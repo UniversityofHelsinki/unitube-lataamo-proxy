@@ -1,4 +1,6 @@
 const utf8 = require('utf8');
+const constants = require('../utils/constants');
+const logger = require('../config/winstonLogger');
 
 exports.getLoggedUser = (user) => {
     let eppn = utf8.decode(user.eppn.split('@')[0]);
@@ -21,4 +23,20 @@ exports.parseContributor = (paramArr) => {
 
 const concatContributors = (value) => {
     return  `contributors:${value}`;
+};
+
+exports.logoutUser = (req, res, url) => {
+    try {
+        req.logout();
+        if (req.cookies) {
+            Object.keys(req.cookies).forEach(cookie => {
+                if (cookie.includes(constants.SHIBBOLETH_COOKIE_NAME)) {
+                    res.clearCookie(cookie);
+                }
+            });
+        }
+    } catch (error) {
+        logger.error(`Error in logging out user ${error}`);
+    }
+    res.redirect(encodeURI(url));
 };

@@ -52,6 +52,9 @@ module.exports = function (router) {
      */
     router.get("/user", user.userInfo);
 
+
+    router.get("/logout", user.logout);
+
     /**
      * @swagger
      *     /api/event/{id}:
