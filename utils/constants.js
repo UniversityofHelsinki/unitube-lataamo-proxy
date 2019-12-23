@@ -8,6 +8,8 @@ const ESB_IAM_GROUPS_PATH = '/iam/group/unitube/search/';
 const ROLE_ANONYMOUS = 'ROLE_ANONYMOUS';
 const ROLE_KATSOMO = 'ROLE_KATSOMO';
 
+const SHIBBOLETH_COOKIE_NAME = '_shibsession_';
+
 const MOODLE_ACL_INSTRUCTOR = '_Instructor';
 const MOODLE_ACL_LEARNER = '_Learner';
 const STATUS_PUBLISHED = 'status_published';
@@ -179,5 +181,6 @@ module.exports = {
     SERIES_ACL_TEMPLATE_TEST,
     INBOX,
     OPENCAST_STATE_SUCCEEDED,
-    TRASH
+    TRASH,
+    SHIBBOLETH_COOKIE_NAME
 };
