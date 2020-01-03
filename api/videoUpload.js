@@ -57,13 +57,13 @@ const returnUsersInboxSeries = async (loggedUser) => {
         logger.error(`Error in returnOrCreateUsersInboxSeries USER: ${ loggedUser.eppn } ${ err }`);
         return false;
     }
-}
+};
 
 
 exports.upload = async (req, res) => {
     const uploadId = uuidv4();
     const loggedUser = userService.getLoggedUser(req.user);
-    const uploadPath = path.join(__dirname, 'uploads/');
+    const uploadPath = path.join(__dirname, `uploads/${loggedUser.eppn}/`);
 
     uploadLogger.log(INFO_LEVEL, `POST /userVideos - Upload video started. USER: ${req.user.eppn} -- ${uploadId}`);
 
@@ -95,7 +95,20 @@ exports.upload = async (req, res) => {
 
     req.pipe(req.busboy); // Pipe it trough busboy
 
-    req.busboy.on('file', (fieldname, file, filename) => {
+    req.busboy.on('file', (fieldname, file, filename, encoding, mimeType) => {
+        if(!mimeType.includes('video')){
+            deleteFile(uploadPath, uploadId);
+            res.status(415);
+            const msg = `${filename} is wrong file type`;
+            uploadLogger.log(ERROR_LEVEL, `POST /userVideos ${msg} USER: ${req.user.eppn} -- ${uploadId}. WRONG FILE TYPE ${mimeType}`);
+            file.resume();
+            return res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO_WRONG_FILE_TYPE,
+                msg,
+                id: uploadId
+            });
+        }
+
         const startTime = new Date();
         uploadLogger.log(INFO_LEVEL, `Upload of '${filename}' started  USER: ${req.user.eppn} -- ${uploadId}`);
         // path to the file
@@ -118,7 +131,7 @@ exports.upload = async (req, res) => {
 
             if (response && response.status === 201) {
                 // on success clean file from disk and return 200
-                deleteFile(filePathOnDisk, uploadId);
+                deleteFile(uploadPath, uploadId);
                 res.status(200);
                 uploadLogger.log(INFO_LEVEL,
                     `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)} USER: ${req.user.eppn} -- ${uploadId}`);
@@ -130,7 +143,7 @@ exports.upload = async (req, res) => {
                 })
             } else {
                 // on failure clean file from disk and return 500
-                deleteFile(filePathOnDisk, uploadId);
+                deleteFile(uploadPath, uploadId);
                 res.status(500);
                 const msg = `${filename} failed to upload to opencast.`;
                 uploadLogger.log(ERROR_LEVEL, `POST /userVideos ${msg} USER: ${req.user.eppn} -- ${uploadId} ${response}`);
