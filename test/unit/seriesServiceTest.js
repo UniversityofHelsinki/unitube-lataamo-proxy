@@ -11,7 +11,7 @@ describe('Series Service', function() {
     });
 
     it('updateSeriesAclList() should return correct roles if role_anonymous is selected', function() {
-        const seriesAclListWithRoleAnonymous = {"acl": ['ROLE_ANONYMOUS']};
+        const seriesAclListWithRoleAnonymous = {'acl': ['ROLE_ANONYMOUS']};
         let aclList = SeriesService.openCastFormatSeriesAclList(seriesAclListWithRoleAnonymous);
         expect(aclList.length).to.equal(4);
         const aclReadEntry = { allow: true, action: 'read', role: constants.ROLE_ANONYMOUS };
@@ -20,7 +20,7 @@ describe('Series Service', function() {
     });
 
     it('updateSeriesAclList() should return correct roles if role_anonymous and moodle roles are selected', function() {
-        const seriesAclListWithRoleAnonymous = {"acl": ['ROLE_ANONYMOUS', "123_Instructor", "123_Learner"]};
+        const seriesAclListWithRoleAnonymous = {'acl': ['ROLE_ANONYMOUS', '123_Instructor', '123_Learner']};
         let aclList = SeriesService.openCastFormatSeriesAclList(seriesAclListWithRoleAnonymous);
         expect(aclList.length).to.equal(6);
         let aclRoleAnonymousReadEntry = { allow: true, action: 'read', role: constants.ROLE_ANONYMOUS };
@@ -32,7 +32,7 @@ describe('Series Service', function() {
 
 
     it('updateSeriesAclList() should return correct roles if role_anonymous and moodle roles are selected', function() {
-        const seriesAclListWithRoleAnonymous = {"acl": ["ROLE_ANONYMOUS", "123_Instructor", "123_Learner"]};
+        const seriesAclListWithRoleAnonymous = {'acl': ['ROLE_ANONYMOUS', '123_Instructor', '123_Learner']};
         let aclList = SeriesService.openCastFormatSeriesAclList(seriesAclListWithRoleAnonymous);
         expect(aclList.length).to.equal(6);
         let aclRoleAnonymousReadEntry = { allow: true, action: 'read', role: constants.ROLE_ANONYMOUS };

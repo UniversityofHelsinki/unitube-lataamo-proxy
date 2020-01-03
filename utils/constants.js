@@ -45,69 +45,69 @@ const CREATE_SERIES = 'create_series';
 
 const SERIES_ACL_TEMPLATE = [
     {
-        "action": "read",
-        "allow": true,
-        "role": "ROLE_USER_LATAAMO_TESTI"
+        'action': 'read',
+        'allow': true,
+        'role': 'ROLE_USER_LATAAMO_TESTI'
     },
     {
-        "action": "write",
-        "allow": true,
-        "role": "ROLE_USER_LATAAMO_TESTI"
+        'action': 'write',
+        'allow': true,
+        'role': 'ROLE_USER_LATAAMO_TESTI'
     }
 ];
 
 const SERIES_ACL_TEMPLATE_TEST = [
     {
-        "action": "read",
-        "allow": true,
-        "role": "ROLE_USER_KATSOMO_TESTI"
+        'action': 'read',
+        'allow': true,
+        'role': 'ROLE_USER_KATSOMO_TESTI'
     }
 ];
 
 const SERIES_ACL_ROLE_KATSOMO =
     {
-        "action": "read",
-        "allow": true,
-        "role": "ROLE_KATSOMO"
+        'action': 'read',
+        'allow': true,
+        'role': 'ROLE_KATSOMO'
     };
 
 const SERIES_ACL_TEMPLATE_TUOTANTO = [
     {
-        "action": "read",
-        "allow": true,
-        "role": "ROLE_USER_LATAAMO_TUOTANTO"
+        'action': 'read',
+        'allow': true,
+        'role': 'ROLE_USER_LATAAMO_TUOTANTO'
     },
     {
-        "action": "write",
-        "allow": true,
-        "role": "ROLE_USER_LATAAMO_TUOTANTO"
+        'action': 'write',
+        'allow': true,
+        'role': 'ROLE_USER_LATAAMO_TUOTANTO'
     }
 ];
 
 const PROCESSING_METADATA = {
-    "workflow": "schedule-and-upload",
-    "configuration": {
-        "flagForCutting": "false",
-        "flagForReview": "false",
-        "publishToEngage": "true",
-        "publishToHarvesting": "true",
-        "straightToPublishing": "true"
+    'workflow': 'schedule-and-upload',
+    'configuration': {
+        'flagForCutting': 'false',
+        'flagForReview': 'false',
+        'publishToEngage': 'true',
+        'publishToHarvesting': 'true',
+        'straightToPublishing': 'true'
     }
 };
 
 const SERIES_CONTRIBUTORS_TEMPLATE = {
-    "id": "contributor",
-    "value": ""
+    'id': 'contributor',
+    'value': ''
 };
 
 const SERIES_ACL_TEMPLATE_READ_ENTRY = {
-    "allow": true,
-    "action": "read"
+    'allow': true,
+    'action': 'read'
 };
 
 const SERIES_ACL_TEMPLATE_WRITE_ENTRY = {
-    "allow": true,
-    "action": "write"
+    'allow': true,
+    'action': 'write'
 };
 
 const ADD_TO_IAM_GROUPS = ['grp-', 'hy-', 'sys-'];
@@ -115,16 +115,16 @@ const PUBLIC_ROLES = [ROLE_ANONYMOUS, ROLE_KATSOMO];
 
 const SERIES_METADATA = [
     {
-        "label": "Opencast Series DublinCore",
-        "flavor": "dublincore/series",
-        "fields": [
+        'label': 'Opencast Series DublinCore',
+        'flavor': 'dublincore/series',
+        'fields': [
             {
-                "id": "title",
-                "value": ""
+                'id': 'title',
+                'value': ''
             },
             {
-                "id": "description",
-                "value": ""
+                'id': 'description',
+                'value': ''
             }
         ]
     }
@@ -135,7 +135,7 @@ const SERIES_METADATA = [
 // Opencast instantiates a java.util.Properties from the value, so key=value pairs and \n as a delimeter.
 // https://docs.oracle.com/javase/7/docs/api/java/util/Properties.html#load(java.io.InputStream)
 const PROPERTIES_REPUBLISH_METADATA =
-    "publishLive=false\nuploadedSearchPreview=true\npublishToOaiPmh=true\ncomment=false\npublishToMediaModule=true";
+    'publishLive=false\nuploadedSearchPreview=true\npublishToOaiPmh=true\ncomment=false\npublishToMediaModule=true';
 
 
 module.exports = {

@@ -372,7 +372,7 @@ exports.returnOrCreateUsersSeries = async (seriesName, loggedUser) => {
         if (!series) {
             logger.info(seriesName + ` series not found with title ${lataamoSeriesTitle}`);
             series = await this.createLataamoSeries(seriesName, loggedUser.eppn);
-            logger.info(`Created ` + seriesName + ` ${series}`);
+            logger.info('Created ' + seriesName + ` ${series}`);
             return series;
         }
         return userSeries;
@@ -385,7 +385,7 @@ exports.returnOrCreateUsersSeries = async (seriesName, loggedUser) => {
 // create the default lataamo series for the given seriesName + userId
 exports.createLataamoSeries = async (seriesName, userId) => {
     const lataamoSeriesTitle = seriesTitleForLoggedUser(seriesName, userId);
-    const lataamoSeriesDescription = `Lataamo-` + seriesName + ` series for ${ userId }`;
+    const lataamoSeriesDescription = 'Lataamo-' + seriesName + ` series for ${ userId }`;
     const lataamoSeriesLicense = '';
     const lataamoSeriesLanguage = 'en';
     const lataamoSeriesCreator = 'Lataamo-proxy-service';

@@ -58,7 +58,7 @@ exports.getInboxEvents = async (req, res) => {
             const inboxEventsWithAcls = await fetchEventMetadata(inboxSeries);
             res.json(eventsService.filterEventsForClient(inboxEventsWithAcls));
         } else {
-            res.json([])
+            res.json([]);
         }
     }catch(error){
         const msg = error.message;
