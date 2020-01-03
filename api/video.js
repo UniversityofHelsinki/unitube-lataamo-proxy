@@ -48,7 +48,7 @@ exports.getUserVideos = async (req, res) => {
         res.json({
             message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_LIST_FOR_USER,
             msg
-        })
+        });
     }
 };
 
@@ -87,7 +87,7 @@ exports.downloadVideo = async (req, res) => {
         const response = await apiService.downloadVideo(req.body.mediaUrl);
         response.data.pipe(res);
     } catch(error) {
-        console.log("ERROR", error.message);
+        console.log('ERROR', error.message);
         res.status(500);
         const msg = error.message;
         logger.error(`Error PUT /userVideos/:id ${msg} USER ${req.user.eppn}`);

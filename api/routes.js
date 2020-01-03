@@ -50,10 +50,10 @@ module.exports = function (router) {
      *         default:
      *           description: Unexpected error     
      */
-    router.get("/user", user.userInfo);
+    router.get('/user', user.userInfo);
 
 
-    router.get("/logout", user.logout);
+    router.get('/logout', user.logout);
 
     /**
      * @swagger
@@ -74,7 +74,7 @@ module.exports = function (router) {
      *         default:
      *           description: Unexpected error    
      */
-    router.get("/event/:id", event.getEvent);
+    router.get('/event/:id', event.getEvent);
 
     /**
      * @swagger
@@ -95,7 +95,7 @@ module.exports = function (router) {
      *         default:
      *           description: Unexpected error
      */
-    router.get("/videoUrl/:id", video.getVideoUrl);
+    router.get('/videoUrl/:id', video.getVideoUrl);
 
     /**
      * @swagger
@@ -118,7 +118,7 @@ module.exports = function (router) {
      *         default:
      *           description: Unexpected error
      */
-     router.get('/series/:id', series.getSeries);
+    router.get('/series/:id', series.getSeries);
 
     /**
      * @swagger
@@ -233,7 +233,7 @@ module.exports = function (router) {
      */
     router.get('/getUserSeriesDropDownList', series.getUserSeriesDropDownList);
 
-   /**
+    /**
     * @swagger
     *     /api/userVideos:
     *     get:
