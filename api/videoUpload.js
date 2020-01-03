@@ -19,7 +19,7 @@ const INFO_LEVEL = 'info';
 const ensureUploadDir = async (directory) => {
     try {
         // https://github.com/jprichardson/node-fs-extra/blob/HEAD/docs/ensureDir.md
-        await fs.ensureDir(directory)
+        await fs.ensureDir(directory);
         logger.info(`Using uploadPath ${directory}`);
         return true;
     } catch (err) {
@@ -84,7 +84,7 @@ exports.upload = async (req, res) => {
 
     if (!inboxSeries) {
         res.status(500);
-        const msg = `Failed to resolve inboxSeries for user.`;
+        const msg = 'Failed to resolve inboxSeries for user.';
         uploadLogger.log(ERROR_LEVEL, `POST /userVideos ${msg} USER: ${req.user.eppn} -- ${uploadId}`);
         return res.json({
             message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
@@ -140,7 +140,7 @@ exports.upload = async (req, res) => {
                     message: messageKeys.SUCCESS_MESSAGE_VIDEO_UPLOAD,
                     msg,
                     id: uploadId
-                })
+                });
             } else {
                 // on failure clean file from disk and return 500
                 deleteFile(uploadPath, uploadId);

@@ -15,18 +15,18 @@ let ReverseProxyStrategy = require('passport-reverseproxy');
 
 module.exports.shibbolethAuthentication = function (app, passport) {
     passport.use(new ReverseProxyStrategy({
-            headers: {
-                'eppn': {alias: 'eppn', required: true},
-                'preferredlanguage': {alias: 'preferredLanguage', required: false},
-                'hyGroupCn': {alias: 'hyGroupCn', required: false},
-                'displayName': {alias: 'displayName', required: false}
-            },
-            whitelist: localhostIP
-        })
+        headers: {
+            'eppn': {alias: 'eppn', required: true},
+            'preferredlanguage': {alias: 'preferredLanguage', required: false},
+            'hyGroupCn': {alias: 'hyGroupCn', required: false},
+            'displayName': {alias: 'displayName', required: false}
+        },
+        whitelist: localhostIP
+    })
     );
     app.use(passport.initialize());
     app.use(passport.authenticate('reverseproxy', { session: false }));
-}
+};
 
 // instance of axios with a custom config.
 // ocast base url and authorization header
@@ -36,13 +36,13 @@ module.exports.opencastBase = axios.create({
     headers: {'authorization': auth},
     validateStatus: () => { // https://github.com/axios/axios/issues/1143
         return true;        // without this axios might throw error on non 200 responses
-      }
+    }
 });
 
 module.exports.opencastBaseStream = axios.create({
     maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
     headers: {'authorization': auth},
-    responseType: "stream",
+    responseType: 'stream',
     validateStatus: () => { // https://github.com/axios/axios/issues/1143
         return true;        // without this axios might throw error on non 200 responses
     }

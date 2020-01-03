@@ -23,9 +23,9 @@ const LOG_FILE_NAME = 'access.log';
 const LOG_DIRECTORY = __dirname;
 
 const accessLogStream = fs.createWriteStream(
-    path.join(LOG_DIRECTORY + '/logs', LOG_FILE_NAME), { flags: 'a' })
+    path.join(LOG_DIRECTORY + '/logs', LOG_FILE_NAME), { flags: 'a' });
 
-app.use(morgan('combined', { stream: accessLogStream }))
+app.use(morgan('combined', { stream: accessLogStream }));
 app.use(cors());
 app.use(compression());
 app.use(cookieParser());

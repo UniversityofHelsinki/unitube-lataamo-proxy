@@ -40,7 +40,7 @@ exports.updateSeries = async (req, res) => {
         res.json({
             message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPDATE_SERIES_DETAILS,
             msg
-        })
+        });
     }
 };
 
@@ -58,7 +58,7 @@ exports.getUserSeriesDropDownList = async (req, res) => {
         res.json({
             message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_SERIES_LIST_FOR_USER,
             msg
-        })
+        });
     }
 };
 
@@ -79,7 +79,7 @@ exports.getUserSeries = async (req, res) => {
         res.json({
             message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_SERIES_LIST_FOR_USER,
             msg
-        })
+        });
     }
 };
 

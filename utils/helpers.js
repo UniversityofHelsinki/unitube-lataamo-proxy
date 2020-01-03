@@ -3,4 +3,4 @@
 // uses same naming convention with salitallenninjärjestelmä
 exports.seriesTitleForLoggedUser = (seriesName, userId) => {
     return  seriesName + ` ${userId}`;
-}
+};
