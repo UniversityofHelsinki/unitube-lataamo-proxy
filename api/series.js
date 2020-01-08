@@ -68,7 +68,8 @@ exports.getUserSeries = async (req, res) => {
         const loggedUser = userService.getLoggedUser(req.user);
         const userSeries = await apiService.getUserSeries(loggedUser);
         const userSeriesWithoutTrash = await seriesService.filterTrashSeries(userSeries);
-        const userSeriesWithoutInbox = await seriesService.filterInboxSeries(userSeriesWithoutTrash);
+        const userSeriesWithoutInbox = await seriesService.filterInboxSeries(userSeriesWithoutTrash, loggedUser);
+        console.log("user series without inbox", userSeriesWithoutInbox);
         const seriesWithAllEventsCount = await eventsService.getAllSeriesEventsCount(userSeriesWithoutInbox);
         const userSeriesWithPublicity = await seriesService.addPublicityStatusToSeries(seriesWithAllEventsCount);
         res.json(userSeriesWithPublicity);

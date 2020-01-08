@@ -66,7 +66,7 @@ exports.addUserToEmptyContributorsList = (metadata, user) => {
     !metadata.contributors || metadata.contributors.length === 0 ? metadata.contributors = [user.eppn] : metadata.contributors;
 };
 
-exports.filterInboxSeries = (series) => series.filter(series => !series.title.toLowerCase().includes(constants.INBOX));
+exports.filterInboxSeries = (series, user) => series.filter(series => series.title.toLowerCase() !== constants.INBOX + ' ' + user.eppn);
 
 exports.filterTrashSeries = (series) => series.filter(series => !series.title.toLowerCase().includes(constants.TRASH));
 
