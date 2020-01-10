@@ -38,5 +38,5 @@ exports.logoutUser = (req, res, url) => {
     } catch (error) {
         logger.error(`Error in logging out user ${error}`);
     }
-    res.redirect(encodeURI(url));
+    res.redirect(url);
 };
