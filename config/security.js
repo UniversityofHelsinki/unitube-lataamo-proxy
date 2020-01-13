@@ -25,7 +25,14 @@ module.exports.shibbolethAuthentication = function (app, passport) {
     })
     );
     app.use(passport.initialize());
-    app.use(passport.authenticate('reverseproxy', { session: false }));
+
+    app.use(function(req, res, next) {
+        if (req.path === "/api") {
+            next();
+        } else {
+            passport.authenticate('reverseproxy', {session: false})(req, res, next);
+        }
+    });
 };
 
 // instance of axios with a custom config.
