@@ -28,7 +28,7 @@ module.exports.shibbolethAuthentication = function (app, passport) {
 
     app.use(function(req, res, next) {
         console.log(req.path);
-        if (req.path === '/api') {
+        if (req.path === '/api' || req.path === '/api/') {
             next();
         } else {
             passport.authenticate('reverseproxy', {session: false})(req, res, next);
