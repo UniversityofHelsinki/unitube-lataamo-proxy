@@ -20,7 +20,7 @@ module.exports = function (router) {
 
     /**
      * @swagger
-     *     /api/:
+     *     /api:
      *     get:
      *       tags:
      *         - retrieve
@@ -28,12 +28,10 @@ module.exports = function (router) {
      *       responses:
      *         304:
      *           description: A status message (ping) with version info.
-     *         401:
-     *           description: Not authenticated. Required Shibboleth headers not present in the request.
      *         default:
      *           description: Unexpected error    
      */
-    router.get('/', api.apiInfo);
+    router.get('/info', api.apiInfo);
 
     /**
      * @swagger
@@ -451,4 +449,5 @@ module.exports = function (router) {
     router.get('/persons/:query', persons.getPersons);
 
     router.post('/download' , video.downloadVideo);
+
 };
