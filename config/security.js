@@ -27,7 +27,6 @@ module.exports.shibbolethAuthentication = function (app, passport) {
     app.use(passport.initialize());
 
     app.use(function(req, res, next) {
-        console.log(req.path);
         if (req.path === '/api/info') {
             next();
         } else {
