@@ -31,7 +31,7 @@ module.exports = function (router) {
      *         default:
      *           description: Unexpected error    
      */
-    router.get('/', api.apiInfo);
+    router.get('/info', api.apiInfo);
 
     /**
      * @swagger
