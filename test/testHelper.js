@@ -68,9 +68,11 @@ const mockTestUser2 = {
 };
 
 const mockTestUser3 = {
-    eppn: 'Tester-XYZ',
+    eppn: 'tester-xyz',
     preferredlanguage: 'fi'
 };
+
+
 // TODO: put json into separate files
 
 const mockUserNoSeries = [];
@@ -136,6 +138,41 @@ const mockUserInboxSeries2 = [
         title: 'SERIES_OWNER_EPPN'
     }
 ];
+
+
+const mockUserInboxSeries3 = [
+    { identifier: CONSTANTS.TEST_INBOX_SERIES_ID,
+        creator: 'Opencast Project Administrator',
+        created: '2019-06-11T12:59:40Z',
+        subjects:
+            [ 'subjects-järvi',
+                'subjects-laavu',
+                'subjects-aamupuuro',
+                'subjects-turve',
+                'subjects-salama',
+                'subjects-koivikko' ],
+        organizers: [ 'creator-kasitunnus' ],
+        publishers: [ 'publisher-kasitunnus' ],
+        contributors: [ 'SeriesOwnerEppn', 'contrib1', 'jaaki', 'grp-lataamo-1', 'grp-XYZ'],
+        title: 'inbox SeriesOwnerEppn'
+    },
+    { identifier: CONSTANTS.TEST_SERIES_2_ID,
+        creator: 'Opencast Project Administrator',
+        created: '2019-06-11T12:59:40Z',
+        subjects:
+            [ 'subjects-järvi',
+                'subjects-laavu',
+                'subjects-aamupuuro',
+                'subjects-turve',
+                'subjects-salama',
+                'subjects-koivikko' ],
+        organizers: [ 'creator-kasitunnus' ],
+        publishers: [ 'publisher-kasitunnus' ],
+        contributors: [ 'SeriesOwnerEppn', 'contrib1', 'jaaki', 'grp-lataamo-1', 'grp-XYZ'],
+        title: 'inbox tester-xyz'
+    }
+];
+
 
 // these are filtered by contributor (eppn in contributor values)
 const mockUserSeries = [
@@ -1949,8 +1986,8 @@ const lataamoSeries8 = () =>
 
 const lataamoWithInboxSeries = () =>
     nock(CONSTANTS.OCAST_BASE_URL)
-        .get(CONSTANTS.OCAST_SERIES_PATH + '?filter=contributors:Tester-XYZ,contributors:')
-        .reply(200, mockUserInboxSeries2);
+        .get(CONSTANTS.OCAST_SERIES_PATH + '?filter=contributors:tester-xyz,contributors:')
+        .reply(200, mockUserInboxSeries3);
 
 const lataamoPostSeries = () =>
     nock(CONSTANTS.OCAST_BASE_URL)
