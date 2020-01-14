@@ -236,7 +236,6 @@ describe('user inbox series should not return from /userSeries route', () => {
             .set('preferredlanguage', test.mockTestUser3.preferredlanguage)
             .expect(200)
             .expect('Content-Type', /json/);
-        console.log("response: ", response.body);
         assert.lengthOf(response.body, 1, 'One series should be returned');
         assert.equal(response.body[0].identifier, '3f9ff5b-7663-54b7-b7cf-950be665de3c' );
         assert.deepEqual(response.body[0].visibility, ['status_private']);

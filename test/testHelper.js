@@ -1987,7 +1987,7 @@ const lataamoSeries8 = () =>
 const lataamoWithInboxSeries = () =>
     nock(CONSTANTS.OCAST_BASE_URL)
         .get(CONSTANTS.OCAST_SERIES_PATH + '?filter=contributors:tester-xyz,contributors:')
-        .reply(200, mockUserInboxSeries3).log(console.log);
+        .reply(200, mockUserInboxSeries3);
 
 const lataamoPostSeries = () =>
     nock(CONSTANTS.OCAST_BASE_URL)
