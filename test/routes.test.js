@@ -15,70 +15,19 @@ const LATAAMO_USER_INBOX_EVENTS_PATH = '/api/userInboxEvents';
 const LATAAMO_USER_TRASH_EVENTS_PATH = '/api/userTrashEvents';
 const LATAAMO_USER_EVENT_PATH = '/api/event';
 const LATAAMO_SERIES_PATH = '/api/series';
-const LATAAMO_API_INFO_PATH = '/api/';
+const LATAAMO_API_BASE_PATH = '/api/';
+const LATAAMO_API_INFO_PATH = '/api/info';
 const LATAAMO_USER_PATH = '/api/user';
 const LATAAMO_API_VIDEO_PATH = '/api/videoUrl/';
 
 const constants = require('../utils/constants');
 const messageKeys = require('../utils/message-keys');
 
-describe('Authentication with shibboleth headers (eppn, preferredlanguage, hyGroupCn)', () => {
-
-    it('should return 200 OK when eppn and preferredlanguage are present', async () => {
-        let response = await supertest(app)
-            .get(LATAAMO_API_INFO_PATH)
-            .set('eppn', 'test_request_id')
-            .set('preferredlanguage', 'test_lang')
-            .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
-            .set('displayName', 'Matti Meikalainen')
-            .expect(200)
-            .expect('Content-Type', /json/);
-    });
-
-    it('should return 401 OK when eppn header not present', async () => {
-        let response = await supertest(app)
-            .get(LATAAMO_API_INFO_PATH)
-            .set('preferredlanguage', 'test_lang')
-            .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
-            .set('displayName', 'Matti Meikalainen')
-            .expect(401);
-    });
-
-    it('should return 200 OK when preferredlanguage header not present', async () => {
-        let response = await supertest(app)
-            .get(LATAAMO_API_INFO_PATH)
-            .set('eppn', 'test_request_id')
-            .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
-            .set('displayName', 'Matti Meikalainen')
-            .expect(200);
-    });
-
-    it('should return 401 OK when preferredlanguage and eppn headers not present', async () => {
-        let response = await supertest(app)
-            .get(LATAAMO_API_INFO_PATH)
-            .expect(401);
-    });
-
-    it('should return 200 OK when hyGroupCn header is not present', async () => {
-        let response = await supertest(app)
-            .get(LATAAMO_API_INFO_PATH)
-            .set('eppn', 'test_request_id')
-            .set('preferredlanguage', 'test_lang')
-            .set('displayName', 'Matti Meikalainen')
-            .expect(200);
-    });
-});
-
-
-describe('api info returned from / route', () => {
+describe('api info returned from /info route', () => {
 
     it('should return api info', async () => {
         let response = await supertest(app)
             .get(LATAAMO_API_INFO_PATH)
-            .set('eppn', 'test_request_id')
-            .set('preferredlanguage', 'test_lang')
-            .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
-            .set('displayName', 'Matti Meikalainen')
             .expect(200)
             .expect('Content-Type', /json/);
 
@@ -104,6 +53,12 @@ describe('user eppn, preferredlanguage and hyGroupCn returned from /user route',
         assert.equal(response.body.eppn, test.mockTestUser.eppn);
         assert.equal(response.body.preferredLanguage, test.mockTestUser.preferredlanguage);
         assert.equal(response.body.hyGroupCn, test.mockTestUser.hyGroupCn);
+    });
+
+    it('should return 401 OK when eppn header not present', async () => {
+        let response = await supertest(app)
+            .get(LATAAMO_USER_PATH)
+            .expect(401)
     });
 });
 
