@@ -813,14 +813,12 @@ describe('Fetching event from /event/id route', () => {
             { allow: true, role: 'ROLE_ANONYMOUS', action: 'read' },
             { allow: true, role: 'ROLE_KATSOMO', action: 'read' } ];
 
-        const licenses = [ 'ALLRIGHTS',
-            'CC-BY',
-            'CC-BY-SA',
-            'CC-BY-ND',
-            'CC-BY-NC',
-            'CC-BY-NC-SA',
-            'CC-BY-NC-ND',
-            'CC0' ];
+        const licenses = [
+            "UNITUBE-ALLRIGHTS",
+            "CC-BY",
+            "CC-BY-NC-ND",
+            "CC0"
+        ];
 
         let response = await supertest(app)
             .get(LATAAMO_USER_EVENT_PATH + '/' + test.constants.TEST_EVENT_1_ID)
