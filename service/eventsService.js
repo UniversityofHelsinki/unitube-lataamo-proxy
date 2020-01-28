@@ -20,6 +20,8 @@ exports.filterEventsForClient = (ocResponseData) => {
         eventArray.push({
             'identifier': event.identifier,
             'title': event.title,
+            'description' : event.description,
+            'license' : calculateLicensePropertyForVideo(event),
             'duration': moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format('HH:mm:ss', {trim:false}),
             'creator': event.creator,
             'processing_state' : event.processing_state,
@@ -32,14 +34,24 @@ exports.filterEventsForClient = (ocResponseData) => {
     return eventArray;
 };
 
+const calculateLicensePropertyForVideo = (event) => {
+    const foundEpisodeFlavorMetadata = event.metadata.find(field => {
+        return field.flavor === 'dublincore/episode';
+    });
+    const foundFieldWithLicenseInfo = foundEpisodeFlavorMetadata.fields.find(field => {
+        return field.id === 'license';
+    });
+    return foundFieldWithLicenseInfo.value;
+};
+
 const calculateMediaPropertyForVideo = (event) => {
-    let mediaUlrs = [];
+    let mediaUrls = [];
     event.media.forEach(media => {
         if (event.processing_state === constants.OPENCAST_STATE_SUCCEEDED) {
-            mediaUlrs.push(media.url);
+            mediaUrls.push(media.url);
         }
     });
-    return [...new Set(mediaUlrs)];
+    return [...new Set(mediaUrls)];
 };
 
 exports.calculateVisibilityProperty = (event) => {
