@@ -174,6 +174,8 @@ describe('user inbox series should not return from /userSeries route', () => {
     beforeEach(() => {
         // mock needed opencast apis
         test.mockSeriesWithInboxCall();
+        test.mockInboxSeriesEventsRequest();
+        test.mockInboxSeriesAclCall();
         test.mockOCastEvent1AclCall();
         test.mockOcastEvent2AclCall();
         test.mockOcastEvent3AclCall();
@@ -189,9 +191,10 @@ describe('user inbox series should not return from /userSeries route', () => {
             .set('preferredlanguage', test.mockTestUser3.preferredlanguage)
             .expect(200)
             .expect('Content-Type', /json/);
-        assert.equal(response.body[0].identifier, 'd72a8c9e-f854-4ba4-9ed2-89405fae214e' );
-        assert.deepEqual(response.body[0].visibility, ['status_published', 'status_moodle']);
-        assert.equal(response.body[0].title , 'SERIES_OWNER_EPPN');
+        assert.lengthOf(response.body, 1, 'One series should be returned');
+        assert.equal(response.body[0].identifier, '3f9ff5b-7663-54b7-b7cf-950be665de3c' );
+        assert.deepEqual(response.body[0].visibility, ['status_private']);
+        assert.equal(response.body[0].title , 'inbox SeriesOwnerEppn');
     });
 
 
@@ -810,14 +813,12 @@ describe('Fetching event from /event/id route', () => {
             { allow: true, role: 'ROLE_ANONYMOUS', action: 'read' },
             { allow: true, role: 'ROLE_KATSOMO', action: 'read' } ];
 
-        const licenses = [ 'ALLRIGHTS',
-            'CC-BY',
-            'CC-BY-SA',
-            'CC-BY-ND',
-            'CC-BY-NC',
-            'CC-BY-NC-SA',
-            'CC-BY-NC-ND',
-            'CC0' ];
+        const licenses = [
+            "UNITUBE-ALLRIGHTS",
+            "CC-BY",
+            "CC-BY-NC-ND",
+            "CC0"
+        ];
 
         let response = await supertest(app)
             .get(LATAAMO_USER_EVENT_PATH + '/' + test.constants.TEST_EVENT_1_ID)
