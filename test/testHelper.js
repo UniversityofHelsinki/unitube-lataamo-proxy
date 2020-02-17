@@ -754,7 +754,7 @@ const eventACLs =  [
     { allow: true, role: 'ROLE_ADMIN', action: 'read' },
     { allow: true, role: 'ROLE_ADMIN', action: 'write' },
     { allow: true, role: 'ROLE_ANONYMOUS', action: 'read' },
-    { allow: true, role: 'ROLE_KATSOMO', action: 'read' },
+    { allow: true, role: 'ROLE_USER_KATSOMO_TUOTANTO', action: 'read' },
 ];
 
 // /api/series/d72a8c9e-f854-4ba4-9ed2-89405fae214e/acl
@@ -770,7 +770,7 @@ const event2ACLs =  [
     { allow: true, role: 'ROLE_ADMIN', action: 'read' },
     { allow: true, role: 'ROLE_ADMIN', action: 'write' },
     { allow: true, role: 'ROLE_ANONYMOUS', action: 'read' },
-    { allow: true, role: 'ROLE_KATSOMO', action: 'read' },
+    { allow: true, role: 'ROLE_USER_KATSOMO_TUOTANTO', action: 'read' },
     { allow: true, role: '123_Instructor', action: 'read' },
     { allow: true, role: '123_Learner', action: 'read' },
 ];

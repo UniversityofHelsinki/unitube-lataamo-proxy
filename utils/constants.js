@@ -6,7 +6,7 @@ const ESB_IAM_GROUPS_PATH = '/iam/group/unitube/search/';
 
 
 const ROLE_ANONYMOUS = 'ROLE_ANONYMOUS';
-const ROLE_KATSOMO = 'ROLE_KATSOMO';
+const ROLE_KATSOMO = 'ROLE_USER_KATSOMO_TUOTANTO';
 
 const SHIBBOLETH_COOKIE_NAME = '_shibsession_';
 
@@ -68,7 +68,7 @@ const SERIES_ACL_ROLE_KATSOMO =
     {
         'action': 'read',
         'allow': true,
-        'role': 'ROLE_KATSOMO'
+        'role': 'ROLE_USER_KATSOMO_TUOTANTO'
     };
 
 const SERIES_ACL_TEMPLATE_TUOTANTO = [
