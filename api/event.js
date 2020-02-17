@@ -78,7 +78,7 @@ exports.getTrashEvents = async (req, res) => {
         const trashSeries = await apiService.getUserTrashSeries(loggedUser);
         if(trashSeries && trashSeries.length > 0){
             const trashEventsWithAcls = await fetchEventMetadata(trashSeries);
-            res.json(eventsService.filterEventsForClient(trashEventsWithAcls));
+            res.json(eventsService.filterEventsForClientTrash(trashEventsWithAcls));
         }else{
             res.json([]);
         }
