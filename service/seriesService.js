@@ -104,7 +104,7 @@ const updateSeriesAclList = (aclList) => {
         seriesAclTemplate = [...constants.SERIES_ACL_TEMPLATE_TUOTANTO];
     } else {
         seriesAclTemplate = [...constants.SERIES_ACL_TEMPLATE];
-        aclList = commonService.removeRoleWhenTestEnvironment(aclList, constants.ROLE_KATSOMO);
+        aclList = commonService.removeRoleWhenTestEnvironment(aclList, constants.ROLE_KATSOMO_TUOTANTO);
     }
     let seriesACLTemplateReadEntry = constants.SERIES_ACL_TEMPLATE_READ_ENTRY;
     let seriesACLTemplateWriteEntry = constants.SERIES_ACL_TEMPLATE_WRITE_ENTRY;
@@ -144,7 +144,7 @@ const getSeriesRolesLists = async (series) => {
 
 const updateSeriesPublicity = (series) => {
     let published = false;
-    if (commonService.publicRoleCount(series.roles) === 2) { //series has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
+    if (commonService.publicRoleCount(series.roles) >= 1) { //series has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
         published = true;
     } else {
         published = false;
@@ -174,7 +174,7 @@ exports.addPublicityStatusToSeries = async (seriesList) => {
 
 exports.addPublishedInfoInSeriesAndMoodleRoles = async (series) => {
     let roles = await apiService.getSeriesAcldata(series.identifier);
-    if (commonService.publicRoleCount(roles) === 2) { //series has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
+    if (commonService.publicRoleCount(roles) >= 1) { //series has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
         series.published = constants.ROLE_ANONYMOUS;
     } else {
         series.published = '';
@@ -211,7 +211,7 @@ const calculateVisibilityProperty = (series) => {
 const setVisibilityForSeries = (series) => {
     const visibility = [];
 
-    if (commonService.publicRoleCount(series.roles) === 2) { //video has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
+    if (commonService.publicRoleCount(series.roles) >= 1) { //video has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
         visibility.push(constants.STATUS_PUBLISHED);
     } else {
         visibility.push(constants.STATUS_PRIVATE);
