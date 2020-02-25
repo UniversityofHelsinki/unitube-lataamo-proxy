@@ -102,6 +102,22 @@ exports.downloadVideo = async (req, res) => {
 };
 
 
+/**
+ * Handle vtt file upload.
+ * Uses multer package to read form data: https://www.npmjs.com/package/multer
+ * Uses node-webvtt package to validate vtt file: https://www.npmjs.com/package/node-webvtt
+ *
+ * file structure returned by multer:
+ *  {
+ *    fieldname: 'video_webvtt_file',
+ *    originalname: 'fulica.vtt',
+ *    encoding: '7bit',
+ *    mimetype: 'text/vtt',
+ *    buffer: <Buffer xyz.....>,
+ *    size: 226
+ *  }
+ *
+ **/
 exports.uploadVideoTextTrack = async(req, res) => {
     // https://attacomsian.com/blog/express-file-upload-multer
     // https://www.npmjs.com/package/multer
@@ -110,25 +126,15 @@ exports.uploadVideoTextTrack = async(req, res) => {
         // get the vtt file from the form
         const vttFile = req.file;
 
-        // make sure file was available
-        if (!vttFile) {
+        if(!vttFile) {
             res.status(400).send({
                 status: false,
-                data: 'No file is selected.'
+                data: 'The vtt file is missing.'
             });
         } else {
-            // vttFile structure:
-            //{   fieldname: 'video_webvtt_file',
-            //    originalname: 'fulica.vtt',
-            //    encoding: '7bit',
-            //    mimetype: 'text/vtt',
-            //    buffer: <Buffer xyz.....>,
-            //    size: 226 }
-
-            // do some validation to the file
-            const parsed = webvttParser.parse(vttFile.buffer.toString());
-
-            if (parsed && parsed.valid) {
+            try {
+                // https://www.npmjs.com/package/node-webvtt#parsing
+                webvttParser.parse(vttFile.buffer.toString());
                 // all ok
                 logger.info('vtt file parsed ok, next file to opencast.');
                 // TODO: send the vtt file to opencast
@@ -144,26 +150,21 @@ exports.uploadVideoTextTrack = async(req, res) => {
                         size: vttFile.size
                     }
                 });
-            } else {
-                // not all ok
-                logger.error(`vtt file seems to be malformed, please check. USER ${req.user.eppn}`);
-
+            } catch(err) {
+                logger.error(`vtt file seems to be malformed (${err.message}), please check. -- USER ${req.user.eppn}`);
                 res.status(400);
-                const msg = 'vtt file seems to be malformed, please check.'
                 res.json({
                     message: 'Failure in video text track upload',
-                    msg
+                    msg: err.message
                 });
             }
         }
-    } catch (err) {
-        logger.error(`addVideoTextTrack USER ${req.user.eppn}`);
-
+    } catch(err) {
+        logger.error(`Error while uploading vtt file. ${err.message}  -- USER ${req.user.eppn}`);
         res.status(500);
-        const msg = err.message;
         res.json({
             message: 'Failure in video text track upload',
-            msg
+            msg: err.message
         });
     }
 };
