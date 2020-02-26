@@ -10,10 +10,6 @@ const videoUpload = require('./videoUpload');
 const iamGroups = require('./iamGroups');
 const persons = require('./persons');
 
-// https://www.npmjs.com/package/multer
-const multer  = require('multer');
-const memoryStorage = multer.memoryStorage();
-const multerInMemoryUpload = multer({ storage: memoryStorage });
 
 const swaggerUi = require('swagger-ui-express');
 const apiSpecs = require('../config/swagger'); // swagger config
@@ -477,5 +473,5 @@ module.exports = function (router) {
      *         default:
      *           description: Unexpected error.
      */
-    router.post('/videoTextTrack' , multerInMemoryUpload.single('video_webvtt_file'), video.uploadVideoTextTrack);
+    router.post('/videoTextTrack', video.uploadVideoTextTrack);
 };
