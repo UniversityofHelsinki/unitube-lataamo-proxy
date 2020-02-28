@@ -141,12 +141,33 @@ exports.uploadVideoTextTrack = async(req, res) => {
         try {
             // https://www.npmjs.com/package/node-webvtt#parsing
             webvttParser.parse(vttFile.buffer.toString());
+        } catch (err) {
+            logger.error(`vtt file seems to be malformed (${err.message}), please check. -- USER ${req.user.eppn}`);
+            res.status(400);
+            res.json({
+                message: 'Failure in video text track upload',
+                msg: err.message
+            });
+        }
             // all ok
             logger.info('vtt file parsed ok, next file to opencast.');
-            // TODO: send the vtt file to opencast
-            //const response = await apiService.uploadVideoTextTrack(file, eventId);
-            // res.status(response.status);
-            // res.json({message : response.statusText});
+
+            try {
+                const response = await apiService.addWebVttFile(vttFile, eventId);
+                if (response.status === 201) {
+                    console.log(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
+                    logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
+                } else {
+                    console.log(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
+                    logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
+                    res.status(response.status);
+                    res.json({message : response.statusText});
+                }
+            } catch (error) {
+                console.log(error);
+                res.status(error.status);
+                res.json({message : error});
+            }
             res.json({
                 status: true,
                 message: 'File received in unitube-lataamo.',
@@ -156,14 +177,6 @@ exports.uploadVideoTextTrack = async(req, res) => {
                     size: vttFile.size
                 }
             });
-        } catch (err) {
-            logger.error(`vtt file seems to be malformed (${err.message}), please check. -- USER ${req.user.eppn}`);
-            res.status(400);
-            res.json({
-                message: 'Failure in video text track upload',
-                msg: err.message
-            });
-        }
     } catch (err) {
         res.status(400);
         if (err.code === 'LIMIT_FILE_SIZE') {

@@ -171,15 +171,55 @@ exports.getMetadataForEvent = async (event) => {
     return response.data;
 };
 
-exports.uploadVideoTextTrack = async (vttFile, eventId) => {
+exports.getMediaPackageForEvent = async (eventId) => {
     const mediaPackageUrl = constants.OCAST_EVENT_ASSET_EPISODE + eventId;
     const response = await security.opencastBase.get(mediaPackageUrl);
-    console.log(response.data);
-
-
     return response.data;
 };
 
+exports.addWebVttFile = async (vttFile, eventId) => {
+    const assetsUrl = constants.OCAST_ADMIN_EVENT + eventId + constants.OCAST_ASSETS_PATH;
+
+    const metadata = {
+        "assets": {
+            "options": [
+                {
+                    "id": "attachment_captions_webvtt",
+                    "type": "attachment",
+                    "flavorType": "text",
+                    "flavorSubType": "vtt",
+                    "displayOrder": 3,
+                    "title": "EVENTS.EVENTS.NEW.UPLOAD_ASSET.OPTION.CAPTIONS_WEBVTT"
+                }
+            ]
+        },
+        "processing": {
+            "workflow": "publish-uploaded-assets",
+            "configuration": {
+                "downloadSourceflavorsExist": "true",
+                "download-source-flavors": "text/vtt"
+            }
+        }
+    };
+
+    let bodyFormData = new FormData();
+    bodyFormData.append('attachment_captions_webvtt', vttFile.buffer);
+    bodyFormData.append('metadata', JSON.stringify(metadata));
+    try {
+        const headers = {
+            ...bodyFormData.getHeaders(),
+            'Content-Length': bodyFormData.getLengthSync(),
+            'Content-Type': 'multipart/form-data'
+        };
+        const response = await security.opencastBase.post(assetsUrl, bodyFormData, {headers});
+        return response;
+    } catch (err) {
+        return {
+            status: 500,
+            message: err.message
+        };
+    }
+};
 
 exports.updateEventMetadata = async (metadata, eventId, isTrash, user) => {
     try {

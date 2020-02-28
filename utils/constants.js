@@ -35,7 +35,9 @@ const OCAST_METADATA_PATH = '/metadata';
 const OCAST_TYPE_QUERY_PARAMETER = '?type=';
 const OCAST_TYPE_DUBLINCORE_EPISODE = 'dublincore/episode';
 const OCAST_TYPE_DUBLINCORE_SERIES = 'dublincore/series';
-const OCAST_EVENT_ASSET_EPISODE = '/asset/episode/';
+const OCAST_EVENT_ASSET_EPISODE = '/assets/episode/';
+const OCAST_ADMIN_EVENT = '/admin-ng/event/';
+const OCAST_ASSETS_PATH = '/assets';
 
 const OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER = '?filter=series:';
 
@@ -184,5 +186,7 @@ module.exports = {
     OPENCAST_STATE_SUCCEEDED,
     TRASH,
     SHIBBOLETH_COOKIE_NAME,
-    OCAST_EVENT_ASSET_EPISODE
+    OCAST_EVENT_ASSET_EPISODE,
+    OCAST_ADMIN_EVENT,
+    OCAST_ASSETS_PATH
 };
