@@ -9,6 +9,7 @@ const series = require('./series');
 const videoUpload = require('./videoUpload');
 const iamGroups = require('./iamGroups');
 const persons = require('./persons');
+const upload = require('../utils/upload');
 
 
 const swaggerUi = require('swagger-ui-express');
@@ -451,7 +452,6 @@ module.exports = function (router) {
 
     router.post('/download' , video.downloadVideo);
 
-
     /**
      * @swagger
      *     api/videoTextTrack:
@@ -473,5 +473,5 @@ module.exports = function (router) {
      *         default:
      *           description: Unexpected error.
      */
-    router.post('/videoTextTrack', video.uploadVideoTextTrack);
+    router.post('/videoTextTrack', upload,  video.uploadVideoTextTrack);
 };

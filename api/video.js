@@ -9,21 +9,6 @@ const logger = require('../config/winstonLogger');
 const messageKeys = require('../utils/message-keys');
 const webvttParser = require('node-webvtt');
 
-// For WebVTT file upload (https://www.npmjs.com/package/multer)
-const multer  = require('multer');
-const filter = require('../utils/vttFileFilter');
-const memoryStorage = multer.memoryStorage();
-const multerInMemoryUpload = multer({
-    storage: memoryStorage,
-    limits: {
-        files: 1,
-        fieldSize: 1000
-    },
-    fileFilter: filter.vttFilter
-}).single('video_webvtt_file'); // the file input field name in the submitting form
-
-
-
 
 exports.getVideoUrl = async (req, res) => {
     try {
@@ -131,61 +116,64 @@ exports.downloadVideo = async (req, res) => {
  *  }
  *
  **/
+
+
 exports.uploadVideoTextTrack = async(req, res) => {
     // https://attacomsian.com/blog/express-file-upload-multer
     // https://www.npmjs.com/package/multer
     logger.info('addVideoTextTrack called.');
 
-    multerInMemoryUpload(req, res, function (err) {
-        if (err) { //instanceof multer.MulterError
-            res.status(400);
-            if (err.code === 'LIMIT_FILE_SIZE') {
-                err.message = 'File Size is too large.';
-                err.success = false;
-            }
+    try {
+        // get the vtt file from the form
+        const vttFile = req.file;
+        const eventId = req.body.eventId;
+
+        console.log(eventId);
+
+        if (!vttFile) {
+            res.status(400)
+            res.json({
+                message: 'The vtt file is missing.',
+                msg: 'The vtt file is missing.'
+            });
+        }
+
+        try {
+            // https://www.npmjs.com/package/node-webvtt#parsing
+            webvttParser.parse(vttFile.buffer.toString());
+            // all ok
+            logger.info('vtt file parsed ok, next file to opencast.');
+            // TODO: send the vtt file to opencast
+            //const response = await apiService.uploadVideoTextTrack(file, eventId);
+            // res.status(response.status);
+            // res.json({message : response.statusText});
+            res.json({
+                status: true,
+                message: 'File received in unitube-lataamo.',
+                data: {
+                    name: vttFile.originalname,
+                    mimetype: vttFile.mimetype,
+                    size: vttFile.size
+                }
+            });
+        } catch (err) {
+            logger.error(`vtt file seems to be malformed (${err.message}), please check. -- USER ${req.user.eppn}`);
             res.status(400);
             res.json({
                 message: 'Failure in video text track upload',
                 msg: err.message
             });
-        } else {
-            // get the vtt file from the form
-            const vttFile = req.file;
-
-            if (!vttFile) {
-                res.status(400)
-                res.json({
-                    message: 'The vtt file is missing.',
-                    msg: 'The vtt file is missing.'
-                });
-            }
-
-            try {
-                // https://www.npmjs.com/package/node-webvtt#parsing
-                webvttParser.parse(vttFile.buffer.toString());
-                // all ok
-                logger.info('vtt file parsed ok, next file to opencast.');
-                // TODO: send the vtt file to opencast
-                // const response = await apiService.uploadVideoTextTrack(file, eventId);
-                // res.status(response.status);
-                // res.json({message : response.statusText});
-                res.json({
-                    status: true,
-                    message: 'File received in unitube-lataamo.',
-                    data: {
-                        name: vttFile.originalname,
-                        mimetype: vttFile.mimetype,
-                        size: vttFile.size
-                    }
-                });
-            } catch (err) {
-                logger.error(`vtt file seems to be malformed (${err.message}), please check. -- USER ${req.user.eppn}`);
-                res.status(400);
-                res.json({
-                    message: 'Failure in video text track upload',
-                    msg: err.message
-                });
-            }
         }
-    });
+    } catch (err) {
+        res.status(400);
+        if (err.code === 'LIMIT_FILE_SIZE') {
+            err.message = 'File Size is too large.';
+            err.success = false;
+        }
+        res.status(400);
+        res.json({
+            message: 'Failure in video text track upload',
+            msg: err.message
+        });
+    }
 };

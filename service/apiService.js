@@ -171,6 +171,15 @@ exports.getMetadataForEvent = async (event) => {
     return response.data;
 };
 
+exports.uploadVideoTextTrack = async (vttFile, eventId) => {
+    const mediaPackageUrl = constants.OCAST_EVENT_ASSET_EPISODE + eventId;
+    const response = await security.opencastBase.get(mediaPackageUrl);
+    console.log(response.data);
+
+
+    return response.data;
+};
+
 
 exports.updateEventMetadata = async (metadata, eventId, isTrash, user) => {
     try {
