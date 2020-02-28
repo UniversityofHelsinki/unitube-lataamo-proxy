@@ -203,7 +203,7 @@ exports.addWebVttFile = async (vttFile, eventId) => {
     };
 
     let bodyFormData = new FormData();
-    bodyFormData.append('attachment_captions_webvtt', vttFile.buffer);
+    bodyFormData.append('attachment_captions_webvtt', vttFile.buffer.toString());
     bodyFormData.append('metadata', JSON.stringify(metadata));
     try {
         const headers = {
