@@ -8,6 +8,7 @@ const publicationService = require('../service/publicationService');
 const logger = require('../config/winstonLogger');
 const messageKeys = require('../utils/message-keys');
 const webvttParser = require('node-webvtt');
+const upload = require('../utils/upload');
 
 
 exports.getVideoUrl = async (req, res) => {
@@ -121,14 +122,24 @@ exports.uploadVideoTextTrack = async(req, res) => {
     // https://attacomsian.com/blog/express-file-upload-multer
     // https://www.npmjs.com/package/multer
     logger.info('addVideoTextTrack called.');
+    console.log('addVideoTextTrack called.');
 
-    try {
-        // get the vtt file from the form
+    upload(req, res, async(err) => {
+
+        if ( err ) {
+
+            console.log("JUPAJUU");
+            console.log(err);
+
+            res.status(500);
+            return res.json({ message: messageKeys.ERROR_MALFORMED_WEBVTT_FILE });
+        }
+
         const vttFile = req.file;
         const eventId = req.body.eventId;
 
         if (!vttFile) {
-            res.status(400)
+            res.status(400);
             res.json({
                 message: 'The vtt file is missing.',
                 msg: 'The vtt file is missing.'
@@ -171,16 +182,5 @@ exports.uploadVideoTextTrack = async(req, res) => {
                     size: vttFile.size
                 }
             });
-    } catch (err) {
-        res.status(400);
-        if (err.code === 'LIMIT_FILE_SIZE') {
-            err.message = messageKeys.ERROR_LIMIT_FILE_SIZE;
-            err.success = false;
-        }
-        res.status(400);
-        res.json({
-            message: messageKeys.ERROR_WEBVTT_FILE_UPLOAD,
-            msg: err.message
-        });
-    }
+    });
 };
