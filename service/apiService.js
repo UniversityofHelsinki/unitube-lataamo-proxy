@@ -179,40 +179,16 @@ exports.getMediaPackageForEvent = async (eventId) => {
 
 exports.addWebVttFile = async (vttFile, eventId) => {
     const assetsUrl = constants.OCAST_ADMIN_EVENT + eventId + constants.OCAST_ASSETS_PATH;
-
-    const metadata = {
-        "assets": {
-            "options": [
-                {
-                    "id": "attachment_captions_webvtt",
-                    "type": "attachment",
-                    "flavorType": "text",
-                    "flavorSubType": "vtt",
-                    "displayOrder": 3,
-                    "title": "EVENTS.EVENTS.NEW.UPLOAD_ASSET.OPTION.CAPTIONS_WEBVTT"
-                }
-            ]
-        },
-        "processing": {
-            "workflow": "publish-uploaded-assets",
-            "configuration": {
-                "downloadSourceflavorsExist": "true",
-                "download-source-flavors": "text/vtt"
-            }
-        }
-    };
-
     let bodyFormData = new FormData();
     bodyFormData.append('attachment_captions_webvtt', vttFile.buffer.toString());
-    bodyFormData.append('metadata', JSON.stringify(metadata));
+    bodyFormData.append('metadata', JSON.stringify(constants.WEBVTT_TEMPLATE));
     try {
         const headers = {
             ...bodyFormData.getHeaders(),
             'Content-Length': bodyFormData.getLengthSync(),
             'Content-Type': 'multipart/form-data'
         };
-        const response = await security.opencastBase.post(assetsUrl, bodyFormData, {headers});
-        return response;
+        return await security.opencastBase.post(assetsUrl, bodyFormData, {headers});
     } catch (err) {
         return {
             status: 500,

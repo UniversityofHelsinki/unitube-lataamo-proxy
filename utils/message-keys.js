@@ -20,6 +20,10 @@ const ERROR_MESSAGE_FAILED_TO_GET_INBOX_EVENTS = 'error-failed-to-get-inbox-even
 const ERROR_MESSAGE_FAILED_TO_GET_TRASH_EVENTS = 'error-failed-to-get-trash-events';
 const ERROR_MESSAGE_FAILED_TO_DOWNLOAD_VIDEO = 'error-failed-to-download-video';
 const SUCCESS_MESSAGE_VIDEO_UPLOAD = 'success-video-sent-to-opencast';
+const ERROR_MALFORMED_WEBVTT_FILE = 'error-vtt-file-malformed';
+const SUCCESS_WEBVTT_UPLOAD = 'success-vtt-file-upload';
+const ERROR_LIMIT_FILE_SIZE = 'error-limit-file-size';
+const ERROR_WEBVTT_FILE_UPLOAD = 'error-webvtt-file-upload';
 
 module.exports = {
     ERROR_MESSAGE_FAILED_TO_GET_USER,
@@ -41,5 +45,9 @@ module.exports = {
     ERROR_MESSAGE_FAILED_TO_GET_INBOX_EVENTS,
     ERROR_MESSAGE_FAILED_TO_DOWNLOAD_VIDEO,
     ERROR_MESSAGE_FAILED_TO_GET_TRASH_EVENTS,
-    ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_TRASH_NOT_ALLOWED
+    ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_TRASH_NOT_ALLOWED,
+    ERROR_MALFORMED_WEBVTT_FILE,
+    SUCCESS_WEBVTT_UPLOAD,
+    ERROR_LIMIT_FILE_SIZE,
+    ERROR_WEBVTT_FILE_UPLOAD
 };

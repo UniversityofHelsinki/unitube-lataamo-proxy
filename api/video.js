@@ -117,7 +117,6 @@ exports.downloadVideo = async (req, res) => {
  *
  **/
 
-
 exports.uploadVideoTextTrack = async(req, res) => {
     // https://attacomsian.com/blog/express-file-upload-multer
     // https://www.npmjs.com/package/multer
@@ -127,8 +126,6 @@ exports.uploadVideoTextTrack = async(req, res) => {
         // get the vtt file from the form
         const vttFile = req.file;
         const eventId = req.body.eventId;
-
-        console.log(eventId);
 
         if (!vttFile) {
             res.status(400)
@@ -145,7 +142,7 @@ exports.uploadVideoTextTrack = async(req, res) => {
             logger.error(`vtt file seems to be malformed (${err.message}), please check. -- USER ${req.user.eppn}`);
             res.status(400);
             res.json({
-                message: 'Failure in video text track upload',
+                message: messageKeys.ERROR_MALFORMED_WEBVTT_FILE,
                 msg: err.message
             });
         }
@@ -155,22 +152,19 @@ exports.uploadVideoTextTrack = async(req, res) => {
             try {
                 const response = await apiService.addWebVttFile(vttFile, eventId);
                 if (response.status === 201) {
-                    console.log(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
                     logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
                 } else {
-                    console.log(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
                     logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
                     res.status(response.status);
-                    res.json({message : response.statusText});
+                    res.json({message : response.message});
                 }
             } catch (error) {
-                console.log(error);
                 res.status(error.status);
                 res.json({message : error});
             }
             res.json({
                 status: true,
-                message: 'File received in unitube-lataamo.',
+                message: messageKeys.SUCCESS_WEBVTT_UPLOAD,
                 data: {
                     name: vttFile.originalname,
                     mimetype: vttFile.mimetype,
@@ -180,12 +174,12 @@ exports.uploadVideoTextTrack = async(req, res) => {
     } catch (err) {
         res.status(400);
         if (err.code === 'LIMIT_FILE_SIZE') {
-            err.message = 'File Size is too large.';
+            err.message = messageKeys.ERROR_LIMIT_FILE_SIZE;
             err.success = false;
         }
         res.status(400);
         res.json({
-            message: 'Failure in video text track upload',
+            message: messageKeys.ERROR_WEBVTT_FILE_UPLOAD,
             msg: err.message
         });
     }
