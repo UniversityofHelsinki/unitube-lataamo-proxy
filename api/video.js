@@ -162,25 +162,19 @@ exports.uploadVideoTextTrack = async(req, res) => {
 
             try {
                 const response = await apiService.addWebVttFile(vttFile, eventId);
+                console.log(response.status);
                 if (response.status === 201) {
                     logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
+                    res.status(response.status);
+                    res.json({message: messageKeys.SUCCESS_WEBVTT_UPLOAD});
                 } else {
                     logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
                     res.status(response.status);
-                    res.json({message : response.message});
+                    res.json({message : messageKeys.ERROR_WEBVTT_FILE_UPLOAD});
                 }
             } catch (error) {
                 res.status(error.status);
                 res.json({message : error});
             }
-            res.json({
-                status: true,
-                message: messageKeys.SUCCESS_WEBVTT_UPLOAD,
-                data: {
-                    name: vttFile.originalname,
-                    mimetype: vttFile.mimetype,
-                    size: vttFile.size
-                }
-            });
     });
 };
