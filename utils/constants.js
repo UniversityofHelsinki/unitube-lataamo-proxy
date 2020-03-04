@@ -35,6 +35,9 @@ const OCAST_METADATA_PATH = '/metadata';
 const OCAST_TYPE_QUERY_PARAMETER = '?type=';
 const OCAST_TYPE_DUBLINCORE_EPISODE = 'dublincore/episode';
 const OCAST_TYPE_DUBLINCORE_SERIES = 'dublincore/series';
+const OCAST_EVENT_ASSET_EPISODE = '/assets/episode/';
+const OCAST_ADMIN_EVENT = '/admin-ng/event/';
+const OCAST_ASSETS_PATH = '/assets';
 
 const OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER = '?filter=series:';
 
@@ -42,6 +45,28 @@ const OCAST_VIDEOS_FILTER_USER_NAME = '?filter=title:';
 
 const UPDATE_SERIES = 'update_series';
 const CREATE_SERIES = 'create_series';
+
+const WEBVTT_TEMPLATE =  {
+    "assets": {
+        "options": [
+            {
+                "id": "attachment_captions_webvtt",
+                "type": "attachment",
+                "flavorType": "text",
+                "flavorSubType": "vtt",
+                "displayOrder": 3,
+                "title": "EVENTS.EVENTS.NEW.UPLOAD_ASSET.OPTION.CAPTIONS_WEBVTT"
+            }
+        ]
+    },
+    "processing": {
+        "workflow": "publish-uploaded-assets",
+        "configuration": {
+            "downloadSourceflavorsExist": "true",
+            "download-source-flavors": "text/vtt"
+        }
+    }
+};
 
 const SERIES_ACL_TEMPLATE = [
     {
@@ -182,5 +207,9 @@ module.exports = {
     INBOX,
     OPENCAST_STATE_SUCCEEDED,
     TRASH,
-    SHIBBOLETH_COOKIE_NAME
+    SHIBBOLETH_COOKIE_NAME,
+    OCAST_EVENT_ASSET_EPISODE,
+    OCAST_ADMIN_EVENT,
+    OCAST_ASSETS_PATH,
+    WEBVTT_TEMPLATE
 };
