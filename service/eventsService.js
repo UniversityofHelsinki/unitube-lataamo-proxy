@@ -17,19 +17,46 @@ exports.filterEventsForClient = (ocResponseData) => {
 
     const eventArray = [];
     ocResponseData.forEach(event => {
-        eventArray.push({
-            'identifier': event.identifier,
-            'title': event.title,
-            'description' : event.description,
-            'license' : calculateLicensePropertyForVideo(event),
-            'duration': moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format('HH:mm:ss', {trim:false}),
-            'creator': event.creator,
-            'processing_state' : event.processing_state,
-            'visibility' : calculateVisibilityPropertyForVideo(event),
-            'created': event.created,
-            'series': event.series.title,
-            'media' : calculateMediaPropertyForVideo(event)
-        });
+            eventArray.push({
+                'identifier': event.identifier,
+                'title': event.title,
+                'description' : event.description,
+                'license' : calculateLicensePropertyForVideo(event),
+                'duration': moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format('HH:mm:ss', {trim:false}),
+                'creator': event.creator,
+                'processing_state' : event.processing_state,
+                'visibility' : calculateVisibilityPropertyForVideo(event),
+                'created': event.created,
+                'series': event.series.title,
+                'media' : calculateMediaPropertyForVideo(event)
+            });
+    });
+    return eventArray;
+};
+
+exports.filterEventsForClientTrash = (ocResponseData) => {
+
+    if(!ocResponseData){
+        return [];
+    }
+
+    const eventArray = [];
+    ocResponseData.forEach(event => {
+        if(event.processing_state!=='FAILED'){
+            eventArray.push({
+                'identifier': event.identifier,
+                'title': event.title,
+                'description' : event.description,
+                'license' : calculateLicensePropertyForVideo(event),
+                'duration': moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format('HH:mm:ss', {trim:false}),
+                'creator': event.creator,
+                'processing_state' : event.processing_state,
+                'visibility' : calculateVisibilityPropertyForVideo(event),
+                'created': event.created,
+                'series': event.series.title,
+                'media' : calculateMediaPropertyForVideo(event)
+            });
+        }
     });
     return eventArray;
 };
