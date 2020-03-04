@@ -95,7 +95,7 @@ const updateAclTemplateWriteEntry = (seriesACLTemplateWriteEntry, aclRole) => {
 };
 
 const isMoodleAclRole = aclRole => aclRole.includes(constants.MOODLE_ACL_INSTRUCTOR) || aclRole.includes(constants.MOODLE_ACL_LEARNER);
-const publicRole = publicRole => publicRole.includes(constants.ROLE_ANONYMOUS) || publicRole.includes(constants.ROLE_KATSOMO);
+const publicRole = publicRole => publicRole.includes(constants.ROLE_ANONYMOUS) || publicRole.includes(constants.ROLE_KATSOMO) || (publicRole.includes(constants.ROLE_KATSOMO_TUOTANTO) || publicRole.includes(constants.ROLE_KATSOMO_TESTI));
 
 const updateSeriesAclList = (aclList) => {
 
@@ -174,7 +174,7 @@ exports.addPublicityStatusToSeries = async (seriesList) => {
 
 exports.addPublishedInfoInSeriesAndMoodleRoles = async (series) => {
     let roles = await apiService.getSeriesAcldata(series.identifier);
-    if (commonService.publicRoleCount(roles) >= 1) { //series has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
+    if (commonService.publicRoleCount(roles) >= 1) { //series has either constants.ROLE_ANONYMOUS or constants.ROLE_KATSOMO or constants.ROLE_KATSOMO_TUOTANTO roles
         series.published = constants.ROLE_ANONYMOUS;
     } else {
         series.published = '';
