@@ -171,6 +171,33 @@ exports.getMetadataForEvent = async (event) => {
     return response.data;
 };
 
+exports.getMediaPackageForEvent = async (eventId) => {
+    const mediaPackageUrl = constants.OCAST_EVENT_ASSET_EPISODE + eventId;
+    const response = await security.opencastBase.get(mediaPackageUrl);
+    return response.data;
+};
+
+exports.addWebVttFile = async (vttFile, eventId) => {
+    const assetsUrl = constants.OCAST_ADMIN_EVENT + eventId + constants.OCAST_ASSETS_PATH;
+    let bodyFormData = new FormData();
+    bodyFormData.append('attachment_captions_webvtt', vttFile.buffer, {
+        filename: vttFile.originalname
+    });
+    bodyFormData.append('metadata', JSON.stringify(constants.WEBVTT_TEMPLATE));
+    try {
+        const headers = {
+            ...bodyFormData.getHeaders(),
+            'Content-Length': bodyFormData.getLengthSync(),
+            'Content-Type': 'multipart/form-data'
+        };
+        return await security.opencastBase.post(assetsUrl, bodyFormData, {headers});
+    } catch (err) {
+        return {
+            status: 500,
+            message: err.message
+        };
+    }
+};
 
 exports.updateEventMetadata = async (metadata, eventId, isTrash, user) => {
     try {

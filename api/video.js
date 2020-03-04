@@ -7,7 +7,9 @@ const apiService = require('../service/apiService');
 const publicationService = require('../service/publicationService');
 const logger = require('../config/winstonLogger');
 const messageKeys = require('../utils/message-keys');
-const fs = require('fs');
+const webvttParser = require('node-webvtt');
+const upload = require('../utils/upload');
+
 
 exports.getVideoUrl = async (req, res) => {
     try {
@@ -96,4 +98,83 @@ exports.downloadVideo = async (req, res) => {
             msg
         });
     }
+};
+
+
+/**
+ * Handle vtt file upload.
+ * Uses multer package to read form data: https://www.npmjs.com/package/multer
+ * Uses node-webvtt package to validate vtt file: https://www.npmjs.com/package/node-webvtt
+ *
+ * file structure returned by multer:
+ *  {
+ *    fieldname: 'video_webvtt_file',
+ *    originalname: 'fulica.vtt',
+ *    encoding: '7bit',
+ *    mimetype: 'text/vtt',
+ *    buffer: <Buffer xyz.....>,
+ *    size: 226
+ *  }
+ *
+ **/
+
+exports.uploadVideoTextTrack = async(req, res) => {
+    // https://attacomsian.com/blog/express-file-upload-multer
+    // https://www.npmjs.com/package/multer
+    logger.info('addVideoTextTrack called.');
+    console.log('addVideoTextTrack called.');
+
+    upload(req, res, async(err) => {
+
+        if ( err ) {
+
+            console.log("JUPAJUU");
+            console.log(err);
+
+            res.status(500);
+            return res.json({ message: messageKeys.ERROR_MALFORMED_WEBVTT_FILE });
+        }
+
+        const vttFile = req.file;
+        const eventId = req.body.eventId;
+
+        if (!vttFile) {
+            res.status(400);
+            res.json({
+                message: 'The vtt file is missing.',
+                msg: 'The vtt file is missing.'
+            });
+        }
+
+        try {
+            // https://www.npmjs.com/package/node-webvtt#parsing
+            webvttParser.parse(vttFile.buffer.toString());
+        } catch (err) {
+            logger.error(`vtt file seems to be malformed (${err.message}), please check. -- USER ${req.user.eppn}`);
+            res.status(400);
+            res.json({
+                message: messageKeys.ERROR_MALFORMED_WEBVTT_FILE,
+                msg: err.message
+            });
+        }
+            // all ok
+            logger.info('vtt file parsed ok, next file to opencast.');
+
+            try {
+                const response = await apiService.addWebVttFile(vttFile, eventId);
+                console.log(response.status);
+                if (response.status === 201) {
+                    logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
+                    res.status(response.status);
+                    res.json({message: messageKeys.SUCCESS_WEBVTT_UPLOAD});
+                } else {
+                    logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
+                    res.status(response.status);
+                    res.json({message : messageKeys.ERROR_WEBVTT_FILE_UPLOAD});
+                }
+            } catch (error) {
+                res.status(error.status);
+                res.json({message : error});
+            }
+    });
 };
