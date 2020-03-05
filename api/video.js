@@ -144,7 +144,7 @@ exports.uploadVideoTextTrack = async(req, res) => {
 
         try {
             // https://www.npmjs.com/package/node-webvtt#parsing
-            webvttParser.parse(vttFile.buffer.toString());
+            webvttParser.parse(vttFile.buffer.toString(), { strict: false });
         } catch (err) {
             logger.error(`vtt file seems to be malformed (${err.message}), please check. -- USER ${req.user.eppn}`);
             res.status(400);
