@@ -124,15 +124,9 @@ exports.uploadVideoTextTrack = async(req, res) => {
     // https://attacomsian.com/blog/express-file-upload-multer
     // https://www.npmjs.com/package/multer
     logger.info('addVideoTextTrack called.');
-    console.log('addVideoTextTrack called.');
-
     upload(req, res, async(err) => {
 
         if ( err ) {
-
-            console.log("JUPAJUU");
-            console.log(err);
-
             res.status(500);
             return res.json({ message: messageKeys.ERROR_MALFORMED_WEBVTT_FILE });
         }
@@ -164,7 +158,6 @@ exports.uploadVideoTextTrack = async(req, res) => {
 
             try {
                 const response = await apiService.addWebVttFile(vttFile, eventId);
-                console.log(response.status);
                 if (response.status === 201) {
                     logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
                     res.status(response.status);
