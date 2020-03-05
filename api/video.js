@@ -17,7 +17,9 @@ exports.getVideoUrl = async (req, res) => {
         const publications = await apiService.getPublicationsForEvent(req.params.id);
         const filteredPublication = publicationService.filterApiChannelPublication(publications);
         const mediaUrls = publicationService.getMediaUrlsFromPublication(req.params.id, filteredPublication);
-        res.json(mediaUrls);
+        const episode = await apiService.getEpisodeForEvent(req.params.id);
+        const episodeWithMediaUrls = eventsService.getVttWithMediaUrls(episode, mediaUrls);
+        res.json(episodeWithMediaUrls);
     } catch (error) {
         const msg = error.message;
         logger.error(`Error GET /videoUrl/:id ${msg} VIDEO ${req.params.id} USER ${req.user.eppn}`);

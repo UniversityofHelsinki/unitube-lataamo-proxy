@@ -147,6 +147,23 @@ exports.getAllEventsWithMediaFileMetadata = async (events) => {
     }));
 };
 
+exports.getVttWithMediaUrls = (episode, mediaUrls) => {
+
+    const mediaPackage = episode['search-results'].result.mediapackage;
+
+    if (mediaPackage) {
+        mediaUrls.forEach(mediaUrl => {
+            if (mediaPackage.id === mediaUrl.id) {
+                const foundVttFile = episode['search-results'].result.mediapackage.attachments.attachment.find(field => {
+                    return field.mimetype === 'text/vtt';
+                });
+                mediaUrl.vttFile = foundVttFile ? foundVttFile : ''
+            }
+        });
+    }
+    return mediaUrls;
+};
+
 exports.getAllEventsWithAcls = async (events) => {
     return Promise.all(events.map(async event => {
         let metadata = event.metadata;
