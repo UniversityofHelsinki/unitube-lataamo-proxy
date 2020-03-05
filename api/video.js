@@ -17,7 +17,9 @@ exports.getVideoUrl = async (req, res) => {
         const publications = await apiService.getPublicationsForEvent(req.params.id);
         const filteredPublication = publicationService.filterApiChannelPublication(publications);
         const mediaUrls = publicationService.getMediaUrlsFromPublication(req.params.id, filteredPublication);
-        res.json(mediaUrls);
+        const episode = await apiService.getEpisodeForEvent(req.params.id);
+        const episodeWithMediaUrls = eventsService.getVttWithMediaUrls(episode, mediaUrls);
+        res.json(episodeWithMediaUrls);
     } catch (error) {
         const msg = error.message;
         logger.error(`Error GET /videoUrl/:id ${msg} VIDEO ${req.params.id} USER ${req.user.eppn}`);
@@ -122,15 +124,9 @@ exports.uploadVideoTextTrack = async(req, res) => {
     // https://attacomsian.com/blog/express-file-upload-multer
     // https://www.npmjs.com/package/multer
     logger.info('addVideoTextTrack called.');
-    console.log('addVideoTextTrack called.');
-
     upload(req, res, async(err) => {
 
         if ( err ) {
-
-            console.log("JUPAJUU");
-            console.log(err);
-
             res.status(500);
             return res.json({ message: messageKeys.ERROR_MALFORMED_WEBVTT_FILE });
         }
@@ -140,7 +136,7 @@ exports.uploadVideoTextTrack = async(req, res) => {
 
         if (!vttFile) {
             res.status(400);
-            res.json({
+            return res.json({
                 message: 'The vtt file is missing.',
                 msg: 'The vtt file is missing.'
             });
@@ -148,11 +144,11 @@ exports.uploadVideoTextTrack = async(req, res) => {
 
         try {
             // https://www.npmjs.com/package/node-webvtt#parsing
-            webvttParser.parse(vttFile.buffer.toString());
+            webvttParser.parse(vttFile.buffer.toString(), { strict: false });
         } catch (err) {
             logger.error(`vtt file seems to be malformed (${err.message}), please check. -- USER ${req.user.eppn}`);
             res.status(400);
-            res.json({
+            return res.json({
                 message: messageKeys.ERROR_MALFORMED_WEBVTT_FILE,
                 msg: err.message
             });
@@ -162,7 +158,6 @@ exports.uploadVideoTextTrack = async(req, res) => {
 
             try {
                 const response = await apiService.addWebVttFile(vttFile, eventId);
-                console.log(response.status);
                 if (response.status === 201) {
                     logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
                     res.status(response.status);

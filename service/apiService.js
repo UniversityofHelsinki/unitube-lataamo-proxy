@@ -140,6 +140,12 @@ exports.getUserSeries = async (user) => {
     return response.data;
 };
 
+exports.getEpisodeForEvent = async (eventId) => {
+    const episodeUrl = constants.OCAST_EPISODE_PATH + '?id=' + eventId;
+    const response = await security.opencastBase.get(episodeUrl);
+    return response.data;
+};
+
 exports.getPublicationsForEvent = async (eventId) => {
     const publicationsUrl = constants.OCAST_VIDEOS_PATH + eventId + constants.OCAST_VIDEO_PUBLICATION_PATH;
     const response = await security.opencastBase.get(publicationsUrl);

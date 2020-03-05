@@ -38,6 +38,7 @@ const OCAST_TYPE_DUBLINCORE_SERIES = 'dublincore/series';
 const OCAST_EVENT_ASSET_EPISODE = '/assets/episode/';
 const OCAST_ADMIN_EVENT = '/admin-ng/event/';
 const OCAST_ASSETS_PATH = '/assets';
+const OCAST_EPISODE_PATH = '/search/episode.json';
 
 const OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER = '?filter=series:';
 
@@ -211,5 +212,6 @@ module.exports = {
     OCAST_EVENT_ASSET_EPISODE,
     OCAST_ADMIN_EVENT,
     OCAST_ASSETS_PATH,
-    WEBVTT_TEMPLATE
+    WEBVTT_TEMPLATE,
+    OCAST_EPISODE_PATH
 };
