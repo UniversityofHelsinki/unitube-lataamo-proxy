@@ -136,7 +136,7 @@ exports.uploadVideoTextTrack = async(req, res) => {
 
         if (!vttFile) {
             res.status(400);
-            res.json({
+            return res.json({
                 message: 'The vtt file is missing.',
                 msg: 'The vtt file is missing.'
             });
@@ -148,7 +148,7 @@ exports.uploadVideoTextTrack = async(req, res) => {
         } catch (err) {
             logger.error(`vtt file seems to be malformed (${err.message}), please check. -- USER ${req.user.eppn}`);
             res.status(400);
-            res.json({
+            return res.json({
                 message: messageKeys.ERROR_MALFORMED_WEBVTT_FILE,
                 msg: err.message
             });
