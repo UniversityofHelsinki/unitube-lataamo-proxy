@@ -142,7 +142,7 @@ exports.getUserSeries = async (user) => {
 
 exports.getEpisodeForEvent = async (eventId) => {
     const episodeUrl = constants.OCAST_EPISODE_PATH + '?id=' + eventId;
-    const response = await security.opencastBase.get(episodeUrl);
+    const response = await security.opencastPresentationBase.get(episodeUrl);
     return response.data;
 };
 
@@ -196,7 +196,7 @@ exports.addWebVttFile = async (vttFile, eventId) => {
             'Content-Length': bodyFormData.getLengthSync(),
             'Content-Type': 'multipart/form-data'
         };
-        return await security.opencastBase.post(assetsUrl, bodyFormData, {headers});
+        return await security.opencastPresentationBase.post(assetsUrl, bodyFormData, {headers});
     } catch (err) {
         return {
             status: 500,

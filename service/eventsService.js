@@ -8,6 +8,7 @@ const constants = require('../utils/constants');
 const {inboxSeriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
 const logger = require('../config/winstonLogger');
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
+const JsonFind = require('json-find');
 
 exports.filterEventsForClient = (ocResponseData) => {
 
@@ -149,18 +150,22 @@ exports.getAllEventsWithMediaFileMetadata = async (events) => {
 
 exports.getVttWithMediaUrls = (episode, mediaUrls) => {
 
-    const mediaPackage = episode['search-results'].result.mediapackage;
+    const json = JsonFind(episode);
 
-    if (mediaPackage) {
+    const mediaPackage = json.checkKey('mediapackage');
+
+    if (mediaPackage && Object.keys(mediaPackage).length > 0) {
         mediaUrls.forEach(mediaUrl => {
             if (mediaPackage.id === mediaUrl.id) {
-                const foundVttFile = episode['search-results'].result.mediapackage.attachments.attachment.find(field => {
+                const attachemets =  json.checkKey('attachment');
+                const foundVttFile = attachemets.find(field => {
                     return field.mimetype === 'text/vtt';
                 });
                 mediaUrl.vttFile = foundVttFile ? foundVttFile : ''
             }
         });
     }
+
     return mediaUrls;
 };
 
