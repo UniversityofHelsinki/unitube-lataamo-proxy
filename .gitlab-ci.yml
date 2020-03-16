@@ -40,7 +40,6 @@ test:
     - npm run coverage
   coverage: /All files\s*\|\s*([\d\.]+)/
 
-
 # Define the process for deploy stage to development environment
 deploy_dev:
   stage: deploy
@@ -49,7 +48,7 @@ deploy_dev:
   environment:
     name: development
   only:
-    - lataamo-403
+    - master
   script:
     - echo "====== Deploy to development server ========"
     - echo "====== Install rsync and openssh ========="
