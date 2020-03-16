@@ -46,7 +46,7 @@ deploy_dev:
   tags:
     - ohtu-build-1
   environment:
-    name: lataamo-403
+    name: lataamo-403 
   only:
     - master
   script:
