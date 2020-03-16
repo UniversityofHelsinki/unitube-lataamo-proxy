@@ -96,19 +96,6 @@ exports.upload = async (req, res) => {
     req.pipe(req.busboy); // Pipe it trough busboy
 
     req.busboy.on('file', (fieldname, file, filename, encoding, mimeType) => {
-        if(!mimeType.includes('video')){
-            deleteFile(uploadPath, uploadId);
-            res.status(415);
-            const msg = `${filename} is wrong file type`;
-            uploadLogger.log(ERROR_LEVEL, `POST /userVideos ${msg} USER: ${req.user.eppn} -- ${uploadId}. WRONG FILE TYPE ${mimeType}`);
-            file.resume();
-            return res.json({
-                message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO_WRONG_FILE_TYPE,
-                msg,
-                id: uploadId
-            });
-        }
-
         const startTime = new Date();
         uploadLogger.log(INFO_LEVEL, `Upload of '${filename}' started  USER: ${req.user.eppn} -- ${uploadId}`);
         // path to the file
