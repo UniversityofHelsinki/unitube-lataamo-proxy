@@ -196,7 +196,7 @@ exports.addWebVttFile = async (vttFile, eventId) => {
             'Content-Length': bodyFormData.getLengthSync(),
             'Content-Type': 'multipart/form-data'
         };
-        return await security.opencastPresentationBase.post(assetsUrl, bodyFormData, {headers});
+        return await security.opencastBase.post(assetsUrl, bodyFormData, {headers});
     } catch (err) {
         return {
             status: 500,
