@@ -46,9 +46,9 @@ deploy_dev:
   tags:
     - ohtu-build-1
   environment:
-    name: lataamo-403 
+    name: development
   only:
-    - master
+    - lataamo-403
   script:
     - echo "====== Deploy to development server ========"
     - echo "====== Install rsync and openssh ========="
