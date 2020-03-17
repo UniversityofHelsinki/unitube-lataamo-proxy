@@ -1,4 +1,5 @@
-const host = process.env.LATAAMO_OPENCAST_HOST;
+const adminHost = process.env.LATAAMO_OPENCAST_HOST;
+const presentationHost = process.env.LATAAMO_OPENCAST_PRESENTATION_HOST;
 const esbHost = process.env.ESB_HOST;
 const esbPersonsApiKey = process.env.ESB_PERSONS_API_KEY;
 const esbGroupsApiKey = process.env.ESB_GROUPS_API_KEY;
@@ -38,9 +39,18 @@ module.exports.shibbolethAuthentication = function (app, passport) {
 // instance of axios with a custom config.
 // ocast base url and authorization header
 module.exports.opencastBase = axios.create({
-    baseURL: host,
+    baseURL: adminHost,
     maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
     headers: {'authorization': auth},
+    validateStatus: () => { // https://github.com/axios/axios/issues/1143
+        return true;        // without this axios might throw error on non 200 responses
+    }
+});
+
+module.exports.opencastPresentationBase = axios.create({
+    baseURL: presentationHost,
+    headers: {'authorization': auth},
+    maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
     validateStatus: () => { // https://github.com/axios/axios/issues/1143
         return true;        // without this axios might throw error on non 200 responses
     }
