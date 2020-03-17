@@ -48,7 +48,7 @@ deploy_dev:
   environment:
     name: development
   only:
-    - master
+    - lataamo-403
   script:
     - echo "====== Deploy to development server ========"
     - echo "====== Install rsync and openssh ========="
