@@ -380,7 +380,7 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
     const auth = `Basic ${userpass}`;
     try {
 
-        let response = await fetch("http://localhost:8080" + videoUploadUrl, { method: 'POST',
+        let response = await fetch(process.env.LATAAMO_OPENCAST_HOST + videoUploadUrl, { method: 'POST',
             headers: {'authorization': auth}
             , body: bodyFormData});
 
