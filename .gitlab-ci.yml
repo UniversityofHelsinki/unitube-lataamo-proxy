@@ -33,7 +33,7 @@ build:
 
 # Define the process for test stage
 test:
-  stage: test
+  stage: node-fetch-test
   tags:
     - ohtu-build-1
   script:
