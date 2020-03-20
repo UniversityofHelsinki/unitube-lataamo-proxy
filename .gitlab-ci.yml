@@ -74,9 +74,9 @@ deploy_test:
   tags:
     - ohtu-build-1
   environment:
-    name: node-fetch-test
+    name: test
   only:
-    - test
+    - node-fetch-test
   script:
     - echo "====== Deploy to test server ========"
     - echo "====== Install rsync and openssh ========="
