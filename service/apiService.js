@@ -8,6 +8,7 @@ const logger = require('../config/winstonLogger');
 const userService = require('./userService');
 const eventsService = require('./eventsService');
 const messageKeys = require('../utils/message-keys');
+const fetch = require('node-fetch');
 
 //
 // This file is the façade for opencast server
@@ -372,16 +373,29 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
     // https://nodejs.org/api/fs.html#fs_fs_createreadstream_path_options
     bodyFormData.append('presenter', fs.createReadStream(filePathOnDisk));
 
+
+    const username = process.env.LATAAMO_OPENCAST_USER;
+    const password = process.env.LATAAMO_OPENCAST_PASS;
+    const userpass = Buffer.from(`${username}:${password}`).toString('base64');
+    const auth = `Basic ${userpass}`;
     try {
-        const headers = {
-            ...bodyFormData.getHeaders(),
-            'Content-Disposition': 'multipart/form-data',
-            'Content-Type': 'application/x-www-form-urlencoded'
+
+        let response = await fetch(process.env.LATAAMO_OPENCAST_HOST + videoUploadUrl, { method: 'POST',
+            headers: {'authorization': auth}
+            , body: bodyFormData});
+
+
+        const data = await response.json();
+        const resolvedData = {
+            ...data,
+            status: response.status,
+            data : data
         };
-        // do we want to wait ocast's reponse?
-        const response = await security.opencastBase.post(videoUploadUrl, bodyFormData, {headers});
-        return response;
+        console.log("HIT", resolvedData);
+        return resolvedData;
+
     } catch (err) {
+        console.log(err);
         return {
             status: 500,
             message: err.message
