@@ -76,7 +76,7 @@ deploy_test:
   environment:
     name: test
   only:
-    - node-fetch-test
+    - test
   script:
     - echo "====== Deploy to test server ========"
     - echo "====== Install rsync and openssh ========="
