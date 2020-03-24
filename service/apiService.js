@@ -360,6 +360,7 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
     const acls = constants.SERIES_ACL_TEMPLATE;
     const acls_tuotanto = constants.SERIES_ACL_TEMPLATE_TUOTANTO;
     const processingMetadata = constants.PROCESSING_METADATA;
+    
 
     let bodyFormData = new FormData();
     bodyFormData.append('metadata', JSON.stringify(metadataArray));
