@@ -6,7 +6,9 @@ const ESB_IAM_GROUPS_PATH = '/iam/group/unitube/search/';
 
 
 const ROLE_ANONYMOUS = 'ROLE_ANONYMOUS';
-const ROLE_KATSOMO = 'ROLE_KATSOMO';
+const ROLE_KATSOMO_TUOTANTO = 'ROLE_USER_KATSOMO_TUOTANTO';
+const ROLE_KATSOMO_TESTI = 'ROLE_USER_KATSOMO_TESTI';
+const ROLE_KATSOMO = 'ROLE_USER_KATSOMO';
 
 const SHIBBOLETH_COOKIE_NAME = '_shibsession_';
 
@@ -94,7 +96,7 @@ const SERIES_ACL_ROLE_KATSOMO =
     {
         'action': 'read',
         'allow': true,
-        'role': 'ROLE_KATSOMO'
+        'role': 'ROLE_USER_KATSOMO_TESTI'
     };
 
 const SERIES_ACL_TEMPLATE_TUOTANTO = [
@@ -137,7 +139,8 @@ const SERIES_ACL_TEMPLATE_WRITE_ENTRY = {
 };
 
 const ADD_TO_IAM_GROUPS = ['grp-', 'hy-', 'sys-'];
-const PUBLIC_ROLES = [ROLE_ANONYMOUS, ROLE_KATSOMO];
+//tästä pois ROLE_KATSOMO? lisää role_katsomo_Testi?
+const PUBLIC_ROLES = [ROLE_ANONYMOUS, ROLE_KATSOMO, ROLE_KATSOMO_TUOTANTO];
 
 const SERIES_METADATA = [
     {
@@ -168,6 +171,8 @@ module.exports = {
     ROLE_ANONYMOUS,
     SERIES_ACL_ROLE_KATSOMO,
     ROLE_KATSOMO,
+    ROLE_KATSOMO_TUOTANTO,
+    ROLE_KATSOMO_TESTI,
     ADD_TO_IAM_GROUPS,
     PUBLIC_ROLES,
     STATUS_PUBLISHED,

@@ -368,7 +368,6 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
     } else {
         bodyFormData.append('acl', JSON.stringify(acls));
     }
-    bodyFormData.append('acl', JSON.stringify(acls));
     bodyFormData.append('processing', JSON.stringify(processingMetadata));
     // https://nodejs.org/api/fs.html#fs_fs_createreadstream_path_options
     bodyFormData.append('presenter', fs.createReadStream(filePathOnDisk));
