@@ -14,6 +14,8 @@ const {seriesTitleForLoggedUser} = require('../utils/helpers'); // helper functi
 const ERROR_LEVEL = 'error';
 const INFO_LEVEL = 'info';
 
+const jobsService = require('../service/jobsService');
+
 
 // make sure the upload dir exists
 const ensureUploadDir = async (directory) => {
@@ -113,12 +115,19 @@ exports.upload = async (req, res) => {
             uploadLogger.log(INFO_LEVEL,
                 `Loading time with busboy ${timeDiff} milliseconds USER: ${req.user.eppn} -- ${uploadId}`);
 
+            // set upload job status
+            jobsService.setJobStatus(uploadId, 'STARTED');
+            res.status(202);
+            res.jobId = uploadId;
+            res.send('Upload job started. ID: ' + uploadId);
+
             // try to send the file to opencast
             const response = await apiService.uploadVideo(filePathOnDisk, filename, inboxSeries.identifier);
 
             if (response && response.status === 201) {
                 // on success clean file from disk and return 200
                 deleteFile(uploadPath, uploadId);
+                jobsService.setJobStatus(uploadId, 'FINISHED');
                 res.status(200);
                 uploadLogger.log(INFO_LEVEL,
                     `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)} USER: ${req.user.eppn} -- ${uploadId}`);
@@ -131,6 +140,7 @@ exports.upload = async (req, res) => {
             } else {
                 // on failure clean file from disk and return 500
                 deleteFile(uploadPath, uploadId);
+                jobsService.setJobStatus(uploadId, 'ERROR');
                 res.status(500);
                 const msg = `${filename} failed to upload to opencast.`;
                 uploadLogger.log(ERROR_LEVEL, `POST /userVideos ${msg} USER: ${req.user.eppn} -- ${uploadId} ${response}`);
