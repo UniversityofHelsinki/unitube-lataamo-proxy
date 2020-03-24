@@ -24,7 +24,7 @@ exports.publicRoleCount = (roles) => {
 
 /**
  * if NOT prod environment and has roleToCompare role (=ROLE_ANONYMOUS)
- *  - adds ROLE_KATSOMO role in roles if roles don't already have ROLE_KATSOMO role
+ *  - adds ROLE_KATSOMO_TESTI role in roles if roles don't already have ROLE_KATSOMO_TESTI role
  *
  * @param roleList
  * @param roleToCompare
@@ -40,7 +40,7 @@ exports.addRoleWhenTestEnvironment = (roleList, roleToCompare) => {
                 if (elem.role === roleToCompare) {
                     found = true;
                 }
-                if (elem.role === constants.ROLE_KATSOMO) {
+                if (elem.role === constants.ROLE_KATSOMO_TESTI) {
                     alreadyInRoleList = true;
                 }
             });
@@ -53,7 +53,7 @@ exports.addRoleWhenTestEnvironment = (roleList, roleToCompare) => {
 
 /**
  * if NOT prod environment
- *  - removes ROLE_KATSOMO role in roles
+ *  - removes ROLE_USER_KATSOMO_TUOTANTO role in roles
  *
  * @param roleList
  * @param roleToRemove

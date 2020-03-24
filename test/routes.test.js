@@ -811,7 +811,7 @@ describe('Fetching event from /event/id route', () => {
             { allow: true, role: 'ROLE_ADMIN', action: 'read' },
             { allow: true, role: 'ROLE_ADMIN', action: 'write' },
             { allow: true, role: 'ROLE_ANONYMOUS', action: 'read' },
-            { allow: true, role: 'ROLE_USER_KATSOMO_TUOTANTO', action: 'read' }
+            { allow: true, role: 'ROLE_USER_KATSOMO_TESTI', action: 'read' }
         ];
 
         const licenses = [
