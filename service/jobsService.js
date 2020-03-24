@@ -1,6 +1,6 @@
 let jobs = [];
 
-exports.getJob = (jobId) => {
+exports.getJob = jobId => {
     return jobs.find(job => job.id === jobId);
 };
 
@@ -17,5 +17,11 @@ exports.setJobStatus = (jobId, status) => {
         }
     } else {
         jobs.push({id: jobId, status: status});
+    }
+};
+
+exports.removeJob = jobId => {
+    if (jobs.length > 0) {
+        jobs = jobs.filter(job => job.id !== jobId);
     }
 };
