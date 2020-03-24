@@ -6,7 +6,7 @@ exports.getJob = (jobId) => {
 
 exports.setJobStatus = (jobId, status) => {
     if (jobs.length > 0 ) {
-        let foundJob = jobs.reduce(job => {
+        let foundJob = jobs.find(job => {
             return job.id === jobId;
         });
 
