@@ -10,11 +10,13 @@ const messageKeys = require('../utils/message-keys');
 const {inboxSeriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
 const constants = require('../utils/constants');
 const {seriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
+const jobsService = require('../service/jobsService');
+const HttpStatus = require('http-status-codes');
 
 const ERROR_LEVEL = 'error';
 const INFO_LEVEL = 'info';
 
-const jobsService = require('../service/jobsService');
+
 
 
 // make sure the upload dir exists
@@ -72,7 +74,7 @@ exports.upload = async (req, res) => {
     if (!ensureUploadDir(uploadPath)) {
         // upload dir failed log and return error
         uploadLogger.log(ERROR_LEVEL, `Upload dir unavailable '${uploadPath}' USER: ${req.user.eppn} -- ${uploadId}`);
-        res.status(500);
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR);
         const msg = 'Upload dir unavailable.';
         return res.json({
             message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
@@ -85,7 +87,7 @@ exports.upload = async (req, res) => {
     const inboxSeries = await returnUsersInboxSeries(loggedUser);
 
     if (!inboxSeries) {
-        res.status(500);
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR);
         const msg = 'Failed to resolve inboxSeries for user.';
         uploadLogger.log(ERROR_LEVEL, `POST /userVideos ${msg} USER: ${req.user.eppn} -- ${uploadId}`);
         return res.json({
@@ -117,18 +119,18 @@ exports.upload = async (req, res) => {
 
             // set upload job status
             jobsService.setJobStatus(uploadId, 'STARTED');
-            res.status(202);
+            res.status(HttpStatus.ACCEPTED);
             res.jobId = uploadId;
             res.send('Upload job started. ID: ' + uploadId);
 
             // try to send the file to opencast
             const response = await apiService.uploadVideo(filePathOnDisk, filename, inboxSeries.identifier);
 
-            if (response && response.status === 201) {
+            if (response && response.status === HttpStatus.CREATED) {
                 // on success clean file from disk and return 200
                 deleteFile(uploadPath, uploadId);
                 jobsService.setJobStatus(uploadId, 'FINISHED');
-                res.status(200);
+                res.status(HttpStatus.OK);
                 uploadLogger.log(INFO_LEVEL,
                     `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)} USER: ${req.user.eppn} -- ${uploadId}`);
                 const msg = `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)}`;
@@ -141,7 +143,7 @@ exports.upload = async (req, res) => {
                 // on failure clean file from disk and return 500
                 deleteFile(uploadPath, uploadId);
                 jobsService.setJobStatus(uploadId, 'ERROR');
-                res.status(500);
+                res.status(HttpStatus.INTERNAL_SERVER_ERROR);
                 const msg = `${filename} failed to upload to opencast.`;
                 uploadLogger.log(ERROR_LEVEL, `POST /userVideos ${msg} USER: ${req.user.eppn} -- ${uploadId} ${response}`);
                 return res.json({
