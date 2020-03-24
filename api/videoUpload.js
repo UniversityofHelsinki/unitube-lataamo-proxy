@@ -11,7 +11,7 @@ const {inboxSeriesTitleForLoggedUser} = require('../utils/helpers'); // helper f
 const constants = require('../utils/constants');
 const {seriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
 const jobsService = require('../service/jobsService');
-const HttpStatus = require('http-status-codes');
+const HttpStatus = require('http-status');
 
 const ERROR_LEVEL = 'error';
 const INFO_LEVEL = 'info';
