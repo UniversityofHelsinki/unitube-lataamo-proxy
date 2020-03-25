@@ -9,6 +9,7 @@ const series = require('./series');
 const videoUpload = require('./videoUpload');
 const iamGroups = require('./iamGroups');
 const persons = require('./persons');
+const jobs = require('./jobs');
 
 
 const swaggerUi = require('swagger-ui-express');
@@ -473,4 +474,6 @@ module.exports = function (router) {
      *           description: Unexpected error.
      */
     router.post('/videoTextTrack', video.uploadVideoTextTrack);
+
+    router.get('/monitor/:jobId', jobs.getJobStatus);
 };
