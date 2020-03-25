@@ -20,14 +20,14 @@ exports.getJobStatus =  (req, res) => {
             }
             res.json(job);
         } else {
-            res.status(500);
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR);
             res.json({
                 message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_JOB
             });
         }
     } catch (error) {
         const msg = error.message;
-        res.status(500);
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR);
         res.json({
             message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_JOB,
             msg
