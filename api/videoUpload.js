@@ -133,12 +133,6 @@ exports.upload = async (req, res) => {
                 res.status(HttpStatus.OK);
                 uploadLogger.log(INFO_LEVEL,
                     `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)} USER: ${req.user.eppn} -- ${uploadId}`);
-                const msg = `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)}`;
-                return res.json({
-                    message: messageKeys.SUCCESS_MESSAGE_VIDEO_UPLOAD,
-                    msg,
-                    id: uploadId
-                });
             } else {
                 // on failure clean file from disk and return 500
                 deleteFile(uploadPath, uploadId);
