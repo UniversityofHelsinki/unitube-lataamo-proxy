@@ -121,7 +121,7 @@ exports.upload = async (req, res) => {
             jobsService.setJobStatus(uploadId, 'STARTED');
             res.status(HttpStatus.ACCEPTED);
             res.jobId = uploadId;
-            res.send('Upload job started. ID: ' + uploadId);
+            res.json({id: uploadId, status: 'STARTED'});
 
             // try to send the file to opencast
             const response = await apiService.uploadVideo(filePathOnDisk, filename, inboxSeries.identifier);
