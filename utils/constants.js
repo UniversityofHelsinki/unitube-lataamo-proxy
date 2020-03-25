@@ -42,6 +42,10 @@ const OCAST_ADMIN_EVENT = '/admin-ng/event/';
 const OCAST_ASSETS_PATH = '/assets';
 const OCAST_EPISODE_PATH = '/search/episode.json';
 
+const JOB_STATUS_STARTED = 'STARTED';
+const JOB_STATUS_FINISHED = 'FINISHED';
+const JOB_STATUS_ERROR = 'ERROR';
+
 const OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER = '?filter=series:';
 
 const OCAST_VIDEOS_FILTER_USER_NAME = '?filter=title:';
@@ -218,5 +222,8 @@ module.exports = {
     OCAST_ADMIN_EVENT,
     OCAST_ASSETS_PATH,
     WEBVTT_TEMPLATE,
-    OCAST_EPISODE_PATH
+    OCAST_EPISODE_PATH,
+    JOB_STATUS_STARTED,
+    JOB_STATUS_FINISHED,
+    JOB_STATUS_ERROR
 };
