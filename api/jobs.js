@@ -12,7 +12,7 @@ exports.getJobStatus =  (req, res) => {
             res.status(HttpStatus.ACCEPTED);
         }
         if (job.status === constants.JOB_STATUS_FINISHED) {
-            res.status(HttpStatus.OK)
+            res.status(HttpStatus.CREATED)
         }
         if (job.status === constants.JOB_STATUS_ERROR) {
           res.status(HttpStatus.INTERNAL_SERVER_ERROR);
