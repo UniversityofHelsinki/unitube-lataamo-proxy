@@ -9,6 +9,7 @@ const series = require('./series');
 const videoUpload = require('./videoUpload');
 const iamGroups = require('./iamGroups');
 const persons = require('./persons');
+const jobs = require('./jobs');
 
 
 const swaggerUi = require('swagger-ui-express');
@@ -473,4 +474,29 @@ module.exports = function (router) {
      *           description: Unexpected error.
      */
     router.post('/videoTextTrack', video.uploadVideoTextTrack);
+
+    /**
+     * @swagger
+     *     /api/monitor/{jobId}:
+     *     get:
+     *       tags:
+     *         - retrieve
+     *       summary: Return job status by jobId.
+     *       description: Returns job status by jobId
+     *       parameters:
+     *         - in: path
+     *           name: jobId
+     *           required: true
+     *           description: ID of the job.
+     *       responses:
+     *         201:
+     *           description: Job is finished.
+     *         202:
+     *           description: Job is still processing
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         default:
+     *           description: Unexpected error
+     */
+    router.get('/monitor/:jobId', jobs.getJobStatus);
 };
