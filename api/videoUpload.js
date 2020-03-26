@@ -139,11 +139,6 @@ exports.upload = async (req, res) => {
                 res.status(HttpStatus.INTERNAL_SERVER_ERROR);
                 const msg = `${filename} failed to upload to opencast.`;
                 uploadLogger.log(ERROR_LEVEL, `POST /userVideos ${msg} USER: ${req.user.eppn} -- ${uploadId} ${response}`);
-                return res.json({
-                    message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
-                    msg,
-                    id: uploadId
-                });
             }
         });
     });
