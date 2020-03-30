@@ -13,9 +13,11 @@ exports.getJobStatus =  (req, res) => {
                 res.status(HttpStatus.ACCEPTED);
             }
             if (job.status === constants.JOB_STATUS_FINISHED) {
-                res.status(HttpStatus.CREATED)
+                jobService.removeJob(req.params.jobId);
+                res.status(HttpStatus.CREATED);
             }
             if (job.status === constants.JOB_STATUS_ERROR) {
+                jobService.removeJob(req.params.jobId);
                 res.status(HttpStatus.INTERNAL_SERVER_ERROR);
             }
             res.json(job);
