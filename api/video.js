@@ -9,7 +9,8 @@ const logger = require('../config/winstonLogger');
 const messageKeys = require('../utils/message-keys');
 const webvttParser = require('node-webvtt');
 const upload = require('../utils/upload');
-
+const path = require('path');
+const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 
 exports.getVideoUrl = async (req, res) => {
     try {
@@ -172,4 +173,28 @@ exports.uploadVideoTextTrack = async(req, res) => {
                 res.json({message : error});
             }
     });
+};
+
+exports.deleteVideoTextTrack = async(req, res) => {
+    logger.info('deleteVideoTextTrack called.');
+        const filePath = path.join(__dirname, `../files/empty.vtt`);
+
+        const vttFile = fs.createReadStream(filePath);
+        const eventId = req.body.eventId;
+
+        try {
+            const response = await apiService.addWebVttFile(vttFile, eventId);
+            if (response.status === 201) {
+                logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
+                res.status(response.status);
+                res.json({message: messageKeys.SUCCESS_WEBVTT_UPLOAD});
+            } else {
+                logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
+                res.status(response.status);
+                res.json({message : messageKeys.ERROR_WEBVTT_FILE_UPLOAD});
+            }
+        } catch (error) {
+            res.status(error.status);
+            res.json({message : error});
+        }
 };
