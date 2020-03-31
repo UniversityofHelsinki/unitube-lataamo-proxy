@@ -126,8 +126,6 @@ exports.uploadVideoTextTrack = async(req, res) => {
     // https://www.npmjs.com/package/multer
     logger.info('addVideoTextTrack called.');
     upload(req, res, async(err) => {
-        console.log(err);
-
         if ( err ) {
             res.status(500);
             return res.json({ message: messageKeys.ERROR_MALFORMED_WEBVTT_FILE });
@@ -135,9 +133,6 @@ exports.uploadVideoTextTrack = async(req, res) => {
 
         const vttFile = req.file;
         const eventId = req.body.eventId;
-
-        console.log(vttFile);
-        console.log(eventId);
 
         if (!vttFile) {
             res.status(400);
@@ -151,7 +146,6 @@ exports.uploadVideoTextTrack = async(req, res) => {
             // https://www.npmjs.com/package/node-webvtt#parsing
             webvttParser.parse(vttFile.buffer.toString(), { strict: false });
         } catch (err) {
-            console.log(err);
             logger.error(`vtt file seems to be malformed (${err.message}), please check. -- USER ${req.user.eppn}`);
             res.status(400);
             return res.json({
