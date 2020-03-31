@@ -236,6 +236,8 @@ describe('user video urls returned from /video/id events route', () => {
     // mock needed opencast api calls
         test.mockEventPublicationCall();
         test.mockEvent2PubcliationCall();
+        test.mockEventEpisodeCall();
+        test.mockeEvent2EpisodeCall();
     });
 
     it('should return highest quality video url', async () => {
@@ -248,9 +250,27 @@ describe('user video urls returned from /video/id events route', () => {
             .expect(200)
             .expect('Content-Type', /json/);
 
+        console.log(response.body);
         assert.isArray(response.body, 'Response should be an array');
         assert.lengthOf(response.body, 1, 'One video should be returned');
         assert.equal(response.body[0].url, 'https://ocast-devel-i1.it.helsinki.fi/static/mh_default_org/api/b419f01d-c203-4610-a1d4-a4b8904083d4/a9f5e413-1dcc-4832-a750-251a16893b2f/Samsung_and_RedBull_See_the_Unexpected_HDR_UHD_4K_Demo.mp4');
+    });
+
+    it('should return highest quality video url with correct vtt file', async () => {
+        let response = await supertest(app)
+            .get(LATAAMO_API_VIDEO_PATH + test.constants.TEST_EVENT_1_ID)
+            .set('eppn', 'SeriesOwnerEppn')
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
+            .expect(200)
+            .expect('Content-Type', /json/);
+
+        assert.isArray(response.body, 'Response should be an array');
+        assert.lengthOf(response.body, 1, 'One video should be returned');
+        assert.equal(response.body[0].url, 'https://ocast-devel-i1.it.helsinki.fi/static/mh_default_org/api/b419f01d-c203-4610-a1d4-a4b8904083d4/a9f5e413-1dcc-4832-a750-251a16893b2f/Samsung_and_RedBull_See_the_Unexpected_HDR_UHD_4K_Demo.mp4');
+        assert.equal(response.body[0].vttFile.id, 'd74f0d42-5084-468d-b224-f2ec5f058492');
+        assert.equal(response.body[0].vttFile.url, 'http://localhost:8080/static/mh_default_org/engage-player/2d72b653-02f6-4638-ba58-281b2d49af33/7578df20-9939-40dc-a305-7f83e225e9af/testwebvtt.vtt');
     });
 
     it('should return two highest quality videos', async () =>  {
@@ -267,6 +287,25 @@ describe('user video urls returned from /video/id events route', () => {
         assert.lengthOf(response.body, 2, 'Two videos should be returned');
         assert.equal(response.body[0].url, 'https://ocast-devel-i1.it.helsinki.fi/static/mh_default_org/api/9059828c-8cef-4caf-a878-d6fa0a359857/a4227095-2b28-4846-b538-a0c8129d54b8/SHOT4_4K_CC_injected.mp4');
         assert.equal(response.body[1].url, 'https://ocast-devel-i1.it.helsinki.fi/static/mh_default_org/api/9059828c-8cef-4caf-a878-d6fa0a359857/e11d592c-f67c-423c-a275-fb4d39868510/SHOT4_4K_CC_injected.mp4');
+    });
+
+    it('should return two highest quality videos with correct vtt files', async () =>  {
+        let response = await supertest(app)
+            .get(LATAAMO_API_VIDEO_PATH + test.constants.TEST_EVENT_2_ID)
+            .set('eppn', 'SeriesOwnerEppn')
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
+            .expect(200)
+            .expect('Content-Type', /json/);
+
+        assert.isArray(response.body, 'Response should be an array');
+        assert.lengthOf(response.body, 2, 'Two videos should be returned');
+        assert.equal(response.body[0].url, 'https://ocast-devel-i1.it.helsinki.fi/static/mh_default_org/api/9059828c-8cef-4caf-a878-d6fa0a359857/a4227095-2b28-4846-b538-a0c8129d54b8/SHOT4_4K_CC_injected.mp4');
+        assert.equal(response.body[1].url, 'https://ocast-devel-i1.it.helsinki.fi/static/mh_default_org/api/9059828c-8cef-4caf-a878-d6fa0a359857/e11d592c-f67c-423c-a275-fb4d39868510/SHOT4_4K_CC_injected.mp4');
+        assert.equal(response.body[0].vttFile.url, 'http://localhost:8080/static/mh_default_org/engage-player/2d72b653-02f6-4638-ba58-281b2d49af33/7578df20-9939-40dc-a305-7f83e225e9af/testwebvtt.vtt');
+        assert.equal(response.body[1].vttFile.url, 'http://localhost:8080/static/mh_default_org/engage-player/2d72b653-02f6-4638-ba58-281b2d49af33/7578df20-9939-40dc-a305-7f83e225e9af/testwebvtt.vtt');
+
     });
 
     afterEach(() => {
@@ -811,7 +850,8 @@ describe('Fetching event from /event/id route', () => {
             { allow: true, role: 'ROLE_ADMIN', action: 'read' },
             { allow: true, role: 'ROLE_ADMIN', action: 'write' },
             { allow: true, role: 'ROLE_ANONYMOUS', action: 'read' },
-            { allow: true, role: 'ROLE_KATSOMO', action: 'read' } ];
+            { allow: true, role: 'ROLE_USER_KATSOMO_TESTI', action: 'read' }
+        ];
 
         const licenses = [
             "UNITUBE-ALLRIGHTS",

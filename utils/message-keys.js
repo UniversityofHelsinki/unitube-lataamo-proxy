@@ -8,7 +8,6 @@ const ERROR_MESSAGE_FAILED_TO_UPDATE_SERIES_DETAILS = 'error-failed-to-update-se
 const ERROR_MESSAGE_FAILED_TO_GET_SERIES_LIST_FOR_USER = 'error-failed-to-get-series-list-for-user';
 const ERROR_MESSAGE_FAILED_TO_GET_EVENT_LIST_FOR_USER = 'error-failed-to-get-event-list-for-user';
 const ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO = 'error-failed-to-upload-video';
-const ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO_WRONG_FILE_TYPE = 'error_failed_to_upload_video_wrong_file_type';
 const ERROR_MESSAGE_FAILED_TO_UPDATE_EVENT_DETAILS = 'error-failed-to-update-event-details';
 const ERROR_MESSAGE_FAILED_TO_MOVE_EVENT_TO_TRASH ='error-failed-to-move-event-to-trash';
 const ERROR_MESSAGE_FAILED_TO_SAVE_SERIES = 'error-failed-to-save-series';
@@ -19,7 +18,12 @@ const ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_TRASH_NOT_ALLOWED = 'error_failed_to_s
 const ERROR_MESSAGE_FAILED_TO_GET_INBOX_EVENTS = 'error-failed-to-get-inbox-events';
 const ERROR_MESSAGE_FAILED_TO_GET_TRASH_EVENTS = 'error-failed-to-get-trash-events';
 const ERROR_MESSAGE_FAILED_TO_DOWNLOAD_VIDEO = 'error-failed-to-download-video';
+const ERROR_MESSAGE_FAILED_TO_GET_JOB = 'error-failed-to-get-job';
 const SUCCESS_MESSAGE_VIDEO_UPLOAD = 'success-video-sent-to-opencast';
+const ERROR_MALFORMED_WEBVTT_FILE = 'error-vtt-file-malformed';
+const SUCCESS_WEBVTT_UPLOAD = 'success-vtt-file-upload';
+const ERROR_LIMIT_FILE_SIZE = 'error-limit-file-size';
+const ERROR_WEBVTT_FILE_UPLOAD = 'error-webvtt-file-upload';
 
 module.exports = {
     ERROR_MESSAGE_FAILED_TO_GET_USER,
@@ -30,7 +34,6 @@ module.exports = {
     ERROR_MESSAGE_FAILED_TO_GET_SERIES_LIST_FOR_USER,
     ERROR_MESSAGE_FAILED_TO_GET_EVENT_LIST_FOR_USER,
     ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,
-    ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO_WRONG_FILE_TYPE,
     ERROR_MESSAGE_FAILED_TO_UPDATE_EVENT_DETAILS,
     ERROR_MESSAGE_FAILED_TO_MOVE_EVENT_TO_TRASH,
     ERROR_MESSAGE_FAILED_TO_SAVE_SERIES,
@@ -41,5 +44,10 @@ module.exports = {
     ERROR_MESSAGE_FAILED_TO_GET_INBOX_EVENTS,
     ERROR_MESSAGE_FAILED_TO_DOWNLOAD_VIDEO,
     ERROR_MESSAGE_FAILED_TO_GET_TRASH_EVENTS,
-    ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_TRASH_NOT_ALLOWED
+    ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_TRASH_NOT_ALLOWED,
+    ERROR_MALFORMED_WEBVTT_FILE,
+    SUCCESS_WEBVTT_UPLOAD,
+    ERROR_LIMIT_FILE_SIZE,
+    ERROR_WEBVTT_FILE_UPLOAD,
+    ERROR_MESSAGE_FAILED_TO_GET_JOB
 };

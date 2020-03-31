@@ -6,7 +6,9 @@ const ESB_IAM_GROUPS_PATH = '/iam/group/unitube/search/';
 
 
 const ROLE_ANONYMOUS = 'ROLE_ANONYMOUS';
-const ROLE_KATSOMO = 'ROLE_KATSOMO';
+const ROLE_KATSOMO_TUOTANTO = 'ROLE_USER_KATSOMO_TUOTANTO';
+const ROLE_KATSOMO_TESTI = 'ROLE_USER_KATSOMO_TESTI';
+const ROLE_KATSOMO = 'ROLE_USER_KATSOMO';
 
 const SHIBBOLETH_COOKIE_NAME = '_shibsession_';
 
@@ -35,6 +37,14 @@ const OCAST_METADATA_PATH = '/metadata';
 const OCAST_TYPE_QUERY_PARAMETER = '?type=';
 const OCAST_TYPE_DUBLINCORE_EPISODE = 'dublincore/episode';
 const OCAST_TYPE_DUBLINCORE_SERIES = 'dublincore/series';
+const OCAST_EVENT_ASSET_EPISODE = '/assets/episode/';
+const OCAST_ADMIN_EVENT = '/admin-ng/event/';
+const OCAST_ASSETS_PATH = '/assets';
+const OCAST_EPISODE_PATH = '/search/episode.json';
+
+const JOB_STATUS_STARTED = 'STARTED';
+const JOB_STATUS_FINISHED = 'FINISHED';
+const JOB_STATUS_ERROR = 'ERROR';
 
 const OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER = '?filter=series:';
 
@@ -42,6 +52,28 @@ const OCAST_VIDEOS_FILTER_USER_NAME = '?filter=title:';
 
 const UPDATE_SERIES = 'update_series';
 const CREATE_SERIES = 'create_series';
+
+const WEBVTT_TEMPLATE =  {
+    "assets": {
+        "options": [
+            {
+                "id": "attachment_captions_webvtt",
+                "type": "attachment",
+                "flavorType": "text",
+                "flavorSubType": "vtt",
+                "displayOrder": 3,
+                "title": "EVENTS.EVENTS.NEW.UPLOAD_ASSET.OPTION.CAPTIONS_WEBVTT"
+            }
+        ]
+    },
+    "processing": {
+        "workflow": "publish-uploaded-assets",
+        "configuration": {
+            "downloadSourceflavorsExist": "true",
+            "download-source-flavors": "text/vtt"
+        }
+    }
+};
 
 const SERIES_ACL_TEMPLATE = [
     {
@@ -68,7 +100,7 @@ const SERIES_ACL_ROLE_KATSOMO =
     {
         'action': 'read',
         'allow': true,
-        'role': 'ROLE_KATSOMO'
+        'role': 'ROLE_USER_KATSOMO_TESTI'
     };
 
 const SERIES_ACL_TEMPLATE_TUOTANTO = [
@@ -111,7 +143,8 @@ const SERIES_ACL_TEMPLATE_WRITE_ENTRY = {
 };
 
 const ADD_TO_IAM_GROUPS = ['grp-', 'hy-', 'sys-'];
-const PUBLIC_ROLES = [ROLE_ANONYMOUS, ROLE_KATSOMO];
+//tästä pois ROLE_KATSOMO? lisää role_katsomo_Testi?
+const PUBLIC_ROLES = [ROLE_ANONYMOUS, ROLE_KATSOMO, ROLE_KATSOMO_TUOTANTO];
 
 const SERIES_METADATA = [
     {
@@ -142,6 +175,8 @@ module.exports = {
     ROLE_ANONYMOUS,
     SERIES_ACL_ROLE_KATSOMO,
     ROLE_KATSOMO,
+    ROLE_KATSOMO_TUOTANTO,
+    ROLE_KATSOMO_TESTI,
     ADD_TO_IAM_GROUPS,
     PUBLIC_ROLES,
     STATUS_PUBLISHED,
@@ -182,5 +217,13 @@ module.exports = {
     INBOX,
     OPENCAST_STATE_SUCCEEDED,
     TRASH,
-    SHIBBOLETH_COOKIE_NAME
+    SHIBBOLETH_COOKIE_NAME,
+    OCAST_EVENT_ASSET_EPISODE,
+    OCAST_ADMIN_EVENT,
+    OCAST_ASSETS_PATH,
+    WEBVTT_TEMPLATE,
+    OCAST_EPISODE_PATH,
+    JOB_STATUS_STARTED,
+    JOB_STATUS_FINISHED,
+    JOB_STATUS_ERROR
 };

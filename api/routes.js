@@ -9,6 +9,8 @@ const series = require('./series');
 const videoUpload = require('./videoUpload');
 const iamGroups = require('./iamGroups');
 const persons = require('./persons');
+const jobs = require('./jobs');
+
 
 const swaggerUi = require('swagger-ui-express');
 const apiSpecs = require('../config/swagger'); // swagger config
@@ -19,34 +21,34 @@ module.exports = function (router) {
     router.get('/api-docs', swaggerUi.setup(apiSpecs));
 
     /**
-     * @swagger
-     *     /api:
-     *     get:
+     * @swagger
+     *     /api:
+     *     get:
      *       tags:
      *         - retrieve
-     *       summary: Return status message (ping).
+     *       summary: Return status message (ping).
      *       responses:
      *         304:
-     *           description: A status message (ping) with version info.
+     *           description: A status message (ping) with version info.
      *         default:
-     *           description: Unexpected error    
+     *           description: Unexpected error
      */
     router.get('/info', api.apiInfo);
 
     /**
-     * @swagger
-     *     /api/user:
-     *     get:
+     * @swagger
+     *     /api/user:
+     *     get:
      *       tags:
      *         - retrieve
-     *       summary: Returns the logged in user.
+     *       summary: Returns the logged in user.
      *       responses:
      *         200:
      *           description: A user object in JSON.
      *         401:
      *           description: Not authenticated. Required Shibboleth headers not present in the request.
      *         default:
-     *           description: Unexpected error     
+     *           description: Unexpected error
      */
     router.get('/user', user.userInfo);
 
@@ -54,13 +56,13 @@ module.exports = function (router) {
     router.get('/logout', user.logout);
 
     /**
-     * @swagger
+     * @swagger
      *     /api/event/{id}:
      *     get:
      *       tags:
      *         - retrieve
      *       summary: Return video's details by ID.
-     *       description: Returns selected video's information.
+     *       description: Returns selected video's information.
      *       parameters:
      *         - in: path
      *           name: id
@@ -70,18 +72,18 @@ module.exports = function (router) {
      *         401:
      *           description: Not authenticated. Required Shibboleth headers not present in the request.
      *         default:
-     *           description: Unexpected error    
+     *           description: Unexpected error
      */
     router.get('/event/:id', event.getEvent);
 
     /**
-     * @swagger
+     * @swagger
      *     /api/videoUrl/{id}:
      *     get:
      *       tags:
      *         - retrieve
      *       summary: Return video's highest quality media URL's by ID.
-     *       description: Returns list of selected video's highest quality media URL's (url to video(s) file(s)).
+     *       description: Returns list of selected video's highest quality media URL's (url to video(s) file(s)).
      *       parameters:
      *         - in: path
      *           name: id
@@ -96,13 +98,13 @@ module.exports = function (router) {
     router.get('/videoUrl/:id', video.getVideoUrl);
 
     /**
-     * @swagger
+     * @swagger
      *     /api/series/{id}:
      *     get:
      *       tags:
      *         - retrieve
      *       summary: Return series by ID.
-     *       description: Returns selected series media and publish info
+     *       description: Returns selected series media and publish info
      *       parameters:
      *         - in: path
      *           name: id
@@ -119,7 +121,7 @@ module.exports = function (router) {
     router.get('/series/:id', series.getSeries);
 
     /**
-     * @swagger
+     * @swagger
      *     /api/series/{id}:
      *     put:
      *       tags:
@@ -152,18 +154,18 @@ module.exports = function (router) {
      *         401:
      *           description: Not authenticated. Required Shibboleth headers not present in the request.
      *         500:
-     *           description: Internal server error, an error occurred.    
+     *           description: Internal server error, an error occurred.
      */
     router.put('/series/:id', series.updateSeries);
 
     /**
-     * @swagger
+     * @swagger
      *     /api/userInboxEvents:
      *     get:
      *       tags:
      *         - retrieve
      *       summary: Return user's inbox events.
-     *       description: Returns inbox series events for logged in user.
+     *       description: Returns inbox series events for logged in user.
      *       responses:
      *         200:
      *           description: List of inbox series events.
@@ -175,13 +177,13 @@ module.exports = function (router) {
     router.get('/userInboxEvents', event.getInboxEvents);
 
     /**
-     * @swagger
+     * @swagger
      *     /api/userTrashEvents:
      *     get:
      *       tags:
      *         - retrieve
      *       summary: Return user's trash events.
-     *       description: Returns trash series events for logged in user.
+     *       description: Returns trash series events for logged in user.
      *       responses:
      *         200:
      *           description: List of trash series events.
@@ -193,13 +195,13 @@ module.exports = function (router) {
     router.get('/userTrashEvents', event.getTrashEvents);
 
     /**
-     * @swagger
+     * @swagger
      *     /api/userSeries:
      *     get:
      *       tags:
      *         - retrieve
      *       summary: Return user's series without inbox series.
-     *       description: Returns series for logged in user. These series are the ones user is listed as contributor.
+     *       description: Returns series for logged in user. These series are the ones user is listed as contributor.
      *                    Published info of series is also returned.
      *       responses:
      *         200:
@@ -213,13 +215,13 @@ module.exports = function (router) {
 
 
     /**
-     * @swagger
+     * @swagger
      *     /api/userSeries:
      *     get:
      *       tags:
      *         - retrieve
      *       summary: Return user's series.
-     *       description: Returns series for logged in user. These series are the ones user is listed as contributor.
+     *       description: Returns series for logged in user. These series are the ones user is listed as contributor.
      *                    Published info of series is also returned.
      *       responses:
      *         200:
@@ -232,31 +234,31 @@ module.exports = function (router) {
     router.get('/getUserSeriesDropDownList', series.getUserSeriesDropDownList);
 
     /**
-    * @swagger
-    *     /api/userVideos:
-    *     get:
-    *       tags:
-    *         - retrieve
-    *       summary: Returns user's videos.
-    *       description: Returns videos for logged user. Returns the videos that are connected to user's series.
-    *       responses:
-    *         200:
-    *           description: List of videos.
-    *         401:
-    *           description: Not authenticated. Required Shibboleth headers not present in the request.
-    *         500:
-    *           description: Internal server error, an error occurred.
-    */ 
+     * @swagger
+     *     /api/userVideos:
+     *     get:
+     *       tags:
+     *         - retrieve
+     *       summary: Returns user's videos.
+     *       description: Returns videos for logged user. Returns the videos that are connected to user's series.
+     *       responses:
+     *         200:
+     *           description: List of videos.
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         500:
+     *           description: Internal server error, an error occurred.
+     */
     router.get('/userVideos', video.getUserVideos);
 
     /**
-     * @swagger
+     * @swagger
      *     /api/userVideos:
      *     post:
      *       tags:
      *         - create
      *       summary: Upload a video file.
-     *       description: Upload a video file to Opencast service. Video is saved to Lataamo proxy before sending to Opencast.
+     *       description: Upload a video file to Opencast service. Video is saved to Lataamo proxy before sending to Opencast.
      *       consumes:
      *         - multipart/form-data
      *       parameters:
@@ -275,7 +277,7 @@ module.exports = function (router) {
     router.post('/userVideos', videoUpload.upload);
 
     /**
-     * @swagger
+     * @swagger
      *     /api/userVideos/{id}:
      *     put:
      *       tags:
@@ -313,12 +315,12 @@ module.exports = function (router) {
      *         403:
      *           description: Forbidden. Event (video) has an active transaction in progress on the Opencast server.
      *         500:
-     *           description: Internal server error, an error occurred.    
+     *           description: Internal server error, an error occurred.
      */
     router.put('/userVideos/:id', video.updateVideo);
 
     /**
-     * @swagger
+     * @swagger
      *     /api/moveEventToTrash/{id}:
      *     put:
      *       tags:
@@ -356,12 +358,12 @@ module.exports = function (router) {
      *         403:
      *           description: Forbidden. Event (video) has an active transaction in progress on the Opencast server.
      *         500:
-     *           description: Internal server error, an error occurred.    
+     *           description: Internal server error, an error occurred.
      */
     router.put('/moveEventToTrash/:id', event.moveToTrash);
 
     /**
-     * @swagger
+     * @swagger
      *     /api/series:
      *     post:
      *       tags:
@@ -402,18 +404,18 @@ module.exports = function (router) {
      *         403:
      *           description: Forbidden. Series' name contained "inbox".
      *         500:
-     *           description: Internal server error, an error occurred.    
+     *           description: Internal server error, an error occurred.
      */
     router.post('/series', series.createSeries);
 
     /**
-     * @swagger
+     * @swagger
      *     /iamGroups/:query:
      *     get:
      *       tags:
      *         - retrieve
      *       summary: Return iam groups by query
-     *       description: Returns iam group(s) by query
+     *       description: Returns iam group(s) by query
      *       parameters:
      *         - in: path
      *           name: path
@@ -423,18 +425,18 @@ module.exports = function (router) {
      *         401:
      *           description: Not authenticated. Required Shibboleth headers not present in the request.
      *         default:
-     *           description: Unexpected error    
+     *           description: Unexpected error
      */
     router.get('/iamGroups/:query', iamGroups.getIamGroups);
 
     /**
-     * @swagger
+     * @swagger
      *     /persons/:query:
      *     get:
      *       tags:
      *         - retrieve
      *       summary: Return persons by query
-     *       description: Returns person(s) by query
+     *       description: Returns person(s) by query
      *       parameters:
      *         - in: path
      *           name: path
@@ -444,10 +446,57 @@ module.exports = function (router) {
      *         401:
      *           description: Not authenticated. Required Shibboleth headers not present in the request.
      *         default:
-     *           description: Unexpected error    
+     *           description: Unexpected error
      */
     router.get('/persons/:query', persons.getPersons);
 
     router.post('/download' , video.downloadVideo);
 
+    /**
+     * @swagger
+     *     api/videoTextTrack:
+     *     post:
+     *       tags:
+     *         - create
+     *       summary: Receive a video text track file (WebVTT) for a video (opencast event)
+     *       description: Receive video text track file (WebVTT) for a video identified by eventId and send it to opencast server.
+     *       parameters:
+     *         - in: body
+     *           description: multipart/form-data from the client
+     *       responses:
+     *         200:
+     *           description: File was successfully received and sent to opencast for further processing.
+     *         400:
+     *           description: In-case of bad request, wrong file format etc.
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         default:
+     *           description: Unexpected error.
+     */
+    router.post('/videoTextTrack', video.uploadVideoTextTrack);
+
+    /**
+     * @swagger
+     *     /api/monitor/{jobId}:
+     *     get:
+     *       tags:
+     *         - retrieve
+     *       summary: Return job status by jobId.
+     *       description: Returns job status by jobId
+     *       parameters:
+     *         - in: path
+     *           name: jobId
+     *           required: true
+     *           description: ID of the job.
+     *       responses:
+     *         201:
+     *           description: Job is finished.
+     *         202:
+     *           description: Job is still processing
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         default:
+     *           description: Unexpected error
+     */
+    router.get('/monitor/:jobId', jobs.getJobStatus);
 };

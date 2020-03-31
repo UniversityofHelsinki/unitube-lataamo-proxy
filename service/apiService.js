@@ -8,6 +8,7 @@ const logger = require('../config/winstonLogger');
 const userService = require('./userService');
 const eventsService = require('./eventsService');
 const messageKeys = require('../utils/message-keys');
+const fetch = require('node-fetch');
 
 //
 // This file is the façade for opencast server
@@ -140,6 +141,12 @@ exports.getUserSeries = async (user) => {
     return response.data;
 };
 
+exports.getEpisodeForEvent = async (eventId) => {
+    const episodeUrl = constants.OCAST_EPISODE_PATH + '?id=' + eventId;
+    const response = await security.opencastPresentationBase.get(episodeUrl);
+    return response.data;
+};
+
 exports.getPublicationsForEvent = async (eventId) => {
     const publicationsUrl = constants.OCAST_VIDEOS_PATH + eventId + constants.OCAST_VIDEO_PUBLICATION_PATH;
     const response = await security.opencastBase.get(publicationsUrl);
@@ -171,6 +178,33 @@ exports.getMetadataForEvent = async (event) => {
     return response.data;
 };
 
+exports.getMediaPackageForEvent = async (eventId) => {
+    const mediaPackageUrl = constants.OCAST_EVENT_ASSET_EPISODE + eventId;
+    const response = await security.opencastBase.get(mediaPackageUrl);
+    return response.data;
+};
+
+exports.addWebVttFile = async (vttFile, eventId) => {
+    const assetsUrl = constants.OCAST_ADMIN_EVENT + eventId + constants.OCAST_ASSETS_PATH;
+    let bodyFormData = new FormData();
+    bodyFormData.append('attachment_captions_webvtt', vttFile.buffer, {
+        filename: vttFile.originalname
+    });
+    bodyFormData.append('metadata', JSON.stringify(constants.WEBVTT_TEMPLATE));
+    try {
+        const headers = {
+            ...bodyFormData.getHeaders(),
+            'Content-Length': bodyFormData.getLengthSync(),
+            'Content-Type': 'multipart/form-data'
+        };
+        return await security.opencastBase.post(assetsUrl, bodyFormData, {headers});
+    } catch (err) {
+        return {
+            status: 500,
+            message: err.message
+        };
+    }
+};
 
 exports.updateEventMetadata = async (metadata, eventId, isTrash, user) => {
     try {
@@ -327,6 +361,7 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
     const acls_tuotanto = constants.SERIES_ACL_TEMPLATE_TUOTANTO;
     const processingMetadata = constants.PROCESSING_METADATA;
 
+
     let bodyFormData = new FormData();
     bodyFormData.append('metadata', JSON.stringify(metadataArray));
     if (process.env.ENVIRONMENT === 'prod') {
@@ -334,20 +369,30 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
     } else {
         bodyFormData.append('acl', JSON.stringify(acls));
     }
-    bodyFormData.append('acl', JSON.stringify(acls));
     bodyFormData.append('processing', JSON.stringify(processingMetadata));
     // https://nodejs.org/api/fs.html#fs_fs_createreadstream_path_options
     bodyFormData.append('presenter', fs.createReadStream(filePathOnDisk));
 
+
+    const username = process.env.LATAAMO_OPENCAST_USER;
+    const password = process.env.LATAAMO_OPENCAST_PASS;
+    const userpass = Buffer.from(`${username}:${password}`).toString('base64');
+    const auth = `Basic ${userpass}`;
     try {
-        const headers = {
-            ...bodyFormData.getHeaders(),
-            'Content-Disposition': 'multipart/form-data',
-            'Content-Type': 'application/x-www-form-urlencoded'
+
+        let response = await fetch(process.env.LATAAMO_OPENCAST_HOST + videoUploadUrl, { method: 'POST',
+            headers: {'authorization': auth}
+            , body: bodyFormData});
+
+
+        const data = await response.json();
+        const resolvedData = {
+            ...data,
+            status: response.status,
+            data : data
         };
-        // do we want to wait ocast's reponse?
-        const response = await security.opencastBase.post(videoUploadUrl, bodyFormData, {headers});
-        return response;
+        return resolvedData;
+
     } catch (err) {
         return {
             status: 500,

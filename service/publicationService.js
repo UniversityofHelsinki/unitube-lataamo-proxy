@@ -64,7 +64,7 @@ exports.getMediaUrlsFromPublication = (eventId , publication) => {
         filteredMedias = filterOnlyHighestQualityPublications(publication[0].media);
         if (filteredMedias && filteredMedias.length > 0) {
             filteredMedias.some(media =>  {
-                mediaUrls.push({id: eventId, url: media.url, duration: moment.duration(media.duration, 'milliseconds').format('HH:mm:ss', {trim:false}), resolution: `${media.height}x${media.width}`});
+                mediaUrls.push({id: eventId, url: media.url, duration: moment.duration(media.duration, 'milliseconds').format('HH:mm:ss', {trim:false}), resolution: `${media.width}x${media.height}`});
             });
         }
     } else {

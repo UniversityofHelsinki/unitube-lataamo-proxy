@@ -8,6 +8,7 @@ const constants = require('../utils/constants');
 const {inboxSeriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
 const logger = require('../config/winstonLogger');
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
+const JsonFind = require('json-find');
 
 exports.filterEventsForClient = (ocResponseData) => {
 
@@ -17,19 +18,46 @@ exports.filterEventsForClient = (ocResponseData) => {
 
     const eventArray = [];
     ocResponseData.forEach(event => {
-        eventArray.push({
-            'identifier': event.identifier,
-            'title': event.title,
-            'description' : event.description,
-            'license' : calculateLicensePropertyForVideo(event),
-            'duration': moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format('HH:mm:ss', {trim:false}),
-            'creator': event.creator,
-            'processing_state' : event.processing_state,
-            'visibility' : calculateVisibilityPropertyForVideo(event),
-            'created': event.created,
-            'series': event.series.title,
-            'media' : calculateMediaPropertyForVideo(event)
-        });
+            eventArray.push({
+                'identifier': event.identifier,
+                'title': event.title,
+                'description' : event.description,
+                'license' : calculateLicensePropertyForVideo(event),
+                'duration': moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format('HH:mm:ss', {trim:false}),
+                'creator': event.creator,
+                'processing_state' : event.processing_state,
+                'visibility' : calculateVisibilityPropertyForVideo(event),
+                'created': event.created,
+                'series': event.series.title,
+                'media' : calculateMediaPropertyForVideo(event)
+            });
+    });
+    return eventArray;
+};
+
+exports.filterEventsForClientTrash = (ocResponseData) => {
+
+    if(!ocResponseData){
+        return [];
+    }
+
+    const eventArray = [];
+    ocResponseData.forEach(event => {
+        if(event.processing_state!=='FAILED'){
+            eventArray.push({
+                'identifier': event.identifier,
+                'title': event.title,
+                'description' : event.description,
+                'license' : calculateLicensePropertyForVideo(event),
+                'duration': moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format('HH:mm:ss', {trim:false}),
+                'creator': event.creator,
+                'processing_state' : event.processing_state,
+                'visibility' : calculateVisibilityPropertyForVideo(event),
+                'created': event.created,
+                'series': event.series.title,
+                'media' : calculateMediaPropertyForVideo(event)
+            });
+        }
     });
     return eventArray;
 };
@@ -64,7 +92,7 @@ exports.calculateVisibilityProperty = (event) => {
 const calculateVisibilityPropertyForVideo = (video) => {
     const visibility = [];
 
-    if (commonService.publicRoleCount(video.acls) === 2) { //video has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
+    if (commonService.publicRoleCount(video.acls) >= 1) { //video has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
         visibility.push(constants.STATUS_PUBLISHED);
     } else {
         visibility.push(constants.STATUS_PRIVATE);
@@ -118,6 +146,27 @@ exports.getAllEventsWithMediaFileMetadata = async (events) => {
             mediaFileMetadata : mediaFileMetadata
         };
     }));
+};
+
+exports.getVttWithMediaUrls = (episode, mediaUrls) => {
+
+    const json = JsonFind(episode);
+
+    const mediaPackage = json.checkKey('mediapackage');
+
+    if (mediaPackage && Object.keys(mediaPackage).length > 0) {
+        mediaUrls.forEach(mediaUrl => {
+            if (mediaPackage.id === mediaUrl.id) {
+                const attachemets =  json.checkKey('attachment');
+                const foundVttFile = attachemets.find(field => {
+                    return field.mimetype === 'text/vtt';
+                });
+                mediaUrl.vttFile = foundVttFile ? foundVttFile : ''
+            }
+        });
+    }
+
+    return mediaUrls;
 };
 
 exports.getAllEventsWithAcls = async (events) => {
