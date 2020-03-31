@@ -133,7 +133,7 @@ exports.uploadVideoTextTrack = async(req, res) => {
         }
 
         const vttFile = req.file;
-        const eventId = req.body.eventId;
+        const eventId = req.params.eventId;
 
         if (!vttFile) {
             res.status(400);
@@ -178,12 +178,11 @@ exports.uploadVideoTextTrack = async(req, res) => {
 exports.deleteVideoTextTrack = async(req, res) => {
     logger.info('deleteVideoTextTrack called.');
         const filePath = path.join(__dirname, `../files/empty.vtt`);
-
         const vttFile = fs.createReadStream(filePath);
-        const eventId = req.body.eventId;
+        const eventId = req.params.eventId;
 
         try {
-            const response = await apiService.addWebVttFile(vttFile, eventId);
+            const response = await apiService.deleteWebVttFile(vttFile, eventId);
             if (response.status === 201) {
                 logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
                 res.status(response.status);
@@ -191,10 +190,10 @@ exports.deleteVideoTextTrack = async(req, res) => {
             } else {
                 logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
                 res.status(response.status);
-                res.json({message : messageKeys.ERROR_WEBVTT_FILE_UPLOAD});
+                res.json({message: messageKeys.ERROR_WEBVTT_FILE_UPLOAD});
             }
         } catch (error) {
             res.status(error.status);
-            res.json({message : error});
+            res.json({message: error});
         }
 };

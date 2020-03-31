@@ -497,7 +497,7 @@ module.exports = function (router) {
      *         default:
      *           description: Unexpected error.
      */
-    router.delete('/deleteVideoTextTrack/:eventId', video.deleteVideoTextTrack);
+    router.delete('/videoTextTrack/:eventId', video.deleteVideoTextTrack);
 
 
     /**
