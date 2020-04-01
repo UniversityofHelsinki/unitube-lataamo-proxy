@@ -1,3 +1,3 @@
 const NodeCache = require("node-cache");
 
-module.exports = new NodeCache();
+module.exports = new NodeCache({stdTTL: 0, checkperiod: 0});
