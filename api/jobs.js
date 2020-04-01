@@ -8,7 +8,7 @@ exports.getJobStatus =  (req, res) => {
     try {
         logger.info(`GET /monitor/:jobId ${req.params.jobId}`);
         const job = jobService.getJob(req.params.jobId);
-        if (job) {
+        if (job && job.status) {
             if (job.status === constants.JOB_STATUS_STARTED) {
                 res.status(HttpStatus.ACCEPTED);
             }
@@ -22,6 +22,7 @@ exports.getJobStatus =  (req, res) => {
             }
             res.json(job);
         } else {
+            logger.error(`Error in getting job status job is ${job} and job status is ${job.status}`);
             res.status(HttpStatus.INTERNAL_SERVER_ERROR);
             res.json({
                 message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_JOB
@@ -29,6 +30,7 @@ exports.getJobStatus =  (req, res) => {
         }
     } catch (error) {
         const msg = error.message;
+        logger.error(`Error in getting job: ${error} message : ${msg}`);
         res.status(HttpStatus.INTERNAL_SERVER_ERROR);
         res.json({
             message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_JOB,
