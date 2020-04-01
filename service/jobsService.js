@@ -1,31 +1,28 @@
 const logger = require('../config/winstonLogger');
+const cacheService = require('../service/cacheService');
 
-let jobs = [];
 
 exports.getJob = jobId => {
+    let keys = cacheService.getKeys();
+    let jobs = cacheService.getAll(keys);
+    console.log(`finding job with jobId ${jobId} from jobs ` +  JSON.stringify(jobs));
     logger.info(`finding job with jobId ${jobId} from jobs ` +  JSON.stringify(jobs));
-    return jobs.find(job => job.id === jobId);
+    let foundJob = cacheService.get(jobId);
+    console.log("found job " , foundJob);
+    return foundJob;
 };
 
 exports.setJobStatus = (jobId, status) => {
-    if (jobs.length > 0 ) {
-        let foundJob = jobs.find(job => {
-            return job.id === jobId;
-        });
-
-        if (foundJob) {
-            foundJob.status = status;
-        } else {
-            jobs.push({id: jobId, status: status});
-        }
-    } else {
-        jobs.push({id: jobId, status: status});
-    }
+    let keys = cacheService.getKeys();
+    let jobs = cacheService.getAll(keys);
+    console.log(`updating job with jobId ${jobId} from jobs ` +  JSON.stringify(jobs));
+    logger.info(`updating job with jobId ${jobId} from jobs ` +  JSON.stringify(jobs));
+    cacheService.updateCache(jobId, {jobId, status: status});
 };
 
 exports.removeJob = jobId => {
+    let keys = cacheService.getKeys();
+    let jobs = cacheService.getAll(keys);
     logger.info(`removing job with jobId ${jobId} from jobs ` + JSON.stringify(jobs));
-    if (jobs.length > 0) {
-        jobs = jobs.filter(job => job.id !== jobId);
-    }
+    cacheService.removeFromCache(jobId);
 };
