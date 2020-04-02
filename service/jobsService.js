@@ -2,27 +2,20 @@ const logger = require('../config/winstonLogger');
 const cacheService = require('../service/cacheService');
 
 
-exports.getJob = jobId => {
-    let keys = cacheService.getKeys();
-    let jobs = cacheService.getAll(keys);
-    console.log(`finding job with jobId ${jobId} from jobs ` +  JSON.stringify(jobs));
-    logger.info(`finding job with jobId ${jobId} from jobs ` +  JSON.stringify(jobs));
-    let foundJob = cacheService.get(jobId);
-    console.log("found job " , foundJob);
-    return foundJob;
+exports.getJob = async jobId => {
+    let jobs = await cacheService.getKeys();
+    logger.info(`getting job with jobId ${jobId} from jobs ` + jobs);
+    return await cacheService.get(jobId);
 };
 
-exports.setJobStatus = (jobId, status) => {
-    let keys = cacheService.getKeys();
-    let jobs = cacheService.getAll(keys);
-    console.log(`updating job with jobId ${jobId} from jobs ` +  JSON.stringify(jobs));
-    logger.info(`updating job with jobId ${jobId} from jobs ` +  JSON.stringify(jobs));
-    cacheService.updateCache(jobId, {jobId, status: status});
+exports.setJobStatus = async (jobId, status) => {
+    let jobs = await cacheService.getKeys();
+    logger.info(`updating job with jobId ${jobId} from jobs ` + jobs);
+    await cacheService.updateCache(jobId, JSON.stringify({jobId, status: status}));
 };
 
-exports.removeJob = jobId => {
-    let keys = cacheService.getKeys();
-    let jobs = cacheService.getAll(keys);
-    logger.info(`removing job with jobId ${jobId} from jobs ` + JSON.stringify(jobs));
-    cacheService.removeFromCache(jobId);
+exports.removeJob = async jobId => {
+    let jobs = await cacheService.getKeys();
+    logger.info(`removing job with jobId ${jobId} from jobs ` + jobs);
+    await cacheService.removeFromCache(jobId);
 };

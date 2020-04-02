@@ -1,22 +1,18 @@
-const cache = require('../utils/node-cache');
+const client = require('../utils/redis');
 
-exports.updateCache = (key, value) => cache.set(key, value);
+exports.updateCache = async (key, value) => await client.set(key, value);
 
-exports.get = (key) => cache.get(key);
+exports.get = async (key) => await client.get(key);
 
-exports.getAll = (keys) => cache.mget(keys);
+exports.getAll = (keys) => client.mget(keys);
 
-exports.delete = (key) => cache.del(key);
+exports.delete = async (key) => await client.del(key);
 
-exports.removeFromCache = (key) => {
-    const cacheKey = this.get(key);
+exports.removeFromCache = async (key) => {
+    const cacheKey = await this.get(key);
     if (cacheKey !== undefined) {
-        this.delete(key);
+        await this.delete(key);
     }
 };
 
-exports.getKeys = () => cache.keys();
-
-exports.flushAll = () => cache.flushAll();
-
-exports.has = (key) => cache.has( key );
+exports.getKeys = async () => await client.keys('*');
