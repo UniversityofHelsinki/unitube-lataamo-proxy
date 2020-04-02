@@ -7,12 +7,20 @@ install required packages
 
 ### Add .env file to project root with environment variables
 LATAAMO_OPENCAST_HOST (OpenCast development url)
+LATAAMO_OPENCAST_PRESENTATION_HOST (Opencast development url)
 LATAAMO_OPENCAST_USER (found in keepass)
 LATAAMO_OPENCAST_PASS (found in keepass)
 ENVIRONMENT (local development = local, devel environment = devel, test environment = test, prod environment = prod)
 ESB_HOST (esb host url, found in keepass)
 ESB_GROUPS_API_KEY (found in keepass)
 ESB_PERSONS_API_KEY (found in keepass)
+
+### Install Redis for local development with Docker
+docker run -d -p 6379:6379 --name redis1 redis
+### If you need to run Redis-Cli commands inside Docker container
+docker exec -it redis1 sh
+redis-cli
+ping --> should return Pong
 
 ### `npm start nodemon`
 to start node server to localhost:3000 

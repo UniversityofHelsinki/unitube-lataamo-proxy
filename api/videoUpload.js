@@ -117,7 +117,7 @@ exports.upload = async (req, res) => {
                 `Loading time with busboy ${timeDiff} milliseconds USER: ${req.user.eppn} -- ${uploadId}`);
 
             // set upload job status
-            jobsService.setJobStatus(uploadId, constants.JOB_STATUS_STARTED);
+            await jobsService.setJobStatus(uploadId, constants.JOB_STATUS_STARTED);
             res.status(HttpStatus.ACCEPTED);
             res.jobId = uploadId;
             res.json({id: uploadId, status: constants.JOB_STATUS_STARTED});
@@ -128,14 +128,14 @@ exports.upload = async (req, res) => {
             if (response && response.status === HttpStatus.CREATED) {
                 // on success clean file from disk and return 200
                 deleteFile(uploadPath, uploadId);
-                jobsService.setJobStatus(uploadId, constants.JOB_STATUS_FINISHED);
+                await jobsService.setJobStatus(uploadId, constants.JOB_STATUS_FINISHED);
                 res.status(HttpStatus.OK);
                 uploadLogger.log(INFO_LEVEL,
                     `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)} USER: ${req.user.eppn} -- ${uploadId}`);
             } else {
                 // on failure clean file from disk and return 500
                 deleteFile(uploadPath, uploadId);
-                jobsService.setJobStatus(uploadId, constants.JOB_STATUS_ERROR);
+                await jobsService.setJobStatus(uploadId, constants.JOB_STATUS_ERROR);
                 res.status(HttpStatus.INTERNAL_SERVER_ERROR);
                 const msg = `${filename} failed to upload to opencast.`;
                 uploadLogger.log(ERROR_LEVEL, `POST /userVideos ${msg} USER: ${req.user.eppn} -- ${uploadId} ${response}`);
