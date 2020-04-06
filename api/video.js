@@ -86,10 +86,9 @@ exports.updateVideo = async (req, res) => {
 
 exports.downloadVideo = async (req, res) => {
     try {
-        console.log(req.body.mediaUrl);
         logger.info(`POST download VIDEO ${req.body.mediaUrl} USER ${req.user.eppn}`);
         const response = await apiService.downloadVideo(req.body.mediaUrl);
-        response.data.pipe(res);
+        response.body.pipe(res);
     } catch(error) {
         console.log('ERROR', error.message);
         res.status(500);

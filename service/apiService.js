@@ -402,8 +402,15 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
 };
 
 exports.downloadVideo = async (videoUrl) => {
-    const response = await security.opencastBaseStream.get(encodeURI(videoUrl));
-    return response;
+    try {
+        let response = await fetch(encodeURI(videoUrl), {method: 'GET', headers: {'authorization': security.authentication()}});
+        return response;
+    } catch (err) {
+        return {
+            status: 500,
+            message: err.message
+        };
+    }
 };
 
 // get or creates series for user with given 'seriesName'
