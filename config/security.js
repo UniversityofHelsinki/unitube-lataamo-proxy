@@ -78,3 +78,7 @@ module.exports.esbGroupsBase = axios.create({
     maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
     headers: {'apikey': esbGroupsApiKey, 'Content-Type': 'application/json;charset=utf-8'},
 });
+
+module.exports.authentication = () => {
+    return auth;
+};
