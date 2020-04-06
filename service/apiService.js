@@ -373,15 +373,10 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
     // https://nodejs.org/api/fs.html#fs_fs_createreadstream_path_options
     bodyFormData.append('presenter', fs.createReadStream(filePathOnDisk));
 
-
-    const username = process.env.LATAAMO_OPENCAST_USER;
-    const password = process.env.LATAAMO_OPENCAST_PASS;
-    const userpass = Buffer.from(`${username}:${password}`).toString('base64');
-    const auth = `Basic ${userpass}`;
     try {
 
         let response = await fetch(process.env.LATAAMO_OPENCAST_HOST + videoUploadUrl, { method: 'POST',
-            headers: {'authorization': auth}
+            headers: {'authorization': security.authentication()}
             , body: bodyFormData});
 
 
@@ -403,7 +398,7 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
 
 exports.downloadVideo = async (videoUrl) => {
     try {
-        let response = await fetch(encodeURI(videoUrl), {method: 'GET', headers: {'authorization': security.authentication()}});
+        let response = await fetch(encodeURI(videoUrl), {method: 'GET', headers: {'authorization': security.authentication() }});
         return response;
     } catch (err) {
         return {

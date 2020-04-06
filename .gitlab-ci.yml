@@ -76,7 +76,7 @@ deploy_test:
   environment:
     name: test
   only:
-    - lataamo-395_node_fetch
+    - test
   script:
     - echo "====== Deploy to test server ========"
     - echo "====== Install rsync and openssh ========="
