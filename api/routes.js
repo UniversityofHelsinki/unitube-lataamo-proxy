@@ -475,6 +475,31 @@ module.exports = function (router) {
      */
     router.post('/videoTextTrack', video.uploadVideoTextTrack);
 
+
+    /**
+     * @swagger
+     *     api/videoTextTrack:
+     *     put:
+     *       tags:
+     *         - delete
+     *       summary: Delete a video text track file (WebVTT) for a video (opencast event)
+     *       description: Delete video text track file (WebVTT) for a video identified by eventId and send it to opencast server.
+     *       parameters:
+     *         - in: body
+     *           description: multipart/form-data from the client
+     *       responses:
+     *         200:
+     *           description: File was successfully received and sent to opencast for further processing.
+     *         400:
+     *           description: In-case of bad request, wrong file format etc.
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         default:
+     *           description: Unexpected error.
+     */
+    router.delete('/videoTextTrack/:eventId', video.deleteVideoTextTrack);
+
+
     /**
      * @swagger
      *     /api/monitor/{jobId}:
