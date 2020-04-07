@@ -168,7 +168,7 @@ const SERIES_METADATA = [
 // Opencast instantiates a java.util.Properties from the value, so key=value pairs and \n as a delimeter.
 // https://docs.oracle.com/javase/7/docs/api/java/util/Properties.html#load(java.io.InputStream)
 const PROPERTIES_REPUBLISH_METADATA =
-    'publishLive=false\nuploadedSearchPreview=true\npublishToOaiPmh=true\ncomment=false\npublishToMediaModule=true';
+    'publishLive=false\nuploadedSearchPreview=true\npublishToOaiPmh=false\ncomment=false\npublishToMediaModule=true';
 
 
 module.exports = {
