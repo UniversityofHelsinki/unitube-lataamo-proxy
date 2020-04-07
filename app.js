@@ -13,6 +13,7 @@ const busboy = require('connect-busboy');  //https://github.com/mscdex/connect-b
 const compression = require('compression');
 const xss = require('xss-clean');
 const cookieParser = require('cookie-parser');
+const redisClient = require('./utils/redis');
 
 const app = express();
 app.use(helmet());
@@ -35,10 +36,19 @@ app.use(bodyParser.json());
 app.use(xss());
 app.use('/api', router);
 
+redisClient.on('connect', function() {
+    console.log('Redis client connected');
+});
+
+redisClient.on('error', function (err) {
+    console.log('Something went wrong ' + err);
+});
+
 // busboy middle-ware
 router.use(busboy({
     highWaterMark: 2 * 1024 * 1024, // Set 2MiB buffer
 }));
+
 
 app.use('/api', router);
 routes(router);

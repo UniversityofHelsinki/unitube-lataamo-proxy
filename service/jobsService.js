@@ -1,27 +1,21 @@
-let jobs = [];
+const logger = require('../config/winstonLogger');
+const cacheService = require('../service/cacheService');
 
-exports.getJob = jobId => {
-    return jobs.find(job => job.id === jobId);
+
+exports.getJob = async jobId => {
+    let jobs = await cacheService.getKeys();
+    logger.info(`getting job with jobId ${jobId} from jobs ` + jobs);
+    return await cacheService.get(jobId);
 };
 
-exports.setJobStatus = (jobId, status) => {
-    if (jobs.length > 0 ) {
-        let foundJob = jobs.find(job => {
-            return job.id === jobId;
-        });
-
-        if (foundJob) {
-            foundJob.status = status;
-        } else {
-            jobs.push({id: jobId, status: status});
-        }
-    } else {
-        jobs.push({id: jobId, status: status});
-    }
+exports.setJobStatus = async (jobId, status) => {
+    let jobs = await cacheService.getKeys();
+    logger.info(`updating job with jobId ${jobId} from jobs ` + jobs);
+    await cacheService.updateCache(jobId, JSON.stringify({jobId, status: status}));
 };
 
-exports.removeJob = jobId => {
-    if (jobs.length > 0) {
-        jobs = jobs.filter(job => job.id !== jobId);
-    }
+exports.removeJob = async jobId => {
+    let jobs = await cacheService.getKeys();
+    logger.info(`removing job with jobId ${jobId} from jobs ` + jobs);
+    await cacheService.removeFromCache(jobId);
 };
