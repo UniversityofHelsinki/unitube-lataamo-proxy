@@ -238,6 +238,8 @@ describe('user video urls returned from /video/id events route', () => {
         test.mockEvent2PubcliationCall();
         test.mockEventEpisodeCall();
         test.mockeEvent2EpisodeCall();
+        test.mockEvent1VttFileCall();
+        test.mockEvent2VttFileCall();
     });
 
     it('should return highest quality video url', async () => {
@@ -271,6 +273,7 @@ describe('user video urls returned from /video/id events route', () => {
         assert.equal(response.body[0].url, 'https://ocast-devel-i1.it.helsinki.fi/static/mh_default_org/api/b419f01d-c203-4610-a1d4-a4b8904083d4/a9f5e413-1dcc-4832-a750-251a16893b2f/Samsung_and_RedBull_See_the_Unexpected_HDR_UHD_4K_Demo.mp4');
         assert.equal(response.body[0].vttFile.id, 'd74f0d42-5084-468d-b224-f2ec5f058492');
         assert.equal(response.body[0].vttFile.url, 'http://localhost:8080/static/mh_default_org/engage-player/2d72b653-02f6-4638-ba58-281b2d49af33/7578df20-9939-40dc-a305-7f83e225e9af/testwebvtt.vtt');
+        assert.isNotNull(response.body[0].vttFile.track);
     });
 
     it('should return two highest quality videos', async () =>  {
@@ -287,6 +290,8 @@ describe('user video urls returned from /video/id events route', () => {
         assert.lengthOf(response.body, 2, 'Two videos should be returned');
         assert.equal(response.body[0].url, 'https://ocast-devel-i1.it.helsinki.fi/static/mh_default_org/api/9059828c-8cef-4caf-a878-d6fa0a359857/a4227095-2b28-4846-b538-a0c8129d54b8/SHOT4_4K_CC_injected.mp4');
         assert.equal(response.body[1].url, 'https://ocast-devel-i1.it.helsinki.fi/static/mh_default_org/api/9059828c-8cef-4caf-a878-d6fa0a359857/e11d592c-f67c-423c-a275-fb4d39868510/SHOT4_4K_CC_injected.mp4');
+        assert.isNotNull(response.body[0].vttFile.track);
+        assert.isNotNull(response.body[1].vttFile.track);
     });
 
     it('should return two highest quality videos with correct vtt files', async () =>  {
@@ -305,7 +310,8 @@ describe('user video urls returned from /video/id events route', () => {
         assert.equal(response.body[1].url, 'https://ocast-devel-i1.it.helsinki.fi/static/mh_default_org/api/9059828c-8cef-4caf-a878-d6fa0a359857/e11d592c-f67c-423c-a275-fb4d39868510/SHOT4_4K_CC_injected.mp4');
         assert.equal(response.body[0].vttFile.url, 'http://localhost:8080/static/mh_default_org/engage-player/2d72b653-02f6-4638-ba58-281b2d49af33/7578df20-9939-40dc-a305-7f83e225e9af/testwebvtt.vtt');
         assert.equal(response.body[1].vttFile.url, 'http://localhost:8080/static/mh_default_org/engage-player/2d72b653-02f6-4638-ba58-281b2d49af33/7578df20-9939-40dc-a305-7f83e225e9af/testwebvtt.vtt');
-
+        assert.isNotNull(response.body[0].vttFile.track);
+        assert.isNotNull(response.body[1].vttFile.track);
     });
 
     afterEach(() => {

@@ -1208,6 +1208,14 @@ const mockEventPublicationContainsOneVideoWithDifferentQualities = [
     }
 ];
 
+const mockEvent1VttFile = 'WEBVTT\n' +
+    '\n' +
+    '00:00:00.500 --> 00:00:02.000\n' +
+    'The Web is always changing\n' +
+    '\n' +
+    '00:00:02.500 --> 00:00:04.300\n' +
+    'and the way we access it is changing';
+
 const mockEventPublicationContainsTwoVideosWithDifferentQualities = [
     {
         'metadata': [],
@@ -1821,6 +1829,14 @@ const event2Publications = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(`${CONSTANTS.OCAST_VIDEOS_PATH}${CONSTANTS.TEST_EVENT_2_ID}${CONSTANTS.OCAST_VIDEO_PUBLICATION_PATH}`)
     .reply(200, mockEventPublicationContainsTwoVideosWithDifferentQualities);
 
+const event1VttFile = () => nock('http://localhost:8080')
+    .get('/static/mh_default_org/engage-player/2d72b653-02f6-4638-ba58-281b2d49af33/7578df20-9939-40dc-a305-7f83e225e9af/testwebvtt.vtt')
+    .reply(200, mockEvent1VttFile);
+
+const event2VttFile = () => nock('http://localhost:8080')
+    .get('/static/mh_default_org/engage-player/2d72b653-02f6-4638-ba58-281b2d49af33/7578df20-9939-40dc-a305-7f83e225e9af/testwebvtt.vtt')
+    .reply(200, mockEvent1VttFile);
+
 const eventEpisode = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(`${CONSTANTS.OCAST_EVENT_EPISODE_PATH}?id=${CONSTANTS.TEST_EVENT_1_ID}`)
     .reply(200, mockEpisodeForEvent);
@@ -2184,4 +2200,6 @@ module.exports.mockTrashSeriesAclCall = trashEventAclsFromSeries;
 module.exports.mockInboxSeriesCall = inboxUserSeries;
 module.exports.mockTrashSeriesCall = trashUserSeries;
 module.exports.mockSeriesWithInboxCall = lataamoWithInboxSeries;
+module.exports.mockEvent1VttFileCall = event1VttFile;
+module.exports.mockEvent2VttFileCall = event2VttFile;
 module.exports.cleanAll = cleanMocks;

@@ -18,19 +18,19 @@ exports.filterEventsForClient = (ocResponseData) => {
 
     const eventArray = [];
     ocResponseData.forEach(event => {
-            eventArray.push({
-                'identifier': event.identifier,
-                'title': event.title,
-                'description' : event.description,
-                'license' : calculateLicensePropertyForVideo(event),
-                'duration': moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format('HH:mm:ss', {trim:false}),
-                'creator': event.creator,
-                'processing_state' : event.processing_state,
-                'visibility' : calculateVisibilityPropertyForVideo(event),
-                'created': event.created,
-                'series': event.series.title,
-                'media' : calculateMediaPropertyForVideo(event)
-            });
+        eventArray.push({
+            'identifier': event.identifier,
+            'title': event.title,
+            'description' : event.description,
+            'license' : calculateLicensePropertyForVideo(event),
+            'duration': moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format('HH:mm:ss', {trim:false}),
+            'creator': event.creator,
+            'processing_state' : event.processing_state,
+            'visibility' : calculateVisibilityPropertyForVideo(event),
+            'created': event.created,
+            'series': event.series.title,
+            'media' : calculateMediaPropertyForVideo(event)
+        });
     });
     return eventArray;
 };
@@ -148,25 +148,34 @@ exports.getAllEventsWithMediaFileMetadata = async (events) => {
     }));
 };
 
-exports.getVttWithMediaUrls = (episode, mediaUrls) => {
+const getVttWithTrack = async (vttFile) => {
+    const vttFileTrack = await apiService.downloadVttFile(vttFile.url);
+    const text = await vttFileTrack.text();
+    return text;
+};
+
+exports.getVttWithMediaUrls = async (episode, mediaUrls) => {
 
     const json = JsonFind(episode);
 
     const mediaPackage = json.checkKey('mediapackage');
 
     if (mediaPackage && Object.keys(mediaPackage).length > 0) {
-        mediaUrls.forEach(mediaUrl => {
+        return Promise.all(mediaUrls.map(async mediaUrl => {
             if (mediaPackage.id === mediaUrl.id) {
                 const attachemets =  json.checkKey('attachment');
                 const foundVttFile = attachemets.find(field => {
                     return field.mimetype === 'text/vtt';
                 });
-                mediaUrl.vttFile = foundVttFile ? foundVttFile : ''
+                mediaUrl.vttFile = foundVttFile ? foundVttFile : '';
+                if (mediaUrl.vttFile) {
+                    const vttTrack = await getVttWithTrack(mediaUrl.vttFile);
+                    mediaUrl.vttFile.track = vttTrack;
+                }
             }
-        });
+            return mediaUrl;
+        }));
     }
-
-    return mediaUrls;
 };
 
 exports.getAllEventsWithAcls = async (events) => {
@@ -273,16 +282,16 @@ exports.modifySeriesEventMetadataForOpencast = (metadata) => {
     const metadataArray = [];
 
     metadataArray.push({
-        'id' : 'title',
-        'value': metadata.title },
-    {
-        'id' : 'description',
-        'value': metadata.description
-    },
-    {
-        'id' : 'contributor',
-        'value': metadata.contributors
-    }
+            'id' : 'title',
+            'value': metadata.title },
+        {
+            'id' : 'description',
+            'value': metadata.description
+        },
+        {
+            'id' : 'contributor',
+            'value': metadata.contributors
+        }
     );
 
     return metadataArray;
