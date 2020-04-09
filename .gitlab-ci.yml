@@ -74,9 +74,9 @@ deploy_test:
   tags:
     - ohtu-build-1
   environment:
-    name: lataamo-380
+    name: test
   only:
-    - test
+    - lataamo-380
   script:
     - echo "====== Deploy to test server ========"
     - echo "====== Install rsync and openssh ========="
