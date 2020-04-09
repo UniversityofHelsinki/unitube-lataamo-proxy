@@ -74,7 +74,7 @@ deploy_test:
   tags:
     - ohtu-build-1
   environment:
-    name: test
+    name: lataamo-380
   only:
     - test
   script:
