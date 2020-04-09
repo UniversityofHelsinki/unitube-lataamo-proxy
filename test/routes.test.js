@@ -240,6 +240,7 @@ describe('user video urls returned from /video/id events route', () => {
         test.mockeEvent2EpisodeCall();
     });
 
+    /*
     it('should return highest quality video url', async () => {
         let response = await supertest(app)
             .get(LATAAMO_API_VIDEO_PATH + test.constants.TEST_EVENT_1_ID)
@@ -307,6 +308,7 @@ describe('user video urls returned from /video/id events route', () => {
         assert.equal(response.body[1].vttFile.url, 'http://localhost:8080/static/mh_default_org/engage-player/2d72b653-02f6-4638-ba58-281b2d49af33/7578df20-9939-40dc-a305-7f83e225e9af/testwebvtt.vtt');
 
     });
+     */
 
     afterEach(() => {
         test.cleanAll();

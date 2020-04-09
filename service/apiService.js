@@ -429,6 +429,18 @@ exports.downloadVideo = async (videoUrl) => {
     }
 };
 
+exports.downloadVttFile = async (vttFileUrl) => {
+    try {
+        let response = await fetch(encodeURI(vttFileUrl), {method: 'GET', headers: {'authorization': security.authentication() }});
+        return response;
+    } catch (err) {
+        return {
+            status: 500,
+            message: err.message
+        };
+    }
+};
+
 // get or creates series for user with given 'seriesName'
 exports.returnOrCreateUsersSeries = async (seriesName, loggedUser) => {
     let lataamoSeriesTitle = seriesTitleForLoggedUser(seriesName, loggedUser.eppn);
