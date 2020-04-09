@@ -149,6 +149,7 @@ exports.getEpisodeForEvent = async (eventId) => {
 
 exports.getPublicationsForEvent = async (eventId) => {
     const publicationsUrl = constants.OCAST_VIDEOS_PATH + eventId + constants.OCAST_VIDEO_PUBLICATION_PATH;
+    console.log(publicationsUrl);
     const response = await security.opencastBase.get(publicationsUrl);
     return response.data;
 };
@@ -420,6 +421,18 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
 exports.downloadVideo = async (videoUrl) => {
     try {
         let response = await fetch(encodeURI(videoUrl), {method: 'GET', headers: {'authorization': security.authentication() }});
+        return response;
+    } catch (err) {
+        return {
+            status: 500,
+            message: err.message
+        };
+    }
+};
+
+exports.downloadVttFile = async (vttFileUrl) => {
+    try {
+        let response = await fetch(encodeURI(vttFileUrl), {method: 'GET', headers: {'authorization': security.authentication() }});
         return response;
     } catch (err) {
         return {
