@@ -149,6 +149,7 @@ exports.getEpisodeForEvent = async (eventId) => {
 
 exports.getPublicationsForEvent = async (eventId) => {
     const publicationsUrl = constants.OCAST_VIDEOS_PATH + eventId + constants.OCAST_VIDEO_PUBLICATION_PATH;
+    console.log(publicationsUrl);
     const response = await security.opencastBase.get(publicationsUrl);
     return response.data;
 };
@@ -195,6 +196,27 @@ exports.addWebVttFile = async (vttFile, eventId) => {
         const headers = {
             ...bodyFormData.getHeaders(),
             'Content-Length': bodyFormData.getLengthSync(),
+            'Content-Type': 'multipart/form-data'
+        };
+        return await security.opencastBase.post(assetsUrl, bodyFormData, {headers});
+    } catch (err) {
+        return {
+            status: 500,
+            message: err.message
+        };
+    }
+};
+
+exports.deleteWebVttFile = async (vttFile, eventId) => {
+    const assetsUrl = constants.OCAST_ADMIN_EVENT + eventId + constants.OCAST_ASSETS_PATH;
+    let bodyFormData = new FormData();
+    bodyFormData.append('attachment_captions_webvtt', vttFile, {
+        filename: 'empty.vtt'
+    });
+    bodyFormData.append('metadata', JSON.stringify(constants.WEBVTT_TEMPLATE));
+    try {
+        const headers = {
+            ...bodyFormData.getHeaders(),
             'Content-Type': 'multipart/form-data'
         };
         return await security.opencastBase.post(assetsUrl, bodyFormData, {headers});
@@ -399,6 +421,18 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
 exports.downloadVideo = async (videoUrl) => {
     try {
         let response = await fetch(encodeURI(videoUrl), {method: 'GET', headers: {'authorization': security.authentication() }});
+        return response;
+    } catch (err) {
+        return {
+            status: 500,
+            message: err.message
+        };
+    }
+};
+
+exports.downloadVttFile = async (vttFileUrl) => {
+    try {
+        let response = await fetch(encodeURI(vttFileUrl), {method: 'GET', headers: {'authorization': security.authentication() }});
         return response;
     } catch (err) {
         return {

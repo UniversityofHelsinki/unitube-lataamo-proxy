@@ -9,7 +9,8 @@ const logger = require('../config/winstonLogger');
 const messageKeys = require('../utils/message-keys');
 const webvttParser = require('node-webvtt');
 const upload = require('../utils/upload');
-
+const path = require('path');
+const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 
 exports.getVideoUrl = async (req, res) => {
     try {
@@ -18,7 +19,7 @@ exports.getVideoUrl = async (req, res) => {
         const filteredPublication = publicationService.filterApiChannelPublication(publications);
         const mediaUrls = publicationService.getMediaUrlsFromPublication(req.params.id, filteredPublication);
         const episode = await apiService.getEpisodeForEvent(req.params.id);
-        const episodeWithMediaUrls = eventsService.getVttWithMediaUrls(episode, mediaUrls);
+        const episodeWithMediaUrls = await eventsService.getVttWithMediaUrls(episode, mediaUrls);
         res.json(episodeWithMediaUrls);
     } catch (error) {
         const msg = error.message;
@@ -125,7 +126,6 @@ exports.uploadVideoTextTrack = async(req, res) => {
     // https://www.npmjs.com/package/multer
     logger.info('addVideoTextTrack called.');
     upload(req, res, async(err) => {
-
         if ( err ) {
             res.status(500);
             return res.json({ message: messageKeys.ERROR_MALFORMED_WEBVTT_FILE });
@@ -172,4 +172,27 @@ exports.uploadVideoTextTrack = async(req, res) => {
                 res.json({message : error});
             }
     });
+};
+
+exports.deleteVideoTextTrack = async(req, res) => {
+    logger.info('deleteVideoTextTrack called.');
+        const filePath = path.join(__dirname, `../files/empty.vtt`);
+        const vttFile = fs.createReadStream(filePath);
+        const eventId = req.params.eventId;
+
+        try {
+            const response = await apiService.deleteWebVttFile(vttFile, eventId);
+            if (response.status === 201) {
+                logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} DELETED`);
+                res.status(response.status);
+                res.json({message: messageKeys.SUCCESS_WEBVTT_UPLOAD});
+            } else {
+                logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
+                res.status(response.status);
+                res.json({message: messageKeys.ERROR_WEBVTT_FILE_UPLOAD});
+            }
+        } catch (error) {
+            res.status(error.status);
+            res.json({message: error});
+        }
 };
