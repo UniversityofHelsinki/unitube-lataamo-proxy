@@ -11,6 +11,7 @@ const webvttParser = require('node-webvtt');
 const upload = require('../utils/upload');
 const path = require('path');
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
+const { parse, stringifyVtt } = require('subtitle'); // https://www.npmjs.com/package/subtitle
 
 exports.getVideoUrl = async (req, res) => {
     try {
@@ -103,15 +104,32 @@ exports.downloadVideo = async (req, res) => {
     }
 };
 
+// buffer and original name are the desired, required properties of the subtitle file
+const srtToVtt = (srtSubtitleFile) => {
+    const convertedVtt = {};
+    // console.log(`srtToVtt START (srt):\n ${srtSubtitleFile.buffer.toString()}`);
+    const subtitleArray = parse(srtSubtitleFile.buffer.toString());
+    convertedVtt.buffer = stringifyVtt(subtitleArray);
+    // change the file extension to vtt
+    convertedVtt.originalname = srtSubtitleFile.originalname.slice(0, -4) + '.vtt';
+    // console.log(`srtToVtt END (vtt): \n ${JSON.stringify(convertedVtt)}`);
+    return convertedVtt;
+};
+
+const isVttFile = (fileMimeType) => {
+    return fileMimeType === 'text/vtt';
+};
+
 
 /**
  * Handle vtt file upload.
  * Uses multer package to read form data: https://www.npmjs.com/package/multer
  * Uses node-webvtt package to validate vtt file: https://www.npmjs.com/package/node-webvtt
+ * If the file is in srt format tries to convert it to vtt.
  *
  * file structure returned by multer:
  *  {
- *    fieldname: 'video_webvtt_file',
+ *    fieldname: 'video_text_track_file',
  *    originalname: 'fulica.vtt',
  *    encoding: '7bit',
  *    mimetype: 'text/vtt',
@@ -120,7 +138,6 @@ exports.downloadVideo = async (req, res) => {
  *  }
  *
  **/
-
 exports.uploadVideoTextTrack = async(req, res) => {
     // https://attacomsian.com/blog/express-file-upload-multer
     // https://www.npmjs.com/package/multer
@@ -131,7 +148,7 @@ exports.uploadVideoTextTrack = async(req, res) => {
             return res.json({ message: messageKeys.ERROR_MALFORMED_WEBVTT_FILE });
         }
 
-        const vttFile = req.file;
+        let vttFile = req.file;
         const eventId = req.body.eventId;
 
         if (!vttFile) {
@@ -143,6 +160,10 @@ exports.uploadVideoTextTrack = async(req, res) => {
         }
 
         try {
+            if (!isVttFile(vttFile.mimetype) ) {
+                logger.info(`Subtitle file not in a vtt format, trying to convert. [File: (${vttFile.filename}) MIME type: ${vttFile.mimetype}]. -- USER ${req.user.eppn}`);
+                vttFile = srtToVtt(vttFile);
+            }
             // https://www.npmjs.com/package/node-webvtt#parsing
             webvttParser.parse(vttFile.buffer.toString(), { strict: false });
         } catch (err) {
@@ -153,46 +174,44 @@ exports.uploadVideoTextTrack = async(req, res) => {
                 msg: err.message
             });
         }
-            // all ok
-            logger.info('vtt file parsed ok, next file to opencast.');
-
-            try {
-                const response = await apiService.addWebVttFile(vttFile, eventId);
-                if (response.status === 201) {
-                    logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
-                    res.status(response.status);
-                    res.json({message: messageKeys.SUCCESS_WEBVTT_UPLOAD});
-                } else {
-                    logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
-                    res.status(response.status);
-                    res.json({message : messageKeys.ERROR_WEBVTT_FILE_UPLOAD});
-                }
-            } catch (error) {
-                res.status(error.status);
-                res.json({message : error});
-            }
-    });
-};
-
-exports.deleteVideoTextTrack = async(req, res) => {
-    logger.info('deleteVideoTextTrack called.');
-        const filePath = path.join(__dirname, `../files/empty.vtt`);
-        const vttFile = fs.createReadStream(filePath);
-        const eventId = req.params.eventId;
 
         try {
-            const response = await apiService.deleteWebVttFile(vttFile, eventId);
+            const response = await apiService.addWebVttFile(vttFile, eventId);
             if (response.status === 201) {
-                logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} DELETED`);
+                logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
                 res.status(response.status);
                 res.json({message: messageKeys.SUCCESS_WEBVTT_UPLOAD});
             } else {
                 logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
                 res.status(response.status);
-                res.json({message: messageKeys.ERROR_WEBVTT_FILE_UPLOAD});
+                res.json({message : messageKeys.ERROR_WEBVTT_FILE_UPLOAD});
             }
         } catch (error) {
             res.status(error.status);
-            res.json({message: error});
+            res.json({message : error});
         }
+    });
+};
+
+exports.deleteVideoTextTrack = async(req, res) => {
+    logger.info('deleteVideoTextTrack called.');
+    const filePath = path.join(__dirname, `../files/empty.vtt`);
+    const vttFile = fs.createReadStream(filePath);
+    const eventId = req.params.eventId;
+
+    try {
+        const response = await apiService.deleteWebVttFile(vttFile, eventId);
+        if (response.status === 201) {
+            logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} DELETED`);
+            res.status(response.status);
+            res.json({message: messageKeys.SUCCESS_WEBVTT_UPLOAD});
+        } else {
+            logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
+            res.status(response.status);
+            res.json({message: messageKeys.ERROR_WEBVTT_FILE_UPLOAD});
+        }
+    } catch (error) {
+        res.status(error.status);
+        res.json({message: error});
+    }
 };
