@@ -14,17 +14,23 @@ const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 const { parse, stringifyVtt } = require('subtitle'); // https://www.npmjs.com/package/subtitle
 
 exports.getVideoUrl = async (req, res) => {
+    let debugStage = 0;
     try {
         logger.info(`GET video media url /videoUrl/:id VIDEO ${req.params.id} USER: ${req.user.eppn}`);
         const publications = await apiService.getPublicationsForEvent(req.params.id);
+        debugStage = 1;
         const filteredPublication = publicationService.filterApiChannelPublication(publications);
+        debugStage = 2;
         const mediaUrls = publicationService.getMediaUrlsFromPublication(req.params.id, filteredPublication);
+        debugStage = 3;
         const episode = await apiService.getEpisodeForEvent(req.params.id);
+        debugStage = 4;
         const episodeWithMediaUrls = await eventsService.getVttWithMediaUrls(episode, mediaUrls);
+        debugStage = 5;
         res.json(episodeWithMediaUrls);
     } catch (error) {
         const msg = error.message;
-        logger.error(`Error GET /videoUrl/:id ${msg} VIDEO ${req.params.id} USER ${req.user.eppn}`);
+        logger.error(`GET /videoUrl/:id VIDEO: ${req.params.id} USER: ${req.user.eppn} DEBUG-STAGE: ${debugStage} CAUSE: ${error}`);
         res.status(500);
         res.json({
             message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_VIDEO_URL,
