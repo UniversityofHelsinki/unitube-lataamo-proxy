@@ -23,10 +23,10 @@ const ensureUploadDir = async (directory) => {
     try {
         // https://github.com/jprichardson/node-fs-extra/blob/HEAD/docs/ensureDir.md
         await fs.ensureDir(directory);
-        logger.info(`Using uploadPath ${directory}`);
+        uploadLogger.log(INFO_LEVEL,`Using uploadPath ${directory}`);
         return true;
     } catch (err) {
-        logger.error(`Error in ensureUploadDir ${err}`);
+        uploadLogger.log(ERROR_LEVEL,`Error in ensureUploadDir ${err}`);
         return false;
     }
 };
@@ -52,12 +52,12 @@ const returnUsersInboxSeries = async (loggedUser) => {
         let inboxSeries = userSeries.find(series => series.title === lataamoInboxSeriesTitle);
 
         if (!inboxSeries) {
-            logger.info(`inbox series not found with title ${ lataamoInboxSeriesTitle }`);
-            logger.info(`Created inbox ${ inboxSeries }`);
+            uploadLogger.log(INFO_LEVEL,`inbox series not found with title ${ lataamoInboxSeriesTitle }`);
+            uploadLogger.log(INFO_LEVEL,`Created inbox ${ inboxSeries }`);
         }
         return inboxSeries;
     } catch (err) {
-        logger.error(`Error in returnOrCreateUsersInboxSeries USER: ${ loggedUser.eppn } ${ err }`);
+        uploadLogger.log(ERROR_LEVEL,`Error in returnOrCreateUsersInboxSeries USER: ${ loggedUser.eppn } ${ err }`);
         return false;
     }
 };
