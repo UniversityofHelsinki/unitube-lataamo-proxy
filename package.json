@@ -47,7 +47,7 @@
     "path": "^0.12.7",
     "pretty-ms": "^5.0.0",
     "redis": "^3.0.2",
-    "subtitle": "^2.0.3",
+    "subtitle": "https://github.com/tzpr/subtitle.js.git",
     "swagger-jsdoc": "^3.4.0",
     "swagger-ui-express": "^4.1.2",
     "utf8": "^3.0.0",
@@ -62,7 +62,7 @@
     "jest": "^24.9.0",
     "mocha": "^8.0.1",
     "nock": "^10.0.6",
-    "nodemon": "^1.19.4",
+    "nodemon": "^2.0.4",
     "nyc": "^14.1.1",
     "supertest": "^4.0.2"
   }
