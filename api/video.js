@@ -11,7 +11,7 @@ const webvttParser = require('node-webvtt');
 const upload = require('../utils/upload');
 const path = require('path');
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
-const { parse, stringifyVtt } = require('subtitle'); // https://www.npmjs.com/package/subtitle
+const { parse, stringifyVtt } = require('../utils/subtitle.bundle'); // https://github.com/gsantiago/subtitle.js
 
 exports.getVideoUrl = async (req, res) => {
     let debugStage = 0;
@@ -171,7 +171,7 @@ exports.uploadVideoTextTrack = async(req, res) => {
                 vttFile = srtToVtt(vttFile);
             }
             // https://www.npmjs.com/package/node-webvtt#parsing
-            webvttParser.parse(vttFile.buffer.toString(), { strict: false });
+            webvttParser.parse(vttFile.buffer.toString(), { strict: true });
         } catch (err) {
             logger.error(`vtt file seems to be malformed (${err.message}), please check. -- USER ${req.user.eppn}`);
             res.status(400);
