@@ -6,24 +6,26 @@ const HttpStatus = require('http-status');
 
 exports.getJobStatus = async (req, res) => {
     try {
-        logger.info(`GET /monitor/:jobId ${req.params.jobId}`);
         const job = await jobService.getJob(req.params.jobId);
         const parsedJob = JSON.parse(job);
+
         if (parsedJob && parsedJob.status) {
             if (parsedJob.status === constants.JOB_STATUS_STARTED) {
                 res.status(HttpStatus.ACCEPTED);
             }
             if (parsedJob.status === constants.JOB_STATUS_FINISHED) {
                 await jobService.removeJob(req.params.jobId);
+                logger.info(`[Jobs] Job removed with JOB_ID: ${parsedJob.jobId} USER: ${req.user.eppn}`);
                 res.status(HttpStatus.CREATED);
             }
             if (parsedJob.status === constants.JOB_STATUS_ERROR) {
                 await jobService.removeJob(req.params.jobId);
+                logger.info(`[Jobs] Job removed after ERROR. JOB_ID: ${parsedJob.jobId} USER: ${req.user.eppn}`);
                 res.status(HttpStatus.INTERNAL_SERVER_ERROR);
             }
             res.json(parsedJob);
         } else {
-            logger.error(`Error in getting job status job is ${job} and job status is ${job.status}`);
+            logger.error(`[Jobs] Failed to get status for job from jobService. JOB: ${job} USER: ${req.user.eppn}`);
             res.status(HttpStatus.INTERNAL_SERVER_ERROR);
             res.json({
                 message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_JOB
@@ -31,7 +33,7 @@ exports.getJobStatus = async (req, res) => {
         }
     } catch (error) {
         const msg = error.message;
-        logger.error(`Error in getting job: ${error} message : ${msg}`);
+        logger.error(`[Jobs] Failed to get job. JOB_ID: ${req.params.jobId} ERROR: ${error} USER: ${req.user.eppn}`);
         res.status(HttpStatus.INTERNAL_SERVER_ERROR);
         res.json({
             message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_JOB,

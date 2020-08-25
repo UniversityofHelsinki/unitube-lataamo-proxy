@@ -1,6 +1,6 @@
 // For WebVTT file upload (https://www.npmjs.com/package/multer)
 const multer  = require('multer');
-const filter = require('../utils/vttFileFilter');
+const filter = require('../utils/textTrackFileFilter');
 const memoryStorage = multer.memoryStorage();
 
 const upload = multer({
@@ -9,7 +9,7 @@ const upload = multer({
         files: 1,
         fieldSize: 1000
     },
-    fileFilter: filter.vttFilter
-}).single('video_webvtt_file'); // the file input field name in the submitting form
+    fileFilter: filter.textTrackFilter
+}).single('video_text_track_file'); // the file input field name in the submitting form
 
 module.exports = upload;
