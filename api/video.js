@@ -11,7 +11,7 @@ const webvttParser = require('node-webvtt');
 const upload = require('../utils/upload');
 const path = require('path');
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
-const { parse, stringifyVtt } = require('../utils/subtitle.bundle'); // https://github.com/gsantiago/subtitle.js
+const { parseSync, stringifySync } = require('subtitle');
 
 exports.getVideoUrl = async (req, res) => {
     let debugStage = 0;
@@ -113,12 +113,9 @@ exports.downloadVideo = async (req, res) => {
 // buffer and original name are the desired, required properties of the subtitle file
 const srtToVtt = (srtSubtitleFile) => {
     const convertedVtt = {};
-    // console.log(`srtToVtt START (srt):\n ${srtSubtitleFile.buffer.toString()}`);
-    const subtitleArray = parse(srtSubtitleFile.buffer.toString());
-    convertedVtt.buffer = stringifyVtt(subtitleArray);
-    // change the file extension to vtt
+    const nodes = parseSync(srtSubtitleFile.buffer.toString());
+    convertedVtt.buffer = stringifySync(nodes, { format: 'WebVTT' });
     convertedVtt.originalname = srtSubtitleFile.originalname.slice(0, -4) + '.vtt';
-    // console.log(`srtToVtt END (vtt): \n ${JSON.stringify(convertedVtt)}`);
     return convertedVtt;
 };
 
