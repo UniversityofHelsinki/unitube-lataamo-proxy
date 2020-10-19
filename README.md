@@ -23,5 +23,8 @@ redis-cli
 ping --> should return Pong
 
 ### `npm start nodemon`
-to start node server to localhost:3000 
+to start node server to localhost:3000
+
+### Use opencast docker to fake opencast (local development)
+`docker-compose -p opencast-allinone -f docker-compose/docker-compose.allinone.h2.yml up`
 
