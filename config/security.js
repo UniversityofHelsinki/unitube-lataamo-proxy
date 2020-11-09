@@ -8,6 +8,8 @@ const password = process.env.LATAAMO_OPENCAST_PASS;
 const userpass = Buffer.from(`${username}:${password}`).toString('base64');
 const auth = `Basic ${userpass}`;
 const axios = require('axios'); // https://www.npmjs.com/package/axios
+const http = require('http');
+const https = require('https');
 
 const ipaddr = require('ipaddr.js');
 const localhostIP = ipaddr.process('127.0.0.1');
@@ -41,6 +43,8 @@ module.exports.shibbolethAuthentication = function (app, passport) {
 module.exports.opencastBase = axios.create({
     baseURL: adminHost,
     maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
+    httpAgent: new http.Agent({ keepAlive: true }),
+    httpsAgent: new https.Agent({ keepAlive: true }),
     headers: {'authorization': auth},
     validateStatus: () => { // https://github.com/axios/axios/issues/1143
         return true;        // without this axios might throw error on non 200 responses
@@ -51,6 +55,8 @@ module.exports.opencastPresentationBase = axios.create({
     baseURL: presentationHost,
     headers: {'authorization': auth},
     maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
+    httpAgent: new http.Agent({ keepAlive: true }),
+    httpsAgent: new https.Agent({ keepAlive: true }),
     validateStatus: () => { // https://github.com/axios/axios/issues/1143
         return true;        // without this axios might throw error on non 200 responses
     }
@@ -58,6 +64,8 @@ module.exports.opencastPresentationBase = axios.create({
 
 module.exports.opencastBaseStream = axios.create({
     maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
+    httpAgent: new http.Agent({ keepAlive: true }),
+    httpsAgent: new https.Agent({ keepAlive: true }),
     headers: {'authorization': auth},
     responseType: 'stream',
     validateStatus: () => { // https://github.com/axios/axios/issues/1143
@@ -67,6 +75,8 @@ module.exports.opencastBaseStream = axios.create({
 
 module.exports.esbPersonBase = axios.create({
     baseURL: esbHost,
+    httpAgent: new http.Agent({ keepAlive: true }),
+    httpsAgent: new https.Agent({ keepAlive: true }),
     maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
     headers: {'apikey': esbPersonsApiKey, 'Content-Type': 'application/json;charset=utf-8'},
 });
@@ -75,6 +85,8 @@ module.exports.esbPersonBase = axios.create({
 
 module.exports.esbGroupsBase = axios.create({
     baseURL: esbHost,
+    httpAgent: new http.Agent({ keepAlive: true }),
+    httpsAgent: new https.Agent({ keepAlive: true }),
     maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
     headers: {'apikey': esbGroupsApiKey, 'Content-Type': 'application/json;charset=utf-8'},
 });

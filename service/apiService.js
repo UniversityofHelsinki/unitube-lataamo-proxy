@@ -135,11 +135,17 @@ exports.getUserTrashSeries = async (user) => {
 };
 
 exports.getUserSeries = async (user) => {
-    const contributorParameters = userService.parseContributor(user.hyGroupCn);
-    const seriesUrl =  constants.OCAST_SERIES_PATH + '?filter=contributors:' + user.eppn + ',' + contributorParameters;
-    const response = await security.opencastBase.get(seriesUrl);
-    return response.data;
+    try {
+        const contributorParameters = userService.parseContributor(user.hyGroupCn);
+        const seriesUrl =  constants.OCAST_SERIES_PATH + '?filter=contributors:' + user.eppn + ',' + contributorParameters;
+        const response = await security.opencastBase.get(seriesUrl);
+        return response.data;
+    } catch (error) {
+        logger.error(`Error in getting user series: ${user} error:  ${error}`);
+        throw error;
+    }
 };
+
 
 exports.getEpisodeForEvent = async (eventId) => {
     const episodeUrl = constants.OCAST_EPISODE_PATH + '?id=' + eventId;
