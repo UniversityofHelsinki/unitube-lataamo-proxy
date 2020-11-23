@@ -53,9 +53,11 @@ router.use(busboy({
 app.use('/api', router);
 routes(router);
 
-app.listen(port, host,  () => {
+let server = app.listen(port, host,  () => {
     logger.info(`lataamo proxy is listening on port ${port}!`);
 });
+
+server.headersTimeout = 0;
 
 // for the tests
 module.exports = app;
