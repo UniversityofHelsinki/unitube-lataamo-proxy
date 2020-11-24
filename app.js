@@ -53,7 +53,7 @@ router.use(busboy({
 app.use('/api', router);
 routes(router);
 
-let server = app.listen(port, host,  () => {
+const server = app.listen(port, host,  () => {
     logger.info(`lataamo proxy is listening on port ${port}!`);
 });
 
