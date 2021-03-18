@@ -154,6 +154,24 @@ const getVttWithTrack = async (vttFile) => {
     return text;
 };
 
+exports.getVttFile = async (episode, mediaUrls) => {
+    const json = JsonFind(episode);
+
+    const mediaPackage = json.checkKey('mediapackage');
+
+    if (mediaPackage && Object.keys(mediaPackage).length > 0) {
+        return mediaUrls.map(mediaUrl => {
+            if (mediaPackage.id === mediaUrl.id) {
+                const attachments = json.checkKey('attachment');
+                const foundVttFile = attachments.find(field => {
+                    return field.mimetype === 'text/vtt';
+                });
+                return foundVttFile.url;
+            }
+        })[0];
+    }
+};
+
 exports.getVttWithMediaUrls = async (episode, mediaUrls) => {
 
     const json = JsonFind(episode);
