@@ -138,8 +138,75 @@ exports.getUserSeries = async (user) => {
     const contributorParameters = userService.parseContributor(user.hyGroupCn);
     const seriesUrl =  constants.OCAST_SERIES_PATH + '?filter=contributors:' + user.eppn + ',' + contributorParameters;
     const response = await security.opencastBase.get(seriesUrl);
-    return response.data;
+    // response.data is a list of series
+    // HAXXX: split contributors with splitMyContributors
+    return splitMyContributors(response.data);
 };
+
+
+/***
+ * Checks contributors attribute from given list of series.
+ * Splits contributors to separate contributor entries in contributor list when needed.
+ *
+ * Example 1
+ * ----------------------------------------------------------------------------
+ * Input:
+ *    contributors : 'joppe', 'duunari', 'grp-best_group_of_all', 'jappu, jummi'
+ * Output:
+ *    contributors : 'joppe', 'duunari', 'grp-best_group_of_all', 'jappu', 'jummi'
+ *
+ *
+ * Example 2
+ * ----------------------------------------------------------------------------
+ * Input:
+ *    contributors : 'ehpo', 'jahpola', 'grp-best_group_of_all'
+ * Output:
+ *    contributors : 'ehpo', 'jahpola', 'grp-best_group_of_all'
+ *
+ *
+ * Example 3
+ * ----------------------------------------------------------------------------
+ * Input:
+ *    contributors : 'grp-best_group_of_all, molly, grp-not_so_best', 'gavin'
+ * Output:
+ *    contributors : 'grp-best_group_of_all', 'molly', 'grp-not_so_best', 'gavin'
+ *
+ *
+ *
+ * @param userSeries List of series
+ * @returns {[]} list of series
+ */
+const splitMyContributors = (listOfSeries) => {
+    const hackedSeries = [];
+
+    try {
+        if (listOfSeries && Array.isArray(listOfSeries)) {
+            for (const series of listOfSeries) {
+                let resolvedContributors = [];
+                for (const contributor of series.contributors){
+                    if(contributor.includes(',')){
+                        resolvedContributors =
+                            // split and trim and concat to existing contributors
+                            resolvedContributors.concat(contributor.split(',').map(s => s.trim()));
+                    }else{
+                        resolvedContributors.push(contributor);
+                    }
+                }
+                series.contributors = resolvedContributors;
+                hackedSeries.push(series);
+            }
+        } else {
+            console.log('ERROR haxxxMyContributors parameter was no array');
+            return [];
+        }
+    } catch (e) {
+        console.log('ERROR haxxxMyContributors', e);
+        throw Error('Failed to resolve contributors');
+    }
+
+    return hackedSeries;
+}
+
 
 exports.getEpisodeForEvent = async (eventId) => {
     const episodeUrl = constants.OCAST_EPISODE_PATH + '?id=' + eventId;

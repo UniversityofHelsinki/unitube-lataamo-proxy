@@ -8,10 +8,12 @@ const messageKeys = require('../utils/message-keys');
 const logger = require('../config/winstonLogger');
 const constants = require('../utils/constants');
 
+
 exports.getSeries = async (req, res) => {
     try {
         const series = await apiService.getSeries(req.params.id);
-        await apiService.contributorsToIamGroupsAndPersons(series);
+        // HAXXX: split contributors with splitMyContributors
+        await apiService.contributorsToIamGroupsAndPersons(splitMyContributors(series));
         const seriesWithAllEventsCount = await eventsService.getAllEventsCountForSeries(series);
         const userSeriesWithPublished = await seriesService.addPublishedInfoInSeriesAndMoodleRoles(seriesWithAllEventsCount);
         res.json(userSeriesWithPublished);
@@ -23,6 +25,66 @@ exports.getSeries = async (req, res) => {
         });
     }
 };
+
+/***
+ * Checks contributors attribute from given list of series.
+ * Splits contributors to separate contributor entries in contributor list when needed.
+ *
+ * Example 1
+ * ----------------------------------------------------------------------------
+ * Input:
+ *    contributors : 'joppe', 'duunari', 'grp-best_group_of_all', 'jappu, jummi'
+ * Output:
+ *    contributors : 'joppe', 'duunari', 'grp-best_group_of_all', 'jappu', 'jummi'
+ *
+ *
+ * Example 2
+ * ----------------------------------------------------------------------------
+ * Input:
+ *    contributors : 'ehpo', 'jahpola', 'grp-best_group_of_all'
+ * Output:
+ *    contributors : 'ehpo', 'jahpola', 'grp-best_group_of_all'
+ *
+ *
+ * Example 3
+ * ----------------------------------------------------------------------------
+ * Input:
+ *    contributors : 'grp-best_group_of_all, molly, grp-not_so_best', 'gavin'
+ * Output:
+ *    contributors : 'grp-best_group_of_all', 'molly', 'grp-not_so_best', 'gavin'
+ *
+ *
+ *
+ * @param userSeries one series
+ * @returns series with modified contributors
+ */
+const splitMyContributors = (userSeries) => {
+    let hackedSeries;
+    try {
+        if (userSeries) {
+            let resolvedContributors = [];
+            for (const contributor of userSeries.contributors){
+                if(contributor.includes(',')){
+                    // split and trim and concat to existing contributors
+                    resolvedContributors =
+                        resolvedContributors.concat(contributor.split(',').map(s => s.trim()));
+                }else{
+                    resolvedContributors.push(contributor);
+                }
+            }
+            userSeries.contributors = resolvedContributors;
+            hackedSeries = userSeries;
+        } else {
+            console.log('ERROR haxxxMyContributors parameter was undefined');
+            return {};
+        }
+    } catch (e) {
+        console.log('ERROR haxxxMyContributors', e);
+        throw Error('Failed to resolve contributors');
+    }
+    return hackedSeries;
+}
+
 
 exports.updateSeries = async (req, res) => {
     try {
