@@ -61,7 +61,8 @@ exports.splitContributorsFromSeries = (userSeries) => {
                     resolvedContributors.push(contributor);
                 }
             }
-            userSeries.contributors = resolvedContributors;
+            let uniqueContributors = [...new Set(resolvedContributors)];
+            userSeries.contributors = uniqueContributors;
             hackedSeries = userSeries;
         } else {
             console.log('ERROR splitContributorsFromSeries: userSeries was undefined');

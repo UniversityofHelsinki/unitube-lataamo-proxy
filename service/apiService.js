@@ -5,11 +5,10 @@ const {format} = require('date-fns'); // https://www.npmjs.com/package/date-fns
 const constants = require('../utils/constants');
 const {seriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
 const logger = require('../config/winstonLogger');
-const userService = require('./userService');
 const eventsService = require('./eventsService');
 const messageKeys = require('../utils/message-keys');
 const fetch = require('node-fetch');
-const { splitContributorsFromSeriesList } = require('../utils/ocastMigrationUtils');
+const { splitContributorsFromSeries } = require('../utils/ocastMigrationUtils');
 
 //
 // This file is the façade for opencast server
@@ -157,6 +156,19 @@ exports.getUserSeries = async (user) => {
     const availableContributorValuesForUser = [user.eppn, ...user.hyGroupCn];
     let returnedSeriesData = [];
 
+    const filterCorrectSeriesWithCorrectContributors = (transformedSeriesList, contributorValue) => {
+        let returnedSeriesList = [];
+        transformedSeriesList.forEach((transformedSeries) => {
+            let seriesWithSplittedContributors = splitContributorsFromSeries(transformedSeries);
+            seriesWithSplittedContributors.contributors.forEach((contributor) => {
+                if (contributor === contributorValue) {
+                    returnedSeriesList.push(seriesWithSplittedContributors);
+                }
+            });
+        });
+        return returnedSeriesList;
+    };
+
     for (let contributorValue of availableContributorValuesForUser) {
         let theTruePathToSalvation =
             'series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=' +
@@ -165,15 +177,21 @@ exports.getUserSeries = async (user) => {
         let seriesUrl =  '/series/' + theTruePathToSalvation;
 
         let response = await security.opencastBase.get(seriesUrl);
+
         // concatenate all series that are found
-        // TODO: check and prevent possible double entries by comparing series ids before adding to array
-        returnedSeriesData = returnedSeriesData.concat(transformResponseData(response.data.catalogs));
+        let transformedSeriesList = transformResponseData(response.data.catalogs);
+        let filteredSeriesList = filterCorrectSeriesWithCorrectContributors(transformedSeriesList, contributorValue);
+
+        returnedSeriesData = returnedSeriesData.concat(filteredSeriesList);
     }
-    console.log(returnedSeriesData);
+
+    const key = 'identifier';
+    const uniqueSeriesList = [...new Map(returnedSeriesData.map(item =>
+        [item[key], item])).values()];
 
     // response.data is a list of series
     // HAXXX: split contributors with splitContributorsFromSeriesList
-    return splitContributorsFromSeriesList(returnedSeriesData); //response.data);
+    return uniqueSeriesList; //response.data);
 };
 
 
