@@ -8,7 +8,8 @@ const logger = require('../config/winstonLogger');
 const eventsService = require('./eventsService');
 const messageKeys = require('../utils/message-keys');
 const fetch = require('node-fetch');
-const { splitContributorsFromSeries } = require('../utils/ocastMigrationUtils');
+const { filterCorrectSeriesWithCorrectContributors, transformResponseData } =
+    require('../utils/ocastMigrationUtils');
 
 //
 // This file is the façade for opencast server
@@ -150,24 +151,8 @@ exports.getUserSeries = async (user) => {
 // hacked getUserSeries
 exports.getUserSeries = async (user) => {
 
-    // TODO: tsekkaa että vain oikea otetaan
-    // grp-a01830-arkisto tällä tulee kaks osumaa
-    // grp-a01830-arkisto-yleinen
     const availableContributorValuesForUser = [user.eppn, ...user.hyGroupCn];
     let returnedSeriesData = [];
-
-    const filterCorrectSeriesWithCorrectContributors = (transformedSeriesList, contributorValue) => {
-        let returnedSeriesList = [];
-        transformedSeriesList.forEach((transformedSeries) => {
-            let seriesWithSplittedContributors = splitContributorsFromSeries(transformedSeries);
-            seriesWithSplittedContributors.contributors.forEach((contributor) => {
-                if (contributor === contributorValue) {
-                    returnedSeriesList.push(seriesWithSplittedContributors);
-                }
-            });
-        });
-        return returnedSeriesList;
-    };
 
     for (let contributorValue of availableContributorValuesForUser) {
         let theTruePathToSalvation =
@@ -178,303 +163,21 @@ exports.getUserSeries = async (user) => {
 
         let response = await security.opencastBase.get(seriesUrl);
 
-        // concatenate all series that are found
+        // transform data from /series API to same format than the external API (/api/series) uses
         let transformedSeriesList = transformResponseData(response.data.catalogs);
-        let filteredSeriesList = filterCorrectSeriesWithCorrectContributors(transformedSeriesList, contributorValue);
+        // remove series that have only partial match in contributor value
+        let filteredSeriesList =
+            filterCorrectSeriesWithCorrectContributors(transformedSeriesList, contributorValue);
 
         returnedSeriesData = returnedSeriesData.concat(filteredSeriesList);
     }
 
+    // remove possible double series entries using series identifier
     const key = 'identifier';
     const uniqueSeriesList = [...new Map(returnedSeriesData.map(item =>
         [item[key], item])).values()];
 
-    // response.data is a list of series
-    // HAXXX: split contributors with splitContributorsFromSeriesList
-    return uniqueSeriesList; //response.data);
-};
-
-
-/**
-  Transform series data for current Lataamo UI implementation
-
-
- ------------------------------------------------------------------------------
- This is the currently supported data structure returned to UI:
- ------------------------------------------------------------------------------
-
- [
- {
-    identifier: '28ed5c64-5de5-4c0a-8edd-a536c857d847',
-    license: '',
-    creator: 'Opencast Project Administrator',
-    created: '2021-04-06T10:30:57Z',
-    subjects: [ 'Lataamo-trash' ],
-    organizers: [ 'Lataamo-proxy-service', 'tzrasane' ],
-    description: 'Lataamo-trash series for tzrasane',
-    publishers: [ 'tzrasane' ],
-    language: 'en',
-    contributors: [ 'tzrasane' ],
-    title: 'trash tzrasane',
-    rightsholder: 'tzrasane'
-  },
- {
-    identifier: '06bd63f5-4a66-45c5-826f-e5a195c364ad',
-    license: '',
-    creator: 'Opencast Project Administrator',
-    created: '2021-04-06T10:30:59Z',
-    subjects: [ 'Lataamo-inbox' ],
-    organizers: [ 'Lataamo-proxy-service', 'tzrasane' ],
-    description: 'Lataamo-inbox series for tzrasane',
-    publishers: [ 'tzrasane' ],
-    language: 'en',
-    contributors: [ 'tzrasane' ],
-    title: 'inbox tzrasane',
-    rightsholder: 'tzrasane'
-  },
- {
-    identifier: '74ee8056-385a-4e6d-bad8-a05569fa38ee',
-    license: '',
-    creator: 'Opencast Project Administrator',
-    created: '2021-04-06T10:33:08Z',
-    subjects: [],
-    organizers: [],
-    description: 'Kontributor kontribuutio',
-    publishers: [],
-    language: '',
-    contributors: [ 'tzrasane', 'jesbu', 'grp-oppuroomu' ],
-    title: 'Hesbu sarja',
-    rightsholder: ''
-  }
- ]
-
- ------------------------------------------------------------------------------
- This is the data structure returned by Opencast:
- ------------------------------------------------------------------------------
-
- {
-  "catalogs": [
-    {
-      "http://purl.org/dc/terms/": {
-        "identifier": [
-          {
-            "value": "74ee8056-385a-4e6d-bad8-a05569fa38ee"
-          }
-        ],
-        "contributor": [
-          {
-            "value": "tzrasane"
-          },
-          {
-            "value": "jesbu"
-          },
-          {
-            "value": "grp-oppuroomu"
-          }
-        ],
-        "created": [
-          {
-            "type": "dcterms:W3CDTF",
-            "value": "2021-04-06T10:33:08Z"
-          }
-        ],
-        "description": [
-          {
-            "value": "Kontributor kontribuutio"
-          }
-        ],
-        "title": [
-          {
-            "value": "Hesbu sarja"
-          }
-        ]
-      }
-    },
-    {
-      "http://purl.org/dc/terms/": {
-        "rightsHolder": [
-          {
-            "value": "tzrasane"
-          }
-        ],
-        "identifier": [
-          {
-            "value": "06bd63f5-4a66-45c5-826f-e5a195c364ad"
-          }
-        ],
-        "creator": [
-          {
-            "value": "Lataamo-proxy-service"
-          },
-          {
-            "value": "tzrasane"
-          }
-        ],
-        "contributor": [
-          {
-            "value": "tzrasane"
-          }
-        ],
-        "created": [
-          {
-            "type": "dcterms:W3CDTF",
-            "value": "2021-04-06T10:30:59Z"
-          }
-        ],
-        "subject": [
-          {
-            "value": "Lataamo-inbox"
-          }
-        ],
-        "description": [
-          {
-            "value": "Lataamo-inbox series for tzrasane"
-          }
-        ],
-        "publisher": [
-          {
-            "value": "tzrasane"
-          }
-        ],
-        "language": [
-          {
-            "value": "en"
-          }
-        ],
-        "title": [
-          {
-            "value": "inbox tzrasane"
-          }
-        ]
-      }
-    },
-    {
-      "http://purl.org/dc/terms/": {
-        "identifier": [
-          {
-            "value": "3fa9cfad-0888-4a84-9325-1bff86933dec"
-          }
-        ],
-        "contributor": [
-          {
-            "value": "grp-4apis, tzrasane, konttine"
-          }
-        ],
-        "created": [
-          {
-            "type": "dcterms:W3CDTF",
-            "value": "2021-04-06T11:33:23Z"
-          }
-        ],
-        "description": [
-          {
-            "value": "testisarja"
-          }
-        ],
-        "title": [
-          {
-            "value": "orbu dorbu"
-          }
-        ]
-      }
-    },
-    {
-      "http://purl.org/dc/terms/": {
-        "rightsHolder": [
-          {
-            "value": "tzrasane"
-          }
-        ],
-        "identifier": [
-          {
-            "value": "28ed5c64-5de5-4c0a-8edd-a536c857d847"
-          }
-        ],
-        "creator": [
-          {
-            "value": "Lataamo-proxy-service"
-          },
-          {
-            "value": "tzrasane"
-          }
-        ],
-        "contributor": [
-          {
-            "value": "tzrasane"
-          }
-        ],
-        "created": [
-          {
-            "type": "dcterms:W3CDTF",
-            "value": "2021-04-06T10:30:57Z"
-          }
-        ],
-        "subject": [
-          {
-            "value": "Lataamo-trash"
-          }
-        ],
-        "description": [
-          {
-            "value": "Lataamo-trash series for tzrasane"
-          }
-        ],
-        "publisher": [
-          {
-            "value": "tzrasane"
-          }
-        ],
-        "language": [
-          {
-            "value": "en"
-          }
-        ],
-        "title": [
-          {
-            "value": "trash tzrasane"
-          }
-        ]
-      }
-    }
-  ],
-  "totalCount": "4"
-}
-
- */
-const transformResponseData = (data) => {
-
-    function digObjectValuesFromArray(dataArr){
-        if (!dataArr) {
-            return [];
-        }
-
-        const values = [];
-        dataArr.forEach((item) => {
-            values.push(item.value);
-        });
-        return values;
-    }
-
-    const transformedData = [];
-
-    data.forEach((series) => {
-        transformedData.push({
-            identifier: series["http://purl.org/dc/terms/"].identifier[0].value, //'74ee8056-385a-4e6d-bad8-a05569fa38ee',
-            license: '',
-            creator: 'Opencast Project Administrator',
-            created: series["http://purl.org/dc/terms/"].created[0].value, //'2021-04-06T10:33:08Z',
-            subjects: (typeof series["http://purl.org/dc/terms/"].subject !== 'undefined') ? [series["http://purl.org/dc/terms/"].subject[0].value] : [],
-            organizers: digObjectValuesFromArray(series["http://purl.org/dc/terms/"].creator),  // tää on creatorissa inboxilla ja trashillä
-            description: series["http://purl.org/dc/terms/"].description[0].value, //'Kontributor kontribuutio',
-            publishers: (typeof series["http://purl.org/dc/terms/"].publisher !== 'undefined')? [series["http://purl.org/dc/terms/"].publisher[0].value] : [],
-            language: (typeof series["http://purl.org/dc/terms/"].language !== 'undefined') ? series["http://purl.org/dc/terms/"].language[0].value : '',
-            contributors: digObjectValuesFromArray(series["http://purl.org/dc/terms/"].contributor), //[ 'tzrasane', 'jesbu', 'grp-oppuroomu' ],
-            title: series["http://purl.org/dc/terms/"].title[0].value, //'Hesbu sarja',
-            rightsholder: (typeof series["http://purl.org/dc/terms/"].rightsHolder !== 'undefined') ? series["http://purl.org/dc/terms/"].rightsHolder[0].value : ''
-        });
-    });
-
-    return transformedData;
+    return uniqueSeriesList;
 };
 
 
