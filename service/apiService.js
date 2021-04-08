@@ -151,6 +151,9 @@ exports.getUserSeries = async (user) => {
 // hacked getUserSeries
 exports.getUserSeries = async (user) => {
 
+    // TODO: tsekkaa että vain oikea otetaan
+    // grp-a01830-arkisto tällä tulee kaks osumaa
+    // grp-a01830-arkisto-yleinen
     const availableContributorValuesForUser = [user.eppn, ...user.hyGroupCn];
     let returnedSeriesData = [];
 
@@ -422,31 +425,34 @@ exports.getUserSeries = async (user) => {
  */
 const transformResponseData = (data) => {
 
-    function digContributors(dataArr){
-        const contributors = [];
-        dataArr.forEach((contributor) => {
-            contributors.push(contributor.value);
+    function digObjectValuesFromArray(dataArr){
+        if (!dataArr) {
+            return [];
+        }
+
+        const values = [];
+        dataArr.forEach((item) => {
+            values.push(item.value);
         });
-        return contributors;
+        return values;
     }
 
     const transformedData = [];
 
-    // TODO: populate other attributes also, check from the data above in the comments
     data.forEach((series) => {
         transformedData.push({
             identifier: series["http://purl.org/dc/terms/"].identifier[0].value, //'74ee8056-385a-4e6d-bad8-a05569fa38ee',
             license: '',
             creator: 'Opencast Project Administrator',
             created: series["http://purl.org/dc/terms/"].created[0].value, //'2021-04-06T10:33:08Z',
-            subjects: [],
-            organizers: [],
+            subjects: (typeof series["http://purl.org/dc/terms/"].subject !== 'undefined') ? [series["http://purl.org/dc/terms/"].subject[0].value] : [],
+            organizers: digObjectValuesFromArray(series["http://purl.org/dc/terms/"].creator),  // tää on creatorissa inboxilla ja trashillä
             description: series["http://purl.org/dc/terms/"].description[0].value, //'Kontributor kontribuutio',
-            publishers: [],
-            language: '',
-            contributors: digContributors(series["http://purl.org/dc/terms/"].contributor), //[ 'tzrasane', 'jesbu', 'grp-oppuroomu' ],
+            publishers: (typeof series["http://purl.org/dc/terms/"].publisher !== 'undefined')? [series["http://purl.org/dc/terms/"].publisher[0].value] : [],
+            language: (typeof series["http://purl.org/dc/terms/"].language !== 'undefined') ? series["http://purl.org/dc/terms/"].language[0].value : '',
+            contributors: digObjectValuesFromArray(series["http://purl.org/dc/terms/"].contributor), //[ 'tzrasane', 'jesbu', 'grp-oppuroomu' ],
             title: series["http://purl.org/dc/terms/"].title[0].value, //'Hesbu sarja',
-            rightsholder: ''
+            rightsholder: (typeof series["http://purl.org/dc/terms/"].rightsHolder !== 'undefined') ? series["http://purl.org/dc/terms/"].rightsHolder[0].value : ''
         });
     });
 
