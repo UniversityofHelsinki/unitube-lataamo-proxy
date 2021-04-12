@@ -184,21 +184,21 @@ exports.getUserSeries = async (user) => {
     let returnedSeriesData = [];
 
     for (let contributorValue of availableContributorValuesForUser) {
-        let theTruePathToSalvation =
-            'series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=' +
-            contributorValue + // this is either the user's username or group's name (grp-some_group)
-            '&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=&count=';
-        let seriesUrl =  '/series/' + theTruePathToSalvation;
+        if (contributorValue !== '') {
+            let theTruePathToSalvation =
+                'series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=' +
+                contributorValue + // this is either the user's username or group's name (grp-some_group)
+                '&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=&count=';
+            let seriesUrl = '/series/' + theTruePathToSalvation;
+            let response = await security.opencastBase.get(seriesUrl);
+            // transform data from /series API to same format than the external API (/api/series) uses
+            let transformedSeriesList = transformResponseData(response.data.catalogs);
+            // remove series that have only partial match in contributor value
+            let filteredSeriesList =
+                filterCorrectSeriesWithCorrectContributors(transformedSeriesList, contributorValue);
 
-        let response = await security.opencastBase.get(seriesUrl);
-
-        // transform data from /series API to same format than the external API (/api/series) uses
-        let transformedSeriesList = transformResponseData(response.data.catalogs);
-        // remove series that have only partial match in contributor value
-        let filteredSeriesList =
-            filterCorrectSeriesWithCorrectContributors(transformedSeriesList, contributorValue);
-
-        returnedSeriesData = returnedSeriesData.concat(filteredSeriesList);
+            returnedSeriesData = returnedSeriesData.concat(filteredSeriesList);
+        }
     }
 
     // remove possible double series entries using series identifier

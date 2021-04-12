@@ -298,6 +298,7 @@ const mockUserSeries6 =
     };
 
 const mockUserSeriesEmpty = [];
+const mockUserSeriesEmpty_XXX = { catalogs: [], totalCount: '0' };
 
 const mockUserEventsForInboxSeries =  [
     {
@@ -1969,6 +1970,16 @@ const lataamoSeriesEmpty = () =>
         .get(CONSTANTS.OCAST_SERIES_PATH + '?filter=contributors:Tester-XYZ,contributors:grp-XYZ')
         .reply(200, mockUserSeriesEmpty);
 
+const lataamoSeriesEmpty_XXX = () =>
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .get('/series/series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=Tester-XYZ&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=&count=')
+        .reply(200, mockUserSeriesEmpty_XXX);
+
+const lataamoSeriesEmpty_XXX_2 = () =>
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .get('/series/series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=grp-XYZ&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=&count=')
+        .reply(200, mockUserSeriesEmpty_XXX);
+
 // /api/series/?filter=Creator:Opencast Project Administrator
 const lataamoSeries = () =>
     nock(CONSTANTS.OCAST_BASE_URL)
@@ -2130,6 +2141,8 @@ module.exports.mockTestUser = mockTestUser;
 module.exports.mockTestUser2 = mockTestUser2;
 module.exports.mockTestUser3 = mockTestUser3;
 module.exports.mockOCastSeriesApiCallEmpty = lataamoSeriesEmpty;
+module.exports.mockOpencastSeriesApiEmptyResult_XXX = lataamoSeriesEmpty_XXX;
+module.exports.mockOpencastSeriesApiEmptyResult_XXX_2 = lataamoSeriesEmpty_XXX_2;
 module.exports.mockOCastSeriesApiCall = lataamoSeries;
 module.exports.mockOCastSeriesApiCall2 = lataamoSeries2;
 module.exports.mockOCastSeriesApiCall3 = lataamoSeries3;

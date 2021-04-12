@@ -13,7 +13,7 @@ const ocastMigrationlogger = require('../config/ocastMigrationLogger');
 
 
 exports.isContributorMigrationActive = () => {
-    const contributorFlag = process.env.FEATURE_FLAG_FOR_MIGRATION_ACTIVE;
+    const contributorFlag = true; //process.env.FEATURE_FLAG_FOR_MIGRATION_ACTIVE;
     //logger.info(`ocastMigrationUtils isContributorMigrationActive = ${contributorFlag}`);
     return contributorFlag;
 };
