@@ -9,10 +9,9 @@ const eventsService = require('./eventsService');
 const messageKeys = require('../utils/message-keys');
 const fetch = require('node-fetch');
 const { parseContributor } = require('./userService');
-const { filterCorrectSeriesWithCorrectContributors, transformResponseData } =
+const { filterCorrectSeriesWithCorrectContributors, transformResponseData, isContributorMigrationActive } =
     require('../utils/ocastMigrationUtils');
-// TODO: set this value in .env file and read from there
-const FEATURE_FLAG_FOR_MIGRATION_ACTIVE = true;
+
 
 //
 // This file is the façade for opencast server
@@ -174,7 +173,7 @@ exports.getUserSeries = async (user) => {
 exports.getUserSeries = async (user) => {
 
     // check the feature flag value
-    if (!FEATURE_FLAG_FOR_MIGRATION_ACTIVE) {
+    if (!isContributorMigrationActive()) {
         const contributorParameters = parseContributor(user.hyGroupCn);
         const seriesUrl =  constants.OCAST_SERIES_PATH + '?filter=contributors:' + user.eppn + ',' + contributorParameters;
         const response = await security.opencastBase.get(seriesUrl);

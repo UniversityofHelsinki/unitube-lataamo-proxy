@@ -7,9 +7,8 @@ const apiService = require('../service/apiService');
 const messageKeys = require('../utils/message-keys');
 const logger = require('../config/winstonLogger');
 const constants = require('../utils/constants');
-const { splitContributorsFromSeries } = require('../utils/ocastMigrationUtils');
-// TODO: set this value in .env file and read from there
-const FEATURE_FLAG_FOR_MIGRATION_ACTIVE = true;
+const { splitContributorsFromSeries, isContributorMigrationActive } = require('../utils/ocastMigrationUtils');
+
 
 /**
  * Returns a series by series' id.
@@ -32,10 +31,11 @@ exports.getSeries = async (req, res) => {
     try {
         const series = await apiService.getSeries(req.params.id);
         // check the feature flag value
-        if (!FEATURE_FLAG_FOR_MIGRATION_ACTIVE) {
+        if (!isContributorMigrationActive()) {
             await apiService.contributorsToIamGroupsAndPersons(series);
         }else{
-            await apiService.contributorsToIamGroupsAndPersons(splitContributorsFromSeries(series));
+            await apiService.contributorsToIamGroupsAndPersons(
+                splitContributorsFromSeries(series, req.user.eppn));
         }
         const seriesWithAllEventsCount = await eventsService.getAllEventsCountForSeries(series);
         const userSeriesWithPublished = await seriesService.addPublishedInfoInSeriesAndMoodleRoles(seriesWithAllEventsCount);

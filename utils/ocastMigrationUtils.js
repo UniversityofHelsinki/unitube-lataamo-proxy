@@ -9,6 +9,16 @@
  */
 
 
+const ocastMigrationlogger = require('../config/ocastMigrationLogger');
+
+
+exports.isContributorMigrationActive = () => {
+    const contributorFlag = process.env.FEATURE_FLAG_FOR_MIGRATION_ACTIVE;
+    //logger.info(`ocastMigrationUtils isContributorMigrationActive = ${contributorFlag}`);
+    return contributorFlag;
+};
+
+
 /***
  * Checks contributors attribute from given series.
  * Splits contributors to separate contributor entries in contributor list if needed.
@@ -42,7 +52,7 @@
  * @param userSeries one series
  * @returns series with modified contributors
  */
-exports.splitContributorsFromSeries = (userSeries) => {
+exports.splitContributorsFromSeries = (userSeries, userId) => {
     let hackedSeries;
 
     try {
@@ -51,9 +61,14 @@ exports.splitContributorsFromSeries = (userSeries) => {
             for (const contributor of userSeries.contributors){
                 // check if contributor value contains many entries withing one string
                 if(contributor.includes(',')){
+                    ocastMigrationlogger.info(
+                        `XXX splitContributorsFromSeries USER: ${userId} SERIES_ID: ${userSeries.identifier} SERIES_TITLE: ${userSeries.title} CONTRIBUTOR_VALUE_STRING: ${contributor}`);
                     // split and trim and concat to existing contributors
+                    const separatedContributors = contributor.split(',').map(s => s.trim());
+                    ocastMigrationlogger.info(
+                        `XXX splitContributorsFromSeries USER: ${userId} SERIES_ID: ${userSeries.identifier} SERIES_TITLE: ${userSeries.title} CONTRIBUTOR_VALUE_ARRAY: ${separatedContributors}`);
                     resolvedContributors =
-                        resolvedContributors.concat(contributor.split(',').map(s => s.trim()));
+                        resolvedContributors.concat(separatedContributors);
                 }else{
                     resolvedContributors.push(contributor);
                 }
@@ -101,7 +116,8 @@ exports.splitContributorsFromSeries = (userSeries) => {
 exports.filterCorrectSeriesWithCorrectContributors = (transformedSeriesList, contributorValue) => {
     let returnedSeriesList = [];
     transformedSeriesList.forEach((transformedSeries) => {
-        let seriesWithSplittedContributors = this.splitContributorsFromSeries(transformedSeries);
+        let seriesWithSplittedContributors =
+            this.splitContributorsFromSeries(transformedSeries, contributorValue);
         seriesWithSplittedContributors.contributors.forEach((contributor) => {
             if (contributor === contributorValue) {
                 returnedSeriesList.push(seriesWithSplittedContributors);
