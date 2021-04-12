@@ -147,8 +147,23 @@ exports.getUserSeries = async (user) => {
 };
  */
 
-
-// hacked getUserSeries
+/**
+ * Returns series for logged in user.
+ * These series are the ones user is listed as contributor, the contributor value can be user's username or
+ * one of the groups user is a member (grp-something).
+ *
+ * HAXXX:
+ * Opencast is queried once with each contributor value the user has (username and possible groups user is member of).
+ * Before returning the series the series contributor values are checked using splitContributorsFromSeries
+ * function in ocastMigrationUtils.js
+ * @see module:ocastMigrationUtils
+ *
+ * See LATAAMO-510 for the discussion and details ({@link https://jira.it.helsinki.fi/browse/LATAAMO-510}).
+ *
+ *
+ * @param user the logged user
+ * @returns {Promise<*[]>} List of series were user is listed as a contributor
+ */
 exports.getUserSeries = async (user) => {
 
     const availableContributorValuesForUser = [user.eppn, ...user.hyGroupCn];
@@ -157,7 +172,7 @@ exports.getUserSeries = async (user) => {
     for (let contributorValue of availableContributorValuesForUser) {
         let theTruePathToSalvation =
             'series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=' +
-            contributorValue +
+            contributorValue + // this is either the user's username or group's name (grp-some_group)
             '&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=&count=';
         let seriesUrl =  '/series/' + theTruePathToSalvation;
 

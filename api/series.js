@@ -10,10 +10,23 @@ const constants = require('../utils/constants');
 const { splitContributorsFromSeries } = require('../utils/ocastMigrationUtils');
 
 
+/**
+ * Returns a series by series' id.
+ *
+ * HAXXX:
+ * Before returning the series the series contributor values are checked
+ * using splitContributorsFromSeries function in ocastMigrationUtils.js
+ * @see module:ocastMigrationUtils
+ *
+ * See LATAAMO-510 for the discussion and details ({@link https://jira.it.helsinki.fi/browse/LATAAMO-510}).
+ *
+ * @param req
+ * @param res
+ * @returns {Promise<void>} The series found by series id
+ */
 exports.getSeries = async (req, res) => {
     try {
         const series = await apiService.getSeries(req.params.id);
-        // HAXXX: split contributors with splitContributorsFromSeries
         await apiService.contributorsToIamGroupsAndPersons(splitContributorsFromSeries(series));
         const seriesWithAllEventsCount = await eventsService.getAllEventsCountForSeries(series);
         const userSeriesWithPublished = await seriesService.addPublishedInfoInSeriesAndMoodleRoles(seriesWithAllEventsCount);
