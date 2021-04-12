@@ -8,8 +8,11 @@ const logger = require('../config/winstonLogger');
 const eventsService = require('./eventsService');
 const messageKeys = require('../utils/message-keys');
 const fetch = require('node-fetch');
+const { parseContributor } = require('./userService');
 const { filterCorrectSeriesWithCorrectContributors, transformResponseData } =
     require('../utils/ocastMigrationUtils');
+// TODO: set this value in .env file and read from there
+const FEATURE_FLAG_FOR_MIGRATION_ACTIVE = true;
 
 //
 // This file is the façade for opencast server
@@ -160,11 +163,23 @@ exports.getUserSeries = async (user) => {
  *
  * See LATAAMO-510 for the discussion and details ({@link https://jira.it.helsinki.fi/browse/LATAAMO-510}).
  *
+ * Checks feature flag value FEATURE_FLAG_FOR_MIGRATION_ACTIVE
+ * If value is not set (undefined) or the value is false the old implementation is used
+ * to get the list of user's series.
+ *
  *
  * @param user the logged user
  * @returns {Promise<*[]>} List of series were user is listed as a contributor
  */
 exports.getUserSeries = async (user) => {
+
+    // check the feature flag value
+    if (!FEATURE_FLAG_FOR_MIGRATION_ACTIVE) {
+        const contributorParameters = parseContributor(user.hyGroupCn);
+        const seriesUrl =  constants.OCAST_SERIES_PATH + '?filter=contributors:' + user.eppn + ',' + contributorParameters;
+        const response = await security.opencastBase.get(seriesUrl);
+        return response.data;
+    }
 
     const availableContributorValuesForUser = [user.eppn, ...user.hyGroupCn];
     let returnedSeriesData = [];
