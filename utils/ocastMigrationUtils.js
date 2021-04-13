@@ -58,9 +58,9 @@ exports.splitContributorsFromSeries = (userSeries, userId) => {
     try {
         if (userSeries) {
             let resolvedContributors = [];
-            for (const contributor of userSeries.contributors){
+            for (const contributor of userSeries.contributors) {
                 // check if contributor value contains many entries withing one string
-                if(contributor.includes(',')){
+                if (contributor.includes(',')) {
                     ocastMigrationlogger.info(
                         `XXX splitContributorsFromSeries USER: ${userId} SERIES_ID: ${userSeries.identifier} SERIES_TITLE: ${userSeries.title} CONTRIBUTOR_VALUE_STRING: ${contributor}`);
                     // split and trim and concat to existing contributors
@@ -69,7 +69,7 @@ exports.splitContributorsFromSeries = (userSeries, userId) => {
                         `XXX splitContributorsFromSeries USER: ${userId} SERIES_ID: ${userSeries.identifier} SERIES_TITLE: ${userSeries.title} CONTRIBUTOR_VALUE_ARRAY: ${separatedContributors}`);
                     resolvedContributors =
                         resolvedContributors.concat(separatedContributors);
-                }else{
+                } else {
                     resolvedContributors.push(contributor);
                 }
             }
@@ -77,10 +77,14 @@ exports.splitContributorsFromSeries = (userSeries, userId) => {
             userSeries.contributors = uniqueContributors;
             hackedSeries = userSeries;
         } else {
+            ocastMigrationlogger.error(
+                `XXX splitContributorsFromSeries USER: ${userId} ERROR: userSeries was undefined. Returning empty array`);
             console.log('ERROR splitContributorsFromSeries: userSeries was undefined');
             return {};
         }
     } catch (e) {
+        ocastMigrationlogger.error(
+            `XXX splitContributorsFromSeries USER: ${userId} SERIES_ID: ${userSeries.identifier} ERROR: General, failed to resolve contributors`);
         console.log('ERROR splitContributorsFromSeries', e);
         throw Error('Failed to resolve contributors');
     }
