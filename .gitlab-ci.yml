@@ -76,7 +76,7 @@ deploy_test:
   environment:
     name: test
   only:
-    - LATAAMO-510_split_contributors_from_opencast_if_needed
+    - test
   script:
     - echo "====== Deploy to test server ========"
     - echo "====== Install rsync and openssh ========="
