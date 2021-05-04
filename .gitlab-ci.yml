@@ -151,6 +151,6 @@ dependency scanning:
     - echo "Done with npm diagnostics."
     - echo "Sending results to Slack..."
     # Send result files to "audit-logs" channel in Ohtu's Slack space (see https://api.slack.com/methods/files.upload).
-    - "curl -F file=@${CI_PROJECT_DIR}/npm_audit_result.txt -F 'initial_comment=Unitube frontend npm audit report' -F channels=C01KV33GE90 -F filename=npm_audit_result.txt -F filetype=text -H 'Authorization: Bearer '${SLACK_FILE_UPLOAD_TOKEN} https://slack.com/api/files.upload"
-    - "curl -F file=@${CI_PROJECT_DIR}/npm_outdated_packages.txt -F 'initial_comment=Unitube frontend outdated packages report ' -F channels=C01KV33GE90 -F filename=npm_outdated_packages.txt  filetype=text -H 'Authorization: Bearer '${SLACK_FILE_UPLOAD_TOKEN} https://slack.com/api/files.upload"
+    - "curl -F file=@${CI_PROJECT_DIR}/npm_audit_result.txt -F 'initial_comment=Unitube Lataamo-proxy npm audit report' -F channels=C01KV33GE90 -F filename=npm_audit_result.txt -F filetype=text -H 'Authorization: Bearer '${SLACK_FILE_UPLOAD_TOKEN} https://slack.com/api/files.upload"
+    - "curl -F file=@${CI_PROJECT_DIR}/npm_outdated_packages.txt -F 'initial_comment=Unitube Lataamo-proxy outdated packages report ' -F channels=C01KV33GE90 -F filename=npm_outdated_packages.txt  filetype=text -H 'Authorization: Bearer '${SLACK_FILE_UPLOAD_TOKEN} https://slack.com/api/files.upload"
     - echo "Done with sending results to Slack."
