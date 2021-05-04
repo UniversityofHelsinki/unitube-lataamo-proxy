@@ -10,6 +10,7 @@ cache:
 stages:
   - setup
   - build
+  - audit_scan
   - test
   - deploy
 
@@ -49,6 +50,9 @@ deploy_dev:
     name: development
   only:
     - master
+  except:
+    # Skip deploy when scheduled npm audit and outdated scans are executed.
+    - schedules
   script:
     - echo "====== Deploy to development server ========"
     - echo "====== Install rsync and openssh ========="
@@ -124,3 +128,29 @@ deploy_prod:
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
     - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --exclude=".env" --exclude="/api/uploads" --exclude="/logs" --exclude="/files/licenses.json"  --delete ./ lataamo@lataamo-prod.it.helsinki.fi:/home/lataamo/proxy
     - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-prod.it.helsinki.fi "NODE_ENV=production pm2 restart app"
+
+# Rules for the scheduled npm audit and outdated scans
+dependency scanning:
+  stage: audit_scan
+  tags:
+    - ohtu-build-1
+  allow_failure: true
+  only:
+    - schedules
+  before_script:
+    - apk add --no-cache curl
+  script:
+    # Run npm audit and npm outdated commands and write outputs to txt files.
+    - echo "Running npm diagnostics, audit and outdated..."
+    - pwd
+    - npm audit > ${CI_PROJECT_DIR}/npm_audit_result.txt
+    - npm outdated > ${CI_PROJECT_DIR}/npm_outdated_packages.txt
+    - cat ${CI_PROJECT_DIR}/npm_audit_result.txt
+    - cat ${CI_PROJECT_DIR}/npm_outdated_packages.txt
+    - ls -al
+    - echo "Done with npm diagnostics."
+    - echo "Sending results to Slack..."
+    # Send result files to "audit-logs" channel in Ohtu's Slack space (see https://api.slack.com/methods/files.upload).
+    - "curl -F file=@${CI_PROJECT_DIR}/npm_audit_result.txt -F 'initial_comment=Unitube frontend npm audit report' -F channels=C01KV33GE90 -F filename=npm_audit_result.txt -F filetype=text -H 'Authorization: Bearer '${SLACK_FILE_UPLOAD_TOKEN} https://slack.com/api/files.upload"
+    - "curl -F file=@${CI_PROJECT_DIR}/npm_outdated_packages.txt -F 'initial_comment=Unitube frontend outdated packages report ' -F channels=C01KV33GE90 -F filename=npm_outdated_packages.txt  filetype=text -H 'Authorization: Bearer '${SLACK_FILE_UPLOAD_TOKEN} https://slack.com/api/files.upload"
+    - echo "Done with sending results to Slack."
