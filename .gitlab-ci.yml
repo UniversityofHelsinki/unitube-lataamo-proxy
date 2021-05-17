@@ -142,10 +142,11 @@ dependency scanning:
   script:
     # Run npm audit and npm outdated commands and write outputs to a txt file.
     - echo "Running npm diagnostics, audit and outdated..."
-    - export RESULT_FILE="npm_scan_results.txt"
+    - export RESULT_FILE="./npm_scan_results.txt"
     - pwd
     # Write result file
-    - touch ./$RESULT_FILE
+    - touch $RESULT_FILE
+    - ls -al
     - npm audit > $RESULT_FILE
     - echo "" >> $RESULT_FILE
     - echo "" >> $RESULT_FILE
@@ -153,7 +154,6 @@ dependency scanning:
     - echo "" >> $RESULT_FILE
     - npm outdated >> $RESULT_FILE
     - cat $RESULT_FILE
-    - ls -al
     - echo "Done with npm diagnostics."
     - echo "Sending results to Slack..."
     # Send result file to "audit-logs" channel in Ohtu's Slack space (see https://api.slack.com/methods/files.upload).
