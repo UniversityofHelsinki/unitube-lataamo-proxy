@@ -145,13 +145,14 @@ dependency scanning:
     - export RESULT_FILE="npm_scan_results.txt"
     - pwd
     # Write result file
-    - npm audit > ${CI_PROJECT_DIR}/$RESULT_FILE
-    - echo "" >> ${CI_PROJECT_DIR}/$RESULT_FILE
-    - echo "" >> ${CI_PROJECT_DIR}/$RESULT_FILE
-    - echo "                   === npm outdated report ===" >> ${CI_PROJECT_DIR}/$RESULT_FILE
-    - echo "" >> ${CI_PROJECT_DIR}/$RESULT_FILE
-    - npm outdated >> ${CI_PROJECT_DIR}/$RESULT_FILE
-    - cat ${CI_PROJECT_DIR}/$RESULT_FILE
+    - touch ./$RESULT_FILE
+    - npm audit > $RESULT_FILE
+    - echo "" >> $RESULT_FILE
+    - echo "" >> $RESULT_FILE
+    - echo "                   === npm outdated report ===" >> $RESULT_FILE
+    - echo "" >> $RESULT_FILE
+    - npm outdated >> $RESULT_FILE
+    - cat $RESULT_FILE
     - ls -al
     - echo "Done with npm diagnostics."
     - echo "Sending results to Slack..."
