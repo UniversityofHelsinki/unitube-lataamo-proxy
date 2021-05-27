@@ -143,19 +143,32 @@ dependency scanning:
     # Run npm audit and npm outdated commands and write outputs to a txt file.
     - echo "Running npm diagnostics, audit and outdated..."
     - export RESULT_FILE="./npm_scan_results.txt"
-    - pwd
-    # Write result file
+    # Create result file
     - touch $RESULT_FILE
-    - ls -al
-    - npm audit > $RESULT_FILE
+    # Write to the result file
+    - echo " ************ UNITUBE-LATAAMO-PROXY NPM AUDIT RESULT ************ " >> $RESULT_FILE
+    - echo "        https://version.helsinki.fi/tike-ohtu/unitube-lataamo-proxy" >> $RESULT_FILE
     - echo "" >> $RESULT_FILE
+    - echo "                   === npm audit security report ===" >> $RESULT_FILE
+    - echo "" >> $RESULT_FILE
+    # Run npm audit and "catch" the possible non zero exit code (https://docs.gitlab.com/ee/ci/yaml/#script)
+    - "npm audit --parseable | awk -F '\t' 'NF {print $2}' >> $RESULT_FILE || exit_code=$?"
+    # npm audit --parseable | awk -F $'\t' 'NF {print "   Package: "$2, "\tLevel: "$3, "\tMore info: "$6}' # this would be nice format
+    # Add a message based on npm audit's return code
+    - if [ $exit_code -ne 0 ]; then echo "Some vulnerabilities was found, check the above packages." >> $RESULT_FILE; fi;
+    - if [ $exit_code -eq 0 ]; then echo "All is good, enjoy the moment." >> $RESULT_FILE; fi;
+    - echo "" >> $RESULT_FILE
+    - echo " ************ UNITUBE-LATAAMO-PROXY NPM OUTDATED RESULT ************ " >> $RESULT_FILE
     - echo "" >> $RESULT_FILE
     - echo "                   === npm outdated report ===" >> $RESULT_FILE
     - echo "" >> $RESULT_FILE
-    - npm outdated >> $RESULT_FILE
+    # Run npm outdated and "catch" the possible non zero exit code (https://docs.gitlab.com/ee/ci/yaml/#script)
+    - npm outdated >> $RESULT_FILE || exit_code=$?
+    - echo "" >> $RESULT_FILE
+    - echo " ************ END OF FILE ************ " >> $RESULT_FILE
     - cat $RESULT_FILE
     - echo "Done with npm diagnostics."
     - echo "Sending results to Slack..."
     # Send result file to "audit-logs" channel in Ohtu's Slack space (see https://api.slack.com/methods/files.upload).
-    - "curl -F file=@${CI_PROJECT_DIR}/npm_audit_result.txt -F 'initial_comment=Unitube Lataamo-proxy npm report' -F channels=C01KV33GE90 -F filename=npm_audit_result.txt -F filetype=text -H 'Authorization: Bearer '${SLACK_FILE_UPLOAD_TOKEN} https://slack.com/api/files.upload"
+    - "curl -F file=@${CI_PROJECT_DIR}/$RESULT_FILE -F 'initial_comment=Unitube-Lataamo-proxy npm report' -F channels=${AUDIT_RESULT_SLACK_CHANNEL_ID} -F filename=$RESULT_FILE -F filetype=text -H 'Authorization: Bearer '${SLACK_FILE_UPLOAD_TOKEN} https://slack.com/api/files.upload"
     - echo "Done with sending results to Slack."
