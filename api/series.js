@@ -7,11 +7,36 @@ const apiService = require('../service/apiService');
 const messageKeys = require('../utils/message-keys');
 const logger = require('../config/winstonLogger');
 const constants = require('../utils/constants');
+const { splitContributorsFromSeries, isContributorMigrationActive } = require('../utils/ocastMigrationUtils');
 
+
+/**
+ * Returns a series by series' id.
+ *
+ * HAXXX:
+ * Before returning the series the series contributor values are checked
+ * using splitContributorsFromSeries function in ocastMigrationUtils.js
+ * @see module:ocastMigrationUtils
+ *
+ * Checks feature flag value FEATURE_FLAG_FOR_MIGRATION_ACTIVE
+ * If value is not set (undefined) or the value is false the old implementation is used to get the series.
+ *
+ * See LATAAMO-510 for the discussion and details ({@link https://jira.it.helsinki.fi/browse/LATAAMO-510}).
+ *
+ * @param req
+ * @param res
+ * @returns {Promise<void>} The series found by series id
+ */
 exports.getSeries = async (req, res) => {
     try {
         const series = await apiService.getSeries(req.params.id);
-        await apiService.contributorsToIamGroupsAndPersons(series);
+        // check the feature flag value
+        if (!isContributorMigrationActive()) {
+            await apiService.contributorsToIamGroupsAndPersons(series);
+        }else{
+            await apiService.contributorsToIamGroupsAndPersons(
+                splitContributorsFromSeries(series, req.user.eppn));
+        }
         const seriesWithAllEventsCount = await eventsService.getAllEventsCountForSeries(series);
         const userSeriesWithPublished = await seriesService.addPublishedInfoInSeriesAndMoodleRoles(seriesWithAllEventsCount);
         res.json(userSeriesWithPublished);
@@ -23,6 +48,7 @@ exports.getSeries = async (req, res) => {
         });
     }
 };
+
 
 exports.updateSeries = async (req, res) => {
     try {
