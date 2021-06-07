@@ -141,6 +141,7 @@ const mockUserInboxSeries2 = [
 ];
 
 
+
 const mockUserInboxSeries3 = [
     { identifier: CONSTANTS.TEST_INBOX_SERIES_ID,
         creator: 'Opencast Project Administrator',
@@ -298,6 +299,7 @@ const mockUserSeries6 =
     };
 
 const mockUserSeriesEmpty = [];
+
 
 const mockUserEventsForInboxSeries =  [
     {
