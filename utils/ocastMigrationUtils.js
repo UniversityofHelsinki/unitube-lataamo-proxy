@@ -413,7 +413,7 @@ exports.transformResponseData = (data) => {
             created: series[THE_KEY].created[0].value,
             subjects: (typeof series[THE_KEY].subject !== 'undefined') ? [series[THE_KEY].subject[0].value] : [],
             organizers: digObjectValuesFromArray(series[THE_KEY].creator),  // this is in creator attribute in inbox and trash series
-            description: series[THE_KEY].description[0].value,
+            description: (typeof series[THE_KEY].description !== 'undefined') ? series[THE_KEY].description[0].value : '',
             publishers: (typeof series[THE_KEY].publisher !== 'undefined')? [series[THE_KEY].publisher[0].value] : [],
             language: (typeof series[THE_KEY].language !== 'undefined') ? series[THE_KEY].language[0].value : '',
             contributors: digObjectValuesFromArray(series[THE_KEY].contributor),
