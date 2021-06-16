@@ -188,7 +188,7 @@ exports.getUserSeries = async (user) => {
             let theTruePathToSalvation =
                 'series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=' +
                 contributorValue + // this is either the user's username or group's name (grp-some_group)
-                '&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=&count=100';
+                '&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=0&count=100';
             let seriesUrl = '/series/' + theTruePathToSalvation;
             let response = await security.opencastBase.get(seriesUrl);
             // if totalCount is less or equal result than maximum paging result return all
