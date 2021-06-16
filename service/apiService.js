@@ -188,16 +188,38 @@ exports.getUserSeries = async (user) => {
             let theTruePathToSalvation =
                 'series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=' +
                 contributorValue + // this is either the user's username or group's name (grp-some_group)
-                '&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=&count=';
+                '&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=0&count=100';
             let seriesUrl = '/series/' + theTruePathToSalvation;
             let response = await security.opencastBase.get(seriesUrl);
-            // transform data from /series API to same format than the external API (/api/series) uses
-            let transformedSeriesList = transformResponseData(response.data.catalogs);
-            // remove series that have only partial match in contributor value
-            let filteredSeriesList =
-                filterCorrectSeriesWithCorrectContributors(transformedSeriesList, contributorValue);
+            // if totalCount is less or equal result than maximum paging result return all
+            if (response.data.totalCount <= 100) {
+                // transform data from /series API to same format than the external API (/api/series) uses
+                let transformedSeriesList = transformResponseData(response.data.catalogs);
+                // remove series that have only partial match in contributor value
+                let filteredSeriesList =
+                    filterCorrectSeriesWithCorrectContributors(transformedSeriesList, contributorValue);
 
-            returnedSeriesData = returnedSeriesData.concat(filteredSeriesList);
+                returnedSeriesData = returnedSeriesData.concat(filteredSeriesList);
+            }
+            // if totalCount is more than maximum paging result then loop all pages
+            else {
+                let pageCount = Math.floor(response.data.totalCount / 100);
+                for (let page = 0; page <= pageCount; page++) {
+                    let theOtherTruePathToSalvation =
+                        'series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=' +
+                        contributorValue + // this is either the user's username or group's name (grp-some_group)
+                        '&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=' + page + '&count=100';
+
+                    let seriesUrl = '/series/' + theOtherTruePathToSalvation;
+                    let response = await security.opencastBase.get(seriesUrl);
+                    let transformedSeriesList = transformResponseData(response.data.catalogs);
+                    // remove series that have only partial match in contributor value
+                    let filteredSeriesList =
+                        filterCorrectSeriesWithCorrectContributors(transformedSeriesList, contributorValue);
+
+                    returnedSeriesData = returnedSeriesData.concat(filteredSeriesList);
+                }
+            }
         }
     }
 
