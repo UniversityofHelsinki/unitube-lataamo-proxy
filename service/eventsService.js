@@ -5,7 +5,7 @@ const moment = require('moment');
 const momentDurationFormatSetup = require('moment-duration-format');
 momentDurationFormatSetup(moment);
 const constants = require('../utils/constants');
-const {inboxSeriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
+//const {inboxSeriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
 const logger = require('../config/winstonLogger');
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 const JsonFind = require('json-find');
@@ -267,6 +267,16 @@ exports.getMediaFileMetadataForEvent = async (event) => {
     };
 };
 
+exports.updateEventAcl = async (events, acl) => {
+    return Promise.all(events.map(async event => {
+        await apiService.updateEventAcl(event, acl);
+        return {
+            ...event,
+            acl: acl
+        };
+    }));
+};
+
 exports.getDurationFromMediaFileMetadataForEvent = (event) => {
     return {
         ...event,
@@ -300,16 +310,16 @@ exports.modifySeriesEventMetadataForOpencast = (metadata) => {
     const metadataArray = [];
 
     metadataArray.push({
-            'id' : 'title',
-            'value': metadata.title },
-        {
-            'id' : 'description',
-            'value': metadata.description
-        },
-        {
-            'id' : 'contributor',
-            'value': metadata.contributors
-        }
+        'id' : 'title',
+        'value': metadata.title },
+    {
+        'id' : 'description',
+        'value': metadata.description
+    },
+    {
+        'id' : 'contributor',
+        'value': metadata.contributors
+    }
     );
 
     return metadataArray;

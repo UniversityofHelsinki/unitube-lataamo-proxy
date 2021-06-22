@@ -57,8 +57,16 @@ exports.updateSeries = async (req, res) => {
         seriesService.addUserToEmptyContributorsList(rawEventMetadata, loggedUser);
         let modifiedMetadata = eventsService.modifySeriesEventMetadataForOpencast(rawEventMetadata);
         let modifiedSeriesAclMetadata = seriesService.openCastFormatSeriesAclList(rawEventMetadata, constants.UPDATE_SERIES);
-        const response = await apiService.updateSeriesAcldata(modifiedSeriesAclMetadata, req.body.identifier);
-        const data = await apiService.updateSeriesEventMetadata(modifiedMetadata, req.body.identifier);
+        await apiService.updateSeriesAcldata(modifiedSeriesAclMetadata, req.body.identifier);
+        await apiService.updateSeriesEventMetadata(modifiedMetadata, req.body.identifier);
+
+        const events = await eventsService.getAllEvents([req.body.identifier]);
+        const concatenatedEventsArray = eventsService.concatenateArray(events);
+
+        if (concatenatedEventsArray && concatenatedEventsArray.length > 0) {
+            await eventsService.updateEventAcl(concatenatedEventsArray, modifiedSeriesAclMetadata);
+        }
+
         res.json({message: 'OK'});
     } catch (error) {
         res.status(500);
