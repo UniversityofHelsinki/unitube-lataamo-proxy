@@ -318,6 +318,12 @@ exports.deleteWebVttFile = async (vttFile, eventId) => {
     }
 };
 
+exports.getEventAcl = async (event) => {
+    const aclUrl = constants.OCAST_VIDEOS_PATH + event.identifier + constants.OCAST_ACL_PATH;
+    const response = await security.opencastBase.get(aclUrl);
+    return response.data;
+};
+
 exports.updateEventAcl = async (event, acl) => {
     const aclUrl = constants.OCAST_VIDEOS_PATH + event.identifier + constants.OCAST_ACL_PATH;
     let bodyFormData = new FormData();

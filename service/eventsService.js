@@ -1,3 +1,4 @@
+const equal = require('deep-equal');
 const commonService = require('./commonService');
 const seriesService = require('./seriesService');
 const apiService = require('./apiService');
@@ -267,9 +268,13 @@ exports.getMediaFileMetadataForEvent = async (event) => {
     };
 };
 
-exports.updateEventAcl = async (events, acl) => {
+exports.updateEventAcl = async (events, acl, series) => {
     return Promise.all(events.map(async event => {
-        await apiService.updateEventAcl(event, acl);
+        const eventAcl = await apiService.getEventAcl(event);
+        if (!equal(eventAcl, acl)) {
+            logger.info(`EVENT : ${event.identifier} ACL : ${JSON.stringify(eventAcl)} IS NOT SAME AS SERIES : ${series} ACL : ${JSON.stringify(acl)}`);
+            await apiService.updateEventAcl(event, acl);
+        }
         return {
             ...event,
             acl: acl

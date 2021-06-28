@@ -64,7 +64,7 @@ exports.updateSeries = async (req, res) => {
         const concatenatedEventsArray = eventsService.concatenateArray(events);
 
         if (concatenatedEventsArray && concatenatedEventsArray.length > 0) {
-            await eventsService.updateEventAcl(concatenatedEventsArray, modifiedSeriesAclMetadata);
+            await eventsService.updateEventAcl(concatenatedEventsArray, modifiedSeriesAclMetadata, req.body.identifier);
         }
 
         res.json({message: 'OK'});
