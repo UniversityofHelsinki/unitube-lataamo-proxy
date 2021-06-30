@@ -308,6 +308,7 @@ describe('user series put', () => {
         test.mockLataamoPutSeriesCall();
         test.mockLataamoUpdateSeriesAcl();
         test.mockLataamoUpdateSeriesMetadata();
+        test.noSeriesEventsCall();
     });
 
     it('Successful series update should return 200', async () => {

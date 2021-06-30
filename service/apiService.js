@@ -318,6 +318,31 @@ exports.deleteWebVttFile = async (vttFile, eventId) => {
     }
 };
 
+exports.getEventAcl = async (event) => {
+    const aclUrl = constants.OCAST_VIDEOS_PATH + event.identifier + constants.OCAST_ACL_PATH;
+    const response = await security.opencastBase.get(aclUrl);
+    return response.data;
+};
+
+exports.updateEventAcl = async (event, acl) => {
+    const aclUrl = constants.OCAST_VIDEOS_PATH + event.identifier + constants.OCAST_ACL_PATH;
+    let bodyFormData = new FormData();
+    bodyFormData.append('eventId', event.identifier),
+    bodyFormData.append('acl', JSON.stringify(acl));
+    try {
+        const headers = {
+            ...bodyFormData.getHeaders(),
+            'Content-Type': 'multipart/form-data'
+        };
+        return await security.opencastBase.put(aclUrl, bodyFormData, {headers});
+    } catch (err) {
+        return {
+            status: 500,
+            message: err.message
+        };
+    }
+};
+
 exports.updateEventMetadata = async (metadata, eventId, isTrash, user) => {
     try {
         // check event transaction status
