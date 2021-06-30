@@ -787,49 +787,49 @@ const userSeriesListFromOpenCastTrashInbox =
 
 exports.mockOpencastSeriesApiEmptyResult_XXX = () =>
     nock(CONSTANTS.OCAST_BASE_URL)
-        .get('/series/series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=Tester-XYZ&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=&count=')
+        .get('/series/series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=Tester-XYZ&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=0&count=100')
         .reply(200, mockUserSeriesEmpty_XXX);
 
 exports.mockOpencastSeriesApiEmptyResult_XXX_2 = () =>
     nock(CONSTANTS.OCAST_BASE_URL)
-        .get('/series/series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=grp-XYZ&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=&count=')
+        .get('/series/series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=grp-XYZ&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=0&count=100')
         .reply(200, mockUserSeriesEmpty_XXX);
 
 exports.mockSeriesWithInboxCall_XXX = () =>
     nock(CONSTANTS.OCAST_BASE_URL)
-        .get('/series/series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=tester-xyz&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=&count=')
+        .get('/series/series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=tester-xyz&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=0&count=100')
         .reply(200, mockUserInboxSeries3_XXX);
 
 exports.mockUserSeriesListCall_elluri_XXX = () =>
     nock(CONSTANTS.OCAST_BASE_URL)
-        .get('/series/series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=elluri&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=&count=')
+        .get('/series/series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=elluri&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=0&count=100')
         .reply(200, userSeriesListFromOpenCastTrashInboxPlus2);
 
 exports.mockUserSeriesListCall_elluri_XXX2 = () =>
     nock(CONSTANTS.OCAST_BASE_URL)
-        .get('/series/series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=elluri&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=&count=')
+        .get('/series/series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=elluri&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=0&count=100')
         .reply(200, userSeriesListFromOpenCastTrashInbox);
 
 exports.mockUserSeriesListCall_elluri_XXX3 = () =>
     nock(CONSTANTS.OCAST_BASE_URL)
-        .get('/series/series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=elluri&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=&count=')
+        .get('/series/series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=elluri&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=0&count=100')
         .reply(200, userSeriesListFromOpenCastTrashInboxPlus1);
 
 exports.mockUserSeriesListCall_grp_oppuroomu_XXX = () =>
     nock(CONSTANTS.OCAST_BASE_URL)
-        .get('/series/series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=grp-oppuroomu&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=&count=')
+        .get('/series/series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=grp-oppuroomu&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=0&count=100')
         .reply(200, userSeriesListFromOpenCastJust1);
 
 exports.mockUserSeriesListCall_grp_XYZ_XXX = () =>
     nock(CONSTANTS.OCAST_BASE_URL)
-        .get('/series/series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=grp-XYZ&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=&count=')
+        .get('/series/series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=grp-XYZ&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=0&count=100')
         .reply(200, userSeriesListFromOpenCastTrashInboxPlus1);
 
 exports.mockOpencastSeriesApiEmptyResultContributorParam_XXX = (contributor) =>
     nock(CONSTANTS.OCAST_BASE_URL)
         .get('/series/series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor='+
             contributor +
-            '&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=&count=')
+            '&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=0&count=100')
         .reply(200, mockUserSeriesEmpty_XXX);
 
 
@@ -837,5 +837,5 @@ exports.mockOpencastSeriesApiResult3SeriesContributorParam_XXX = (contributor) =
     nock(CONSTANTS.OCAST_BASE_URL)
         .get('/series/series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor='+
             contributor +
-            '&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=&count=')
+            '&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=0&count=100')
         .reply(200, mockUserSeriesThreeStycken);
