@@ -5,10 +5,13 @@ const {format} = require('date-fns'); // https://www.npmjs.com/package/date-fns
 const constants = require('../utils/constants');
 const {seriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
 const logger = require('../config/winstonLogger');
-const userService = require('./userService');
 const eventsService = require('./eventsService');
 const messageKeys = require('../utils/message-keys');
 const fetch = require('node-fetch');
+const { parseContributor } = require('./userService');
+const { filterCorrectSeriesWithCorrectContributors, transformResponseData, isContributorMigrationActive } =
+    require('../utils/ocastMigrationUtils');
+
 
 //
 // This file is the façade for opencast server
@@ -134,12 +137,100 @@ exports.getUserTrashSeries = async (user) => {
     return response.data;
 };
 
+
+/*
 exports.getUserSeries = async (user) => {
     const contributorParameters = userService.parseContributor(user.hyGroupCn);
     const seriesUrl =  constants.OCAST_SERIES_PATH + '?filter=contributors:' + user.eppn + ',' + contributorParameters;
     const response = await security.opencastBase.get(seriesUrl);
-    return response.data;
+    // response.data is a list of series
+    // HAXXX: split contributors with splitContributorsFromSeriesList
+    return splitContributorsFromSeriesList(response.data);
 };
+ */
+
+/**
+ * Returns series for logged in user.
+ * These series are the ones user is listed as contributor, the contributor value can be user's username or
+ * one of the groups user is a member (grp-something).
+ *
+ * HAXXX:
+ * Opencast is queried once with each contributor value the user has (username and possible groups user is member of).
+ * Before returning the series the series contributor values are checked using splitContributorsFromSeries
+ * function in ocastMigrationUtils.js
+ * @see module:ocastMigrationUtils
+ *
+ * See LATAAMO-510 for the discussion and details ({@link https://jira.it.helsinki.fi/browse/LATAAMO-510}).
+ *
+ * Checks feature flag value FEATURE_FLAG_FOR_MIGRATION_ACTIVE
+ * If value is not set (undefined) or the value is false the old implementation is used
+ * to get the list of user's series.
+ *
+ *
+ * @param user the logged user
+ * @returns {Promise<*[]>} List of series were user is listed as a contributor
+ */
+exports.getUserSeries = async (user) => {
+
+    // check the feature flag value
+    if (!isContributorMigrationActive()) {
+        const contributorParameters = parseContributor(user.hyGroupCn);
+        const seriesUrl =  constants.OCAST_SERIES_PATH + '?filter=contributors:' + user.eppn + ',' + contributorParameters;
+        const response = await security.opencastBase.get(seriesUrl);
+        return response.data;
+    }
+
+    const availableContributorValuesForUser = [user.eppn, ...user.hyGroupCn];
+    let returnedSeriesData = [];
+
+    for (let contributorValue of availableContributorValuesForUser) {
+        if (contributorValue !== '') {
+            let theTruePathToSalvation =
+                'series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=' +
+                contributorValue + // this is either the user's username or group's name (grp-some_group)
+                '&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=0&count=100';
+            let seriesUrl = '/series/' + theTruePathToSalvation;
+            let response = await security.opencastBase.get(seriesUrl);
+            // if totalCount is less or equal result than maximum paging result return all
+            if (response.data.totalCount <= 100) {
+                // transform data from /series API to same format than the external API (/api/series) uses
+                let transformedSeriesList = transformResponseData(response.data.catalogs);
+                // remove series that have only partial match in contributor value
+                let filteredSeriesList =
+                    filterCorrectSeriesWithCorrectContributors(transformedSeriesList, contributorValue);
+
+                returnedSeriesData = returnedSeriesData.concat(filteredSeriesList);
+            }
+            // if totalCount is more than maximum paging result then loop all pages
+            else {
+                let pageCount = Math.floor(response.data.totalCount / 100);
+                for (let page = 0; page <= pageCount; page++) {
+                    let theOtherTruePathToSalvation =
+                        'series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=' +
+                        contributorValue + // this is either the user's username or group's name (grp-some_group)
+                        '&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=' + page + '&count=100';
+
+                    let seriesUrl = '/series/' + theOtherTruePathToSalvation;
+                    let response = await security.opencastBase.get(seriesUrl);
+                    let transformedSeriesList = transformResponseData(response.data.catalogs);
+                    // remove series that have only partial match in contributor value
+                    let filteredSeriesList =
+                        filterCorrectSeriesWithCorrectContributors(transformedSeriesList, contributorValue);
+
+                    returnedSeriesData = returnedSeriesData.concat(filteredSeriesList);
+                }
+            }
+        }
+    }
+
+    // remove possible double series entries using series identifier
+    const key = 'identifier';
+    const uniqueSeriesList = [...new Map(returnedSeriesData.map(item =>
+        [item[key], item])).values()];
+
+    return uniqueSeriesList;
+};
+
 
 exports.getEpisodeForEvent = async (eventId) => {
     const episodeUrl = constants.OCAST_EPISODE_PATH + '?id=' + eventId;
@@ -149,7 +240,6 @@ exports.getEpisodeForEvent = async (eventId) => {
 
 exports.getPublicationsForEvent = async (eventId) => {
     const publicationsUrl = constants.OCAST_VIDEOS_PATH + eventId + constants.OCAST_VIDEO_PUBLICATION_PATH;
-    console.log(publicationsUrl);
     const response = await security.opencastBase.get(publicationsUrl);
     return response.data;
 };
@@ -220,6 +310,31 @@ exports.deleteWebVttFile = async (vttFile, eventId) => {
             'Content-Type': 'multipart/form-data'
         };
         return await security.opencastBase.post(assetsUrl, bodyFormData, {headers});
+    } catch (err) {
+        return {
+            status: 500,
+            message: err.message
+        };
+    }
+};
+
+exports.getEventAcl = async (event) => {
+    const aclUrl = constants.OCAST_VIDEOS_PATH + event.identifier + constants.OCAST_ACL_PATH;
+    const response = await security.opencastBase.get(aclUrl);
+    return response.data;
+};
+
+exports.updateEventAcl = async (event, acl) => {
+    const aclUrl = constants.OCAST_VIDEOS_PATH + event.identifier + constants.OCAST_ACL_PATH;
+    let bodyFormData = new FormData();
+    bodyFormData.append('eventId', event.identifier),
+    bodyFormData.append('acl', JSON.stringify(acl));
+    try {
+        const headers = {
+            ...bodyFormData.getHeaders(),
+            'Content-Type': 'multipart/form-data'
+        };
+        return await security.opencastBase.put(aclUrl, bodyFormData, {headers});
     } catch (err) {
         return {
             status: 500,
