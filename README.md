@@ -26,5 +26,8 @@ ESB_PERSONS_API_KEY (found in keepass)
 to start node server to localhost:3000
 
 ### Use opencast docker to fake opencast (local development)
-`docker-compose -p opencast-allinone -f docker-compose/docker-compose.allinone.h2.yml up`
+1. Clone the repository from GitHub: https://github.com/opencast/opencast-docker \
+2. Edit `docker-compose.allinone.h2.yml` file found in `/opencast-docker/docker-compose` folder \
+Find `image: quay.io/opencast/allinone:X.X` and change it to `image: quay.io/opencast/allinone:6.6` (14.7.2021)
+3. `docker-compose -p opencast-allinone -f docker-compose/docker-compose.allinone.h2.yml up`
 
