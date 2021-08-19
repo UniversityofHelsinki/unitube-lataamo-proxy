@@ -56,16 +56,17 @@ exports.getUserVideos = async (req, res) => {
     } catch (error) {
         if(error.message === 'read ECONNRESET' || error.message === 'socket hang up' ){
             // wait and rerun, or handle connection and rerun
+            logger.error(`Error GET /userVideos ${error.message} USER ${req.user.eppn}`);
             console.log(error.message);
-        } else {
-            res.status(500);
-            const msg = error.message;
-            logger.error(`Error GET /userVideos ${msg} USER ${req.user.eppn}`);
-            res.json({
-                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_LIST_FOR_USER,
-                msg
-            });
+            return;
         }
+        res.status(500);
+        const msg = error.message;
+        logger.error(`Error GET /userVideos ${msg} USER ${req.user.eppn}`);
+        res.json({
+            message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_LIST_FOR_USER,
+            msg
+        });
 
     }
 };
