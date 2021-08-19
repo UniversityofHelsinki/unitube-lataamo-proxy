@@ -141,7 +141,6 @@ const mockUserInboxSeries2 = [
 ];
 
 
-
 const mockUserInboxSeries3 = [
     { identifier: CONSTANTS.TEST_INBOX_SERIES_ID,
         creator: 'Opencast Project Administrator',
@@ -299,7 +298,6 @@ const mockUserSeries6 =
     };
 
 const mockUserSeriesEmpty = [];
-
 
 const mockUserEventsForInboxSeries =  [
     {
@@ -1959,11 +1957,7 @@ const series3_Events = () => nock(CONSTANTS.OCAST_BASE_URL)
     .query({filter: `series:${CONSTANTS.TEST_SERIES_3_ID}`})
     .reply(200, mockUserEventsForSeries3);
 
-// events by series /api/events/?filter=series:series:123456
-const noSeries_Events = () => nock(CONSTANTS.OCAST_BASE_URL)
-    .get(CONSTANTS.OCAST_VIDEOS_PATH)
-    .query({filter: `series:123456`})
-    .reply(200, []);
+
 
 // event by id /api/event/6394a9b7-3c06-477e-841a-70862eb07bfb
 const event1 = () => nock(CONSTANTS.OCAST_BASE_URL)
@@ -2208,5 +2202,4 @@ module.exports.mockTrashSeriesCall = trashUserSeries;
 module.exports.mockSeriesWithInboxCall = lataamoWithInboxSeries;
 module.exports.mockEvent1VttFileCall = event1VttFile;
 module.exports.mockEvent2VttFileCall = event2VttFile;
-module.exports.noSeriesEventsCall = noSeries_Events;
 module.exports.cleanAll = cleanMocks;

@@ -6,7 +6,6 @@ const supertest = require('supertest'); // https://www.npmjs.com/package/superte
 const app = require('../app');
 
 let test = require('./testHelper');
-const testXXX = require('./testHelperXXX');
 
 // Unitube-lataamo proxy APIs under the test
 const LATAAMO_USER_SERIES_PATH = '/api/userSeries';
@@ -16,6 +15,7 @@ const LATAAMO_USER_INBOX_EVENTS_PATH = '/api/userInboxEvents';
 const LATAAMO_USER_TRASH_EVENTS_PATH = '/api/userTrashEvents';
 const LATAAMO_USER_EVENT_PATH = '/api/event';
 const LATAAMO_SERIES_PATH = '/api/series';
+const LATAAMO_API_BASE_PATH = '/api/';
 const LATAAMO_API_INFO_PATH = '/api/info';
 const LATAAMO_USER_PATH = '/api/user';
 const LATAAMO_API_VIDEO_PATH = '/api/videoUrl/';
@@ -58,7 +58,7 @@ describe('user eppn, preferredlanguage and hyGroupCn returned from /user route',
     it('should return 401 OK when eppn header not present', async () => {
         let response = await supertest(app)
             .get(LATAAMO_USER_PATH)
-            .expect(401);
+            .expect(401)
     });
 });
 
@@ -67,6 +67,7 @@ describe('user series returned from /userSeries route', () => {
 
     beforeEach(() => {
         // mock needed opencast apis
+        test.mockOCastSeriesApiCallEmpty();
         test.mockOCastSeriesApiCall2();
         test.mockOCastUserApiCall();
         test.mockOCastSeriesApiCall();
@@ -76,10 +77,7 @@ describe('user series returned from /userSeries route', () => {
         test.mockOCastEvents_1_ApiCall();
     });
 
-    it('-Contributor FIX- Should return no series if user and users groups are not in the series contributors list', async () => {
-        testXXX.mockOpencastSeriesApiEmptyResult_XXX();
-        testXXX.mockOpencastSeriesApiEmptyResult_XXX_2();
-
+    it('should return no series if user and users groups are not in the series contributors list', async () => {
         let response = await supertest(app)
             .get(LATAAMO_USER_SERIES_PATH)
             .set('eppn', test.mockTestUser.eppn)
@@ -93,15 +91,13 @@ describe('user series returned from /userSeries route', () => {
         assert.lengthOf(response.body, 0, 'Response array should be empty, no series should be returned');
     });
 
-    it('-Contributor FIX- Should return user\'s series if user is the series contributor', async () => {
-        testXXX.mockUserSeriesListCall_elluri_XXX();
-        const seriesOwnerEppn = 'elluri';
 
+    it('should return user\'s series if user is the series contributor', async () => {
         let response = await supertest(app)
             .get(LATAAMO_USER_SERIES_PATH)
-            .set('eppn', seriesOwnerEppn)
+            .set('eppn', 'SeriesOwnerEppn')
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
-            //.set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
             .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
@@ -112,18 +108,12 @@ describe('user series returned from /userSeries route', () => {
         assert.equal(response.body[1].eventsCount, 1);
     });
 
-    it('-Contributor FIX- Should return user\'s series if users group is in the series contributors list', async () => {
-        testXXX.mockUserSeriesListCall_elluri_XXX2();
-        testXXX.mockUserSeriesListCall_grp_oppuroomu_XXX();
-
-        const groupOfTheUser = 'grp-oppuroomu';
-        const seriesOwnerEppn = 'elluri';
-
+    it('should return user\'s series if users group is in the series contributors list', async () => {
         let response = await supertest(app)
             .get(LATAAMO_USER_SERIES_PATH)
-            .set('eppn', seriesOwnerEppn)
+            .set('eppn', test.mockTestUser.eppn)
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
-            .set('hyGroupCn', groupOfTheUser) //'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
+            .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
             .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
@@ -152,18 +142,12 @@ describe('user series returned from /userSeries route', () => {
         test.mockOcastEvetns_3_ApiCall();
     });
 
-    it('-Contributor FIX- Should return user\'s series published == true for the first and second series and published == false for the third series', async () => {
-        const eppen = 'Tester-XYZ';
-        const gruppen = 'grp-lataamo-6';
-
-        testXXX.mockOpencastSeriesApiResult3SeriesContributorParam_XXX(eppen);
-        testXXX.mockOpencastSeriesApiResult3SeriesContributorParam_XXX(gruppen);
-
+    it('should return user\'s series published == true for the first and second series and published == false for the third series', async () => {
         let response = await supertest(app)
             .get(LATAAMO_USER_SERIES_PATH)
-            .set('eppn', eppen)
+            .set('eppn', test.mockTestUser2.eppn)
             .set('preferredlanguage', test.mockTestUser2.preferredlanguage)
-            .set('hyGroupCn', gruppen)
+            .set('hyGroupCn', test.mockTestUser2.hyGroupCn)
             .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
@@ -177,6 +161,40 @@ describe('user series returned from /userSeries route', () => {
         assert.equal(response.body[2].published, false, 'Two series should be returned');
         assert.equal(response.body[2].eventsCount, 1);
         assert.deepEqual(response.body[2].visibility, ['status_private']);
+    });
+
+
+    afterEach(() => {
+        test.cleanAll();
+    });
+});
+
+describe('user inbox series should not return from /userSeries route', () => {
+
+    beforeEach(() => {
+        // mock needed opencast apis
+        test.mockSeriesWithInboxCall();
+        test.mockInboxSeriesEventsRequest();
+        test.mockInboxSeriesAclCall();
+        test.mockOCastEvent1AclCall();
+        test.mockOcastEvent2AclCall();
+        test.mockOcastEvent3AclCall();
+        test.mockOCastEvents_1_ApiCall();
+        test.mockOCastEvents_2_ApiCall();
+        test.mockOcastEvetns_3_ApiCall();
+    });
+
+    it('should not return inbox series', async () => {
+        let response = await supertest(app)
+            .get(LATAAMO_USER_SERIES_PATH)
+            .set('eppn', test.mockTestUser3.eppn)
+            .set('preferredlanguage', test.mockTestUser3.preferredlanguage)
+            .expect(200)
+            .expect('Content-Type', /json/);
+        assert.lengthOf(response.body, 1, 'One series should be returned');
+        assert.equal(response.body[0].identifier, '3f9ff5b-7663-54b7-b7cf-950be665de3c' );
+        assert.deepEqual(response.body[0].visibility, ['status_private']);
+        assert.equal(response.body[0].title , 'inbox SeriesOwnerEppn');
     });
 
 
@@ -234,6 +252,7 @@ describe('user video urls returned from /video/id events route', () => {
             .expect(200)
             .expect('Content-Type', /json/);
 
+        console.log(response.body);
         assert.isArray(response.body, 'Response should be an array');
         assert.lengthOf(response.body, 1, 'One video should be returned');
         assert.equal(response.body[0].url, 'https://ocast-devel-i1.it.helsinki.fi/static/mh_default_org/api/b419f01d-c203-4610-a1d4-a4b8904083d4/a9f5e413-1dcc-4832-a750-251a16893b2f/Samsung_and_RedBull_See_the_Unexpected_HDR_UHD_4K_Demo.mp4');
@@ -308,7 +327,6 @@ describe('user series put', () => {
         test.mockLataamoPutSeriesCall();
         test.mockLataamoUpdateSeriesAcl();
         test.mockLataamoUpdateSeriesMetadata();
-        test.noSeriesEventsCall();
     });
 
     it('Successful series update should return 200', async () => {
@@ -454,12 +472,12 @@ afterEach(() => {
 describe('user events (videos) returned from /userEvents route', () => {
     beforeEach(() => {
     // mock needed opencast api calls
-        test.mockOCastSeriesApiCall();  // list series mockUserSeries seriesid1 and 2
-        test.mockOCastSeriesApiCall3(); // list series mockUserSeries2 seriesid2
-        test.mockOCastSeriesApiCall4();  // list series mockUserSeriesEmpty
-        test.mockOCastSeriesApiCall5();  // list series mockUserSeriesEmpty
-        test.mockOCastSeriesApiCall9();  // get series with seriesid1
-        test.mockOCastSeriesApiCall10();  // get series with seriesid2
+        test.mockOCastSeriesApiCall();
+        test.mockOCastSeriesApiCall3();
+        test.mockOCastSeriesApiCall4();
+        test.mockOCastSeriesApiCall5();
+        test.mockOCastSeriesApiCall9();
+        test.mockOCastSeriesApiCall10();
         test.mockOCastUserApiCall();
         test.mockOCastEvents_1_ApiCall();
         test.mockOCastEvents_2_ApiCall();
@@ -477,14 +495,10 @@ describe('user events (videos) returned from /userEvents route', () => {
         test.mockLataamoPostSeriesCall();
     });
 
-    it('-Contributor FIX- should return events from series where user is contributor', async () => {
-        testXXX.mockUserSeriesListCall_elluri_XXX3(); // series id 1 and inbox series id 2
-        testXXX.mockUserSeriesListCall_grp_XYZ_XXX(); // series id 1 and inbox series id 2
-        const owner = 'elluri';
-
+    it('should return events from series where user is contributor', async () => {
         let response = await supertest(app)
             .get(LATAAMO_USER_EVENTS_PATH)
-            .set('eppn', owner ) //'SeriesOwnerEppn')
+            .set('eppn', 'SeriesOwnerEppn')
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
             .set('displayName', test.mockTestUser.displayName)
@@ -507,14 +521,10 @@ describe('user events (videos) returned from /userEvents route', () => {
         assert.deepEqual(response.body[2].visibility, [constants.STATUS_PUBLISHED, constants.STATUS_MOODLE]);
     });
 
-    it('-Contributor FIX- Events should have visibility array property', async () => {
-        testXXX.mockUserSeriesListCall_elluri_XXX3(); // series id 1 and inbox series id 2
-        testXXX.mockUserSeriesListCall_grp_XYZ_XXX(); // series id 1 and inbox series id 2
-        const owner = 'elluri';
-
+    it('events should have visibility array property', async () => {
         let response = await supertest(app)
             .get(LATAAMO_USER_EVENTS_PATH)
-            .set('eppn', owner) //'SeriesOwnerEppn')
+            .set('eppn', 'SeriesOwnerEppn')
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
             .set('displayName', test.mockTestUser.displayName)
@@ -527,42 +537,31 @@ describe('user events (videos) returned from /userEvents route', () => {
     });
 
 
-    it('-Contributor FIX- Should return events from series where users group is in contributors field', async () => {
-        testXXX.mockUserSeriesListCall_elluri_XXX3(); // series id 1 and inbox series id 2
-        testXXX.mockUserSeriesListCall_grp_XYZ_XXX(); // series id 1 and inbox series id 2
-        const owner = 'elluri';
-
+    it('should return events from series where users group is in contributors field', async () => {
+        const userId = 'NOT_CONTRIBUTOR_IN_ANY_SERIES';
         let response = await supertest(app)
             .get(LATAAMO_USER_EVENTS_PATH)
-            .set('eppn', owner)
+            .set('eppn', userId)
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
-            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3;grp-lataamo-1')
             .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
 
         assert.isArray(response.body, 'Response should be an array');
-        assert.lengthOf(response.body, 3, 'Two events should be returned');
+        assert.lengthOf(response.body, 2, 'Two events should be returned');
         assert.equal(response.body[0].identifier, test.constants.TEST_EVENT_1_ID);
         assert.equal(response.body[1].identifier, test.constants.TEST_EVENT_2_ID);
-        assert.equal(response.body[2].identifier, test.constants.TEST_EVENT_3_ID);
     });
 
 
-    it('-Contributor FIX- No events should be returned from series where users group is not in contributors field', async () => {
+    it('no events should be returned from series where users group is not in contributors field', async () => {
         const userId = 'NOT_CONTRIBUTOR_IN_ANY_SERIES';
-        const group1 = 'grp-lataamo-2';
-        const group2 = 'grp-lataamo-3';
-
-        testXXX.mockOpencastSeriesApiEmptyResultContributorParam_XXX(userId);
-        testXXX.mockOpencastSeriesApiEmptyResultContributorParam_XXX(group1);
-        testXXX.mockOpencastSeriesApiEmptyResultContributorParam_XXX(group2);
-
         let response = await supertest(app)
             .get(LATAAMO_USER_EVENTS_PATH)
             .set('eppn', userId)
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
-            .set('hyGroupCn', `${group1};${group2}`)
+            .set('hyGroupCn', 'grp-lataamo-2;grp-lataamo-3')
             .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
@@ -572,11 +571,8 @@ describe('user events (videos) returned from /userEvents route', () => {
     });
 
 
-    it('-Contributor FIX- No events should be returned if user is not contributor in any series', async () => {
+    it('no events should be returned if user is not contributor in any series', async () => {
         const userId = 'NOT_CONTRIBUTOR_IN_ANY_SERIES';
-
-        testXXX.mockOpencastSeriesApiEmptyResultContributorParam_XXX(userId);
-        testXXX.mockOpencastSeriesApiEmptyResultContributorParam_XXX(test.mockTestUser.hyGroupCn);
 
         let response = await supertest(app)
             .get(LATAAMO_USER_EVENTS_PATH)

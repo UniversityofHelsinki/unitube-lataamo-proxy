@@ -7,36 +7,11 @@ const apiService = require('../service/apiService');
 const messageKeys = require('../utils/message-keys');
 const logger = require('../config/winstonLogger');
 const constants = require('../utils/constants');
-const { splitContributorsFromSeries, isContributorMigrationActive } = require('../utils/ocastMigrationUtils');
 
-
-/**
- * Returns a series by series' id.
- *
- * HAXXX:
- * Before returning the series the series contributor values are checked
- * using splitContributorsFromSeries function in ocastMigrationUtils.js
- * @see module:ocastMigrationUtils
- *
- * Checks feature flag value FEATURE_FLAG_FOR_MIGRATION_ACTIVE
- * If value is not set (undefined) or the value is false the old implementation is used to get the series.
- *
- * See LATAAMO-510 for the discussion and details ({@link https://jira.it.helsinki.fi/browse/LATAAMO-510}).
- *
- * @param req
- * @param res
- * @returns {Promise<void>} The series found by series id
- */
 exports.getSeries = async (req, res) => {
     try {
         const series = await apiService.getSeries(req.params.id);
-        // check the feature flag value
-        if (!isContributorMigrationActive()) {
-            await apiService.contributorsToIamGroupsAndPersons(series);
-        }else{
-            await apiService.contributorsToIamGroupsAndPersons(
-                splitContributorsFromSeries(series, req.user.eppn));
-        }
+        await apiService.contributorsToIamGroupsAndPersons(series);
         const seriesWithAllEventsCount = await eventsService.getAllEventsCountForSeries(series);
         const userSeriesWithPublished = await seriesService.addPublishedInfoInSeriesAndMoodleRoles(seriesWithAllEventsCount);
         res.json(userSeriesWithPublished);
@@ -49,7 +24,6 @@ exports.getSeries = async (req, res) => {
     }
 };
 
-
 exports.updateSeries = async (req, res) => {
     try {
         const rawEventMetadata = req.body;
@@ -57,16 +31,8 @@ exports.updateSeries = async (req, res) => {
         seriesService.addUserToEmptyContributorsList(rawEventMetadata, loggedUser);
         let modifiedMetadata = eventsService.modifySeriesEventMetadataForOpencast(rawEventMetadata);
         let modifiedSeriesAclMetadata = seriesService.openCastFormatSeriesAclList(rawEventMetadata, constants.UPDATE_SERIES);
-        await apiService.updateSeriesAcldata(modifiedSeriesAclMetadata, req.body.identifier);
-        await apiService.updateSeriesEventMetadata(modifiedMetadata, req.body.identifier);
-
-        const events = await eventsService.getAllEvents([req.body.identifier]);
-        const concatenatedEventsArray = eventsService.concatenateArray(events);
-
-        if (concatenatedEventsArray && concatenatedEventsArray.length > 0) {
-            await eventsService.updateEventAcl(concatenatedEventsArray, modifiedSeriesAclMetadata, req.body.identifier);
-        }
-
+        const response = await apiService.updateSeriesAcldata(modifiedSeriesAclMetadata, req.body.identifier);
+        const data = await apiService.updateSeriesEventMetadata(modifiedMetadata, req.body.identifier);
         res.json({message: 'OK'});
     } catch (error) {
         res.status(500);

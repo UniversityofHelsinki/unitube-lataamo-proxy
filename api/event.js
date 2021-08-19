@@ -3,7 +3,6 @@
 const apiService = require('../service/apiService');
 const eventsService = require('../service/eventsService');
 const licenseService = require('../service/licenseService');
-const publicationService = require('../service/publicationService');
 const userService = require('../service/userService');
 const seriesService = require('../service/seriesService');
 const messageKeys = require('../utils/message-keys');
@@ -34,31 +33,6 @@ exports.getEvent = async (req, res) => {
         });
     }
 };
-
-exports.getVttFileForEvent = async (req, res) => {
-    try {
-        const episode = await apiService.getEpisodeForEvent(req.params.id);
-        const publications = await apiService.getPublicationsForEvent(req.params.id);
-        const filteredPublication = publicationService.filterApiChannelPublication(publications);
-        const mediaUrls = publicationService.getMediaUrlsFromPublication(req.params.id, filteredPublication);
-        const vttFile = await eventsService.getVttFile(episode, mediaUrls);
-        const response = await apiService.downloadVttFile(vttFile);
-        res.set({
-            'content-length': response.headers.get('content-length'),
-        });
-        response.body.pipe(res);
-    } catch(error) {
-        console.log('ERROR', error.message);
-        res.status(500);
-        const msg = error.message;
-        logger.error(`Error GET /vttFileForEvent/:id ${msg} USER ${req.user.eppn}`);
-        res.json({
-            message: messageKeys.ERROR_MESSAGE_FAILED_TO_DOWNLOAD_VIDEO,
-            msg
-        });
-    }
-};
-
 
 exports.getInboxEvents = async (req, res) => {
     logger.info(`GET /userInboxEvents USER: ${req.user.eppn}`);

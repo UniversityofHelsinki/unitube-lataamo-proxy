@@ -178,25 +178,6 @@ module.exports = function (router) {
 
     /**
      * @swagger
-     *     /api/vttFilesForEvent:
-     *     get:
-     *       tags:
-     *         - retrieve
-     *       summary: Return vtt file
-     *       description: Returns vtt file for event
-     *       responses:
-     *         200:
-     *           description: VTT file for event.
-     *         401:
-     *           description: Not authenticated. Required Shibboleth headers not present in the request.
-     *         500:
-     *           description: Internal server error, an error occurred.
-     */
-    router.get('/vttFileForEvent/:id', event.getVttFileForEvent);
-
-
-    /**
-     * @swagger
      *     /api/userTrashEvents:
      *     get:
      *       tags:

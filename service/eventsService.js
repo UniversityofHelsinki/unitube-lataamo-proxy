@@ -1,4 +1,3 @@
-const equal = require('deep-equal');
 const commonService = require('./commonService');
 const seriesService = require('./seriesService');
 const apiService = require('./apiService');
@@ -6,7 +5,7 @@ const moment = require('moment');
 const momentDurationFormatSetup = require('moment-duration-format');
 momentDurationFormatSetup(moment);
 const constants = require('../utils/constants');
-//const {inboxSeriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
+const {inboxSeriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
 const logger = require('../config/winstonLogger');
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 const JsonFind = require('json-find');
@@ -155,24 +154,6 @@ const getVttWithTrack = async (vttFile) => {
     return text;
 };
 
-exports.getVttFile = async (episode, mediaUrls) => {
-    const json = JsonFind(episode);
-
-    const mediaPackage = json.checkKey('mediapackage');
-
-    if (mediaPackage && Object.keys(mediaPackage).length > 0) {
-        return mediaUrls.map(mediaUrl => {
-            if (mediaPackage.id === mediaUrl.id) {
-                const attachments = json.checkKey('attachment');
-                const foundVttFile = attachments.find(field => {
-                    return field.mimetype === 'text/vtt';
-                });
-                return foundVttFile.url;
-            }
-        })[0];
-    }
-};
-
 exports.getVttWithMediaUrls = async (episode, mediaUrls) => {
 
     const json = JsonFind(episode);
@@ -268,20 +249,6 @@ exports.getMediaFileMetadataForEvent = async (event) => {
     };
 };
 
-exports.updateEventAcl = async (events, acl, series) => {
-    return Promise.all(events.map(async event => {
-        const eventAcl = await apiService.getEventAcl(event);
-        if (!equal(eventAcl, acl)) {
-            logger.info(`EVENT : ${event.identifier} ACL : ${JSON.stringify(eventAcl)} IS NOT SAME AS SERIES : ${series} ACL : ${JSON.stringify(acl)}`);
-            await apiService.updateEventAcl(event, acl);
-        }
-        return {
-            ...event,
-            acl: acl
-        };
-    }));
-};
-
 exports.getDurationFromMediaFileMetadataForEvent = (event) => {
     return {
         ...event,
@@ -315,16 +282,16 @@ exports.modifySeriesEventMetadataForOpencast = (metadata) => {
     const metadataArray = [];
 
     metadataArray.push({
-        'id' : 'title',
-        'value': metadata.title },
-    {
-        'id' : 'description',
-        'value': metadata.description
-    },
-    {
-        'id' : 'contributor',
-        'value': metadata.contributors
-    }
+            'id' : 'title',
+            'value': metadata.title },
+        {
+            'id' : 'description',
+            'value': metadata.description
+        },
+        {
+            'id' : 'contributor',
+            'value': metadata.contributors
+        }
     );
 
     return metadataArray;
