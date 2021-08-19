@@ -169,29 +169,46 @@ exports.getUserSeries = async (user) => {
  * @returns {Promise<*[]>} List of series were user is listed as a contributor
  */
 exports.getUserSeries = async (user) => {
-    try {
-        // check the feature flag value
-        if (!isContributorMigrationActive()) {
-            const contributorParameters = parseContributor(user.hyGroupCn);
-            const seriesUrl =  constants.OCAST_SERIES_PATH + '?filter=contributors:' + user.eppn + ',' + contributorParameters;
-            const response = await security.opencastBase.get(seriesUrl);
-            return response.data;
-        }
+    // check the feature flag value
+    if (!isContributorMigrationActive()) {
+        const contributorParameters = parseContributor(user.hyGroupCn);
+        const seriesUrl =  constants.OCAST_SERIES_PATH + '?filter=contributors:' + user.eppn + ',' + contributorParameters;
+        const response = await security.opencastBase.get(seriesUrl);
+        return response.data;
+    }
 
-        const availableContributorValuesForUser = [user.eppn, ...user.hyGroupCn];
-        let returnedSeriesData = [];
+    const availableContributorValuesForUser = [user.eppn, ...user.hyGroupCn];
+    let returnedSeriesData = [];
 
-        for (let contributorValue of availableContributorValuesForUser) {
-            if (contributorValue !== '') {
-                let theTruePathToSalvation =
-                    'series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=' +
-                    contributorValue + // this is either the user's username or group's name (grp-some_group)
-                    '&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=0&count=100';
-                let seriesUrl = '/series/' + theTruePathToSalvation;
-                let response = await security.opencastBase.get(seriesUrl);
-                // if totalCount is less or equal result than maximum paging result return all
-                if (response.data.totalCount <= 100) {
-                    // transform data from /series API to same format than the external API (/api/series) uses
+    for (let contributorValue of availableContributorValuesForUser) {
+        if (contributorValue !== '') {
+            let theTruePathToSalvation =
+                'series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=' +
+                contributorValue + // this is either the user's username or group's name (grp-some_group)
+                '&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=0&count=100';
+            let seriesUrl = '/series/' + theTruePathToSalvation;
+            let response = await security.opencastBase.get(seriesUrl);
+            // if totalCount is less or equal result than maximum paging result return all
+            if (response.data.totalCount <= 100) {
+                // transform data from /series API to same format than the external API (/api/series) uses
+                let transformedSeriesList = transformResponseData(response.data.catalogs);
+                // remove series that have only partial match in contributor value
+                let filteredSeriesList =
+                    filterCorrectSeriesWithCorrectContributors(transformedSeriesList, contributorValue);
+
+                returnedSeriesData = returnedSeriesData.concat(filteredSeriesList);
+            }
+            // if totalCount is more than maximum paging result then loop all pages
+            else {
+                let pageCount = Math.floor(response.data.totalCount / 100);
+                for (let page = 0; page <= pageCount; page++) {
+                    let theOtherTruePathToSalvation =
+                        'series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=' +
+                        contributorValue + // this is either the user's username or group's name (grp-some_group)
+                        '&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=' + page + '&count=100';
+
+                    let seriesUrl = '/series/' + theOtherTruePathToSalvation;
+                    let response = await security.opencastBase.get(seriesUrl);
                     let transformedSeriesList = transformResponseData(response.data.catalogs);
                     // remove series that have only partial match in contributor value
                     let filteredSeriesList =
@@ -199,38 +216,16 @@ exports.getUserSeries = async (user) => {
 
                     returnedSeriesData = returnedSeriesData.concat(filteredSeriesList);
                 }
-                // if totalCount is more than maximum paging result then loop all pages
-                else {
-                    let pageCount = Math.floor(response.data.totalCount / 100);
-                    for (let page = 0; page <= pageCount; page++) {
-                        let theOtherTruePathToSalvation =
-                            'series.json?q=&edit=false&fuzzyMatch=false&seriesId=&seriesTitle=&creator=&contributor=' +
-                            contributorValue + // this is either the user's username or group's name (grp-some_group)
-                            '&publisher=&rightsholder=&createdfrom=&createdto=&language=&license=&subject=&abstract=&description=&sort=&startPage=' + page + '&count=100';
-
-                        let seriesUrl = '/series/' + theOtherTruePathToSalvation;
-                        let response = await security.opencastBase.get(seriesUrl);
-                        let transformedSeriesList = transformResponseData(response.data.catalogs);
-                        // remove series that have only partial match in contributor value
-                        let filteredSeriesList =
-                            filterCorrectSeriesWithCorrectContributors(transformedSeriesList, contributorValue);
-
-                        returnedSeriesData = returnedSeriesData.concat(filteredSeriesList);
-                    }
-                }
             }
         }
-
-        // remove possible double series entries using series identifier
-        const key = 'identifier';
-        const uniqueSeriesList = [...new Map(returnedSeriesData.map(item =>
-            [item[key], item])).values()];
-
-        return uniqueSeriesList;
-    } catch (error) {
-        logger.error(`Error in getting user series: ${user} error:  ${error}`);
-        throw error;
     }
+
+    // remove possible double series entries using series identifier
+    const key = 'identifier';
+    const uniqueSeriesList = [...new Map(returnedSeriesData.map(item =>
+        [item[key], item])).values()];
+
+    return uniqueSeriesList;
 };
 
 exports.getEpisodeForEvent = async (eventId) => {
