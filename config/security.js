@@ -44,7 +44,7 @@ module.exports.shibbolethAuthentication = function (app, passport) {
 module.exports.opencastBase = axios.create({
     baseURL: adminHost,
     maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
-    httpAgent: new http.Agent({ keepAlive: true }),
+    httpAgent: new http.Agent({ keepAlive: true, maxSockets:1 }),
     httpsAgent: new https.Agent({ keepAlive: true, maxSockets:1 }),
     headers: {'authorization': auth},
     validateStatus: () => { // https://github.com/axios/axios/issues/1143
@@ -56,8 +56,8 @@ module.exports.opencastPresentationBase = axios.create({
     baseURL: presentationHost,
     headers: {'authorization': auth},
     maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
-    httpAgent: new http.Agent({ keepAlive: true }),
-    httpsAgent: new https.Agent({ keepAlive: true }),
+    httpAgent: new http.Agent({ keepAlive: true, maxSockets:1 }),
+    httpsAgent: new https.Agent({ keepAlive: true, maxSockets:1 }),
     validateStatus: () => { // https://github.com/axios/axios/issues/1143
         return true;        // without this axios might throw error on non 200 responses
     }
@@ -65,8 +65,8 @@ module.exports.opencastPresentationBase = axios.create({
 
 module.exports.opencastBaseStream = axios.create({
     maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
-    httpAgent: new http.Agent({ keepAlive: true }),
-    httpsAgent: new https.Agent({ keepAlive: true }),
+    httpAgent: new http.Agent({ keepAlive: true, maxSockets:1 }),
+    httpsAgent: new https.Agent({ keepAlive: true, maxSockets:1 }),
     headers: {'authorization': auth},
     responseType: 'stream',
     validateStatus: () => { // https://github.com/axios/axios/issues/1143
@@ -77,8 +77,8 @@ module.exports.opencastBaseStream = axios.create({
 module.exports.esbPersonBase = axios.create({
     baseURL: esbHost,
     maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
-    httpAgent: new http.Agent({ keepAlive: true }),
-    httpsAgent: new https.Agent({ keepAlive: true }),
+    httpAgent: new http.Agent({ keepAlive: true, maxSockets:1 }),
+    httpsAgent: new https.Agent({ keepAlive: true, maxSockets:1 }),
     headers: {'apikey': esbPersonsApiKey, 'Content-Type': 'application/json;charset=utf-8'},
 });
 
@@ -87,6 +87,8 @@ module.exports.esbPersonBase = axios.create({
 module.exports.esbGroupsBase = axios.create({
     baseURL: esbHost,
     maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
+    httpAgent: new http.Agent({ keepAlive: true, maxSockets:1 }),
+    httpsAgent: new https.Agent({ keepAlive: true, maxSockets:1 }),
     headers: {'apikey': esbGroupsApiKey, 'Content-Type': 'application/json;charset=utf-8'},
 });
 
