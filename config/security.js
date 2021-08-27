@@ -44,8 +44,8 @@ module.exports.shibbolethAuthentication = function (app, passport) {
 module.exports.opencastBase = axios.create({
     baseURL: adminHost,
     maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
-    httpAgent: new http.Agent({ keepAlive: true, KeepAliveTimeout:30, MaxKeepAliveRequests:1 }),
-    httpsAgent: new https.Agent({ keepAlive: true, KeepAliveTimeout:30, MaxKeepAliveRequests:1 }),
+    httpAgent: new http.Agent({ keepAlive: true, MaxKeepAliveRequests:1 }),
+    httpsAgent: new https.Agent({ keepAlive: true, MaxKeepAliveRequests:1 }),
     headers: {'authorization': auth},
     validateStatus: () => { // https://github.com/axios/axios/issues/1143
         return true;        // without this axios might throw error on non 200 responses
