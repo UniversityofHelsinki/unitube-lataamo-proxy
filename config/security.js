@@ -56,8 +56,8 @@ module.exports.opencastPresentationBase = axios.create({
     baseURL: presentationHost,
     headers: {'authorization': auth},
     maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
-    httpAgent: new http.Agent({ keepAlive: true, maxSockets:2 }),
-    httpsAgent: new https.Agent({ keepAlive: true, maxSockets:2 }),
+    httpAgent: new http.Agent({ keepAlive: true, maxSockets:100 }),
+    httpsAgent: new https.Agent({ keepAlive: true, maxSockets:100 }),
     validateStatus: () => { // https://github.com/axios/axios/issues/1143
         return true;        // without this axios might throw error on non 200 responses
     }
