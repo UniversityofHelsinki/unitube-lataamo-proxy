@@ -44,8 +44,8 @@ module.exports.shibbolethAuthentication = function (app, passport) {
 module.exports.opencastBase = axios.create({
     baseURL: adminHost,
     maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
-    httpAgent: new http.Agent({ keepAlive: true, timeout:1000000 }),
-    httpsAgent: new https.Agent({ keepAlive: true, timeout:1000000 }),
+    httpAgent: new http.Agent({ keepAlive: true, maxSockets:2 }),
+    httpsAgent: new https.Agent({ keepAlive: true, maxSockets:2 }),
     headers: {'authorization': auth},
     validateStatus: () => { // https://github.com/axios/axios/issues/1143
         return true;        // without this axios might throw error on non 200 responses
@@ -56,8 +56,8 @@ module.exports.opencastPresentationBase = axios.create({
     baseURL: presentationHost,
     headers: {'authorization': auth},
     maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
-    httpAgent: new http.Agent({ keepAlive: true, timeout:1000000 }),
-    httpsAgent: new https.Agent({ keepAlive: true, timeout:1000000 }),
+    httpAgent: new http.Agent({ keepAlive: true, maxSockets:2 }),
+    httpsAgent: new https.Agent({ keepAlive: true, maxSockets:2 }),
     validateStatus: () => { // https://github.com/axios/axios/issues/1143
         return true;        // without this axios might throw error on non 200 responses
     }
@@ -65,8 +65,8 @@ module.exports.opencastPresentationBase = axios.create({
 
 module.exports.opencastBaseStream = axios.create({
     maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
-    httpAgent: new http.Agent({ keepAlive: true, timeout:1000000 }),
-    httpsAgent: new https.Agent({ keepAlive: true, timeout:1000000 }),
+    httpAgent: new http.Agent({ keepAlive: true, maxSockets:2 }),
+    httpsAgent: new https.Agent({ keepAlive: true, maxSockets:2 }),
     headers: {'authorization': auth},
     responseType: 'stream',
     validateStatus: () => { // https://github.com/axios/axios/issues/1143
