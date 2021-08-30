@@ -33,7 +33,8 @@ exports.getEventsByIdentifier = async (identifier) => {
     userEventsUrl = userEventsUrl + identifier;
     try{
         const headers = {
-            'Keep-Alive': 'timeout=100, max=100'
+            'Keep-Alive': true,
+            'timeout': 1000000
         };
         const response = await security.opencastBase.get(userEventsUrl, {headers});
         return response.data;
@@ -51,7 +52,8 @@ exports.getEventsWithSeriesByIdentifier = async (series) => {
 
     try{
         const headers = {
-            'Keep-Alive': 'timeout=100, max=100'
+            'Keep-Alive': true,
+            'timeout': 1000000
         };
         const response = await security.opencastBase.get(userEventsUrl, {headers});
         const events = response.data;
