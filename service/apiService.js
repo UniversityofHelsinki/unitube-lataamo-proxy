@@ -31,46 +31,46 @@ exports.getEvent = async (identifier) => {
 exports.getEventsByIdentifier = async (identifier) => {
     let userEventsUrl = constants.OCAST_VIDEOS_PATH + constants.OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER;
     userEventsUrl = userEventsUrl + identifier;
-    /*    try{
-            const headers = {
-                'Keep-Alive': true
-            };
-            const response = await security.opencastBase.get(userEventsUrl, {headers});
-            return response.data;
-        } catch (error){
-            console.log(error);
-            throw error;
-        }*/
-    const response = await security.opencastBase.get(userEventsUrl);
-    return response.data;
+    try{
+        const headers = {
+            'Keep-Alive': 'timeout=100, max=100'
+        };
+        const response = await security.opencastBase.get(userEventsUrl, {headers});
+        return response.data;
+    } catch (error){
+        console.log(error);
+        throw error;
+    }
+    // const response = await security.opencastBase.get(userEventsUrl);
+    // return response.data;
 };
 
 exports.getEventsWithSeriesByIdentifier = async (series) => {
     let userEventsUrl = constants.OCAST_VIDEOS_PATH + constants.OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER;
     userEventsUrl = userEventsUrl + series.identifier;
 
-    /*    try{
-            const headers = {
-                'Keep-Alive': true
-            };
-            const response = await security.opencastBase.get(userEventsUrl, {headers});
-            const events = response.data;
-            return {
-                ...series,
-                eventsCount: events.length,
-                eventColumns: someEventColumns(events)
-            };
-        } catch (error){
-            console.log(error);
-            throw error;
-        }*/
-    const response = await security.opencastBase.get(userEventsUrl);
+    try{
+        const headers = {
+            'Keep-Alive': 'timeout=100, max=100'
+        };
+        const response = await security.opencastBase.get(userEventsUrl, {headers});
+        const events = response.data;
+        return {
+            ...series,
+            eventsCount: events.length,
+            eventColumns: someEventColumns(events)
+        };
+    } catch (error){
+        console.log(error);
+        throw error;
+    }
+/*    const response = await security.opencastBase.get(userEventsUrl);
     const events = response.data;
     return {
         ...series,
         eventsCount: events.length,
         eventColumns: someEventColumns(events)
-    };
+    };*/
 };
 
 const someEventColumns = (events) => {
