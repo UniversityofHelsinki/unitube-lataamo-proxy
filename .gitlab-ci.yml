@@ -49,7 +49,7 @@ deploy_dev:
   environment:
     name: development
   only:
-    - LATAAMO-440_new
+    - master
   except:
     # Skip deploy when scheduled npm audit and outdated scans are executed.
     - schedules
