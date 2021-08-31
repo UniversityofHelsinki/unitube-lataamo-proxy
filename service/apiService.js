@@ -136,8 +136,6 @@ exports.getUserTrashSeries = async (user) => {
     const response = await security.opencastBase.get(seriesUrl);
     return response.data;
 };
-
-
 /*
 exports.getUserSeries = async (user) => {
     const contributorParameters = userService.parseContributor(user.hyGroupCn);
@@ -171,7 +169,6 @@ exports.getUserSeries = async (user) => {
  * @returns {Promise<*[]>} List of series were user is listed as a contributor
  */
 exports.getUserSeries = async (user) => {
-
     // check the feature flag value
     if (!isContributorMigrationActive()) {
         const contributorParameters = parseContributor(user.hyGroupCn);
@@ -230,7 +227,6 @@ exports.getUserSeries = async (user) => {
 
     return uniqueSeriesList;
 };
-
 
 exports.getEpisodeForEvent = async (eventId) => {
     const episodeUrl = constants.OCAST_EPISODE_PATH + '?id=' + eventId;
