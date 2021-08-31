@@ -8,6 +8,9 @@ const password = process.env.LATAAMO_OPENCAST_PASS;
 const userpass = Buffer.from(`${username}:${password}`).toString('base64');
 const auth = `Basic ${userpass}`;
 const axios = require('axios'); // https://www.npmjs.com/package/axios
+const http = require('http');
+const https = require('https');
+
 
 const ipaddr = require('ipaddr.js');
 const localhostIP = ipaddr.process('127.0.0.1');
@@ -41,6 +44,8 @@ module.exports.shibbolethAuthentication = function (app, passport) {
 module.exports.opencastBase = axios.create({
     baseURL: adminHost,
     maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
+    httpAgent: new http.Agent({ keepAlive: true, maxSockets:2 }),
+    httpsAgent: new https.Agent({ keepAlive: true, maxSockets:2 }),
     headers: {'authorization': auth},
     validateStatus: () => { // https://github.com/axios/axios/issues/1143
         return true;        // without this axios might throw error on non 200 responses
@@ -51,6 +56,8 @@ module.exports.opencastPresentationBase = axios.create({
     baseURL: presentationHost,
     headers: {'authorization': auth},
     maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
+    httpAgent: new http.Agent({ keepAlive: true, maxSockets:2 }),
+    httpsAgent: new https.Agent({ keepAlive: true, maxSockets:2 }),
     validateStatus: () => { // https://github.com/axios/axios/issues/1143
         return true;        // without this axios might throw error on non 200 responses
     }
@@ -58,6 +65,8 @@ module.exports.opencastPresentationBase = axios.create({
 
 module.exports.opencastBaseStream = axios.create({
     maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
+    httpAgent: new http.Agent({ keepAlive: true, maxSockets:2 }),
+    httpsAgent: new https.Agent({ keepAlive: true, maxSockets:2 }),
     headers: {'authorization': auth},
     responseType: 'stream',
     validateStatus: () => { // https://github.com/axios/axios/issues/1143
