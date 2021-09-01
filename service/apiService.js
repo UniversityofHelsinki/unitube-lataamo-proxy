@@ -323,7 +323,7 @@ exports.getEventAcl = async (event) => {
 exports.updateEventAcl = async (event, acl) => {
     const aclUrl = constants.OCAST_VIDEOS_PATH + event.identifier + constants.OCAST_ACL_PATH;
     let bodyFormData = new FormData();
-    bodyFormData.append('eventId', event.identifier),
+    bodyFormData.append('eventId', event.identifier);
     bodyFormData.append('acl', JSON.stringify(acl));
     try {
         const headers = {
