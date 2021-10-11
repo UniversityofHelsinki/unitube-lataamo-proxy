@@ -41,7 +41,8 @@ const CONSTANTS = Object.freeze({
     OCAST_EVENT_PATH : '/api/event',
     SERIES_OWNER_EPPN : 'SeriesOwnerEppn',
     INBOX: 'inbox',
-    TRASH: 'trash'
+    TRASH: 'trash',
+    OCAST_VIDEOS_WITH_METADATA_ACLS_AND_PUBLICATIONS : '&withmetadata=true&withacl=true&withpublications=true'
 });
 
 
@@ -1947,10 +1948,22 @@ const series1_Events = () => nock(CONSTANTS.OCAST_BASE_URL)
     .query({filter: `series:${CONSTANTS.TEST_SERIES_1_ID}`})
     .reply(200, mockUserEventsForSeries1);
 
+// events by series /api/events/?filter=series:80f9ff5b-4163-48b7-b7cf-950be665de3c&withmetadata=true&withacl=true&withpublications=true
+const series1_new_events = () => nock(CONSTANTS.OCAST_BASE_URL)
+    .get(CONSTANTS.OCAST_VIDEOS_PATH)
+    .query({filter: `series:${CONSTANTS.TEST_SERIES_1_ID}${CONSTANTS.OCAST_VIDEOS_WITH_METADATA_ACLS_AND_PUBLICATIONS}`})
+    .reply(200, mockUserEventsForSeries1);
+
 // events by series /api/events/?filter=series:series:d72a8c9e-f854-4ba4-9ed2-89405fae214e
 const series2_Events = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(CONSTANTS.OCAST_VIDEOS_PATH)
     .query({filter: `series:${CONSTANTS.TEST_SERIES_2_ID}`})
+    .reply(200, mockUserEventsForSeries2);
+
+// events by series /api/events/?filter=series:series:d72a8c9e-f854-4ba4-9ed2-89405fae214e&withmetadata=true&withacl=true&withpublications=true
+const series2_new_events = () => nock(CONSTANTS.OCAST_BASE_URL)
+    .get(CONSTANTS.OCAST_VIDEOS_PATH)
+    .query({filter: `series:${CONSTANTS.TEST_SERIES_2_ID}${CONSTANTS.OCAST_VIDEOS_WITH_METADATA_ACLS_AND_PUBLICATIONS}`})
     .reply(200, mockUserEventsForSeries2);
 
 // events by series /api/events/?filter=series:series:604d78ac-733f-4c65-b13a-29172fbc0c6f
@@ -2149,7 +2162,9 @@ module.exports.mockOCastSeriesApiCall10 = lataamoSeries10;
 module.exports.mockOCastUserApiCall = lataamoApiUser;
 module.exports.mockOCastUserApiCall2 = lataamoApiUser2;
 module.exports.mockOCastEvents_1_ApiCall = series1_Events;
+module.exports.mockOCastEvents_1_New_ApiCall = series1_new_events;
 module.exports.mockOCastEvents_2_ApiCall = series2_Events;
+module.exports.mockOCastEvents_2_New_ApiCall = series2_new_events;
 module.exports.mockOcastEvetns_3_ApiCall = series3_Events;
 module.exports.mockOCastEventMetadata_1Call = eventMetadata_1;
 module.exports.mockOCastEventMetadata_2Call = eventMetadata_2;

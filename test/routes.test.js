@@ -461,20 +461,8 @@ describe('user events (videos) returned from /userEvents route', () => {
         test.mockOCastSeriesApiCall9();  // get series with seriesid1
         test.mockOCastSeriesApiCall10();  // get series with seriesid2
         test.mockOCastUserApiCall();
-        test.mockOCastEvents_1_ApiCall();
-        test.mockOCastEvents_2_ApiCall();
-        test.mockOCastEventMetadata_1Call();
-        test.mockOCastEventMetadata_2Call();
-        test.mockOCastEventMetadata_3Call();
-        test.mockOCastEvent1MediaCall();
-        test.mockOCastEvent2MediaCall();
-        test.mockOCastEvent3MediaCall();
-        test.mockOCastEvent1MediaMetadataCall();
-        test.mockOCastEvent2MediaMetadataCall();
-        test.mockOCastEvent3MediaMetadataCall();
-        test.mockOCastEvent1AclCall();
-        test.mockOcastEvent2AclCall();
-        test.mockLataamoPostSeriesCall();
+        test.mockOCastEvents_1_New_ApiCall();
+        test.mockOCastEvents_2_New_ApiCall();
     });
 
     it('-Contributor FIX- should return events from series where user is contributor', async () => {
