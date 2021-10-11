@@ -46,13 +46,20 @@ exports.getUserVideos = async (req, res) => {
         const ownSeries = await apiService.getUserSeries(loggedUser);
         const ownSeriesWithoutTrash = await seriesService.filterTrashSeries(ownSeries);
         const seriesIdentifiers = seriesService.getSeriesIdentifiers(ownSeriesWithoutTrash, loggedUser);
-        const allEvents = await eventsService.getAllEvents(seriesIdentifiers);
-        const concatenatedEventsArray = eventsService.concatenateArray(allEvents);
-        const allEventsWithMetaDatas = await eventsService.getAllEventsWithMetadatas(concatenatedEventsArray);
-        const allEventsWithMedia = await eventsService.getEventsWithMedia(allEventsWithMetaDatas);
-        const allEventsWithMediaFile = await eventsService.getAllEventsWithMediaFileMetadata(allEventsWithMedia);
-        const allEventsWithAcls = await eventsService.getAllEventsWithAcls(allEventsWithMediaFile);
-        res.json(eventsService.filterEventsForClient(allEventsWithAcls));
+
+        const allEventsWithMetadatas = await eventsService.getAllEventsBySeriesIdentifiers(seriesIdentifiers);
+
+        const concatenatedEventsArray = eventsService.concatenateArray(allEventsWithMetadatas);
+
+        //const allEvents = await eventsService.getAllEvents(seriesIdentifiers);
+        //const concatenatedEventsArray = eventsService.concatenateArray(allEvents);
+        //const allEventsWithMetaDatas = await eventsService.getAllEventsWithMetadatas(concatenatedEventsArray);
+        //const allEventsWithMedia = await eventsService.getEventsWithMedia(allEventsWithMetaDatas);
+        //const allEventsWithMediaFile = await eventsService.getAllEventsWithMediaFileMetadata(allEventsWithMedia);
+        //const allEventsWithAcls = await eventsService.getAllEventsWithAcls(allEventsWithMediaFile);
+
+
+        res.json(eventsService.filterNewEventsForClient(concatenatedEventsArray));
     } catch (error) {
         res.status(500);
         const msg = error.message;
