@@ -46,20 +46,9 @@ exports.getUserVideos = async (req, res) => {
         const ownSeries = await apiService.getUserSeries(loggedUser);
         const ownSeriesWithoutTrash = await seriesService.filterTrashSeries(ownSeries);
         const seriesIdentifiers = seriesService.getSeriesIdentifiers(ownSeriesWithoutTrash, loggedUser);
-
         const allEventsWithMetaData = await eventsService.getAllEventsBySeriesIdentifiers(seriesIdentifiers);
-
         const concatenatedEventsArray = eventsService.concatenateArray(allEventsWithMetaData);
-
-        //const allEvents = await eventsService.getAllEvents(seriesIdentifiers);
-        //const concatenatedEventsArray = eventsService.concatenateArray(allEvents);
-        //const allEventsWithMetaDatas = await eventsService.getAllEventsWithMetadatas(concatenatedEventsArray);
-        //const allEventsWithMedia = await eventsService.getEventsWithMedia(allEventsWithMetaDatas);
-        //const allEventsWithMediaFile = await eventsService.getAllEventsWithMediaFileMetadata(allEventsWithMedia);
-        //const allEventsWithAcls = await eventsService.getAllEventsWithAcls(allEventsWithMediaFile);
-
-
-        res.json(eventsService.filterNewEventsForClient(concatenatedEventsArray));
+        res.json(eventsService.filterEventsForClientList(concatenatedEventsArray));
     } catch (error) {
         console.log(error);
         res.status(500);

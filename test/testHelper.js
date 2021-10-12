@@ -301,6 +301,604 @@ const mockUserSeries6 =
 
 const mockUserSeriesEmpty = [];
 
+const mockUserEventsForInboxSeriesForList = [
+    {
+        "metadata": [
+            {
+                "flavor": "dublincore/episode",
+                "title": "EVENTS.EVENTS.DETAILS.CATALOG.EPISODE",
+                "fields": [
+                    {
+                        "readOnly": false,
+                        "id": "title",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.TITLE",
+                        "type": "text",
+                        "value": "alle sekunnin testilö.mp4",
+                        "required": true
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "subjects",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.SUBJECT",
+                        "type": "text",
+                        "value": [],
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "description",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.DESCRIPTION",
+                        "type": "text_long",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "translatable": true,
+                        "readOnly": false,
+                        "id": "language",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.LANGUAGE",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "rightsHolder",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.RIGHTS",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "translatable": true,
+                        "readOnly": false,
+                        "id": "license",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.LICENSE",
+                        "type": "ordered_text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "translatable": false,
+                        "readOnly": false,
+                        "id": "isPartOf",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.SERIES",
+                        "type": "text",
+                        "value": "dee7b522-b547-4faa-93fe-04cdd92568ca",
+                        "required": false
+                    },
+                    {
+                        "translatable": false,
+                        "readOnly": false,
+                        "id": "creator",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.PRESENTERS",
+                        "type": "mixed_text",
+                        "value": [],
+                        "required": false
+                    },
+                    {
+                        "translatable": false,
+                        "readOnly": false,
+                        "id": "contributor",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.CONTRIBUTORS",
+                        "type": "mixed_text",
+                        "value": [],
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "startDate",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.START_DATE",
+                        "type": "date",
+                        "value": "2021-10-12T14:11:00.000Z",
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "duration",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.DURATION",
+                        "type": "text",
+                        "value": "00:00:00",
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "location",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.LOCATION",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "source",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.SOURCE",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "readOnly": true,
+                        "id": "created",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.CREATED",
+                        "type": "date",
+                        "value": "2021-10-12T14:11:00.000Z",
+                        "required": false
+                    },
+                    {
+                        "readOnly": true,
+                        "id": "publisher",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.PUBLISHER",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "readOnly": true,
+                        "id": "identifier",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.ID",
+                        "type": "text",
+                        "value": "34a1a436-353b-40c7-805e-4d36c10ac89d",
+                        "required": false
+                    }
+                ]
+            }
+        ],
+        "description": "",
+        "language": "",
+        "source": "",
+        "acl": [
+            {
+                "allow": true,
+                "role": "ROLE_USER_LATAAMO_TESTI",
+                "action": "read"
+            },
+            {
+                "allow": true,
+                "role": "ROLE_USER_LATAAMO_TESTI",
+                "action": "write"
+            }
+        ],
+        "title": 'INBOX EVENT 1',
+        "duration": 0,
+        "contributor": ['SeriesOwnerEppn'],
+        "publication_status": [
+            "internal",
+            "engage-player",
+            "api",
+            "oaipmh-default"
+        ],
+        "identifier": CONSTANTS.TEST_INBOX_EVENT_1,
+        "creator": "Opencast Project Administrator",
+        "presenter": [],
+        "created": "2021-10-12T14:11:00Z",
+        "is_part_of": "dee7b522-b547-4faa-93fe-04cdd92568ca",
+        "subjects": [],
+        "start": "2021-10-12T14:11:00Z",
+        "processing_state": "SUCCEEDED",
+        "license": "",
+        "archive_version": 3,
+        "series": "inbox vmheikki",
+        "has_previews": true,
+        "location": "",
+        "rightsholder": "",
+        "status": "EVENTS.EVENTS.STATUS.PROCESSED",
+        "publications": [
+            {
+                "metadata": [],
+                "attachments": [],
+                "channel": "engage-player",
+                "id": "96dc60ad-9055-49ec-b5ea-de45cc8e3a3b",
+                "media": [],
+                "mediatype": "text/html",
+                "url": "http://localhost:8080/engage/theodul/ui/core.html?id=34a1a436-353b-40c7-805e-4d36c10ac89d"
+            },
+            {
+                "metadata": [
+                    {
+                        "flavor": "dublincore/episode",
+                        "size": -1,
+                        "checksum": "",
+                        "id": "0fed6a66-a71d-443e-ae08-018c226304a9",
+                        "mediatype": "text/xml",
+                        "url": "http://localhost:8080/static/mh_default_org/api/34a1a436-353b-40c7-805e-4d36c10ac89d/5a11af19-bb48-4f19-9a2d-a0c243e7c5ab/dublincore.xml",
+                        "tags": [
+                            "archive",
+                            "engage-download"
+                        ]
+                    },
+                    {
+                        "flavor": "dublincore/series",
+                        "size": -1,
+                        "checksum": "3b4c7233b40e10bd3a7ce77ecf627b24 (md5)",
+                        "id": "733c2a98-7480-4f71-8866-e3611622e1fd",
+                        "mediatype": "text/xml",
+                        "url": "http://localhost:8080/static/mh_default_org/api/34a1a436-353b-40c7-805e-4d36c10ac89d/e256a56b-ffcb-48cf-b180-c816bd02d357/dublincore.xml",
+                        "tags": [
+                            "archive",
+                            "engage-download"
+                        ]
+                    }
+                ],
+                "attachments": [
+                    {
+                        "flavor": "presenter/player+preview",
+                        "ref": "",
+                        "size": 0,
+                        "checksum": "",
+                        "id": "2b0bf337-abaa-4e0f-83ed-4994508f43ab",
+                        "mediatype": "image/png",
+                        "url": "http://localhost:8080/static/mh_default_org/api/34a1a436-353b-40c7-805e-4d36c10ac89d/5a49daa5-31e7-45a0-879d-fdc0a34fc26f/coverimage.png",
+                        "tags": [
+                            "archive",
+                            "engage-download"
+                        ]
+                    },
+                    {
+                        "flavor": "presenter/search+preview",
+                        "ref": "track:cb53eb70-5e42-4eb6-a5f4-a7ec64ed84b4",
+                        "size": 0,
+                        "checksum": "",
+                        "id": "c373c129-99df-4486-80de-0b483435d3e5",
+                        "mediatype": "image/jpeg",
+                        "url": "http://localhost:8080/static/mh_default_org/api/34a1a436-353b-40c7-805e-4d36c10ac89d/9a429c50-031a-4904-bd13-e9141a0b8e16/alle_sekunnin_testilo__1_000s_search.jpg",
+                        "tags": [
+                            "engage-download"
+                        ]
+                    },
+                    {
+                        "flavor": "presenter/timeline+preview",
+                        "ref": "track:track-4",
+                        "size": 0,
+                        "checksum": "",
+                        "id": "cdc8b8b4-6a16-4b61-b57b-10dc2203631d",
+                        "mediatype": "image/png",
+                        "url": "http://localhost:8080/static/mh_default_org/api/34a1a436-353b-40c7-805e-4d36c10ac89d/e7dbd8bc-15d9-4b17-96fb-057a4673699a/alle_sekunnin_testilo__e9fa7cfb_3d10_44c5_a073_819f287f8e9d_timelinepreviews.png",
+                        "tags": [
+                            "engage-download"
+                        ]
+                    }
+                ],
+                "channel": "api",
+                "id": "f0b4b9bc-46dc-4fef-80ae-5c23f2d6c326",
+                "media": [
+                    {
+                        "has_audio": true,
+                        "framerate": 25,
+                        "description": "",
+                        "bitrate": 220888,
+                        "url": "http://localhost:8080/static/mh_default_org/api/34a1a436-353b-40c7-805e-4d36c10ac89d/3cbcb6e7-1d25-4cfa-ae79-6b220fde6966/alle_sekunnin_testilo_.mp4",
+                        "has_video": true,
+                        "tags": [
+                            "720p-quality",
+                            "engage-download",
+                            "engage-streaming"
+                        ],
+                        "flavor": "presenter/delivery",
+                        "duration": 1045,
+                        "size": -1,
+                        "framecount": 25,
+                        "checksum": "6fdc0708a86963220c859546b95649f7 (md5)",
+                        "width": 870,
+                        "id": "33f776ce-bee8-4bfa-ae87-ea4a6949868b",
+                        "mediatype": "video/mp4",
+                        "height": 594
+                    }
+                ],
+                "mediatype": "application/json",
+                "url": "http://localhost:8080/api/events/34a1a436-353b-40c7-805e-4d36c10ac89d"
+            },
+            {
+                "metadata": [],
+                "attachments": [],
+                "channel": "oaipmh-default",
+                "id": "29f1a0ed-e294-4828-af47-7b244014c100",
+                "media": [],
+                "mediatype": "text/xml",
+                "url": "/oaipmh/default?verb=ListMetadataFormats&identifier=34a1a436-353b-40c7-805e-4d36c10ac89d"
+            }
+        ]
+    },
+    {
+        "metadata": [
+            {
+                "flavor": "dublincore/episode",
+                "title": "EVENTS.EVENTS.DETAILS.CATALOG.EPISODE",
+                "fields": [
+                    {
+                        "readOnly": false,
+                        "id": "title",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.TITLE",
+                        "type": "text",
+                        "value": "alle sekunnin testilö.mp4",
+                        "required": true
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "subjects",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.SUBJECT",
+                        "type": "text",
+                        "value": [],
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "description",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.DESCRIPTION",
+                        "type": "text_long",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "translatable": true,
+                        "readOnly": false,
+                        "id": "language",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.LANGUAGE",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "rightsHolder",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.RIGHTS",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "translatable": true,
+                        "readOnly": false,
+                        "id": "license",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.LICENSE",
+                        "type": "ordered_text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "translatable": false,
+                        "readOnly": false,
+                        "id": "isPartOf",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.SERIES",
+                        "type": "text",
+                        "value": "dee7b522-b547-4faa-93fe-04cdd92568ca",
+                        "required": false
+                    },
+                    {
+                        "translatable": false,
+                        "readOnly": false,
+                        "id": "creator",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.PRESENTERS",
+                        "type": "mixed_text",
+                        "value": [],
+                        "required": false
+                    },
+                    {
+                        "translatable": false,
+                        "readOnly": false,
+                        "id": "contributor",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.CONTRIBUTORS",
+                        "type": "mixed_text",
+                        "value": [],
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "startDate",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.START_DATE",
+                        "type": "date",
+                        "value": "2021-10-12T14:11:00.000Z",
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "duration",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.DURATION",
+                        "type": "text",
+                        "value": "00:00:00",
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "location",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.LOCATION",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "source",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.SOURCE",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "readOnly": true,
+                        "id": "created",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.CREATED",
+                        "type": "date",
+                        "value": "2021-10-12T14:11:00.000Z",
+                        "required": false
+                    },
+                    {
+                        "readOnly": true,
+                        "id": "publisher",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.PUBLISHER",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "readOnly": true,
+                        "id": "identifier",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.ID",
+                        "type": "text",
+                        "value": "34a1a436-353b-40c7-805e-4d36c10ac89d",
+                        "required": false
+                    }
+                ]
+            }
+        ],
+        "description": "",
+        "language": "",
+        "source": "",
+        "acl": [
+            {
+                "allow": true,
+                "role": "ROLE_USER_LATAAMO_TESTI",
+                "action": "read"
+            },
+            {
+                "allow": true,
+                "role": "ROLE_USER_LATAAMO_TESTI",
+                "action": "write"
+            }
+        ],
+        "title": 'INBOX EVENT 2',
+        "duration": 0,
+        "contributor": ['SeriesOwnerEppn'],
+        "publication_status": [
+            "internal",
+            "engage-player",
+            "api",
+            "oaipmh-default"
+        ],
+        "identifier": CONSTANTS.TEST_INBOX_EVENT_2,
+        "creator": "Opencast Project Administrator",
+        "presenter": [],
+        "created": "2021-10-12T14:11:00Z",
+        "is_part_of": "dee7b522-b547-4faa-93fe-04cdd92568ca",
+        "subjects": [],
+        "start": "2021-10-12T14:11:00Z",
+        "processing_state": "SUCCEEDED",
+        "license": "",
+        "archive_version": 3,
+        "series": "inbox vmheikki",
+        "has_previews": true,
+        "location": "",
+        "rightsholder": "",
+        "status": "EVENTS.EVENTS.STATUS.PROCESSED",
+        "publications": [
+            {
+                "metadata": [],
+                "attachments": [],
+                "channel": "engage-player",
+                "id": "96dc60ad-9055-49ec-b5ea-de45cc8e3a3b",
+                "media": [],
+                "mediatype": "text/html",
+                "url": "http://localhost:8080/engage/theodul/ui/core.html?id=34a1a436-353b-40c7-805e-4d36c10ac89d"
+            },
+            {
+                "metadata": [
+                    {
+                        "flavor": "dublincore/episode",
+                        "size": -1,
+                        "checksum": "",
+                        "id": "0fed6a66-a71d-443e-ae08-018c226304a9",
+                        "mediatype": "text/xml",
+                        "url": "http://localhost:8080/static/mh_default_org/api/34a1a436-353b-40c7-805e-4d36c10ac89d/5a11af19-bb48-4f19-9a2d-a0c243e7c5ab/dublincore.xml",
+                        "tags": [
+                            "archive",
+                            "engage-download"
+                        ]
+                    },
+                    {
+                        "flavor": "dublincore/series",
+                        "size": -1,
+                        "checksum": "3b4c7233b40e10bd3a7ce77ecf627b24 (md5)",
+                        "id": "733c2a98-7480-4f71-8866-e3611622e1fd",
+                        "mediatype": "text/xml",
+                        "url": "http://localhost:8080/static/mh_default_org/api/34a1a436-353b-40c7-805e-4d36c10ac89d/e256a56b-ffcb-48cf-b180-c816bd02d357/dublincore.xml",
+                        "tags": [
+                            "archive",
+                            "engage-download"
+                        ]
+                    }
+                ],
+                "attachments": [
+                    {
+                        "flavor": "presenter/player+preview",
+                        "ref": "",
+                        "size": 0,
+                        "checksum": "",
+                        "id": "2b0bf337-abaa-4e0f-83ed-4994508f43ab",
+                        "mediatype": "image/png",
+                        "url": "http://localhost:8080/static/mh_default_org/api/34a1a436-353b-40c7-805e-4d36c10ac89d/5a49daa5-31e7-45a0-879d-fdc0a34fc26f/coverimage.png",
+                        "tags": [
+                            "archive",
+                            "engage-download"
+                        ]
+                    },
+                    {
+                        "flavor": "presenter/search+preview",
+                        "ref": "track:cb53eb70-5e42-4eb6-a5f4-a7ec64ed84b4",
+                        "size": 0,
+                        "checksum": "",
+                        "id": "c373c129-99df-4486-80de-0b483435d3e5",
+                        "mediatype": "image/jpeg",
+                        "url": "http://localhost:8080/static/mh_default_org/api/34a1a436-353b-40c7-805e-4d36c10ac89d/9a429c50-031a-4904-bd13-e9141a0b8e16/alle_sekunnin_testilo__1_000s_search.jpg",
+                        "tags": [
+                            "engage-download"
+                        ]
+                    },
+                    {
+                        "flavor": "presenter/timeline+preview",
+                        "ref": "track:track-4",
+                        "size": 0,
+                        "checksum": "",
+                        "id": "cdc8b8b4-6a16-4b61-b57b-10dc2203631d",
+                        "mediatype": "image/png",
+                        "url": "http://localhost:8080/static/mh_default_org/api/34a1a436-353b-40c7-805e-4d36c10ac89d/e7dbd8bc-15d9-4b17-96fb-057a4673699a/alle_sekunnin_testilo__e9fa7cfb_3d10_44c5_a073_819f287f8e9d_timelinepreviews.png",
+                        "tags": [
+                            "engage-download"
+                        ]
+                    }
+                ],
+                "channel": "api",
+                "id": "f0b4b9bc-46dc-4fef-80ae-5c23f2d6c326",
+                "media": [
+                    {
+                        "has_audio": true,
+                        "framerate": 25,
+                        "description": "",
+                        "bitrate": 220888,
+                        "url": "http://localhost:8080/static/mh_default_org/api/34a1a436-353b-40c7-805e-4d36c10ac89d/3cbcb6e7-1d25-4cfa-ae79-6b220fde6966/alle_sekunnin_testilo_.mp4",
+                        "has_video": true,
+                        "tags": [
+                            "720p-quality",
+                            "engage-download",
+                            "engage-streaming"
+                        ],
+                        "flavor": "presenter/delivery",
+                        "duration": 1045,
+                        "size": -1,
+                        "framecount": 25,
+                        "checksum": "6fdc0708a86963220c859546b95649f7 (md5)",
+                        "width": 870,
+                        "id": "33f776ce-bee8-4bfa-ae87-ea4a6949868b",
+                        "mediatype": "video/mp4",
+                        "height": 594
+                    }
+                ],
+                "mediatype": "application/json",
+                "url": "http://localhost:8080/api/events/34a1a436-353b-40c7-805e-4d36c10ac89d"
+            },
+            {
+                "metadata": [],
+                "attachments": [],
+                "channel": "oaipmh-default",
+                "id": "29f1a0ed-e294-4828-af47-7b244014c100",
+                "media": [],
+                "mediatype": "text/xml",
+                "url": "/oaipmh/default?verb=ListMetadataFormats&identifier=34a1a436-353b-40c7-805e-4d36c10ac89d"
+            }
+        ]
+    }
+];
+
+
 
 const mockUserEventsForInboxSeries =  [
     {
@@ -336,6 +934,603 @@ const mockUserEventsForInboxSeries =  [
         has_previews: true,
         location: '',
         publication_status: [ 'internal', 'engage-player', 'api', 'oaipmh-default' ]
+    }
+];
+
+const mockUserEventsForTrashSeriesForList = [
+    {
+        "metadata": [
+            {
+                "flavor": "dublincore/episode",
+                "title": "EVENTS.EVENTS.DETAILS.CATALOG.EPISODE",
+                "fields": [
+                    {
+                        "readOnly": false,
+                        "id": "title",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.TITLE",
+                        "type": "text",
+                        "value": "alle sekunnin testilö.mp4",
+                        "required": true
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "subjects",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.SUBJECT",
+                        "type": "text",
+                        "value": [],
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "description",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.DESCRIPTION",
+                        "type": "text_long",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "translatable": true,
+                        "readOnly": false,
+                        "id": "language",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.LANGUAGE",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "rightsHolder",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.RIGHTS",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "translatable": true,
+                        "readOnly": false,
+                        "id": "license",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.LICENSE",
+                        "type": "ordered_text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "translatable": false,
+                        "readOnly": false,
+                        "id": "isPartOf",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.SERIES",
+                        "type": "text",
+                        "value": "dee7b522-b547-4faa-93fe-04cdd92568ca",
+                        "required": false
+                    },
+                    {
+                        "translatable": false,
+                        "readOnly": false,
+                        "id": "creator",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.PRESENTERS",
+                        "type": "mixed_text",
+                        "value": [],
+                        "required": false
+                    },
+                    {
+                        "translatable": false,
+                        "readOnly": false,
+                        "id": "contributor",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.CONTRIBUTORS",
+                        "type": "mixed_text",
+                        "value": [],
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "startDate",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.START_DATE",
+                        "type": "date",
+                        "value": "2021-10-12T14:11:00.000Z",
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "duration",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.DURATION",
+                        "type": "text",
+                        "value": "00:00:00",
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "location",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.LOCATION",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "source",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.SOURCE",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "readOnly": true,
+                        "id": "created",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.CREATED",
+                        "type": "date",
+                        "value": "2021-10-12T14:11:00.000Z",
+                        "required": false
+                    },
+                    {
+                        "readOnly": true,
+                        "id": "publisher",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.PUBLISHER",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "readOnly": true,
+                        "id": "identifier",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.ID",
+                        "type": "text",
+                        "value": "34a1a436-353b-40c7-805e-4d36c10ac89d",
+                        "required": false
+                    }
+                ]
+            }
+        ],
+        "description": "",
+        "language": "",
+        "source": "",
+        "acl": [
+            {
+                "allow": true,
+                "role": "ROLE_USER_LATAAMO_TESTI",
+                "action": "read"
+            },
+            {
+                "allow": true,
+                "role": "ROLE_USER_LATAAMO_TESTI",
+                "action": "write"
+            }
+        ],
+        "title": 'TRASH EVENT 1',
+        "duration": 0,
+        "contributor": ['SeriesOwnerEppn'],
+        "publication_status": [
+            "internal",
+            "engage-player",
+            "api",
+            "oaipmh-default"
+        ],
+        "identifier": CONSTANTS.TEST_TRASH_EVENT_1,
+        "creator": "Opencast Project Administrator",
+        "presenter": [],
+        "created": "2021-10-12T14:11:00Z",
+        "is_part_of": "dee7b522-b547-4faa-93fe-04cdd92568ca",
+        "subjects": [],
+        "start": "2021-10-12T14:11:00Z",
+        "processing_state": "SUCCEEDED",
+        "license": "",
+        "archive_version": 3,
+        "series": "inbox vmheikki",
+        "has_previews": true,
+        "location": "",
+        "rightsholder": "",
+        "status": "EVENTS.EVENTS.STATUS.PROCESSED",
+        "publications": [
+            {
+                "metadata": [],
+                "attachments": [],
+                "channel": "engage-player",
+                "id": "96dc60ad-9055-49ec-b5ea-de45cc8e3a3b",
+                "media": [],
+                "mediatype": "text/html",
+                "url": "http://localhost:8080/engage/theodul/ui/core.html?id=34a1a436-353b-40c7-805e-4d36c10ac89d"
+            },
+            {
+                "metadata": [
+                    {
+                        "flavor": "dublincore/episode",
+                        "size": -1,
+                        "checksum": "",
+                        "id": "0fed6a66-a71d-443e-ae08-018c226304a9",
+                        "mediatype": "text/xml",
+                        "url": "http://localhost:8080/static/mh_default_org/api/34a1a436-353b-40c7-805e-4d36c10ac89d/5a11af19-bb48-4f19-9a2d-a0c243e7c5ab/dublincore.xml",
+                        "tags": [
+                            "archive",
+                            "engage-download"
+                        ]
+                    },
+                    {
+                        "flavor": "dublincore/series",
+                        "size": -1,
+                        "checksum": "3b4c7233b40e10bd3a7ce77ecf627b24 (md5)",
+                        "id": "733c2a98-7480-4f71-8866-e3611622e1fd",
+                        "mediatype": "text/xml",
+                        "url": "http://localhost:8080/static/mh_default_org/api/34a1a436-353b-40c7-805e-4d36c10ac89d/e256a56b-ffcb-48cf-b180-c816bd02d357/dublincore.xml",
+                        "tags": [
+                            "archive",
+                            "engage-download"
+                        ]
+                    }
+                ],
+                "attachments": [
+                    {
+                        "flavor": "presenter/player+preview",
+                        "ref": "",
+                        "size": 0,
+                        "checksum": "",
+                        "id": "2b0bf337-abaa-4e0f-83ed-4994508f43ab",
+                        "mediatype": "image/png",
+                        "url": "http://localhost:8080/static/mh_default_org/api/34a1a436-353b-40c7-805e-4d36c10ac89d/5a49daa5-31e7-45a0-879d-fdc0a34fc26f/coverimage.png",
+                        "tags": [
+                            "archive",
+                            "engage-download"
+                        ]
+                    },
+                    {
+                        "flavor": "presenter/search+preview",
+                        "ref": "track:cb53eb70-5e42-4eb6-a5f4-a7ec64ed84b4",
+                        "size": 0,
+                        "checksum": "",
+                        "id": "c373c129-99df-4486-80de-0b483435d3e5",
+                        "mediatype": "image/jpeg",
+                        "url": "http://localhost:8080/static/mh_default_org/api/34a1a436-353b-40c7-805e-4d36c10ac89d/9a429c50-031a-4904-bd13-e9141a0b8e16/alle_sekunnin_testilo__1_000s_search.jpg",
+                        "tags": [
+                            "engage-download"
+                        ]
+                    },
+                    {
+                        "flavor": "presenter/timeline+preview",
+                        "ref": "track:track-4",
+                        "size": 0,
+                        "checksum": "",
+                        "id": "cdc8b8b4-6a16-4b61-b57b-10dc2203631d",
+                        "mediatype": "image/png",
+                        "url": "http://localhost:8080/static/mh_default_org/api/34a1a436-353b-40c7-805e-4d36c10ac89d/e7dbd8bc-15d9-4b17-96fb-057a4673699a/alle_sekunnin_testilo__e9fa7cfb_3d10_44c5_a073_819f287f8e9d_timelinepreviews.png",
+                        "tags": [
+                            "engage-download"
+                        ]
+                    }
+                ],
+                "channel": "api",
+                "id": "f0b4b9bc-46dc-4fef-80ae-5c23f2d6c326",
+                "media": [
+                    {
+                        "has_audio": true,
+                        "framerate": 25,
+                        "description": "",
+                        "bitrate": 220888,
+                        "url": "http://localhost:8080/static/mh_default_org/api/34a1a436-353b-40c7-805e-4d36c10ac89d/3cbcb6e7-1d25-4cfa-ae79-6b220fde6966/alle_sekunnin_testilo_.mp4",
+                        "has_video": true,
+                        "tags": [
+                            "720p-quality",
+                            "engage-download",
+                            "engage-streaming"
+                        ],
+                        "flavor": "presenter/delivery",
+                        "duration": 1045,
+                        "size": -1,
+                        "framecount": 25,
+                        "checksum": "6fdc0708a86963220c859546b95649f7 (md5)",
+                        "width": 870,
+                        "id": "33f776ce-bee8-4bfa-ae87-ea4a6949868b",
+                        "mediatype": "video/mp4",
+                        "height": 594
+                    }
+                ],
+                "mediatype": "application/json",
+                "url": "http://localhost:8080/api/events/34a1a436-353b-40c7-805e-4d36c10ac89d"
+            },
+            {
+                "metadata": [],
+                "attachments": [],
+                "channel": "oaipmh-default",
+                "id": "29f1a0ed-e294-4828-af47-7b244014c100",
+                "media": [],
+                "mediatype": "text/xml",
+                "url": "/oaipmh/default?verb=ListMetadataFormats&identifier=34a1a436-353b-40c7-805e-4d36c10ac89d"
+            }
+        ]
+    },
+    {
+        "metadata": [
+            {
+                "flavor": "dublincore/episode",
+                "title": "EVENTS.EVENTS.DETAILS.CATALOG.EPISODE",
+                "fields": [
+                    {
+                        "readOnly": false,
+                        "id": "title",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.TITLE",
+                        "type": "text",
+                        "value": "alle sekunnin testilö.mp4",
+                        "required": true
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "subjects",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.SUBJECT",
+                        "type": "text",
+                        "value": [],
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "description",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.DESCRIPTION",
+                        "type": "text_long",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "translatable": true,
+                        "readOnly": false,
+                        "id": "language",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.LANGUAGE",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "rightsHolder",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.RIGHTS",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "translatable": true,
+                        "readOnly": false,
+                        "id": "license",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.LICENSE",
+                        "type": "ordered_text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "translatable": false,
+                        "readOnly": false,
+                        "id": "isPartOf",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.SERIES",
+                        "type": "text",
+                        "value": "dee7b522-b547-4faa-93fe-04cdd92568ca",
+                        "required": false
+                    },
+                    {
+                        "translatable": false,
+                        "readOnly": false,
+                        "id": "creator",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.PRESENTERS",
+                        "type": "mixed_text",
+                        "value": [],
+                        "required": false
+                    },
+                    {
+                        "translatable": false,
+                        "readOnly": false,
+                        "id": "contributor",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.CONTRIBUTORS",
+                        "type": "mixed_text",
+                        "value": [],
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "startDate",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.START_DATE",
+                        "type": "date",
+                        "value": "2021-10-12T14:11:00.000Z",
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "duration",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.DURATION",
+                        "type": "text",
+                        "value": "00:00:00",
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "location",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.LOCATION",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "source",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.SOURCE",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "readOnly": true,
+                        "id": "created",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.CREATED",
+                        "type": "date",
+                        "value": "2021-10-12T14:11:00.000Z",
+                        "required": false
+                    },
+                    {
+                        "readOnly": true,
+                        "id": "publisher",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.PUBLISHER",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "readOnly": true,
+                        "id": "identifier",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.ID",
+                        "type": "text",
+                        "value": "34a1a436-353b-40c7-805e-4d36c10ac89d",
+                        "required": false
+                    }
+                ]
+            }
+        ],
+        "description": "",
+        "language": "",
+        "source": "",
+        "acl": [
+            {
+                "allow": true,
+                "role": "ROLE_USER_LATAAMO_TESTI",
+                "action": "read"
+            },
+            {
+                "allow": true,
+                "role": "ROLE_USER_LATAAMO_TESTI",
+                "action": "write"
+            }
+        ],
+        "title": 'TRASH EVENT 2',
+        "duration": 0,
+        "contributor": ['SeriesOwnerEppn'],
+        "publication_status": [
+            "internal",
+            "engage-player",
+            "api",
+            "oaipmh-default"
+        ],
+        "identifier": CONSTANTS.TEST_TRASH_EVENT_2,
+        "creator": "Opencast Project Administrator",
+        "presenter": [],
+        "created": "2021-10-12T14:11:00Z",
+        "is_part_of": "dee7b522-b547-4faa-93fe-04cdd92568ca",
+        "subjects": [],
+        "start": "2021-10-12T14:11:00Z",
+        "processing_state": "SUCCEEDED",
+        "license": "",
+        "archive_version": 3,
+        "series": "inbox vmheikki",
+        "has_previews": true,
+        "location": "",
+        "rightsholder": "",
+        "status": "EVENTS.EVENTS.STATUS.PROCESSED",
+        "publications": [
+            {
+                "metadata": [],
+                "attachments": [],
+                "channel": "engage-player",
+                "id": "96dc60ad-9055-49ec-b5ea-de45cc8e3a3b",
+                "media": [],
+                "mediatype": "text/html",
+                "url": "http://localhost:8080/engage/theodul/ui/core.html?id=34a1a436-353b-40c7-805e-4d36c10ac89d"
+            },
+            {
+                "metadata": [
+                    {
+                        "flavor": "dublincore/episode",
+                        "size": -1,
+                        "checksum": "",
+                        "id": "0fed6a66-a71d-443e-ae08-018c226304a9",
+                        "mediatype": "text/xml",
+                        "url": "http://localhost:8080/static/mh_default_org/api/34a1a436-353b-40c7-805e-4d36c10ac89d/5a11af19-bb48-4f19-9a2d-a0c243e7c5ab/dublincore.xml",
+                        "tags": [
+                            "archive",
+                            "engage-download"
+                        ]
+                    },
+                    {
+                        "flavor": "dublincore/series",
+                        "size": -1,
+                        "checksum": "3b4c7233b40e10bd3a7ce77ecf627b24 (md5)",
+                        "id": "733c2a98-7480-4f71-8866-e3611622e1fd",
+                        "mediatype": "text/xml",
+                        "url": "http://localhost:8080/static/mh_default_org/api/34a1a436-353b-40c7-805e-4d36c10ac89d/e256a56b-ffcb-48cf-b180-c816bd02d357/dublincore.xml",
+                        "tags": [
+                            "archive",
+                            "engage-download"
+                        ]
+                    }
+                ],
+                "attachments": [
+                    {
+                        "flavor": "presenter/player+preview",
+                        "ref": "",
+                        "size": 0,
+                        "checksum": "",
+                        "id": "2b0bf337-abaa-4e0f-83ed-4994508f43ab",
+                        "mediatype": "image/png",
+                        "url": "http://localhost:8080/static/mh_default_org/api/34a1a436-353b-40c7-805e-4d36c10ac89d/5a49daa5-31e7-45a0-879d-fdc0a34fc26f/coverimage.png",
+                        "tags": [
+                            "archive",
+                            "engage-download"
+                        ]
+                    },
+                    {
+                        "flavor": "presenter/search+preview",
+                        "ref": "track:cb53eb70-5e42-4eb6-a5f4-a7ec64ed84b4",
+                        "size": 0,
+                        "checksum": "",
+                        "id": "c373c129-99df-4486-80de-0b483435d3e5",
+                        "mediatype": "image/jpeg",
+                        "url": "http://localhost:8080/static/mh_default_org/api/34a1a436-353b-40c7-805e-4d36c10ac89d/9a429c50-031a-4904-bd13-e9141a0b8e16/alle_sekunnin_testilo__1_000s_search.jpg",
+                        "tags": [
+                            "engage-download"
+                        ]
+                    },
+                    {
+                        "flavor": "presenter/timeline+preview",
+                        "ref": "track:track-4",
+                        "size": 0,
+                        "checksum": "",
+                        "id": "cdc8b8b4-6a16-4b61-b57b-10dc2203631d",
+                        "mediatype": "image/png",
+                        "url": "http://localhost:8080/static/mh_default_org/api/34a1a436-353b-40c7-805e-4d36c10ac89d/e7dbd8bc-15d9-4b17-96fb-057a4673699a/alle_sekunnin_testilo__e9fa7cfb_3d10_44c5_a073_819f287f8e9d_timelinepreviews.png",
+                        "tags": [
+                            "engage-download"
+                        ]
+                    }
+                ],
+                "channel": "api",
+                "id": "f0b4b9bc-46dc-4fef-80ae-5c23f2d6c326",
+                "media": [
+                    {
+                        "has_audio": true,
+                        "framerate": 25,
+                        "description": "",
+                        "bitrate": 220888,
+                        "url": "http://localhost:8080/static/mh_default_org/api/34a1a436-353b-40c7-805e-4d36c10ac89d/3cbcb6e7-1d25-4cfa-ae79-6b220fde6966/alle_sekunnin_testilo_.mp4",
+                        "has_video": true,
+                        "tags": [
+                            "720p-quality",
+                            "engage-download",
+                            "engage-streaming"
+                        ],
+                        "flavor": "presenter/delivery",
+                        "duration": 1045,
+                        "size": -1,
+                        "framecount": 25,
+                        "checksum": "6fdc0708a86963220c859546b95649f7 (md5)",
+                        "width": 870,
+                        "id": "33f776ce-bee8-4bfa-ae87-ea4a6949868b",
+                        "mediatype": "video/mp4",
+                        "height": 594
+                    }
+                ],
+                "mediatype": "application/json",
+                "url": "http://localhost:8080/api/events/34a1a436-353b-40c7-805e-4d36c10ac89d"
+            },
+            {
+                "metadata": [],
+                "attachments": [],
+                "channel": "oaipmh-default",
+                "id": "29f1a0ed-e294-4828-af47-7b244014c100",
+                "media": [],
+                "mediatype": "text/xml",
+                "url": "/oaipmh/default?verb=ListMetadataFormats&identifier=34a1a436-353b-40c7-805e-4d36c10ac89d"
+            }
+        ]
     }
 ];
 
@@ -2537,11 +3732,22 @@ const inboxSeriesEvents = () => nock(CONSTANTS.OCAST_BASE_URL)
     .query({filter: `series:${CONSTANTS.TEST_INBOX_SERIES_ID}`})
     .reply(200, mockUserEventsForInboxSeries);
 
+
+// events for inbox series /api/events/?filter=series:3f9ff5b-7663-54b7-b7cf-950be665de3c&withmetadata=true&withacl=true&withpublications=true
+const inboxSeriesEventsForList = () => nock(CONSTANTS.OCAST_BASE_URL)
+    .get(`${CONSTANTS.OCAST_VIDEOS_PATH}?filter=series:${CONSTANTS.TEST_INBOX_SERIES_ID}${CONSTANTS.OCAST_VIDEOS_WITH_METADATA_ACLS_AND_PUBLICATIONS}`)
+    .reply(200, mockUserEventsForInboxSeriesForList);
+
 // events for trash series /api/events/?filter=series:3f9ff5b-7663-54b7-b7cf-950be665de3c
 const trashSeriesEvents = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(CONSTANTS.OCAST_VIDEOS_PATH)
     .query({filter: `series:${CONSTANTS.TEST_TRASH_SERIES_ID}`})
     .reply(200, mockUserEventsForTrashSeries);
+
+// events for trash series /api/events/?filter=series:3f9ff5b-7663-54b7-b7cf-950be665de3c&withmetadata=true&withacl=true&withpublications=true
+const trashSeriesEventsForList = () => nock(CONSTANTS.OCAST_BASE_URL)
+    .get(`${CONSTANTS.OCAST_VIDEOS_PATH}?filter=series:${CONSTANTS.TEST_TRASH_SERIES_ID}${CONSTANTS.OCAST_VIDEOS_WITH_METADATA_ACLS_AND_PUBLICATIONS}`)
+    .reply(200, mockUserEventsForTrashSeriesForList);
 
 // events by series /api/events/?filter=series:80f9ff5b-4163-48b7-b7cf-950be665de3c
 const series1_Events = () => nock(CONSTANTS.OCAST_BASE_URL)
@@ -2810,7 +4016,9 @@ module.exports.mockOpencastTrashSeriesRequest = trashSeriesByUserName;
 module.exports.mockOpencastInboxSeriesWithNoResultRequest = noInboxSeriesByUserName;
 module.exports.mockOpencastTrashSeriesWithNoResultRequest = noTrashSeriesByUserName;
 module.exports.mockInboxSeriesEventsRequest = inboxSeriesEvents;
+module.exports.mockInboxSeriesEventsForListRequest = inboxSeriesEventsForList;
 module.exports.mockTrashSeriesEventsRequest = trashSeriesEvents;
+module.exports.mockTrashSeriesEventsForListRequest = trashSeriesEventsForList;
 module.exports.mockInboxEvent1MediaFileMetadataCall = event1InboxMediaFileMetadata;
 module.exports.mockInboxEvent2MediaFileMetadataCall = event2InboxMediaFileMetadata;
 module.exports.mockTrashEvent1MediaFileMetadataCall = event1TrashMediaFileMetadata;

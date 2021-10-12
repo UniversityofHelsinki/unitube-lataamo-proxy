@@ -333,6 +333,7 @@ describe('user inbox events returned from /userInboxEvents route', () => {
         test.mockOpencastTrashSeriesRequest();
         test.mockOpencastInboxSeriesRequest();
         test.mockInboxSeriesEventsRequest();
+        test.mockInboxSeriesEventsForListRequest();
         test.mockOpencastTrashSeriesWithNoResultRequest();
         test.mockOpencastInboxSeriesWithNoResultRequest();
         test.mockOcastInboxEvent1Call();
@@ -394,7 +395,8 @@ describe('user trash events returned from /userTrashEvents route', () => {
         // mock needed opencast api calls
         test.mockOpencastTrashSeriesRequest();
         test.mockOpencastTrashSeriesWithNoResultRequest();
-        test.mockTrashSeriesEventsRequest();
+        //test.mockTrashSeriesEventsRequest();
+        test.mockTrashSeriesEventsForListRequest();
         test.mockOcastTrashEvent1Call();
         test.mockOcastTrashEvent2Call();
         test.mockOCastEvent1TrashMediaMetadataCall();
@@ -480,7 +482,6 @@ describe('user events (videos) returned from /userEvents route', () => {
             .expect('Content-Type', /json/);
 
         assert.isArray(response.body, 'Response should be an array');
-        console.log(response.body);
         assert.lengthOf(response.body, 2, 'Two events should be returned');
         assert.equal(response.body[0].identifier, test.constants.TEST_EVENT_1_ID);
         assert.equal(response.body[1].identifier, test.constants.TEST_EVENT_2_ID);

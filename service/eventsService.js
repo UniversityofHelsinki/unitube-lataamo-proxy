@@ -12,7 +12,7 @@ const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 const JsonFind = require('json-find');
 
 
-exports.filterNewEventsForClient = (ocResponseData) => {
+exports.filterEventsForClientList = (ocResponseData) => {
 
     if(!ocResponseData){
         return [];
@@ -20,37 +20,20 @@ exports.filterNewEventsForClient = (ocResponseData) => {
 
     const eventArray = [];
     ocResponseData.forEach(event => {
-        console.log({
-            'identifier': event.identifier,
-            'title': event.title,
-            'description' : event.description,
-            'license' : event.license,
-            'duration': calculateMediaDurationForVideo(event),
-            'creator': event.creator,
-            'processing_state' : event.processing_state,
-            'visibility' : calculateNewVisibilityPropertyForVideo(event),
-            'created': event.created,
-            'series': event.series,
-            'media' : calculateNewMediaPropertyForVideo(event)
-        });
-
-
         eventArray.push({
             'identifier': event.identifier,
             'title': event.title,
             'description' : event.description,
             'license' : event.license,
-            'duration': calculateMediaDurationForVideo(event),
+            'duration': calculateMediaDurationForVideoList(event),
             'creator': event.creator,
             'processing_state' : event.processing_state,
-            'visibility' : calculateNewVisibilityPropertyForVideo(event),
+            'visibility' : calculateVisibilityPropertyForVideoList(event),
             'created': event.created,
             'series': event.series,
-            'media' : calculateNewMediaPropertyForVideo(event)
+            'media' : calculateMediaPropertyForVideoList(event)
         });
     });
-
-    console.log("RETURNED EVENTS ARRAY", eventArray);
 
     return eventArray;
 };
@@ -95,14 +78,14 @@ exports.filterEventsForClientTrash = (ocResponseData) => {
                 'identifier': event.identifier,
                 'title': event.title,
                 'description' : event.description,
-                'license' : calculateLicensePropertyForVideo(event),
-                'duration': moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format('HH:mm:ss', {trim:false}),
+                'license' : event.license,
+                'duration': calculateMediaDurationForVideoList(event),
                 'creator': event.creator,
                 'processing_state' : event.processing_state,
-                'visibility' : calculateVisibilityPropertyForVideo(event),
+                'visibility' : calculateVisibilityPropertyForVideoList(event),
                 'created': event.created,
-                'series': event.series.title,
-                'media' : calculateMediaPropertyForVideo(event)
+                'series': event.series,
+                'media' : calculateMediaPropertyForVideoList(event)
             });
         }
     });
@@ -119,31 +102,35 @@ const calculateLicensePropertyForVideo = (event) => {
     return foundFieldWithLicenseInfo.value;
 };
 
-const calculateMediaDurationForVideo = (event) => {
+const calculateMediaDurationForVideoList = (event) => {
 
     let duration = '00:00:00';
 
     let apiChannel = event.publications.find(publication => publication.channel === 'api');
 
-    apiChannel.media.forEach(media => {
-        if (media.has_video) {
-            duration = moment.duration(media.duration, 'milliseconds').format('HH:mm:ss', {trim:false});
-        }
-    });
+    if (apiChannel && apiChannel.media) {
+        apiChannel.media.forEach(media => {
+            if (media.has_video) {
+                duration = moment.duration(media.duration, 'milliseconds').format('HH:mm:ss', {trim:false});
+            }
+        });
+    }
 
     return duration;
 };
 
-const calculateNewMediaPropertyForVideo = (event) => {
+const calculateMediaPropertyForVideoList = (event) => {
     let mediaUrls = [];
 
     let apiChannel = event.publications.find(publication => publication.channel === 'api');
 
-    apiChannel.media.forEach(media => {
-        if (media.has_video && event.processing_state === constants.OPENCAST_STATE_SUCCEEDED) {
-            mediaUrls.push(media.url);
-        }
-    });
+    if (apiChannel && apiChannel.media) {
+        apiChannel.media.forEach(media => {
+            if (media.has_video && event.processing_state === constants.OPENCAST_STATE_SUCCEEDED) {
+                mediaUrls.push(media.url);
+            }
+        });
+    }
 
     return [...new Set(mediaUrls)];
 };
@@ -165,14 +152,8 @@ const calculateMediaPropertyForVideo = (event) => {
     return [...new Set(mediaUrls)];
 };
 
-exports.calculateVisibilityProperty = (event) => {
-    return {
-        ...event,
-        visibility: calculateVisibilityPropertyForVideo(event)
-    };
-};
 
-const calculateNewVisibilityPropertyForVideo = (video) => {
+const calculateVisibilityPropertyForVideoList = (video) => {
     const visibility = [];
 
     if (commonService.publicRoleCount(video.acl) >= 1) { //video has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
@@ -215,6 +196,10 @@ exports.getAllEvents = async (seriesIdentifiers) => {
 
 exports.getAllEventsBySeriesIdentifiers = async (seriesIdentifiers) => {
     return await Promise.all(seriesIdentifiers.map(identifier => apiService.getEventsBySeriesIdentifier(identifier)));
+};
+
+exports.getAllEventsBySeriesIdentifier = async (seriesIdentifier) => {
+    return await apiService.getEventsBySeriesIdentifier(seriesIdentifier);
 };
 
 const getAllEventsWithSeries = async (series) => await Promise.all(series.map(series => apiService.getEventsWithSeriesByIdentifier(series)));
@@ -420,16 +405,16 @@ exports.modifySeriesEventMetadataForOpencast = (metadata) => {
     const metadataArray = [];
 
     metadataArray.push({
-        'id' : 'title',
-        'value': metadata.title },
-    {
-        'id' : 'description',
-        'value': metadata.description
-    },
-    {
-        'id' : 'contributor',
-        'value': metadata.contributors
-    }
+            'id' : 'title',
+            'value': metadata.title },
+        {
+            'id' : 'description',
+            'value': metadata.description
+        },
+        {
+            'id' : 'contributor',
+            'value': metadata.contributors
+        }
     );
 
     return metadataArray;
