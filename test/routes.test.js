@@ -480,19 +480,16 @@ describe('user events (videos) returned from /userEvents route', () => {
             .expect('Content-Type', /json/);
 
         assert.isArray(response.body, 'Response should be an array');
-        assert.lengthOf(response.body, 3, 'Three events should be returned');
+        console.log(response.body);
+        assert.lengthOf(response.body, 2, 'Two events should be returned');
         assert.equal(response.body[0].identifier, test.constants.TEST_EVENT_1_ID);
         assert.equal(response.body[1].identifier, test.constants.TEST_EVENT_2_ID);
-        assert.equal(response.body[2].identifier, test.constants.TEST_EVENT_3_ID);
         assert.isArray(response.body[0].visibility, 'Video\'s visibility property should be an array');
         assert.isArray(response.body[1].visibility, 'Video\'s visibility property should be an array');
-        assert.isArray(response.body[2].visibility, 'Video\'s visibility property should be an array');
         assert.lengthOf(response.body[0].visibility, 1, 'Video should have one visibility value');
         assert.equal(response.body[0].visibility, constants.STATUS_PUBLISHED);
         assert.lengthOf(response.body[1].visibility, 1, 'Video should have one visibility value');
         assert.equal(response.body[1].visibility, constants.STATUS_PUBLISHED);
-        assert.lengthOf(response.body[2].visibility, 2, 'Video should have two visibility values');
-        assert.deepEqual(response.body[2].visibility, [constants.STATUS_PUBLISHED, constants.STATUS_MOODLE]);
     });
 
     it('-Contributor FIX- Events should have visibility array property', async () => {
@@ -511,7 +508,6 @@ describe('user events (videos) returned from /userEvents route', () => {
 
         assert.isArray(response.body[0].visibility, 'Video\'s visibility property should be an array');
         assert.isArray(response.body[1].visibility, 'Video\'s visibility property should be an array');
-        assert.isArray(response.body[2].visibility, 'Video\'s visibility property should be an array');
     });
 
 
@@ -530,10 +526,9 @@ describe('user events (videos) returned from /userEvents route', () => {
             .expect('Content-Type', /json/);
 
         assert.isArray(response.body, 'Response should be an array');
-        assert.lengthOf(response.body, 3, 'Two events should be returned');
+        assert.lengthOf(response.body, 2, 'Two events should be returned');
         assert.equal(response.body[0].identifier, test.constants.TEST_EVENT_1_ID);
         assert.equal(response.body[1].identifier, test.constants.TEST_EVENT_2_ID);
-        assert.equal(response.body[2].identifier, test.constants.TEST_EVENT_3_ID);
     });
 
 

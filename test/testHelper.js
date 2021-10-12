@@ -792,12 +792,12 @@ const mockNewUserEventsForSeries1 = [
         "acl": [
             {
                 "allow": true,
-                "role": "ROLE_USER_LATAAMO_TESTI",
+                "role": "ROLE_ANONYMOUS",
                 "action": "read"
             },
             {
                 "allow": true,
-                "role": "ROLE_USER_LATAAMO_TESTI",
+                "role": "ROLE_KATSOMO",
                 "action": "write"
             }
         ],
@@ -1132,12 +1132,12 @@ const mockNewUserEventsForSeries2 = [
         "acl": [
             {
                 "allow": true,
-                "role": "ROLE_USER_LATAAMO_TESTI",
+                "role": "ROLE_ANONYMOUS",
                 "action": "read"
             },
             {
                 "allow": true,
-                "role": "ROLE_USER_LATAAMO_TESTI",
+                "role": "ROLE_KATSOMO",
                 "action": "write"
             }
         ],
