@@ -80,7 +80,7 @@ deploy_test:
   environment:
     name: test
   only:
-    - test
+    - lataamo-econnreset
   script:
     - echo "====== Deploy to test server ========"
     - echo "====== Install rsync and openssh ========="
