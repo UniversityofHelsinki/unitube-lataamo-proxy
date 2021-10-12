@@ -47,9 +47,9 @@ exports.getUserVideos = async (req, res) => {
         const ownSeriesWithoutTrash = await seriesService.filterTrashSeries(ownSeries);
         const seriesIdentifiers = seriesService.getSeriesIdentifiers(ownSeriesWithoutTrash, loggedUser);
 
-        const allEventsWithMetadatas = await eventsService.getAllEventsBySeriesIdentifiers(seriesIdentifiers);
+        const allEventsWithMetaData = await eventsService.getAllEventsBySeriesIdentifiers(seriesIdentifiers);
 
-        const concatenatedEventsArray = eventsService.concatenateArray(allEventsWithMetadatas);
+        const concatenatedEventsArray = eventsService.concatenateArray(allEventsWithMetaData);
 
         //const allEvents = await eventsService.getAllEvents(seriesIdentifiers);
         //const concatenatedEventsArray = eventsService.concatenateArray(allEvents);

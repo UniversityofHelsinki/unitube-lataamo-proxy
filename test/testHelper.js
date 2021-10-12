@@ -643,6 +643,307 @@ const mockUserEvent1 = {
     ]
 };
 
+const mockNewUserEventsForSeries1 = [
+    {
+        "metadata": [
+            {
+                "flavor": "dublincore/episode",
+                "title": "EVENTS.EVENTS.DETAILS.CATALOG.EPISODE",
+                "fields": [
+                    {
+                        "readOnly": false,
+                        "id": "title",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.TITLE",
+                        "type": "text",
+                        "value": "pienivideo.mp4",
+                        "required": true
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "subjects",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.SUBJECT",
+                        "type": "text",
+                        "value": [],
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "description",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.DESCRIPTION",
+                        "type": "text_long",
+                        "value": "jjjj",
+                        "required": false
+                    },
+                    {
+                        "translatable": true,
+                        "readOnly": false,
+                        "id": "language",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.LANGUAGE",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "rightsHolder",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.RIGHTS",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "translatable": true,
+                        "readOnly": false,
+                        "id": "license",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.LICENSE",
+                        "type": "ordered_text",
+                        "value": "UNITUBE-ALLRIGHTS",
+                        "required": false
+                    },
+                    {
+                        "translatable": false,
+                        "readOnly": false,
+                        "id": "isPartOf",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.SERIES",
+                        "type": "text",
+                        "value": "4c90e2c8-6846-42d6-b4d3-201d64a1fff4",
+                        "required": false
+                    },
+                    {
+                        "translatable": false,
+                        "readOnly": false,
+                        "id": "creator",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.PRESENTERS",
+                        "type": "mixed_text",
+                        "value": [],
+                        "required": false
+                    },
+                    {
+                        "translatable": false,
+                        "readOnly": false,
+                        "id": "contributor",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.CONTRIBUTORS",
+                        "type": "mixed_text",
+                        "value": [],
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "startDate",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.START_DATE",
+                        "type": "date",
+                        "value": "2021-08-24T10:31:00.000Z",
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "duration",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.DURATION",
+                        "type": "text",
+                        "value": "00:00:00",
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "location",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.LOCATION",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "source",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.SOURCE",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "readOnly": true,
+                        "id": "created",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.CREATED",
+                        "type": "date",
+                        "value": "2021-08-24T10:31:00.000Z",
+                        "required": false
+                    },
+                    {
+                        "readOnly": true,
+                        "id": "publisher",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.PUBLISHER",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "readOnly": true,
+                        "id": "identifier",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.ID",
+                        "type": "text",
+                        "value": "4a0dfe03-361c-41d5-8df9-47f488639e93",
+                        "required": false
+                    }
+                ]
+            }
+        ],
+        "description": "jjjj",
+        "language": "",
+        "source": "",
+        "acl": [
+            {
+                "allow": true,
+                "role": "ROLE_USER_LATAAMO_TESTI",
+                "action": "read"
+            },
+            {
+                "allow": true,
+                "role": "ROLE_USER_LATAAMO_TESTI",
+                "action": "write"
+            }
+        ],
+        "title": "pienivideo.mp4",
+        "duration": 0,
+        "contributor": [],
+        "publication_status": [
+            "internal",
+            "api",
+            "oaipmh-default",
+            "engage-player"
+        ],
+        "identifier": "4a0dfe03-361c-41d5-8df9-47f488639e93",
+        "creator": "lataamo testi",
+        "presenter": [],
+        "created": "2021-08-24T10:31:00Z",
+        "is_part_of": "4c90e2c8-6846-42d6-b4d3-201d64a1fff4",
+        "subjects": [],
+        "start": "2021-08-24T10:31:00Z",
+        "processing_state": "SUCCEEDED",
+        "license": "UNITUBE-ALLRIGHTS",
+        "archive_version": 4,
+        "series": "julkinen sarja",
+        "has_previews": true,
+        "location": "",
+        "rightsholder": "",
+        "status": "EVENTS.EVENTS.STATUS.PROCESSED",
+        "publications": [
+            {
+                "metadata": [
+                    {
+                        "flavor": "dublincore/series",
+                        "size": -1,
+                        "checksum": "3b4c7233b40e10bd3a7ce77ecf627b24 (md5)",
+                        "id": "b3981f74-309b-4b15-9b01-bcfaa5d0436a",
+                        "mediatype": "text/xml",
+                        "url": "http://localhost:8080/static/mh_default_org/api/4a0dfe03-361c-41d5-8df9-47f488639e93/ee87642f-8869-4fd9-8ac4-5ca3ffe7358b/dublincore.xml",
+                        "tags": [
+                            "archive",
+                            "engage-download"
+                        ]
+                    },
+                    {
+                        "flavor": "dublincore/episode",
+                        "size": -1,
+                        "checksum": "",
+                        "id": "32c6fbcd-62ec-466f-8d99-588f084c7bd7",
+                        "mediatype": "text/xml",
+                        "url": "http://localhost:8080/static/mh_default_org/api/4a0dfe03-361c-41d5-8df9-47f488639e93/332b9e18-8684-4aba-baaa-23bc2d5c0ef6/dublincore.xml",
+                        "tags": [
+                            "archive",
+                            "engage-download"
+                        ]
+                    }
+                ],
+                "attachments": [
+                    {
+                        "flavor": "presenter/player preview",
+                        "ref": "",
+                        "size": 0,
+                        "checksum": "",
+                        "id": "fca12109-aaf9-400e-bdd0-54ea56d99c76",
+                        "mediatype": "image/png",
+                        "url": "http://localhost:8080/static/mh_default_org/api/4a0dfe03-361c-41d5-8df9-47f488639e93/3ec93c98-7c33-441d-b482-ed6b3d9fe42b/coverimage.png",
+                        "tags": [
+                            "archive",
+                            "engage-download"
+                        ]
+                    },
+                    {
+                        "flavor": "presenter/timeline preview",
+                        "ref": "track:track-4",
+                        "size": 0,
+                        "checksum": "",
+                        "id": "3e560268-864e-4ae9-a5f3-791ec22d98d4",
+                        "mediatype": "image/png",
+                        "url": "http://localhost:8080/static/mh_default_org/api/4a0dfe03-361c-41d5-8df9-47f488639e93/3ecf2e3f-9c33-43f7-8588-d3b1bd2fcc7e/pienivideo_7ebe3766_7a16_40f3_a192_45c230fd5c7f_timelinepreviews.png",
+                        "tags": [
+                            "engage-download"
+                        ]
+                    },
+                    {
+                        "flavor": "presenter/search preview",
+                        "ref": "track:d86431c7-1cf0-45ca-8e40-112965f7e854",
+                        "size": 0,
+                        "checksum": "",
+                        "id": "633c90e9-de2a-4295-bb67-44f8d20704fd",
+                        "mediatype": "image/jpeg",
+                        "url": "http://localhost:8080/static/mh_default_org/api/4a0dfe03-361c-41d5-8df9-47f488639e93/39da5b9b-8f82-4f2e-927b-a5eda36b6a25/pienivideo_1_000s_search.jpg",
+                        "tags": [
+                            "engage-download"
+                        ]
+                    }
+                ],
+                "channel": "api",
+                "id": "6ac5d9fd-057e-45df-a9d3-be5b28dc2882",
+                "media": [
+                    {
+                        "has_audio": true,
+                        "framerate": 25,
+                        "description": "",
+                        "bitrate": 819882,
+                        "url": "http://localhost:8080/static/mh_default_org/api/4a0dfe03-361c-41d5-8df9-47f488639e93/db17fd67-86d9-4798-b276-8e4edafce3ec/pienivideo.mp4",
+                        "has_video": true,
+                        "tags": [
+                            "720p-quality",
+                            "engage-download",
+                            "engage-streaming"
+                        ],
+                        "flavor": "presenter/delivery",
+                        "duration": 5880,
+                        "size": -1,
+                        "framecount": 147,
+                        "checksum": "3aaf8daac146b2c1e74c2cc2588e4b4b (md5)",
+                        "width": 406,
+                        "id": "f3c8357f-4c8b-480e-b36c-55f032b602bd",
+                        "mediatype": "video/mp4",
+                        "height": 720
+                    }
+                ],
+                "mediatype": "application/json",
+                "url": "http://localhost:8080/api/events/4a0dfe03-361c-41d5-8df9-47f488639e93"
+            },
+            {
+                "metadata": [],
+                "attachments": [],
+                "channel": "oaipmh-default",
+                "id": "e9c41c47-1c2f-4903-a9f5-c1d457264a07",
+                "media": [],
+                "mediatype": "text/xml",
+                "url": "/oaipmh/default?verb=ListMetadataFormats&identifier=4a0dfe03-361c-41d5-8df9-47f488639e93"
+            },
+            {
+                "metadata": [],
+                "attachments": [],
+                "channel": "engage-player",
+                "id": "36aa5937-0e63-4198-a583-862e415b6675",
+                "media": [],
+                "mediatype": "text/html",
+                "url": "http://localhost:8080/engage/theodul/ui/core.html?id=4a0dfe03-361c-41d5-8df9-47f488639e93"
+            }
+        ]
+    }
+];
+
+
 const mockUserEventsForSeries1 =  [
     {
         identifier: CONSTANTS.TEST_EVENT_1_ID,
@@ -679,6 +980,179 @@ const mockUserEventsForSeries1 =  [
         location: '',
         publication_status: [ 'internal', 'engage-player', 'api', 'oaipmh-default' ],
         isPartOf: CONSTANTS.TEST_SERIES_1_ID
+    }
+];
+
+const mockNewUserEventsForSeries2 = [
+    {
+        "identifier": CONSTANTS.TEST_EVENT_3_ID,
+        "creator": "lataamo testi",
+        "metadata": [
+            {
+                "flavor": "dublincore/episode",
+                "title": "EVENTS.EVENTS.DETAILS.CATALOG.EPISODE",
+                "fields": [
+                    {
+                        "readOnly": false,
+                        "id": "title",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.TITLE",
+                        "type": "text",
+                        "value": "pienivideo.mp4",
+                        "required": true
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "subjects",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.SUBJECT",
+                        "type": "text",
+                        "value": [],
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "description",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.DESCRIPTION",
+                        "type": "text_long",
+                        "value": "jjjj",
+                        "required": false
+                    },
+                    {
+                        "translatable": true,
+                        "readOnly": false,
+                        "id": "language",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.LANGUAGE",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "rightsHolder",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.RIGHTS",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "translatable": true,
+                        "readOnly": false,
+                        "id": "license",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.LICENSE",
+                        "type": "ordered_text",
+                        "value": "UNITUBE-ALLRIGHTS",
+                        "required": false
+                    },
+                    {
+                        "translatable": false,
+                        "readOnly": false,
+                        "id": "isPartOf",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.SERIES",
+                        "type": "text",
+                        "value": "4c90e2c8-6846-42d6-b4d3-201d64a1fff4",
+                        "required": false
+                    },
+                    {
+                        "translatable": false,
+                        "readOnly": false,
+                        "id": "creator",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.PRESENTERS",
+                        "type": "mixed_text",
+                        "value": [],
+                        "required": false
+                    },
+                    {
+                        "translatable": false,
+                        "readOnly": false,
+                        "id": "contributor",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.CONTRIBUTORS",
+                        "type": "mixed_text",
+                        "value": [],
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "startDate",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.START_DATE",
+                        "type": "date",
+                        "value": "2021-08-24T10:31:00.000Z",
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "duration",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.DURATION",
+                        "type": "text",
+                        "value": "00:00:00",
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "location",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.LOCATION",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "readOnly": false,
+                        "id": "source",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.SOURCE",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "readOnly": true,
+                        "id": "created",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.CREATED",
+                        "type": "date",
+                        "value": "2021-08-24T10:31:00.000Z",
+                        "required": false
+                    },
+                    {
+                        "readOnly": true,
+                        "id": "publisher",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.PUBLISHER",
+                        "type": "text",
+                        "value": "",
+                        "required": false
+                    },
+                    {
+                        "readOnly": true,
+                        "id": "identifier",
+                        "label": "EVENTS.EVENTS.DETAILS.METADATA.ID",
+                        "type": "text",
+                        "value": "4a0dfe03-361c-41d5-8df9-47f488639e93",
+                        "required": false
+                    }
+                ]
+            }
+        ],
+        "presenter": [],
+        "created": "2021-08-24T10:31:00Z",
+        "is_part_of": "4c90e2c8-6846-42d6-b4d3-201d64a1fff4",
+        "subjects": ['John Clark', 'Thiago Melo Costa'],
+        "start": "2021-08-24T10:31:00Z",
+        "description": "A great description",
+        "language": "",
+        "source": "",
+        "title": "Captivating title",
+        "processing_state": "SUCCEEDED",
+        "duration": 0,
+        "license": "UNITUBE-ALLRIGHTS",
+        "archive_version": 4,
+        "contributor": ['SeriesOwnerEppn', 'Other'],
+        "series": "julkinen sarja",
+        "has_previews": true,
+        "location": "",
+        "rightsholder": "",
+        "publication_status": [
+            "internal",
+            "api",
+            "oaipmh-default",
+            "engage-player"
+        ],
+        "status": "EVENTS.EVENTS.STATUS.PROCESSED"
     }
 ];
 
@@ -1950,9 +2424,8 @@ const series1_Events = () => nock(CONSTANTS.OCAST_BASE_URL)
 
 // events by series /api/events/?filter=series:80f9ff5b-4163-48b7-b7cf-950be665de3c&withmetadata=true&withacl=true&withpublications=true
 const series1_new_events = () => nock(CONSTANTS.OCAST_BASE_URL)
-    .get(CONSTANTS.OCAST_VIDEOS_PATH)
-    .query({filter: `series:${CONSTANTS.TEST_SERIES_1_ID}${CONSTANTS.OCAST_VIDEOS_WITH_METADATA_ACLS_AND_PUBLICATIONS}`})
-    .reply(200, mockUserEventsForSeries1);
+    .get(`${CONSTANTS.OCAST_VIDEOS_PATH}?filter=series:${CONSTANTS.TEST_SERIES_1_ID}${CONSTANTS.OCAST_VIDEOS_WITH_METADATA_ACLS_AND_PUBLICATIONS}`)
+    .reply(200, mockNewUserEventsForSeries1);
 
 // events by series /api/events/?filter=series:series:d72a8c9e-f854-4ba4-9ed2-89405fae214e
 const series2_Events = () => nock(CONSTANTS.OCAST_BASE_URL)
@@ -1962,9 +2435,8 @@ const series2_Events = () => nock(CONSTANTS.OCAST_BASE_URL)
 
 // events by series /api/events/?filter=series:series:d72a8c9e-f854-4ba4-9ed2-89405fae214e&withmetadata=true&withacl=true&withpublications=true
 const series2_new_events = () => nock(CONSTANTS.OCAST_BASE_URL)
-    .get(CONSTANTS.OCAST_VIDEOS_PATH)
-    .query({filter: `series:${CONSTANTS.TEST_SERIES_2_ID}${CONSTANTS.OCAST_VIDEOS_WITH_METADATA_ACLS_AND_PUBLICATIONS}`})
-    .reply(200, mockUserEventsForSeries2);
+    .get(`${CONSTANTS.OCAST_VIDEOS_PATH}?filter=series:${CONSTANTS.TEST_SERIES_2_ID}${CONSTANTS.OCAST_VIDEOS_WITH_METADATA_ACLS_AND_PUBLICATIONS}`)
+    .reply(200, mockNewUserEventsForSeries2);
 
 // events by series /api/events/?filter=series:series:604d78ac-733f-4c65-b13a-29172fbc0c6f
 const series3_Events = () => nock(CONSTANTS.OCAST_BASE_URL)

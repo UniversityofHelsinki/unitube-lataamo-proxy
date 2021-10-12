@@ -35,6 +35,8 @@ exports.filterNewEventsForClient = (ocResponseData) => {
         });
     });
 
+    console.log("RETURNED EVENTS ARRAY", eventArray);
+
     return eventArray;
 };
 
@@ -127,6 +129,7 @@ const calculateNewMediaPropertyForVideo = (event) => {
             mediaUrls.push(media.url);
         }
     });
+
     return [...new Set(mediaUrls)];
 };
 
@@ -169,6 +172,7 @@ const calculateNewVisibilityPropertyForVideo = (video) => {
     if (moodleAclInstructor && moodleAclLearner && moodleAclInstructor.length > 0 && moodleAclLearner.length > 0) {
         visibility.push(constants.STATUS_MOODLE);
     }
+
     return [...new Set(visibility)];
 };
 
