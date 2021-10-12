@@ -20,6 +20,21 @@ exports.filterNewEventsForClient = (ocResponseData) => {
 
     const eventArray = [];
     ocResponseData.forEach(event => {
+        console.log({
+            'identifier': event.identifier,
+            'title': event.title,
+            'description' : event.description,
+            'license' : event.license,
+            'duration': calculateMediaDurationForVideo(event),
+            'creator': event.creator,
+            'processing_state' : event.processing_state,
+            'visibility' : calculateNewVisibilityPropertyForVideo(event),
+            'created': event.created,
+            'series': event.series,
+            'media' : calculateNewMediaPropertyForVideo(event)
+        });
+
+
         eventArray.push({
             'identifier': event.identifier,
             'title': event.title,

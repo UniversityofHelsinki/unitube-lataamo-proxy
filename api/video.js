@@ -61,6 +61,7 @@ exports.getUserVideos = async (req, res) => {
 
         res.json(eventsService.filterNewEventsForClient(concatenatedEventsArray));
     } catch (error) {
+        console.log(error);
         res.status(500);
         const msg = error.message;
         logger.error(`Error GET /userVideos ${msg} USER ${req.user.eppn}`);
