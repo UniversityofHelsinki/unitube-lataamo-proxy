@@ -108,7 +108,7 @@ deploy_prod:
   environment:
     name: prod
   only:
-    - lataamo-econnreset
+    - prod
   when: manual
   script:
     - echo "====== Deploy to production server ========"
