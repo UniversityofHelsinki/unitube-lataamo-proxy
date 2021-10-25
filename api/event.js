@@ -82,7 +82,7 @@ exports.getInboxEvents = async (req, res) => {
         const inboxSeries = await apiService.returnOrCreateUsersSeries(constants.INBOX, loggedUser);
         if (inboxSeries && inboxSeries.length > 0) {
             const inboxEventsWithAcls = await fetchEventMetadata(inboxSeries);
-            res.json(eventsService.filterEventsForClient(inboxEventsWithAcls));
+            res.json(eventsService.filterEventsForClientList(inboxEventsWithAcls));
         } else {
             res.json([]);
         }
@@ -121,12 +121,8 @@ exports.getTrashEvents = async (req, res) => {
 
 const fetchEventMetadata = async (series) => {
     const identifier = seriesService.getSeriesIdentifier(series);
-    const events = await apiService.getEventsByIdentifier(identifier);
-    const eventsWithMetadatas = await eventsService.getAllEventsWithMetadatas(events);
-    const eventsWithMedia = await eventsService.getEventsWithMedia(eventsWithMetadatas);
-    const eventsWithMediaFile = await eventsService.getAllEventsWithMediaFileMetadata(eventsWithMedia);
-    const eventsWithAcls = await eventsService.getAllEventsWithAcls(eventsWithMediaFile);
-    return eventsWithAcls;
+    const allEventsWithMetaData = await eventsService.getAllEventsBySeriesIdentifier(identifier);
+    return allEventsWithMetaData;
 };
 
 exports.moveToTrash = async (req, res) =>{

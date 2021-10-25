@@ -72,8 +72,8 @@ describe('user series returned from /userSeries route', () => {
         test.mockOCastSeriesApiCall();
         test.mockOCastEvent1AclCall();
         test.mockOcastEvent2AclCall();
-        test.mockOCastEvents_2_ApiCall();
         test.mockOCastEvents_1_ApiCall();
+        test.mockOCastEvents_2_ApiCall();
     });
 
     it('-Contributor FIX- Should return no series if user and users groups are not in the series contributors list', async () => {
@@ -333,6 +333,7 @@ describe('user inbox events returned from /userInboxEvents route', () => {
         test.mockOpencastTrashSeriesRequest();
         test.mockOpencastInboxSeriesRequest();
         test.mockInboxSeriesEventsRequest();
+        test.mockInboxSeriesEventsForListRequest();
         test.mockOpencastTrashSeriesWithNoResultRequest();
         test.mockOpencastInboxSeriesWithNoResultRequest();
         test.mockOcastInboxEvent1Call();
@@ -394,7 +395,8 @@ describe('user trash events returned from /userTrashEvents route', () => {
         // mock needed opencast api calls
         test.mockOpencastTrashSeriesRequest();
         test.mockOpencastTrashSeriesWithNoResultRequest();
-        test.mockTrashSeriesEventsRequest();
+        //test.mockTrashSeriesEventsRequest();
+        test.mockTrashSeriesEventsForListRequest();
         test.mockOcastTrashEvent1Call();
         test.mockOcastTrashEvent2Call();
         test.mockOCastEvent1TrashMediaMetadataCall();
@@ -461,20 +463,8 @@ describe('user events (videos) returned from /userEvents route', () => {
         test.mockOCastSeriesApiCall9();  // get series with seriesid1
         test.mockOCastSeriesApiCall10();  // get series with seriesid2
         test.mockOCastUserApiCall();
-        test.mockOCastEvents_1_ApiCall();
-        test.mockOCastEvents_2_ApiCall();
-        test.mockOCastEventMetadata_1Call();
-        test.mockOCastEventMetadata_2Call();
-        test.mockOCastEventMetadata_3Call();
-        test.mockOCastEvent1MediaCall();
-        test.mockOCastEvent2MediaCall();
-        test.mockOCastEvent3MediaCall();
-        test.mockOCastEvent1MediaMetadataCall();
-        test.mockOCastEvent2MediaMetadataCall();
-        test.mockOCastEvent3MediaMetadataCall();
-        test.mockOCastEvent1AclCall();
-        test.mockOcastEvent2AclCall();
-        test.mockLataamoPostSeriesCall();
+        test.mockOCastEvents_1_New_ApiCall();
+        test.mockOCastEvents_2_New_ApiCall();
     });
 
     it('-Contributor FIX- should return events from series where user is contributor', async () => {
@@ -492,19 +482,15 @@ describe('user events (videos) returned from /userEvents route', () => {
             .expect('Content-Type', /json/);
 
         assert.isArray(response.body, 'Response should be an array');
-        assert.lengthOf(response.body, 3, 'Three events should be returned');
+        assert.lengthOf(response.body, 2, 'Two events should be returned');
         assert.equal(response.body[0].identifier, test.constants.TEST_EVENT_1_ID);
         assert.equal(response.body[1].identifier, test.constants.TEST_EVENT_2_ID);
-        assert.equal(response.body[2].identifier, test.constants.TEST_EVENT_3_ID);
         assert.isArray(response.body[0].visibility, 'Video\'s visibility property should be an array');
         assert.isArray(response.body[1].visibility, 'Video\'s visibility property should be an array');
-        assert.isArray(response.body[2].visibility, 'Video\'s visibility property should be an array');
         assert.lengthOf(response.body[0].visibility, 1, 'Video should have one visibility value');
         assert.equal(response.body[0].visibility, constants.STATUS_PUBLISHED);
         assert.lengthOf(response.body[1].visibility, 1, 'Video should have one visibility value');
         assert.equal(response.body[1].visibility, constants.STATUS_PUBLISHED);
-        assert.lengthOf(response.body[2].visibility, 2, 'Video should have two visibility values');
-        assert.deepEqual(response.body[2].visibility, [constants.STATUS_PUBLISHED, constants.STATUS_MOODLE]);
     });
 
     it('-Contributor FIX- Events should have visibility array property', async () => {
@@ -523,7 +509,6 @@ describe('user events (videos) returned from /userEvents route', () => {
 
         assert.isArray(response.body[0].visibility, 'Video\'s visibility property should be an array');
         assert.isArray(response.body[1].visibility, 'Video\'s visibility property should be an array');
-        assert.isArray(response.body[2].visibility, 'Video\'s visibility property should be an array');
     });
 
 
@@ -542,10 +527,9 @@ describe('user events (videos) returned from /userEvents route', () => {
             .expect('Content-Type', /json/);
 
         assert.isArray(response.body, 'Response should be an array');
-        assert.lengthOf(response.body, 3, 'Two events should be returned');
+        assert.lengthOf(response.body, 2, 'Two events should be returned');
         assert.equal(response.body[0].identifier, test.constants.TEST_EVENT_1_ID);
         assert.equal(response.body[1].identifier, test.constants.TEST_EVENT_2_ID);
-        assert.equal(response.body[2].identifier, test.constants.TEST_EVENT_3_ID);
     });
 
 
