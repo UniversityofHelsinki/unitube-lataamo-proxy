@@ -35,6 +35,13 @@ exports.getEventsByIdentifier = async (identifier) => {
     return response.data;
 };
 
+exports.getEventsBySeriesIdentifier = async (identifier) => {
+    let userEventsUrl = constants.OCAST_VIDEOS_PATH + constants.OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER;
+    userEventsUrl = userEventsUrl + identifier + constants.OCAST_VIDEOS_WITH_METADATA_ACLS_AND_PUBLICATIONS;
+    const response = await security.opencastBase.get(userEventsUrl);
+    return response.data;
+};
+
 exports.getEventsWithSeriesByIdentifier = async (series) => {
     let userEventsUrl = constants.OCAST_VIDEOS_PATH + constants.OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER;
     userEventsUrl = userEventsUrl + series.identifier;

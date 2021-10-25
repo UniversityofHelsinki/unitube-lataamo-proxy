@@ -11,6 +11,35 @@ const logger = require('../config/winstonLogger');
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 const JsonFind = require('json-find');
 
+
+exports.filterEventsForClientList = (ocResponseData) => {
+
+    if(!ocResponseData){
+        return [];
+    }
+
+    const eventArray = [];
+    ocResponseData.forEach(event => {
+        eventArray.push({
+            'identifier': event.identifier,
+            'title': event.title,
+            'description' : event.description,
+            'license' : event.license,
+            'duration': calculateMediaDurationForVideoList(event),
+            'creator': event.creator,
+            'processing_state' : event.processing_state,
+            'visibility' : calculateVisibilityPropertyForVideoList(event),
+            'created': event.created,
+            'series': event.series,
+            'media' : calculateMediaPropertyForVideoList(event)
+        });
+    });
+
+    return eventArray;
+};
+
+
+
 exports.filterEventsForClient = (ocResponseData) => {
 
     if(!ocResponseData){
@@ -49,14 +78,14 @@ exports.filterEventsForClientTrash = (ocResponseData) => {
                 'identifier': event.identifier,
                 'title': event.title,
                 'description' : event.description,
-                'license' : calculateLicensePropertyForVideo(event),
-                'duration': moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format('HH:mm:ss', {trim:false}),
+                'license' : event.license,
+                'duration': calculateMediaDurationForVideoList(event),
                 'creator': event.creator,
                 'processing_state' : event.processing_state,
-                'visibility' : calculateVisibilityPropertyForVideo(event),
+                'visibility' : calculateVisibilityPropertyForVideoList(event),
                 'created': event.created,
-                'series': event.series.title,
-                'media' : calculateMediaPropertyForVideo(event)
+                'series': event.series,
+                'media' : calculateMediaPropertyForVideoList(event)
             });
         }
     });
@@ -73,6 +102,46 @@ const calculateLicensePropertyForVideo = (event) => {
     return foundFieldWithLicenseInfo.value;
 };
 
+const calculateMediaDurationForVideoList = (event) => {
+
+    let duration = '00:00:00';
+
+    let apiChannel = event.publications.find(publication => publication.channel === 'api');
+
+    if (apiChannel && apiChannel.media) {
+        apiChannel.media.forEach(media => {
+            if (media.has_video) {
+                duration = moment.duration(media.duration, 'milliseconds').format('HH:mm:ss', {trim:false});
+            }
+        });
+    }
+
+    return duration;
+};
+
+const calculateMediaPropertyForVideoList = (event) => {
+    let mediaUrls = [];
+
+    let apiChannel = event.publications.find(publication => publication.channel === 'api');
+
+    if (apiChannel && apiChannel.media) {
+        apiChannel.media.forEach(media => {
+            if (media.has_video && event.processing_state === constants.OPENCAST_STATE_SUCCEEDED) {
+                mediaUrls.push(media.url);
+            }
+        });
+    }
+
+    return [...new Set(mediaUrls)];
+};
+
+exports.calculateVisibilityProperty = (event) => {
+    return {
+        ...event,
+        visibility: calculateVisibilityPropertyForVideo(event)
+    };
+};
+
 const calculateMediaPropertyForVideo = (event) => {
     let mediaUrls = [];
     event.media.forEach(media => {
@@ -83,11 +152,24 @@ const calculateMediaPropertyForVideo = (event) => {
     return [...new Set(mediaUrls)];
 };
 
-exports.calculateVisibilityProperty = (event) => {
-    return {
-        ...event,
-        visibility: calculateVisibilityPropertyForVideo(event)
-    };
+
+const calculateVisibilityPropertyForVideoList = (video) => {
+    const visibility = [];
+
+    if (commonService.publicRoleCount(video.acl) >= 1) { //video has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
+        visibility.push(constants.STATUS_PUBLISHED);
+    } else {
+        visibility.push(constants.STATUS_PRIVATE);
+    }
+
+    const moodleAclInstructor = video.acl.filter(acl => acl.role.includes(constants.MOODLE_ACL_INSTRUCTOR));
+    const moodleAclLearner = video.acl.filter(acl => acl.role.includes(constants.MOODLE_ACL_LEARNER));
+
+    if (moodleAclInstructor && moodleAclLearner && moodleAclInstructor.length > 0 && moodleAclLearner.length > 0) {
+        visibility.push(constants.STATUS_MOODLE);
+    }
+
+    return [...new Set(visibility)];
 };
 
 const calculateVisibilityPropertyForVideo = (video) => {
@@ -110,6 +192,14 @@ const calculateVisibilityPropertyForVideo = (video) => {
 
 exports.getAllEvents = async (seriesIdentifiers) => {
     return await Promise.all(seriesIdentifiers.map(identifier => apiService.getEventsByIdentifier(identifier)));
+};
+
+exports.getAllEventsBySeriesIdentifiers = async (seriesIdentifiers) => {
+    return await Promise.all(seriesIdentifiers.map(identifier => apiService.getEventsBySeriesIdentifier(identifier)));
+};
+
+exports.getAllEventsBySeriesIdentifier = async (seriesIdentifier) => {
+    return await apiService.getEventsBySeriesIdentifier(seriesIdentifier);
 };
 
 const getAllEventsWithSeries = async (series) => await Promise.all(series.map(series => apiService.getEventsWithSeriesByIdentifier(series)));
@@ -315,16 +405,16 @@ exports.modifySeriesEventMetadataForOpencast = (metadata) => {
     const metadataArray = [];
 
     metadataArray.push({
-        'id' : 'title',
-        'value': metadata.title },
-    {
-        'id' : 'description',
-        'value': metadata.description
-    },
-    {
-        'id' : 'contributor',
-        'value': metadata.contributors
-    }
+            'id' : 'title',
+            'value': metadata.title },
+        {
+            'id' : 'description',
+            'value': metadata.description
+        },
+        {
+            'id' : 'contributor',
+            'value': metadata.contributors
+        }
     );
 
     return metadataArray;
