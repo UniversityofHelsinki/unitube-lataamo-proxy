@@ -82,13 +82,13 @@ exports.getInboxEvents = async (req, res) => {
         const inboxSeries = await apiService.returnOrCreateUsersSeries(constants.INBOX, loggedUser);
         if (inboxSeries && inboxSeries.length > 0) {
             const inboxEventsWithAcls = await fetchEventMetadata(inboxSeries);
-            res.json(eventsService.filterEventsForClientList(inboxEventsWithAcls));
+            res.json(eventsService.filterEventsForClientList(inboxEventsWithAcls, loggedUser));
         } else {
             res.json([]);
         }
-    }catch(error){
+    } catch(error) {
         const msg = error.message;
-        logger.error(`Error GET /userInboxEvents ${msg} USER ${req.user.eppn}`);
+        logger.error(`Error GET /userInboxEvents ${error} ${msg}  USER ${req.user.eppn}`);
         res.status(500);
         return res.json({
             message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_INBOX_EVENTS,

@@ -12,37 +12,41 @@ const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 const JsonFind = require('json-find');
 
 
-exports.filterEventsForClientList = (ocResponseData) => {
+exports.filterEventsForClientList = (ocResponseData, loggedUser) => {
 
-    if(!ocResponseData){
-        return [];
-    }
+    try {
+        if (!ocResponseData || !Array.isArray(ocResponseData)) {
+            return [];
+        }
 
-    const eventArray = [];
-    ocResponseData.forEach(event => {
-        eventArray.push({
-            'identifier': event.identifier,
-            'title': event.title,
-            'description' : event.description,
-            'license' : event.license,
-            'duration': calculateMediaDurationForVideoList(event),
-            'creator': event.creator,
-            'processing_state' : event.processing_state,
-            'visibility' : calculateVisibilityPropertyForVideoList(event),
-            'created': event.created,
-            'series': event.series,
-            'media' : calculateMediaPropertyForVideoList(event)
+        const eventArray = [];
+        ocResponseData.forEach(event => {
+            eventArray.push({
+                'identifier': event.identifier,
+                'title': event.title,
+                'description': event.description,
+                'license': event.license,
+                'duration': calculateMediaDurationForVideoList(event, loggedUser),
+                'creator': event.creator,
+                'processing_state': event.processing_state,
+                'visibility': calculateVisibilityPropertyForVideoList(event, loggedUser),
+                'created': event.created,
+                'series': event.series,
+                'media': calculateMediaPropertyForVideoList(event, loggedUser)
+            });
         });
-    });
 
-    return eventArray;
+        return eventArray;
+    } catch (error) {
+        logger.error(`error filtering events for client ${error} ${error.message} USER ${loggedUser}`);
+    }
 };
 
 
 
-exports.filterEventsForClient = (ocResponseData) => {
+exports.filterEventsForClient = (ocResponseData, loggedUser) => {
 
-    if(!ocResponseData){
+    if(!ocResponseData || !Array.isArray(ocResponseData)) {
         return [];
     }
 
@@ -52,14 +56,14 @@ exports.filterEventsForClient = (ocResponseData) => {
             'identifier': event.identifier,
             'title': event.title,
             'description' : event.description,
-            'license' : calculateLicensePropertyForVideo(event),
+            'license' : calculateLicensePropertyForVideo(event, loggedUser),
             'duration': moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format('HH:mm:ss', {trim:false}),
             'creator': event.creator,
             'processing_state' : event.processing_state,
-            'visibility' : calculateVisibilityPropertyForVideo(event),
+            'visibility' : calculateVisibilityPropertyForVideo(event, loggedUser),
             'created': event.created,
             'series': event.series.title,
-            'media' : calculateMediaPropertyForVideo(event)
+            'media' : calculateMediaPropertyForVideo(event, loggedUser)
         });
     });
     return eventArray;
@@ -92,47 +96,58 @@ exports.filterEventsForClientTrash = (ocResponseData) => {
     return eventArray;
 };
 
-const calculateLicensePropertyForVideo = (event) => {
-    const foundEpisodeFlavorMetadata = event.metadata.find(field => {
-        return field.flavor === 'dublincore/episode';
-    });
-    const foundFieldWithLicenseInfo = foundEpisodeFlavorMetadata.fields.find(field => {
-        return field.id === 'license';
-    });
-    return foundFieldWithLicenseInfo.value;
+const calculateLicensePropertyForVideo = (event, loggedUser) => {
+    try {
+        const foundEpisodeFlavorMetadata = event.metadata.find(field => {
+            return field.flavor === 'dublincore/episode';
+        });
+        const foundFieldWithLicenseInfo = foundEpisodeFlavorMetadata.fields.find(field => {
+            return field.id === 'license';
+        });
+        return foundFieldWithLicenseInfo.value;
+    } catch (error) {
+        logger.error(`error calculating license property for video ${error} ${error.message} ${event.identifier} FOR USER ${loggedUser}`);
+    }
 };
 
-const calculateMediaDurationForVideoList = (event) => {
+const calculateMediaDurationForVideoList = (event, loggedUser) => {
+    try {
+        let duration = '00:00:00';
+        if (event.publications) {
+            let apiChannel = event.publications.find(publication => publication.channel === 'api');
 
-    let duration = '00:00:00';
-
-    let apiChannel = event.publications.find(publication => publication.channel === 'api');
-
-    if (apiChannel && apiChannel.media) {
-        apiChannel.media.forEach(media => {
-            if (media.has_video) {
-                duration = moment.duration(media.duration, 'milliseconds').format('HH:mm:ss', {trim:false});
+            if (apiChannel && apiChannel.media) {
+                apiChannel.media.forEach(media => {
+                    if (media.has_video) {
+                        duration = moment.duration(media.duration, 'milliseconds').format('HH:mm:ss', {trim: false});
+                    }
+                });
             }
-        });
+        }
+        return duration;
+    } catch (error) {
+        logger.error(`error calculating media duration for video list ${error} ${error.message} ${event.identifier} FOR USER ${loggedUser}`);
     }
-
-    return duration;
 };
 
-const calculateMediaPropertyForVideoList = (event) => {
-    let mediaUrls = [];
+const calculateMediaPropertyForVideoList = (event, loggedUser) => {
+    try {
+        let mediaUrls = [];
+        if (event.publications) {
+            let apiChannel = event.publications.find(publication => publication.channel === 'api');
 
-    let apiChannel = event.publications.find(publication => publication.channel === 'api');
-
-    if (apiChannel && apiChannel.media) {
-        apiChannel.media.forEach(media => {
-            if (media.has_video && event.processing_state === constants.OPENCAST_STATE_SUCCEEDED) {
-                mediaUrls.push(media.url);
+            if (apiChannel && apiChannel.media) {
+                apiChannel.media.forEach(media => {
+                    if (media.has_video && event.processing_state === constants.OPENCAST_STATE_SUCCEEDED) {
+                        mediaUrls.push(media.url);
+                    }
+                });
             }
-        });
+        }
+        return [...new Set(mediaUrls)];
+    } catch (error) {
+        logger.error(`error calculating media property for video list  ${error}  ${error.message} ${event.identifier} FOR USER ${loggedUser}`);
     }
-
-    return [...new Set(mediaUrls)];
 };
 
 exports.calculateVisibilityProperty = (event) => {
@@ -142,52 +157,66 @@ exports.calculateVisibilityProperty = (event) => {
     };
 };
 
-const calculateMediaPropertyForVideo = (event) => {
-    let mediaUrls = [];
-    event.media.forEach(media => {
-        if (event.processing_state === constants.OPENCAST_STATE_SUCCEEDED) {
-            mediaUrls.push(media.url);
+const calculateMediaPropertyForVideo = (event, loggedUser) => {
+    try {
+        let mediaUrls = [];
+        if (event.media) {
+            event.media.forEach(media => {
+                if (event.processing_state === constants.OPENCAST_STATE_SUCCEEDED) {
+                    mediaUrls.push(media.url);
+                }
+            });
         }
-    });
-    return [...new Set(mediaUrls)];
+        return [...new Set(mediaUrls)];
+    } catch (error) {
+        logger.error(`error calculating media property for video list  ${error}  ${error.message} ${event.identifier} FOR USER ${loggedUser}`);
+    }
 };
 
 
-const calculateVisibilityPropertyForVideoList = (video) => {
-    const visibility = [];
+const calculateVisibilityPropertyForVideoList = (video, loggedUser) => {
+    try {
+        const visibility = [];
 
-    if (commonService.publicRoleCount(video.acl) >= 1) { //video has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
-        visibility.push(constants.STATUS_PUBLISHED);
-    } else {
-        visibility.push(constants.STATUS_PRIVATE);
+        if (commonService.publicRoleCount(video.acl) >= 1) { //video has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
+            visibility.push(constants.STATUS_PUBLISHED);
+        } else {
+            visibility.push(constants.STATUS_PRIVATE);
+        }
+
+        const moodleAclInstructor = video.acl.filter(acl => acl.role.includes(constants.MOODLE_ACL_INSTRUCTOR));
+        const moodleAclLearner = video.acl.filter(acl => acl.role.includes(constants.MOODLE_ACL_LEARNER));
+
+        if (moodleAclInstructor && moodleAclLearner && moodleAclInstructor.length > 0 && moodleAclLearner.length > 0) {
+            visibility.push(constants.STATUS_MOODLE);
+        }
+
+        return [...new Set(visibility)];
+    } catch (error) {
+        logger.error(`error calculating visibility property for video list  ${error}  ${error.message} ${video.identifier} FOR USER ${loggedUser}`);
     }
-
-    const moodleAclInstructor = video.acl.filter(acl => acl.role.includes(constants.MOODLE_ACL_INSTRUCTOR));
-    const moodleAclLearner = video.acl.filter(acl => acl.role.includes(constants.MOODLE_ACL_LEARNER));
-
-    if (moodleAclInstructor && moodleAclLearner && moodleAclInstructor.length > 0 && moodleAclLearner.length > 0) {
-        visibility.push(constants.STATUS_MOODLE);
-    }
-
-    return [...new Set(visibility)];
 };
 
-const calculateVisibilityPropertyForVideo = (video) => {
-    const visibility = [];
+const calculateVisibilityPropertyForVideo = (video, loggedUser) => {
+    try {
+        const visibility = [];
 
-    if (commonService.publicRoleCount(video.acls) >= 1) { //video has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
-        visibility.push(constants.STATUS_PUBLISHED);
-    } else {
-        visibility.push(constants.STATUS_PRIVATE);
+        if (commonService.publicRoleCount(video.acls) >= 1) { //video has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
+            visibility.push(constants.STATUS_PUBLISHED);
+        } else {
+            visibility.push(constants.STATUS_PRIVATE);
+        }
+
+        const moodleAclInstructor = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_INSTRUCTOR));
+        const moodleAclLearner = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_LEARNER));
+
+        if (moodleAclInstructor && moodleAclLearner && moodleAclInstructor.length > 0 && moodleAclLearner.length > 0) {
+            visibility.push(constants.STATUS_MOODLE);
+        }
+        return [...new Set(visibility)];
+    } catch (error) {
+        logger.error(`error calculating visibility property for video ${error} ${error.message} ${video.identifier} FOR USER ${loggedUser}`);
     }
-
-    const moodleAclInstructor = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_INSTRUCTOR));
-    const moodleAclLearner = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_LEARNER));
-
-    if (moodleAclInstructor && moodleAclLearner && moodleAclInstructor.length > 0 && moodleAclLearner.length > 0) {
-        visibility.push(constants.STATUS_MOODLE);
-    }
-    return [...new Set(visibility)];
 };
 
 exports.getAllEvents = async (seriesIdentifiers) => {
