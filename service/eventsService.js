@@ -10,6 +10,7 @@ const constants = require('../utils/constants');
 const logger = require('../config/winstonLogger');
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 const JsonFind = require('json-find');
+const messageKeys = require('../utils/message-keys');
 
 
 exports.filterEventsForClientList = (ocResponseData, loggedUser) => {
@@ -434,16 +435,16 @@ exports.modifySeriesEventMetadataForOpencast = (metadata) => {
     const metadataArray = [];
 
     metadataArray.push({
-            'id' : 'title',
-            'value': metadata.title },
-        {
-            'id' : 'description',
-            'value': metadata.description
-        },
-        {
-            'id' : 'contributor',
-            'value': metadata.contributors
-        }
+        'id' : 'title',
+        'value': metadata.title },
+    {
+        'id' : 'description',
+        'value': metadata.description
+    },
+    {
+        'id' : 'contributor',
+        'value': metadata.contributors
+    }
     );
 
     return metadataArray;
