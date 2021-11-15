@@ -124,6 +124,8 @@ const calculateMediaDurationForVideoList = (event, loggedUser) => {
                     }
                 });
             }
+        } else {
+            logger.warn(`publications missing in media duration ${event.identifier} FOR USER ${loggedUser}`);
         }
         return duration;
     } catch (error) {
@@ -144,6 +146,8 @@ const calculateMediaPropertyForVideoList = (event, loggedUser) => {
                     }
                 });
             }
+        } else {
+            logger.warn(`publications missing in media property ${event.identifier} FOR USER ${loggedUser}`);
         }
         return [...new Set(mediaUrls)];
     } catch (error) {
@@ -167,6 +171,8 @@ const calculateMediaPropertyForVideo = (event, loggedUser) => {
                     mediaUrls.push(media.url);
                 }
             });
+        } else {
+            logger.warn(`media property missing in ${event.identifier} FOR USER ${loggedUser}`);
         }
         return [...new Set(mediaUrls)];
     } catch (error) {
@@ -435,16 +441,16 @@ exports.modifySeriesEventMetadataForOpencast = (metadata) => {
     const metadataArray = [];
 
     metadataArray.push({
-        'id' : 'title',
-        'value': metadata.title },
-    {
-        'id' : 'description',
-        'value': metadata.description
-    },
-    {
-        'id' : 'contributor',
-        'value': metadata.contributors
-    }
+            'id' : 'title',
+            'value': metadata.title },
+        {
+            'id' : 'description',
+            'value': metadata.description
+        },
+        {
+            'id' : 'contributor',
+            'value': metadata.contributors
+        }
     );
 
     return metadataArray;
