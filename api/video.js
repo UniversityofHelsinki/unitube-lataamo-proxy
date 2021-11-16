@@ -50,10 +50,9 @@ exports.getUserVideos = async (req, res) => {
         const concatenatedEventsArray = eventsService.concatenateArray(allEventsWithMetaData);
         res.json(eventsService.filterEventsForClientList(concatenatedEventsArray));
     } catch (error) {
-        console.log(error);
         res.status(500);
         const msg = error.message;
-        logger.error(`Error GET /userVideos ${msg} USER ${req.user.eppn}`);
+        logger.error(`Error GET /userVideos ${error} ${msg} USER ${req.user.eppn}`);
         res.json({
             message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_LIST_FOR_USER,
             msg
