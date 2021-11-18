@@ -127,14 +127,21 @@ const calculateVisibilityPropertyForVideoList = (video, loggedUser) => {
     try {
         const visibility = [];
 
+        let moodleAclInstructor;
+        let moodleAclLearner;
+
         if (commonService.publicRoleCount(video.acl) >= 1) { //video has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
             visibility.push(constants.STATUS_PUBLISHED);
         } else {
             visibility.push(constants.STATUS_PRIVATE);
         }
 
-        const moodleAclInstructor = video.acl.filter(acl => acl.role.includes(constants.MOODLE_ACL_INSTRUCTOR));
-        const moodleAclLearner = video.acl.filter(acl => acl.role.includes(constants.MOODLE_ACL_LEARNER));
+        if (video && video.acl) {
+            moodleAclInstructor = video.acl.filter(acl => acl.role.includes(constants.MOODLE_ACL_INSTRUCTOR));
+            moodleAclLearner = video.acl.filter(acl => acl.role.includes(constants.MOODLE_ACL_LEARNER));
+        } else {
+            logger.warn(`warning video has no acl roles ${video.identifier} FOR USER ${loggedUser.eppn}`);
+        }
 
         if (moodleAclInstructor && moodleAclLearner && moodleAclInstructor.length > 0 && moodleAclLearner.length > 0) {
             visibility.push(constants.STATUS_MOODLE);
