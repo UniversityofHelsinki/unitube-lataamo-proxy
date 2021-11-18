@@ -123,25 +123,6 @@ exports.calculateVisibilityProperty = (event) => {
     };
 };
 
-const calculateMediaPropertyForVideo = (event, loggedUser) => {
-    try {
-        let mediaUrls = [];
-        if (event.media) {
-            event.media.forEach(media => {
-                if (event.processing_state === constants.OPENCAST_STATE_SUCCEEDED) {
-                    mediaUrls.push(media.url);
-                }
-            });
-        } else {
-            logger.warn(`media property missing in ${event.identifier} FOR USER ${loggedUser.eppn}`);
-        }
-        return [...new Set(mediaUrls)];
-    } catch (error) {
-        logger.error(`error calculating media property for video list  ${error}  ${error.message} ${event.identifier} FOR USER ${loggedUser.eppn}`);
-    }
-};
-
-
 const calculateVisibilityPropertyForVideoList = (video, loggedUser) => {
     try {
         const visibility = [];
