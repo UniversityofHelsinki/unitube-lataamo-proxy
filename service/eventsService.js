@@ -448,16 +448,16 @@ exports.modifySeriesEventMetadataForOpencast = (metadata) => {
     const metadataArray = [];
 
     metadataArray.push({
-            'id' : 'title',
-            'value': metadata.title },
-        {
-            'id' : 'description',
-            'value': metadata.description
-        },
-        {
-            'id' : 'contributor',
-            'value': metadata.contributors
-        }
+        'id' : 'title',
+        'value': metadata.title },
+    {
+        'id' : 'description',
+        'value': metadata.description
+    },
+    {
+        'id' : 'contributor',
+        'value': metadata.contributors
+    }
     );
 
     return metadataArray;
