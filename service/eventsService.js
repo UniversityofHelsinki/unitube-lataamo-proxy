@@ -107,7 +107,7 @@ const calculateLicensePropertyForVideo = (event, loggedUser) => {
         });
         return foundFieldWithLicenseInfo.value;
     } catch (error) {
-        logger.error(`error calculating license property for video ${error} ${error.message} ${event.identifier} FOR USER ${loggedUser}`);
+        logger.error(`error calculating license property for video ${error} ${error.message} ${event.identifier} FOR USER ${loggedUser.eppn}`);
     }
 };
 
@@ -125,11 +125,11 @@ const calculateMediaDurationForVideoList = (event, loggedUser) => {
                 });
             }
         } else {
-            logger.warn(`publications missing in media duration ${event.identifier} FOR USER ${loggedUser}`);
+            logger.warn(`publications missing in media duration ${event.identifier} FOR USER ${loggedUser.eppn}`);
         }
         return duration;
     } catch (error) {
-        logger.error(`error calculating media duration for video list ${error} ${error.message} ${event.identifier} FOR USER ${loggedUser}`);
+        logger.error(`error calculating media duration for video list ${error} ${error.message} ${event.identifier} FOR USER ${loggedUser.eppn}`);
     }
 };
 
@@ -147,11 +147,11 @@ const calculateMediaPropertyForVideoList = (event, loggedUser) => {
                 });
             }
         } else {
-            logger.warn(`publications missing in media property ${event.identifier} FOR USER ${loggedUser}`);
+            logger.warn(`publications missing in media property ${event.identifier} FOR USER ${loggedUser.eppn}`);
         }
         return [...new Set(mediaUrls)];
     } catch (error) {
-        logger.error(`error calculating media property for video list  ${error}  ${error.message} ${event.identifier} FOR USER ${loggedUser}`);
+        logger.error(`error calculating media property for video list  ${error}  ${error.message} ${event.identifier} FOR USER ${loggedUser.eppn}`);
     }
 };
 
@@ -172,11 +172,11 @@ const calculateMediaPropertyForVideo = (event, loggedUser) => {
                 }
             });
         } else {
-            logger.warn(`media property missing in ${event.identifier} FOR USER ${loggedUser}`);
+            logger.warn(`media property missing in ${event.identifier} FOR USER ${loggedUser.eppn}`);
         }
         return [...new Set(mediaUrls)];
     } catch (error) {
-        logger.error(`error calculating media property for video list  ${error}  ${error.message} ${event.identifier} FOR USER ${loggedUser}`);
+        logger.error(`error calculating media property for video list  ${error}  ${error.message} ${event.identifier} FOR USER ${loggedUser.eppn}`);
     }
 };
 
@@ -200,7 +200,7 @@ const calculateVisibilityPropertyForVideoList = (video, loggedUser) => {
 
         return [...new Set(visibility)];
     } catch (error) {
-        logger.error(`error calculating visibility property for video list  ${error}  ${error.message} ${video.identifier} FOR USER ${loggedUser}`);
+        logger.error(`error calculating visibility property for video list  ${error}  ${error.message} ${video.identifier} FOR USER ${loggedUser.eppn}`);
     }
 };
 
@@ -208,21 +208,28 @@ const calculateVisibilityPropertyForVideo = (video, loggedUser) => {
     try {
         const visibility = [];
 
+        let moodleAclInstructor;
+        let moodleAclLearner;
+
         if (commonService.publicRoleCount(video.acls) >= 1) { //video has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
             visibility.push(constants.STATUS_PUBLISHED);
         } else {
             visibility.push(constants.STATUS_PRIVATE);
         }
 
-        const moodleAclInstructor = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_INSTRUCTOR));
-        const moodleAclLearner = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_LEARNER));
+        if (video && video.acls) {
+            moodleAclInstructor = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_INSTRUCTOR));
+            moodleAclLearner = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_LEARNER));
+        } else {
+            logger.warn(`warning no video or video acls are empty for video : ${video.identifier} FOR USER ${loggedUser.eppn}`);
+        }
 
         if (moodleAclInstructor && moodleAclLearner && moodleAclInstructor.length > 0 && moodleAclLearner.length > 0) {
             visibility.push(constants.STATUS_MOODLE);
         }
         return [...new Set(visibility)];
     } catch (error) {
-        logger.error(`error calculating visibility property for video ${error} ${error.message} ${video.identifier} FOR USER ${loggedUser}`);
+        logger.error(`error calculating visibility property for video ${error} ${error.message} ${video.identifier} FOR USER ${loggedUser.eppn}`);
     }
 };
 
@@ -441,16 +448,16 @@ exports.modifySeriesEventMetadataForOpencast = (metadata) => {
     const metadataArray = [];
 
     metadataArray.push({
-            'id' : 'title',
-            'value': metadata.title },
-        {
-            'id' : 'description',
-            'value': metadata.description
-        },
-        {
-            'id' : 'contributor',
-            'value': metadata.contributors
-        }
+        'id' : 'title',
+        'value': metadata.title },
+    {
+        'id' : 'description',
+        'value': metadata.description
+    },
+    {
+        'id' : 'contributor',
+        'value': metadata.contributors
+    }
     );
 
     return metadataArray;
