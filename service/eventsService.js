@@ -45,32 +45,7 @@ exports.filterEventsForClientList = (ocResponseData, loggedUser) => {
 
 
 
-exports.filterEventsForClient = (ocResponseData, loggedUser) => {
-
-    if(!ocResponseData || !Array.isArray(ocResponseData)) {
-        return [];
-    }
-
-    const eventArray = [];
-    ocResponseData.forEach(event => {
-        eventArray.push({
-            'identifier': event.identifier,
-            'title': event.title,
-            'description' : event.description,
-            'license' : calculateLicensePropertyForVideo(event, loggedUser),
-            'duration': moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format('HH:mm:ss', {trim:false}),
-            'creator': event.creator,
-            'processing_state' : event.processing_state,
-            'visibility' : calculateVisibilityPropertyForVideo(event, loggedUser),
-            'created': event.created,
-            'series': event.series.title,
-            'media' : calculateMediaPropertyForVideo(event, loggedUser)
-        });
-    });
-    return eventArray;
-};
-
-exports.filterEventsForClientTrash = (ocResponseData) => {
+exports.filterEventsForClientTrash = (ocResponseData, loggedUser) => {
 
     if(!ocResponseData){
         return [];
@@ -84,31 +59,17 @@ exports.filterEventsForClientTrash = (ocResponseData) => {
                 'title': event.title,
                 'description' : event.description,
                 'license' : event.license,
-                'duration': calculateMediaDurationForVideoList(event),
+                'duration': calculateMediaDurationForVideoList(event, loggedUser),
                 'creator': event.creator,
                 'processing_state' : event.processing_state,
-                'visibility' : calculateVisibilityPropertyForVideoList(event),
+                'visibility' : calculateVisibilityPropertyForVideoList(event, loggedUser),
                 'created': event.created,
                 'series': event.series,
-                'media' : calculateMediaPropertyForVideoList(event)
+                'media' : calculateMediaPropertyForVideoList(event, loggedUser)
             });
         }
     });
     return eventArray;
-};
-
-const calculateLicensePropertyForVideo = (event, loggedUser) => {
-    try {
-        const foundEpisodeFlavorMetadata = event.metadata.find(field => {
-            return field.flavor === 'dublincore/episode';
-        });
-        const foundFieldWithLicenseInfo = foundEpisodeFlavorMetadata.fields.find(field => {
-            return field.id === 'license';
-        });
-        return foundFieldWithLicenseInfo.value;
-    } catch (error) {
-        logger.error(`error calculating license property for video ${error} ${error.message} ${event.identifier} FOR USER ${loggedUser.eppn}`);
-    }
 };
 
 const calculateMediaDurationForVideoList = (event, loggedUser) => {
