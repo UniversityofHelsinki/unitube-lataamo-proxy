@@ -66,7 +66,7 @@ exports.getInboxEvents = async (req, res) => {
 
     try{
         // get or create trash series for user
-        const trashSeries = await apiService.returnOrCreateUsersSeries(constants.TRASH, loggedUser);
+        await apiService.returnOrCreateUsersSeries(constants.TRASH, loggedUser);
     }catch(error){
         const msg = error.message;
         logger.error(`Error GET/CREATE userTrashEvents ${msg} USER ${req.user.eppn}`);
@@ -104,7 +104,7 @@ exports.getTrashEvents = async (req, res) => {
         const trashSeries = await apiService.getUserTrashSeries(loggedUser);
         if(trashSeries && trashSeries.length > 0){
             const trashEventsWithAcls = await fetchEventMetadata(trashSeries);
-            res.json(eventsService.filterEventsForClientTrash(trashEventsWithAcls));
+            res.json(eventsService.filterEventsForClientTrash(trashEventsWithAcls, loggedUser));
         }else{
             res.json([]);
         }
