@@ -135,12 +135,12 @@ const calculateVisibilityPropertyForVideoList = (video, loggedUser) => {
         } else {
             visibility.push(constants.STATUS_PRIVATE);
         }
-        
+
         if (video && video.acl) {
             moodleAclInstructor = video.acl.filter(acl => acl.role.includes(constants.MOODLE_ACL_INSTRUCTOR));
             moodleAclLearner = video.acl.filter(acl => acl.role.includes(constants.MOODLE_ACL_LEARNER));
         } else {
-            console.log("warning video has no acl roles" , JSON.stringify(video));
+            console.log("calculating visibility property for video in list , warning video has no acl roles" , JSON.stringify(video));
             logger.warn(`warning video has no acl roles ${video.identifier} FOR USER ${loggedUser.eppn}`);
         }
 
@@ -171,7 +171,8 @@ const calculateVisibilityPropertyForVideo = (video, loggedUser) => {
             moodleAclInstructor = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_INSTRUCTOR));
             moodleAclLearner = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_LEARNER));
         } else {
-            logger.warn(`warning no video or video acls are empty for video : ${video.identifier} FOR USER ${loggedUser.eppn}`);
+            console.log("calculating visibility property for video in list , warning video has no acl roles" , JSON.stringify(video));
+            logger.warn(`warning video has no acl roles : ${video.identifier} FOR USER ${loggedUser.eppn}`);
         }
 
         if (moodleAclInstructor && moodleAclLearner && moodleAclInstructor.length > 0 && moodleAclLearner.length > 0) {
