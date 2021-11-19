@@ -135,11 +135,12 @@ const calculateVisibilityPropertyForVideoList = (video, loggedUser) => {
         } else {
             visibility.push(constants.STATUS_PRIVATE);
         }
-
+        
         if (video && video.acl) {
             moodleAclInstructor = video.acl.filter(acl => acl.role.includes(constants.MOODLE_ACL_INSTRUCTOR));
             moodleAclLearner = video.acl.filter(acl => acl.role.includes(constants.MOODLE_ACL_LEARNER));
         } else {
+            console.log("warning video has no acl roles" , JSON.stringify(video));
             logger.warn(`warning video has no acl roles ${video.identifier} FOR USER ${loggedUser.eppn}`);
         }
 
