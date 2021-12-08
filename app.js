@@ -14,6 +14,7 @@ const compression = require('compression');
 const xss = require('xss-clean');
 const cookieParser = require('cookie-parser');
 const redisClient = require('./utils/redis');
+const database = require("./service/database");
 
 const app = express();
 app.use(helmet());
@@ -34,6 +35,13 @@ security.shibbolethAuthentication(app, passport);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(xss());
+
+
+database.pool.query('SELECT NOW()', (err, res) => {
+    console.log(err ? "errors: " + err : 'Postgres client connected ' , res.rows[0]);
+    database.pool.end();
+});
+
 app.use('/api', router);
 
 redisClient.on('connect', function() {

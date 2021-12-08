@@ -15,6 +15,13 @@ ESB_HOST (esb host url, found in keepass)\
 ESB_GROUPS_API_KEY (found in keepass)\
 ESB_PERSONS_API_KEY (found in keepass)
 
+#### Poistamo environment variables
+POSTGRES_USER = postgres
+PASSWORD = (locally use the same password for which you used in the docker container otherwise password is found in keepass)
+PORT = 5432
+HOST = localhost
+DATABASE= (locally use the same database for which you used in the docker container otherwise it is poistamo_dev, poistamo_test or poistamo)
+
 ### Install Redis for local development with Docker
 `docker run -d -p 6379:6379 --name video-upload-status-storage redis`
 ### If you need to run Redis-Cli commands inside Docker container
