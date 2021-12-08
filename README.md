@@ -19,7 +19,7 @@ ESB_PERSONS_API_KEY (found in keepass)
 POSTGRES_USER = (locally use the same username for which you used in the docker container otherwise username is found in keepass)
 PASSWORD = (locally use the same password for which you used in the docker container otherwise password is found in keepass)
 PORT = 5432
-HOST = localhost
+HOST = (locally use localhost, otherwise host is found in keepass)
 DATABASE= (locally use the same database for which you used in the docker container otherwise database names are found in keepass)
 
 ### Install Redis for local development with Docker
