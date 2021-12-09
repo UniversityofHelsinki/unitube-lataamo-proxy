@@ -1,6 +1,7 @@
 const dbApi = require("../api/dbApi");
+const logger = require("../config/winstonLogger");
 
-const getVideoIds = (inboxEventsWithAcls) => {
+const parseVideoIdsFromOpenCast = (inboxEventsWithAcls) => {
     let inboxIds = [];
     for (const inboxEventWithAcl of inboxEventsWithAcls) {
         inboxIds.push(inboxEventWithAcl.identifier);
@@ -8,27 +9,29 @@ const getVideoIds = (inboxEventsWithAcls) => {
     return inboxIds;
 };
 
-const filterOnlyNewVideoIds = (videoIds, foundVideos) => {
-    let foundVideoIdArray = [];
+const filterOnlyNewVideoIds = (videoIdsFromOpenCast, videosFromDb) => {
+    let videoIdsFromDb = [];
 
-    if (foundVideos.rows && foundVideos.rowCount > 0) {
-        for (const row of foundVideos.rows) {
-            foundVideoIdArray.push(row.video_id);
+    if (videosFromDb.rows && videosFromDb.rowCount > 0) {
+        for (const row of videosFromDb.rows) {
+            videoIdsFromDb.push(row.video_id);
         }
-        return videoIds.filter(id => !foundVideoIdArray.includes(id));
+        return videoIdsFromOpenCast.filter(id => !videoIdsFromDb.includes(id));
     } else {
-        return videoIds;
+        return videoIdsFromOpenCast;
     }
 };
 
-exports.insertDeletionDates = async (inboxEventsWithAcls) => {
-    let videoIds = getVideoIds(inboxEventsWithAcls);
-    let foundVideos = await dbApi.returnVideoIdsFromDb(videoIds);
+exports.insertDeletionDates = async (inboxEventsWithAcls, loggedUser) => {
+    logger.info(`insert video deletion dates for user :  ${loggedUser}`);
+    let videoIdsFromOpenCast = parseVideoIdsFromOpenCast(inboxEventsWithAcls);
+    let videosFromDb = await dbApi.returnVideoIdsFromDb(videoIdsFromOpenCast);
 
-    let newVideoIds = filterOnlyNewVideoIds(videoIds, foundVideos);
+    let newVideoIds = filterOnlyNewVideoIds(videoIdsFromOpenCast, videosFromDb);
 
     if (newVideoIds && newVideoIds.length > 0) {
         for (const videoId of newVideoIds) {
+            logger.info(`insert deletion date for video id : ${videoId}`);
             await dbApi.insertDeletionDates(videoId);
         }
     }
