@@ -39,7 +39,6 @@ app.use(xss());
 
 database.pool.query('SELECT NOW()', (err, res) => {
     console.log(err ? "errors: " + err : 'Postgres client connected ' , res.rows[0]);
-    database.pool.end();
 });
 
 app.use('/api', router);

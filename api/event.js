@@ -6,6 +6,7 @@ const licenseService = require('../service/licenseService');
 const publicationService = require('../service/publicationService');
 const userService = require('../service/userService');
 const seriesService = require('../service/seriesService');
+const dbService = require('../service/dbService');
 const messageKeys = require('../utils/message-keys');
 const logger = require('../config/winstonLogger');
 const constants = require('../utils/constants');
@@ -83,6 +84,8 @@ exports.getInboxEvents = async (req, res) => {
         if (inboxSeries && inboxSeries.length > 0) {
             const inboxEventsWithAcls = await fetchEventMetadata(inboxSeries);
             res.json(eventsService.filterEventsForClientList(inboxEventsWithAcls, loggedUser));
+            // insert removal date to postgres db
+            await dbService.insertRemovalDates(inboxEventsWithAcls);
         } else {
             res.json([]);
         }
