@@ -23,7 +23,7 @@ const filterOnlyNewVideoIds = (videoIdsFromOpenCast, videosFromDb) => {
 };
 
 exports.insertDeletionDates = async (inboxEventsWithAcls, loggedUser) => {
-    logger.info(`insert video deletion dates for user :  ${loggedUser}`);
+    logger.info(`insert video deletion dates for user :  ${loggedUser.eppn}`);
     let videoIdsFromOpenCast = parseVideoIdsFromOpenCast(inboxEventsWithAcls);
     let videosFromDb = await dbApi.returnVideoIdsFromDb(videoIdsFromOpenCast);
 
