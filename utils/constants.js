@@ -172,6 +172,7 @@ const SERIES_METADATA = [
 const PROPERTIES_REPUBLISH_METADATA =
     'publishLive=false\nuploadedSearchPreview=true\npublishToOaiPmh=false\ncomment=false\npublishToMediaModule=true';
 
+const DEFAULT_VIDEO_ARCHIVED_YEAR_AMOUNT = 3;
 
 module.exports = {
     ROLE_ANONYMOUS,
@@ -228,5 +229,6 @@ module.exports = {
     JOB_STATUS_STARTED,
     JOB_STATUS_FINISHED,
     JOB_STATUS_ERROR,
-    OCAST_VIDEOS_WITH_METADATA_ACLS_AND_PUBLICATIONS
+    OCAST_VIDEOS_WITH_METADATA_ACLS_AND_PUBLICATIONS,
+    DEFAULT_VIDEO_ARCHIVED_YEAR_AMOUNT
 };

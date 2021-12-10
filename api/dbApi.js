@@ -2,6 +2,7 @@ const database = require("../service/database");
 const logger = require("../config/winstonLogger");
 const fs = require("fs");
 const path = require("path");
+const Constants = require("../utils/constants");
 
 exports.returnVideoIdsFromDb = async (videos) => {
     try {
@@ -16,7 +17,7 @@ exports.returnVideoIdsFromDb = async (videos) => {
 
 const getArchivedDate = () => {
     let archivedDate = new Date();
-    archivedDate.setFullYear(archivedDate.getFullYear() + 3);
+    archivedDate.setFullYear(archivedDate.getFullYear() + Constants.DEFAULT_VIDEO_ARCHIVED_YEAR_AMOUNT);
     return archivedDate;
 };
 
