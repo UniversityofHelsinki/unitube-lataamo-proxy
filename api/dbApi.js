@@ -3,27 +3,30 @@ const logger = require("../config/winstonLogger");
 const fs = require("fs");
 const path = require("path");
 
-exports.returnVideoIdsFromDb = async (ids) => {
+exports.returnVideoIdsFromDb = async (videos) => {
     try {
+        let videoIdsFromOpenCast = videos.map(item => item['id']);
         const selectVideos =  fs.readFileSync(path.resolve(__dirname, "../sql/selectVideos.sql"), "utf8");
-        return await database.pool.query(selectVideos, [ids]);
+        return await database.pool.query(selectVideos, [videoIdsFromOpenCast]);
     } catch (err) {
         logger.error(`Error returning video id:s ${err} ${err.message}`);
+        throw err;
     }
 };
 
-const addThreeYears = () => {
-    let deletionDate = new Date();
-    deletionDate.setFullYear(deletionDate.getFullYear() + 3);
-    return deletionDate;
+const getArchivedDate = () => {
+    let archivedDate = new Date();
+    archivedDate.setFullYear(archivedDate.getFullYear() + 3);
+    return archivedDate;
 };
 
-exports.insertDeletionDates = async (id) => {
+exports.insertArchiveAndVideoCreationDates = async (video) => {
     try {
-        let deletionDate = addThreeYears();
-        const insertDeletionDateSQL =  fs.readFileSync(path.resolve(__dirname, "../sql/insertDeletionDate.sql"), "utf8");
-        await database.pool.query(insertDeletionDateSQL, [id, deletionDate]);
+        let archivedDate = getArchivedDate();
+        const insertDeletionDateSQL =  fs.readFileSync(path.resolve(__dirname, "../sql/insertArchivedAndVideoCreationDate.sql"), "utf8");
+        await database.pool.query(insertDeletionDateSQL, [video.id, archivedDate, video.created]);
     } catch (err) {
-        logger.error(`Error inserting deletion date for videoId : ${id} ${err} ${err.message}`);
+        logger.error(`Error inserting deletion date for videoId : ${video.id} ${err} ${err.message}`);
+        throw err;
     }
 };

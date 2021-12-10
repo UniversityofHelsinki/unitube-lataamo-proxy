@@ -1,38 +1,43 @@
 const dbApi = require("../api/dbApi");
 const logger = require("../config/winstonLogger");
 
-const parseVideoIdsFromOpenCast = (inboxEventsWithAcls) => {
+const parseVideosFromOpenCast = (inboxEventsWithAcls) => {
     let inboxIds = [];
     for (const inboxEventWithAcl of inboxEventsWithAcls) {
-        inboxIds.push(inboxEventWithAcl.identifier);
+        inboxIds.push({ id : inboxEventWithAcl.identifier , created : inboxEventWithAcl.created });
     }
     return inboxIds;
 };
 
-const filterOnlyNewVideoIds = (videoIdsFromOpenCast, videosFromDb) => {
+const filterOnlyNewVideos = (videoIdsFromOpenCast, videosFromDb) => {
     let videoIdsFromDb = [];
 
     if (videosFromDb.rows && videosFromDb.rowCount > 0) {
         for (const row of videosFromDb.rows) {
             videoIdsFromDb.push(row.video_id);
         }
-        return videoIdsFromOpenCast.filter(id => !videoIdsFromDb.includes(id));
+        return videoIdsFromOpenCast.filter(x => !videoIdsFromDb.includes(x.id));
     } else {
         return videoIdsFromOpenCast;
     }
 };
 
 exports.insertDeletionDates = async (inboxEventsWithAcls, loggedUser) => {
-    logger.info(`insert video deletion dates for user :  ${loggedUser.eppn}`);
-    let videoIdsFromOpenCast = parseVideoIdsFromOpenCast(inboxEventsWithAcls);
-    let videosFromDb = await dbApi.returnVideoIdsFromDb(videoIdsFromOpenCast);
+    try {
+        logger.info(`insert video deletion dates for user :  ${loggedUser.eppn}`);
+        let videosFromOpenCast = parseVideosFromOpenCast(inboxEventsWithAcls);
+        let videosFromDb = await dbApi.returnVideoIdsFromDb(videosFromOpenCast);
 
-    let newVideoIds = filterOnlyNewVideoIds(videoIdsFromOpenCast, videosFromDb);
+        const newVideos = filterOnlyNewVideos(videosFromOpenCast, videosFromDb);
 
-    if (newVideoIds && newVideoIds.length > 0) {
-        for (const videoId of newVideoIds) {
-            logger.info(`insert deletion date for video id : ${videoId}`);
-            await dbApi.insertDeletionDates(videoId);
+        if (newVideos && newVideos.length > 0) {
+            for (const video of newVideos) {
+                logger.info(`insert deletion date for video id : ${video.id}`);
+                await dbApi.insertArchiveAndVideoCreationDates(video);
+            }
         }
+    } catch (error) {
+        logger.error(`error inserting deletion dates for user ${loggedUser.eppn}`);
+        throw error;
     }
 };
