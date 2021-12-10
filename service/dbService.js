@@ -22,10 +22,10 @@ const filterOnlyNewVideos = (videoIdsFromOpenCast, videosFromDb) => {
     }
 };
 
-exports.insertArchivedAndCreationDates = async (inboxEventsWithAcls, loggedUser) => {
+exports.insertArchivedAndCreationDates = async (eventsWithAcls, loggedUser) => {
     try {
         logger.info(`insert video deletion dates for user :  ${loggedUser.eppn}`);
-        let videosFromOpenCast = parseVideosFromOpenCast(inboxEventsWithAcls);
+        let videosFromOpenCast = parseVideosFromOpenCast(eventsWithAcls);
         let videosFromDb = await dbApi.returnVideoIdsFromDb(videosFromOpenCast);
 
         const newVideos = filterOnlyNewVideos(videosFromOpenCast, videosFromDb);
