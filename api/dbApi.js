@@ -24,8 +24,8 @@ const getArchivedDate = () => {
 exports.insertArchiveAndVideoCreationDates = async (video) => {
     try {
         let archivedDate = getArchivedDate();
-        const insertDeletionDateSQL =  fs.readFileSync(path.resolve(__dirname, "../sql/insertArchivedAndVideoCreationDate.sql"), "utf8");
-        await database.pool.query(insertDeletionDateSQL, [video.id, archivedDate, video.created]);
+        const insertArchivedAndCreationDatesSQL =  fs.readFileSync(path.resolve(__dirname, "../sql/insertArchivedAndVideoCreationDates.sql"), "utf8");
+        await database.pool.query(insertArchivedAndCreationDatesSQL, [video.id, archivedDate, video.created]);
     } catch (err) {
         logger.error(`Error inserting deletion date for videoId : ${video.id} ${err} ${err.message}`);
         throw err;
