@@ -37,7 +37,8 @@ before('Mock db connection and load app', async () => {
         password: process.env.PASSWORD,
         port: process.env.PORT,
         max: 1, // Reuse the connection to make sure we always hit the same temporal schema
-        idleTimeoutMillis: 0 // Disable auto-disconnection of idle clients to make sure we always hit the same temporal schema
+        idleTimeoutMillis: 0, // Disable auto-disconnection of idle clients to make sure we always hit the same temporal schema
+        SSL: process.env.SSL
     });
 
     // Mock the query function to always return a connection from the pool we just created
