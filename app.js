@@ -37,7 +37,7 @@ app.use(bodyParser.json());
 app.use(xss());
 
 
-database.pool.query('SELECT NOW()', (err, res) => {
+database.query('SELECT NOW()', (err, res) => {
     console.log(err ? "errors: " + err : 'Postgres client connected ' , res.rows[0]);
 });
 

@@ -8,7 +8,7 @@ exports.returnVideoIdsFromDb = async (videos) => {
     try {
         let videoIdsFromOpenCast = videos.map(item => item['id']);
         const selectVideos =  fs.readFileSync(path.resolve(__dirname, "../sql/selectVideos.sql"), "utf8");
-        return await database.pool.query(selectVideos, [videoIdsFromOpenCast]);
+        return await database.query(selectVideos, [videoIdsFromOpenCast]);
     } catch (err) {
         logger.error(`Error returning video id:s ${err} ${err.message}`);
         throw err;
@@ -25,7 +25,7 @@ exports.insertArchiveAndVideoCreationDates = async (video) => {
     try {
         let archivedDate = getArchivedDate();
         const insertArchivedAndCreationDatesSQL =  fs.readFileSync(path.resolve(__dirname, "../sql/insertArchivedAndVideoCreationDates.sql"), "utf8");
-        await database.pool.query(insertArchivedAndCreationDatesSQL, [video.id, archivedDate, video.created]);
+        await database.query(insertArchivedAndCreationDatesSQL, [video.id, archivedDate, video.created]);
     } catch (err) {
         logger.error(`Error inserting deletion date for videoId : ${video.id} ${err} ${err.message}`);
         throw err;

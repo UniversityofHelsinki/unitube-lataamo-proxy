@@ -3,7 +3,10 @@ const chai = require('chai');           // https://www.npmjs.com/package/chai
 const assert = chai.assert;
 const expect = chai.expect;
 const supertest = require('supertest'); // https://www.npmjs.com/package/supertest
-const app = require('../app');
+let app;
+
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 let test = require('./testHelper');
 const testXXX = require('./testHelperXXX');
@@ -22,6 +25,38 @@ const LATAAMO_API_VIDEO_PATH = '/api/videoUrl/';
 
 const constants = require('../utils/constants');
 const messageKeys = require('../utils/message-keys');
+const Pool = require('pg-pool');
+const client = require('../service/database');
+
+before('Mock db connection and load app', async () => {
+    // Create a new pool with a connection limit of 1
+    const pool = new Pool({
+        user: process.env.POSTGRES_USER,
+        host: process.env.HOST,
+        database: process.env.DATABASE,
+        password: process.env.PASSWORD,
+        port: process.env.PORT,
+        max: 1, // Reuse the connection to make sure we always hit the same temporal schema
+        idleTimeoutMillis: 0 // Disable auto-disconnection of idle clients to make sure we always hit the same temporal schema
+    });
+
+    // Mock the query function to always return a connection from the pool we just created
+    client.query = (text, values) => {
+        return pool.query(text, values);
+    };
+
+    // It's important to import the app after mocking the database connection
+    app = require('../app');
+});
+
+beforeEach(async () => {
+    await client.query('CREATE TEMPORARY TABLE videos (video_id VARCHAR(255) NOT NULL, archived_date date, deletion_date date, informed_date date, video_creation_date date, PRIMARY KEY(video_id))');
+});
+
+afterEach('Drop temporary tables', async () => {
+    await client.query('DROP TABLE pg_temp.videos');
+});
+
 
 describe('api info returned from /info route', () => {
 
@@ -215,7 +250,7 @@ describe('user series person - and iamgroup administrators returned from /series
 
 describe('user video urls returned from /video/id events route', () => {
     beforeEach(() => {
-    // mock needed opencast api calls
+        // mock needed opencast api calls
         test.mockEventPublicationCall();
         test.mockEvent2PubcliationCall();
         test.mockEventEpisodeCall();
@@ -370,6 +405,12 @@ describe('user inbox events returned from /userInboxEvents route', () => {
         assert.equal(response.body[0].creator, 'Opencast Project Administrator');
         assert.equal(response.body[0].processing_state, 'SUCCEEDED');
         assert.deepEqual(response.body[0].visibility, ['status_private']);
+
+
+
+        const { rows } = await client.query('SELECT * FROM videos');
+        expect(rows).lengthOf(2);
+
     });
 
     it('should return no inbox events from inbox series', async () => {
@@ -383,6 +424,9 @@ describe('user inbox events returned from /userInboxEvents route', () => {
             .expect('Content-Type', /json/);
         assert.isArray(response.body, 'Response should be an array');
         assert.lengthOf(response.body, 0, 'No events should be returned');
+
+        const { rows } = await client.query('SELECT * FROM videos');
+        expect(rows).lengthOf(0);
     });
 });
 
@@ -455,7 +499,7 @@ afterEach(() => {
 
 describe('user events (videos) returned from /userEvents route', () => {
     beforeEach(() => {
-    // mock needed opencast api calls
+        // mock needed opencast api calls
         test.mockOCastSeriesApiCall();  // list series mockUserSeries seriesid1 and 2
         test.mockOCastSeriesApiCall3(); // list series mockUserSeries2 seriesid2
         test.mockOCastSeriesApiCall4();  // list series mockUserSeriesEmpty
@@ -848,10 +892,10 @@ describe('Fetching event from /event/id route', () => {
         ];
 
         const licenses = [
-            "UNITUBE-ALLRIGHTS",
-            "CC-BY",
-            "CC-BY-NC-ND",
-            "CC0"
+            'UNITUBE-ALLRIGHTS',
+            'CC-BY',
+            'CC-BY-NC-ND',
+            'CC0'
         ];
 
         let response = await supertest(app)
