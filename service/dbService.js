@@ -32,7 +32,6 @@ exports.insertArchivedAndCreationDates = async (eventsWithAcls, loggedUser) => {
         if (newVideos && newVideos.length > 0) {
             for (const video of newVideos) {
                 logger.info(`insert deletion date for video id : ${video.id}`);
-                console.log("HIT", video.id);
                 await dbApi.insertArchiveAndVideoCreationDates(video);
             }
         }

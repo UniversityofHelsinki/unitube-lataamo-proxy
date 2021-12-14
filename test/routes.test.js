@@ -28,6 +28,8 @@ const messageKeys = require('../utils/message-keys');
 const Pool = require('pg-pool');
 const client = require('../service/database');
 
+const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+
 before('Mock db connection and load app', async () => {
     // Create a new pool with a connection limit of 1
     const pool = new Pool({
@@ -407,11 +409,14 @@ describe('user inbox events returned from /userInboxEvents route', () => {
         assert.equal(response.body[0].processing_state, 'SUCCEEDED');
         assert.deepEqual(response.body[0].visibility, ['status_private']);
 
-
+        await wait(100);
 
         const { rows } = await client.query('SELECT * FROM videos');
         expect(rows).lengthOf(2);
-
+        expect(rows[0].video_id).to.deep.equal(response.body[0].identifier);
+        expect(rows[0].archived_date).to.not.be.null;
+        expect(rows[1].video_id).to.deep.equal(response.body[1].identifier);
+        expect(rows[1].archived_date).to.not.be.null;
     });
 
     it('should return no inbox events from inbox series', async () => {
@@ -536,6 +541,15 @@ describe('user events (videos) returned from /userEvents route', () => {
         assert.equal(response.body[0].visibility, constants.STATUS_PUBLISHED);
         assert.lengthOf(response.body[1].visibility, 1, 'Video should have one visibility value');
         assert.equal(response.body[1].visibility, constants.STATUS_PUBLISHED);
+
+        await wait(100);
+
+        const { rows } = await client.query('SELECT * FROM videos');
+        expect(rows).lengthOf(2);
+        expect(rows[0].video_id).to.deep.equal(response.body[0].identifier);
+        expect(rows[0].archived_date).to.not.be.null;
+        expect(rows[1].video_id).to.deep.equal(response.body[1].identifier);
+        expect(rows[1].archived_date).to.not.be.null;
     });
 
     it('-Contributor FIX- Events should have visibility array property', async () => {
@@ -554,6 +568,15 @@ describe('user events (videos) returned from /userEvents route', () => {
 
         assert.isArray(response.body[0].visibility, 'Video\'s visibility property should be an array');
         assert.isArray(response.body[1].visibility, 'Video\'s visibility property should be an array');
+
+        await wait(100);
+
+        const { rows } = await client.query('SELECT * FROM videos');
+        expect(rows).lengthOf(2);
+        expect(rows[0].video_id).to.deep.equal(response.body[0].identifier);
+        expect(rows[0].archived_date).to.not.be.null;
+        expect(rows[1].video_id).to.deep.equal(response.body[1].identifier);
+        expect(rows[1].archived_date).to.not.be.null;
     });
 
 
@@ -575,6 +598,15 @@ describe('user events (videos) returned from /userEvents route', () => {
         assert.lengthOf(response.body, 2, 'Two events should be returned');
         assert.equal(response.body[0].identifier, test.constants.TEST_EVENT_1_ID);
         assert.equal(response.body[1].identifier, test.constants.TEST_EVENT_2_ID);
+
+        await wait(100);
+
+        const { rows } = await client.query('SELECT * FROM videos');
+        expect(rows).lengthOf(2);
+        expect(rows[0].video_id).to.deep.equal(response.body[0].identifier);
+        expect(rows[0].archived_date).to.not.be.null;
+        expect(rows[1].video_id).to.deep.equal(response.body[1].identifier);
+        expect(rows[1].archived_date).to.not.be.null;
     });
 
 
@@ -598,6 +630,11 @@ describe('user events (videos) returned from /userEvents route', () => {
 
         assert.isArray(response.body, 'Response should be an array');
         assert.equal(response.body.length, 0);
+
+        await wait(100);
+
+        const { rows } = await client.query('SELECT * FROM videos');
+        expect(rows).lengthOf(0);
     });
 
 
@@ -618,6 +655,11 @@ describe('user events (videos) returned from /userEvents route', () => {
 
         assert.isArray(response.body, 'Response should be an array');
         assert.equal(response.body.length, 0);
+
+        await wait(100);
+
+        const { rows } = await client.query('SELECT * FROM videos');
+        expect(rows).lengthOf(0);
     });
 });
 

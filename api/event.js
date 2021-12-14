@@ -83,9 +83,9 @@ exports.getInboxEvents = async (req, res) => {
         const inboxSeries = await apiService.returnOrCreateUsersSeries(constants.INBOX, loggedUser);
         if (inboxSeries && inboxSeries.length > 0) {
             const inboxEventsWithAcls = await fetchEventMetadata(inboxSeries);
+            res.json(eventsService.filterEventsForClientList(inboxEventsWithAcls, loggedUser));
             // insert removal date to postgres db
             await dbService.insertArchivedAndCreationDates(inboxEventsWithAcls, loggedUser);
-            res.json(eventsService.filterEventsForClientList(inboxEventsWithAcls, loggedUser));
         } else {
             res.json([]);
         }
