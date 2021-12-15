@@ -82,6 +82,7 @@ deploy_test:
     name: test
   only:
     - test
+    - lataamo_poistamo_test # This is for Poistamo codebase deployment, it can be removed after codebase is integrated with main branch
   script:
     - echo "====== Deploy to test server ========"
     - echo "====== Install rsync and openssh ========="
