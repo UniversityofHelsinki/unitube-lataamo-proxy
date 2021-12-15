@@ -137,6 +137,7 @@ exports.moveToTrash = async (req, res) =>{
 
         if (response.status === 200) {
             logger.info(`PUT /moveEventToTrash/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} OK`);
+            await dbService.insertOrUpdateVideoArchivedDate(req.body.identifier, loggedUser);
         } else if (response.status === 403){
             logger.warn(`PUT /moveEventToTrash/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} ${response.statusText}`);
         } else {

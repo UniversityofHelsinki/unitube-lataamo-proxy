@@ -1,5 +1,5 @@
-const dbApi = require("../api/dbApi");
-const logger = require("../config/winstonLogger");
+const dbApi = require('../api/dbApi');
+const logger = require('../config/winstonLogger');
 
 const parseVideosFromOpenCast = (inboxEventsWithAcls) => {
     let inboxIds = [];
@@ -34,6 +34,24 @@ exports.insertArchivedAndCreationDates = async (eventsWithAcls, loggedUser) => {
                 logger.info(`insert deletion date for video id : ${video.id}`);
                 await dbApi.insertArchiveAndVideoCreationDates(video);
             }
+        }
+    } catch (error) {
+        logger.error(`error inserting deletion dates for user ${loggedUser.eppn}`);
+        throw error;
+    }
+};
+
+exports.insertOrUpdateVideoArchivedDate = async (videoId, loggedUser) => {
+    try {
+        logger.info(`insert or update video ${videoId} deletion date for user : ${loggedUser.eppn}`);
+        let videoFromDb = await dbApi.returnVideoIdFromDb(videoId);
+
+        if (videoFromDb && videoFromDb.rowCount > 0) {
+            logger.info(`update deletion date for video id : ${videoId} marked for deletion`);
+            await dbApi.updateVideoArchivedDateMarkedForDeletion(videoId);
+        } else {
+            logger.info(`insert deletion date for video id : ${videoId} marked for deletion`);
+            await dbApi.insertVideoArchivedDateMarkedForDeletion(videoId);
         }
     } catch (error) {
         logger.error(`error inserting deletion dates for user ${loggedUser.eppn}`);
