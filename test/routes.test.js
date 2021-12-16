@@ -907,12 +907,11 @@ describe('Updating videos aka events', () => {
 
         const { rows } = await client.query('SELECT * FROM videos');
         expect(rows).lengthOf(1);
-        console.log(rows);
         expect(rows[0].archived_date).to.not.be.null;
 
         let archivedDateForVideoMarkedForDeletion = new Date();
         archivedDateForVideoMarkedForDeletion.setMonth(archivedDateForVideoMarkedForDeletion.getMonth() + Constants.DEFAULT_VIDEO_MARKED_FOR_DELETION_MONTHS_AMOUNT);
-        
+
         expect(rows[0].archived_date.toDateString()).to.equal(archivedDateForVideoMarkedForDeletion.toDateString());
     });
 });
