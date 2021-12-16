@@ -27,6 +27,7 @@ const constants = require('../utils/constants');
 const messageKeys = require('../utils/message-keys');
 const Pool = require('pg-pool');
 const client = require('../service/database');
+const Constants = require("../utils/constants");
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -886,6 +887,7 @@ describe('Updating videos aka events', () => {
     });
 
     it('Should move event to trash series when deleted', async () => {
+        await client.query('INSERT INTO videos (video_id, archived_date, video_creation_date) VALUES (234234234, \'2019-01-01\'::date, \'2010-01-01\'::date)');
 
         test.mockOpencastEventNoActiveTransaction('234234234');
         test.mockOpencastUpdateEventOK('234234234');
@@ -901,6 +903,17 @@ describe('Updating videos aka events', () => {
             .set('hyGroupCn', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
+
+
+        const { rows } = await client.query('SELECT * FROM videos');
+        expect(rows).lengthOf(1);
+        console.log(rows);
+        expect(rows[0].archived_date).to.not.be.null;
+
+        let archivedDateForVideoMarkedForDeletion = new Date();
+        archivedDateForVideoMarkedForDeletion.setMonth(archivedDateForVideoMarkedForDeletion.getMonth() + Constants.DEFAULT_VIDEO_MARKED_FOR_DELETION_MONTHS_AMOUNT);
+        
+        expect(rows[0].archived_date.toDateString()).to.equal(archivedDateForVideoMarkedForDeletion.toDateString());
     });
 });
 
