@@ -6,6 +6,7 @@ const licenseService = require('../service/licenseService');
 const publicationService = require('../service/publicationService');
 const userService = require('../service/userService');
 const seriesService = require('../service/seriesService');
+const dbService = require('../service/dbService');
 const messageKeys = require('../utils/message-keys');
 const logger = require('../config/winstonLogger');
 const constants = require('../utils/constants');
@@ -83,6 +84,8 @@ exports.getInboxEvents = async (req, res) => {
         if (inboxSeries && inboxSeries.length > 0) {
             const inboxEventsWithAcls = await fetchEventMetadata(inboxSeries);
             res.json(eventsService.filterEventsForClientList(inboxEventsWithAcls, loggedUser));
+            // insert removal date to postgres db
+            await dbService.insertArchivedAndCreationDates(inboxEventsWithAcls, loggedUser);
         } else {
             res.json([]);
         }
@@ -134,6 +137,7 @@ exports.moveToTrash = async (req, res) =>{
 
         if (response.status === 200) {
             logger.info(`PUT /moveEventToTrash/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} OK`);
+            await dbService.insertOrUpdateVideoArchivedDate(req.body.identifier, loggedUser);
         } else if (response.status === 403){
             logger.warn(`PUT /moveEventToTrash/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} ${response.statusText}`);
         } else {

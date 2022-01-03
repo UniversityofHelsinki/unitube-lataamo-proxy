@@ -12,6 +12,7 @@ const upload = require('../utils/upload');
 const path = require('path');
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 const { parseSync, stringifySync } = require('subtitle');
+const dbService = require("../service/dbService");
 
 exports.getVideoUrl = async (req, res) => {
     let debugStage = 0;
@@ -49,6 +50,8 @@ exports.getUserVideos = async (req, res) => {
         const allEventsWithMetaData = await eventsService.getAllEventsBySeriesIdentifiers(seriesIdentifiers);
         const concatenatedEventsArray = eventsService.concatenateArray(allEventsWithMetaData);
         res.json(eventsService.filterEventsForClientList(concatenatedEventsArray, loggedUser));
+        // insert removal date to postgres db
+        await dbService.insertArchivedAndCreationDates(concatenatedEventsArray, loggedUser);
     } catch (error) {
         res.status(500);
         const msg = error.message;
