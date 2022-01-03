@@ -58,6 +58,7 @@ beforeEach(async () => {
 });
 
 afterEach('Drop temporary tables', async () => {
+    await wait(10);
     await client.query('DROP TABLE pg_temp.videos');
 });
 
