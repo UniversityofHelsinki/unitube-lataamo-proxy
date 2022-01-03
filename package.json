@@ -46,6 +46,8 @@
     "passport": "^0.4.0",
     "passport-reverseproxy": "^0.1.0",
     "path": "^0.12.7",
+    "pg": "^8.7.1",
+    "pg-pool": "^3.4.1",
     "pretty-ms": "^5.0.0",
     "redis": "^3.0.2",
     "subtitle": "^4.0.1",
