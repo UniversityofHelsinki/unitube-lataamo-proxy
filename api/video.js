@@ -12,6 +12,7 @@ const upload = require('../utils/upload');
 const path = require('path');
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 const { parseSync, stringifySync } = require('subtitle');
+const dbService = require("../service/dbService");
 
 exports.getVideoUrl = async (req, res) => {
     let debugStage = 0;
@@ -46,17 +47,15 @@ exports.getUserVideos = async (req, res) => {
         const ownSeries = await apiService.getUserSeries(loggedUser);
         const ownSeriesWithoutTrash = await seriesService.filterTrashSeries(ownSeries);
         const seriesIdentifiers = seriesService.getSeriesIdentifiers(ownSeriesWithoutTrash, loggedUser);
-        const allEvents = await eventsService.getAllEvents(seriesIdentifiers);
-        const concatenatedEventsArray = eventsService.concatenateArray(allEvents);
-        const allEventsWithMetaDatas = await eventsService.getAllEventsWithMetadatas(concatenatedEventsArray);
-        const allEventsWithMedia = await eventsService.getEventsWithMedia(allEventsWithMetaDatas);
-        const allEventsWithMediaFile = await eventsService.getAllEventsWithMediaFileMetadata(allEventsWithMedia);
-        const allEventsWithAcls = await eventsService.getAllEventsWithAcls(allEventsWithMediaFile);
-        res.json(eventsService.filterEventsForClient(allEventsWithAcls));
+        const allEventsWithMetaData = await eventsService.getAllEventsBySeriesIdentifiers(seriesIdentifiers);
+        const concatenatedEventsArray = eventsService.concatenateArray(allEventsWithMetaData);
+        res.json(eventsService.filterEventsForClientList(concatenatedEventsArray, loggedUser));
+        // insert removal date to postgres db
+        await dbService.insertArchivedAndCreationDates(concatenatedEventsArray, loggedUser);
     } catch (error) {
         res.status(500);
         const msg = error.message;
-        logger.error(`Error GET /userVideos ${msg} USER ${req.user.eppn}`);
+        logger.error(`Error GET /userVideos ${error} ${msg} USER ${req.user.eppn}`);
         res.json({
             message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_LIST_FOR_USER,
             msg

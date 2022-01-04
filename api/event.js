@@ -6,6 +6,7 @@ const licenseService = require('../service/licenseService');
 const publicationService = require('../service/publicationService');
 const userService = require('../service/userService');
 const seriesService = require('../service/seriesService');
+const dbService = require('../service/dbService');
 const messageKeys = require('../utils/message-keys');
 const logger = require('../config/winstonLogger');
 const constants = require('../utils/constants');
@@ -66,7 +67,7 @@ exports.getInboxEvents = async (req, res) => {
 
     try{
         // get or create trash series for user
-        const trashSeries = await apiService.returnOrCreateUsersSeries(constants.TRASH, loggedUser);
+        await apiService.returnOrCreateUsersSeries(constants.TRASH, loggedUser);
     }catch(error){
         const msg = error.message;
         logger.error(`Error GET/CREATE userTrashEvents ${msg} USER ${req.user.eppn}`);
@@ -82,13 +83,15 @@ exports.getInboxEvents = async (req, res) => {
         const inboxSeries = await apiService.returnOrCreateUsersSeries(constants.INBOX, loggedUser);
         if (inboxSeries && inboxSeries.length > 0) {
             const inboxEventsWithAcls = await fetchEventMetadata(inboxSeries);
-            res.json(eventsService.filterEventsForClient(inboxEventsWithAcls));
+            res.json(eventsService.filterEventsForClientList(inboxEventsWithAcls, loggedUser));
+            // insert removal date to postgres db
+            await dbService.insertArchivedAndCreationDates(inboxEventsWithAcls, loggedUser);
         } else {
             res.json([]);
         }
-    }catch(error){
+    } catch(error) {
         const msg = error.message;
-        logger.error(`Error GET /userInboxEvents ${msg} USER ${req.user.eppn}`);
+        logger.error(`Error GET /userInboxEvents ${error} ${msg}  USER ${req.user.eppn}`);
         res.status(500);
         return res.json({
             message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_INBOX_EVENTS,
@@ -104,7 +107,7 @@ exports.getTrashEvents = async (req, res) => {
         const trashSeries = await apiService.getUserTrashSeries(loggedUser);
         if(trashSeries && trashSeries.length > 0){
             const trashEventsWithAcls = await fetchEventMetadata(trashSeries);
-            res.json(eventsService.filterEventsForClientTrash(trashEventsWithAcls));
+            res.json(eventsService.filterEventsForClientTrash(trashEventsWithAcls, loggedUser));
         }else{
             res.json([]);
         }
@@ -121,12 +124,8 @@ exports.getTrashEvents = async (req, res) => {
 
 const fetchEventMetadata = async (series) => {
     const identifier = seriesService.getSeriesIdentifier(series);
-    const events = await apiService.getEventsByIdentifier(identifier);
-    const eventsWithMetadatas = await eventsService.getAllEventsWithMetadatas(events);
-    const eventsWithMedia = await eventsService.getEventsWithMedia(eventsWithMetadatas);
-    const eventsWithMediaFile = await eventsService.getAllEventsWithMediaFileMetadata(eventsWithMedia);
-    const eventsWithAcls = await eventsService.getAllEventsWithAcls(eventsWithMediaFile);
-    return eventsWithAcls;
+    const allEventsWithMetaData = await eventsService.getAllEventsBySeriesIdentifier(identifier);
+    return allEventsWithMetaData;
 };
 
 exports.moveToTrash = async (req, res) =>{
@@ -138,6 +137,7 @@ exports.moveToTrash = async (req, res) =>{
 
         if (response.status === 200) {
             logger.info(`PUT /moveEventToTrash/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} OK`);
+            await dbService.insertOrUpdateVideoArchivedDate(req.body.identifier, loggedUser);
         } else if (response.status === 403){
             logger.warn(`PUT /moveEventToTrash/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} ${response.statusText}`);
         } else {

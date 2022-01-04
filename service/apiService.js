@@ -35,6 +35,13 @@ exports.getEventsByIdentifier = async (identifier) => {
     return response.data;
 };
 
+exports.getEventsBySeriesIdentifier = async (identifier) => {
+    let userEventsUrl = constants.OCAST_VIDEOS_PATH + constants.OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER;
+    userEventsUrl = userEventsUrl + identifier + constants.OCAST_VIDEOS_WITH_METADATA_ACLS_AND_PUBLICATIONS;
+    const response = await security.opencastBase.get(userEventsUrl);
+    return response.data;
+};
+
 exports.getEventsWithSeriesByIdentifier = async (series) => {
     let userEventsUrl = constants.OCAST_VIDEOS_PATH + constants.OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER;
     userEventsUrl = userEventsUrl + series.identifier;
@@ -136,8 +143,6 @@ exports.getUserTrashSeries = async (user) => {
     const response = await security.opencastBase.get(seriesUrl);
     return response.data;
 };
-
-
 /*
 exports.getUserSeries = async (user) => {
     const contributorParameters = userService.parseContributor(user.hyGroupCn);
@@ -171,7 +176,6 @@ exports.getUserSeries = async (user) => {
  * @returns {Promise<*[]>} List of series were user is listed as a contributor
  */
 exports.getUserSeries = async (user) => {
-
     // check the feature flag value
     if (!isContributorMigrationActive()) {
         const contributorParameters = parseContributor(user.hyGroupCn);
@@ -230,7 +234,6 @@ exports.getUserSeries = async (user) => {
 
     return uniqueSeriesList;
 };
-
 
 exports.getEpisodeForEvent = async (eventId) => {
     const episodeUrl = constants.OCAST_EPISODE_PATH + '?id=' + eventId;
@@ -327,7 +330,7 @@ exports.getEventAcl = async (event) => {
 exports.updateEventAcl = async (event, acl) => {
     const aclUrl = constants.OCAST_VIDEOS_PATH + event.identifier + constants.OCAST_ACL_PATH;
     let bodyFormData = new FormData();
-    bodyFormData.append('eventId', event.identifier),
+    bodyFormData.append('eventId', event.identifier);
     bodyFormData.append('acl', JSON.stringify(acl));
     try {
         const headers = {

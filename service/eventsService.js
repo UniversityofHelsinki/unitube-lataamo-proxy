@@ -10,33 +10,42 @@ const constants = require('../utils/constants');
 const logger = require('../config/winstonLogger');
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 const JsonFind = require('json-find');
+const messageKeys = require('../utils/message-keys');
 
-exports.filterEventsForClient = (ocResponseData) => {
 
-    if(!ocResponseData){
-        return [];
-    }
+exports.filterEventsForClientList = (ocResponseData, loggedUser) => {
 
-    const eventArray = [];
-    ocResponseData.forEach(event => {
-        eventArray.push({
-            'identifier': event.identifier,
-            'title': event.title,
-            'description' : event.description,
-            'license' : calculateLicensePropertyForVideo(event),
-            'duration': moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format('HH:mm:ss', {trim:false}),
-            'creator': event.creator,
-            'processing_state' : event.processing_state,
-            'visibility' : calculateVisibilityPropertyForVideo(event),
-            'created': event.created,
-            'series': event.series.title,
-            'media' : calculateMediaPropertyForVideo(event)
+    try {
+        if (!ocResponseData || !Array.isArray(ocResponseData)) {
+            return [];
+        }
+
+        const eventArray = [];
+        ocResponseData.forEach(event => {
+            eventArray.push({
+                'identifier': event.identifier,
+                'title': event.title,
+                'description': event.description,
+                'license': event.license,
+                'duration': calculateMediaDurationForVideoList(event, loggedUser),
+                'creator': event.creator,
+                'processing_state': event.processing_state,
+                'visibility': calculateVisibilityPropertyForVideoList(event, loggedUser),
+                'created': event.created,
+                'series': event.series,
+                'media': calculateMediaPropertyForVideoList(event, loggedUser)
+            });
         });
-    });
-    return eventArray;
+
+        return eventArray;
+    } catch (error) {
+        logger.error(`error filtering events for client ${error} ${error.message} USER ${loggedUser}`);
+    }
 };
 
-exports.filterEventsForClientTrash = (ocResponseData) => {
+
+
+exports.filterEventsForClientTrash = (ocResponseData, loggedUser) => {
 
     if(!ocResponseData){
         return [];
@@ -49,38 +58,62 @@ exports.filterEventsForClientTrash = (ocResponseData) => {
                 'identifier': event.identifier,
                 'title': event.title,
                 'description' : event.description,
-                'license' : calculateLicensePropertyForVideo(event),
-                'duration': moment.duration(event.mediaFileMetadata.duration, 'milliseconds').format('HH:mm:ss', {trim:false}),
+                'license' : event.license,
+                'duration': calculateMediaDurationForVideoList(event, loggedUser),
                 'creator': event.creator,
                 'processing_state' : event.processing_state,
-                'visibility' : calculateVisibilityPropertyForVideo(event),
+                'visibility' : calculateVisibilityPropertyForVideoList(event, loggedUser),
                 'created': event.created,
-                'series': event.series.title,
-                'media' : calculateMediaPropertyForVideo(event)
+                'series': event.series,
+                'media' : calculateMediaPropertyForVideoList(event, loggedUser)
             });
         }
     });
     return eventArray;
 };
 
-const calculateLicensePropertyForVideo = (event) => {
-    const foundEpisodeFlavorMetadata = event.metadata.find(field => {
-        return field.flavor === 'dublincore/episode';
-    });
-    const foundFieldWithLicenseInfo = foundEpisodeFlavorMetadata.fields.find(field => {
-        return field.id === 'license';
-    });
-    return foundFieldWithLicenseInfo.value;
+const calculateMediaDurationForVideoList = (event, loggedUser) => {
+    try {
+        let duration = '00:00:00';
+        if (event.publications) {
+            let apiChannel = event.publications.find(publication => publication.channel === 'api');
+
+            if (apiChannel && apiChannel.media) {
+                apiChannel.media.forEach(media => {
+                    if (media.has_video) {
+                        duration = moment.duration(media.duration, 'milliseconds').format('HH:mm:ss', {trim: false});
+                    }
+                });
+            }
+        } else {
+            logger.warn(`publications missing in media duration ${event.identifier} FOR USER ${loggedUser.eppn}`);
+        }
+        return duration;
+    } catch (error) {
+        logger.error(`error calculating media duration for video list ${error} ${error.message} ${event.identifier} FOR USER ${loggedUser.eppn}`);
+    }
 };
 
-const calculateMediaPropertyForVideo = (event) => {
-    let mediaUrls = [];
-    event.media.forEach(media => {
-        if (event.processing_state === constants.OPENCAST_STATE_SUCCEEDED) {
-            mediaUrls.push(media.url);
+const calculateMediaPropertyForVideoList = (event, loggedUser) => {
+    try {
+        let mediaUrls = [];
+        if (event.publications) {
+            let apiChannel = event.publications.find(publication => publication.channel === 'api');
+
+            if (apiChannel && apiChannel.media) {
+                apiChannel.media.forEach(media => {
+                    if (media.has_video && event.processing_state === constants.OPENCAST_STATE_SUCCEEDED) {
+                        mediaUrls.push(media.url);
+                    }
+                });
+            }
+        } else {
+            logger.warn(`publications missing in media property ${event.identifier} FOR USER ${loggedUser.eppn}`);
         }
-    });
-    return [...new Set(mediaUrls)];
+        return [...new Set(mediaUrls)];
+    } catch (error) {
+        logger.error(`error calculating media property for video list  ${error}  ${error.message} ${event.identifier} FOR USER ${loggedUser.eppn}`);
+    }
 };
 
 exports.calculateVisibilityProperty = (event) => {
@@ -90,26 +123,77 @@ exports.calculateVisibilityProperty = (event) => {
     };
 };
 
-const calculateVisibilityPropertyForVideo = (video) => {
-    const visibility = [];
+const calculateVisibilityPropertyForVideoList = (video, loggedUser) => {
+    try {
+        const visibility = [];
 
-    if (commonService.publicRoleCount(video.acls) >= 1) { //video has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
-        visibility.push(constants.STATUS_PUBLISHED);
-    } else {
-        visibility.push(constants.STATUS_PRIVATE);
+        let moodleAclInstructor;
+        let moodleAclLearner;
+
+        if (commonService.publicRoleCount(video.acl) >= 1) { //video has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
+            visibility.push(constants.STATUS_PUBLISHED);
+        } else {
+            visibility.push(constants.STATUS_PRIVATE);
+        }
+
+        if (video && video.acl) {
+            moodleAclInstructor = video.acl.filter(acl => acl.role.includes(constants.MOODLE_ACL_INSTRUCTOR));
+            moodleAclLearner = video.acl.filter(acl => acl.role.includes(constants.MOODLE_ACL_LEARNER));
+        } else {
+            console.log("calculating visibility property for video in list , warning video has no acl roles" , JSON.stringify(video));
+            logger.warn(`warning video has no acl roles ${video.identifier} FOR USER ${loggedUser.eppn}`);
+        }
+
+        if (moodleAclInstructor && moodleAclLearner && moodleAclInstructor.length > 0 && moodleAclLearner.length > 0) {
+            visibility.push(constants.STATUS_MOODLE);
+        }
+
+        return [...new Set(visibility)];
+    } catch (error) {
+        logger.error(`error calculating visibility property for video list  ${error}  ${error.message} ${video.identifier} FOR USER ${loggedUser.eppn}`);
     }
+};
 
-    const moodleAclInstructor = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_INSTRUCTOR));
-    const moodleAclLearner = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_LEARNER));
+const calculateVisibilityPropertyForVideo = (video, loggedUser) => {
+    try {
+        const visibility = [];
 
-    if (moodleAclInstructor && moodleAclLearner && moodleAclInstructor.length > 0 && moodleAclLearner.length > 0) {
-        visibility.push(constants.STATUS_MOODLE);
+        let moodleAclInstructor;
+        let moodleAclLearner;
+
+        if (commonService.publicRoleCount(video.acls) >= 1) { //video has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
+            visibility.push(constants.STATUS_PUBLISHED);
+        } else {
+            visibility.push(constants.STATUS_PRIVATE);
+        }
+
+        if (video && video.acls) {
+            moodleAclInstructor = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_INSTRUCTOR));
+            moodleAclLearner = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_LEARNER));
+        } else {
+            console.log("calculating visibility property for video in list , warning video has no acl roles" , JSON.stringify(video));
+            logger.warn(`warning video has no acl roles : ${video.identifier} FOR USER ${loggedUser.eppn}`);
+        }
+
+        if (moodleAclInstructor && moodleAclLearner && moodleAclInstructor.length > 0 && moodleAclLearner.length > 0) {
+            visibility.push(constants.STATUS_MOODLE);
+        }
+        return [...new Set(visibility)];
+    } catch (error) {
+        logger.error(`error calculating visibility property for video ${error} ${error.message} ${video.identifier} FOR USER ${loggedUser.eppn}`);
     }
-    return [...new Set(visibility)];
 };
 
 exports.getAllEvents = async (seriesIdentifiers) => {
     return await Promise.all(seriesIdentifiers.map(identifier => apiService.getEventsByIdentifier(identifier)));
+};
+
+exports.getAllEventsBySeriesIdentifiers = async (seriesIdentifiers) => {
+    return await Promise.all(seriesIdentifiers.map(identifier => apiService.getEventsBySeriesIdentifier(identifier)));
+};
+
+exports.getAllEventsBySeriesIdentifier = async (seriesIdentifier) => {
+    return await apiService.getEventsBySeriesIdentifier(seriesIdentifier);
 };
 
 const getAllEventsWithSeries = async (series) => await Promise.all(series.map(series => apiService.getEventsWithSeriesByIdentifier(series)));
