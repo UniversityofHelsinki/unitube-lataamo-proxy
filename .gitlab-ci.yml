@@ -49,7 +49,7 @@ deploy_oc_test:
   environment:
     name: development
   only:
-    - oc-test
+    - lataamo-554
   script:
     - echo "====== Deploy to oc-test server ========"
     - echo "====== Install rsync and openssh ========="
