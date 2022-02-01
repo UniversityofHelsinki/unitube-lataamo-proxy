@@ -308,22 +308,18 @@ exports.republishWebVttFile = async (eventId) => {
         let count = 0;
         await new Promise(resolve => setTimeout(resolve, 30000));
         while (hasActiveTransaction && count <= 10){
-            //await new Promise(resolve => setTimeout(resolve, 60000));
             const transactionStatusPath = constants.OCAST_EVENT_MEDIA_PATH_PREFIX + eventId + '/hasActiveTransaction';
             let responseX = await security.opencastBase.get(transactionStatusPath);
 
             if (responseX.data && responseX.data.active !== true) {
-                console.log(count + ' a' + eventId);
                 hasActiveTransaction = false;
             }else{
                 // transaction active, try again after minute
-                console.log(count);
                 count = count + 1;
                 await new Promise(resolve => setTimeout(resolve, 60000));
             }
         }
-        const resp = await security.opencastBase.post(republishMetadataUrl, bodyFormData, {headers});
-        console.log(resp.status);
+        await security.opencastBase.post(republishMetadataUrl, bodyFormData, {headers});
     }catch(error){
         logger.error(`error republishing event ${eventId}`);
         throw error;
