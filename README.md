@@ -14,6 +14,7 @@ ENVIRONMENT (local development = local, devel environment = devel, test environm
 ESB_HOST (esb host url, found in keepass)\
 ESB_GROUPS_API_KEY (found in keepass)\
 ESB_PERSONS_API_KEY (found in keepass)
+REDIS_URL = redis://localhost
 
 #### Poistamo environment variables
 POSTGRES_USER = (locally use the same username for which you used in the docker container otherwise username is found in keepass)
