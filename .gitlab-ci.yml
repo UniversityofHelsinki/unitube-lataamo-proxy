@@ -35,6 +35,8 @@ build:
 # Define the process for test stage
 test:
   stage: test
+  services:
+    - redis:latest
   tags:
     - ohtu-build-1
   script:

@@ -278,6 +278,54 @@ exports.getMediaPackageForEvent = async (eventId) => {
     return response.data;
 };
 
+exports.republishWebVttFile = async (eventId) => {
+    const republishMetadataUrl = '/workflow/start';
+    const mediaPackageUrl = '/assets/episode/' + eventId;
+    try{
+        let bodyFormData = new FormData();
+        // get mediapackage for the republish query
+        const response = await security.opencastBase.get(mediaPackageUrl);
+
+        if (response.status !== 200) {
+            return {
+                status: response.status,
+                statusText: response.statusText,
+                eventId: eventId
+            };
+        }
+        // form data for the republish request
+        bodyFormData = new FormData();
+        bodyFormData.append('definition', 'republish-metadata');
+        bodyFormData.append('mediapackage', response.data);
+        bodyFormData.append('properties', constants.PROPERTIES_REPUBLISH_METADATA);
+
+        let headers = {
+            ...bodyFormData.getHeaders(),
+            'Content-Length': bodyFormData.getLengthSync()
+        };
+
+        let hasActiveTransaction = true;
+        let count = 0;
+        await new Promise(resolve => setTimeout(resolve, 30000));
+        while (hasActiveTransaction && count <= 10){
+            const transactionStatusPath = constants.OCAST_EVENT_MEDIA_PATH_PREFIX + eventId + '/hasActiveTransaction';
+            let responseX = await security.opencastBase.get(transactionStatusPath);
+
+            if (responseX.data && responseX.data.active !== true) {
+                hasActiveTransaction = false;
+            }else{
+                // transaction active, try again after minute
+                count = count + 1;
+                await new Promise(resolve => setTimeout(resolve, 60000));
+            }
+        }
+        await security.opencastBase.post(republishMetadataUrl, bodyFormData, {headers});
+    }catch(error){
+        logger.error(`error republishing event ${eventId}`);
+        throw error;
+    }
+};
+
 exports.addWebVttFile = async (vttFile, eventId) => {
     const assetsUrl = constants.OCAST_ADMIN_EVENT + eventId + constants.OCAST_ASSETS_PATH;
     let bodyFormData = new FormData();
