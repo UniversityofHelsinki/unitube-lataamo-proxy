@@ -70,3 +70,14 @@ exports.insertVideoArchivedDateMarkedForDeletion = async (videoId) => {
         throw err;
     }
 };
+
+exports.updateVideoToActiveState = async(video) => {
+    try {
+        let archivedDate = getArchivedDate();
+        const updateVideoToActiveStateSQL =  fs.readFileSync(path.resolve(__dirname, "../sql/updateVideoToActiveState.sql"), "utf8");
+        await database.query(updateVideoToActiveStateSQL, [archivedDate, null, video.video_id]);
+    } catch (err) {
+        logger.error(`Error updating video to active state : ${video.video_id} ${err} ${err.message}`);
+        throw err;
+    }
+};
