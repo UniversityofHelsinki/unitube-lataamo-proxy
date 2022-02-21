@@ -54,7 +54,7 @@ before('Mock db connection and load app', async () => {
 });
 
 beforeEach(async () => {
-    await client.query('CREATE TEMPORARY TABLE videos (video_id VARCHAR(255) NOT NULL, archived_date date, deletion_date date, informed_date date, video_creation_date date, PRIMARY KEY(video_id))');
+    await client.query('CREATE TEMPORARY TABLE videos (video_id VARCHAR(255) NOT NULL, archived_date date, actual_archived_date date, deletion_date date, informed_date date, video_creation_date date, PRIMARY KEY(video_id))');
 });
 
 afterEach('Drop temporary tables', async () => {
