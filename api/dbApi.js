@@ -16,7 +16,7 @@ exports.returnVideoIdsFromDb = async (videos) => {
     }
 };
 
-const getArchivedDate = () => {
+const setArchivedDate = () => {
     let archivedDate = new Date();
     archivedDate.setFullYear(archivedDate.getFullYear() + Constants.DEFAULT_VIDEO_ARCHIVED_YEAR_AMOUNT);
     return archivedDate;
@@ -28,9 +28,19 @@ const getArchivedDateForVideoMarkedForDeletion = () => {
     return archivedDateForVideoMarkedForDeletion;
 };
 
+exports.returnArchivedDateFromDb = async (videoId) => {
+    try{
+        const selectArchivedDateSQL = fs.readFileSync(path.resolve(__dirname, "../sql/selectVideoArchivedDate.sql"), "utf8");
+        return await database.query(selectArchivedDateSQL, [videoId]);
+    }catch (err) {
+        logger.error(`Error returning video deletion date ${err} ${err.message}`);
+        throw err;
+    }
+};
+
 exports.insertArchiveAndVideoCreationDates = async (video) => {
     try {
-        let archivedDate = getArchivedDate();
+        let archivedDate = setArchivedDate();
         const insertArchivedAndCreationDatesSQL =  fs.readFileSync(path.resolve(__dirname, "../sql/insertArchivedAndVideoCreationDates.sql"), "utf8");
         await database.query(insertArchivedAndCreationDatesSQL, [video.id, archivedDate, video.created]);
     } catch (err) {

@@ -156,3 +156,21 @@ exports.moveToTrash = async (req, res) =>{
         });
     }
 };
+
+exports.getEventDeletionDate = async (req, res) => {
+    try {
+        logger.info(`GET video deletion date /event/:id/deletionDate VIDEO ${req.params.id} USER: ${req.user.eppn}`);
+        let deletionDate = await dbService.getArchivedDate(req.params.id);
+        res.json({
+            deletionDate: deletionDate
+        });
+    } catch (error) {
+        const msg = error.message;
+        logger.error(`Error GET /event/:id/deletionDate ${msg} VIDEO ${req.params.id} USER ${req.user.eppn}`);
+        res.status(500);
+        res.json({
+            message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_DELETION_DATE,
+            msg
+        });
+    }
+};

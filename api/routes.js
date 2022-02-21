@@ -543,4 +543,25 @@ module.exports = function (router) {
      *           description: Unexpected error
      */
     router.get('/monitor/:jobId', jobs.getJobStatus);
+
+    /**
+     * @swagger
+     *     /api/event/{id}/deletionDate:
+     *     get:
+     *       tags:
+     *         - retrieve
+     *       summary: Return video's deletion date by ID.
+     *       description: Returns selected video's deletion date.
+     *       parameters:
+     *         - in: path
+     *           name: id
+     *           required: true
+     *           description: ID of the video AKA event.
+     *       responses:
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         default:
+     *           description: Unexpected error
+     */
+    router.get('/event/:id/deletionDate', event.getEventDeletionDate);
 };

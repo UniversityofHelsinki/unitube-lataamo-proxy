@@ -58,3 +58,20 @@ exports.insertOrUpdateVideoArchivedDate = async (videoId, loggedUser) => {
         throw error;
     }
 };
+
+exports.getArchivedDate = async (videoId) => {
+    try{
+        logger.info(`get video ${videoId} deletion date`);
+        let videoDeletionDateFromDb = await dbApi.returnArchivedDateFromDb(videoId);
+        if(videoDeletionDateFromDb && videoDeletionDateFromDb.rowCount > 0) {
+            videoDeletionDateFromDb = videoDeletionDateFromDb.rows[0].archived_date;
+            return videoDeletionDateFromDb;
+        }else {
+            logger.info(`Cannot get deletion date for video id : ${videoId}`);
+            return null;
+        }
+    } catch (error) {
+        logger.error(`error getting deletion date for video ${videoId}`);
+        throw error;
+    }
+};

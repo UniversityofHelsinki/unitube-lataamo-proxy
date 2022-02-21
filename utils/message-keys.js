@@ -2,6 +2,7 @@
 // error message keys
 const ERROR_MESSAGE_FAILED_TO_GET_USER = 'error_failed_to_get_user';
 const ERROR_MESSAGE_FAILED_TO_GET_EVENT_DETAILS = 'error_failed_to_get_event';
+const ERROR_MESSAGE_FAILED_TO_GET_EVENT_DELETION_DATE = 'error_failed_to_get_event_deletion_date';
 const ERROR_MESSAGE_FAILED_TO_GET_EVENT_VIDEO_URL = 'error-failed-to-get-event-video-url';
 const ERROR_MESSAGE_FAILED_TO_GET_SERIES_DETAILS = 'error-failed-to-get-series-details';
 const ERROR_MESSAGE_FAILED_TO_UPDATE_SERIES_DETAILS = 'error-failed-to-update-series-details';
@@ -28,6 +29,7 @@ const ERROR_WEBVTT_FILE_UPLOAD = 'error-webvtt-file-upload';
 module.exports = {
     ERROR_MESSAGE_FAILED_TO_GET_USER,
     ERROR_MESSAGE_FAILED_TO_GET_EVENT_DETAILS,
+    ERROR_MESSAGE_FAILED_TO_GET_EVENT_DELETION_DATE,
     ERROR_MESSAGE_FAILED_TO_GET_EVENT_VIDEO_URL,
     ERROR_MESSAGE_FAILED_TO_GET_SERIES_DETAILS,
     ERROR_MESSAGE_FAILED_TO_UPDATE_SERIES_DETAILS,
