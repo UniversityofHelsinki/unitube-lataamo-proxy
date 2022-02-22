@@ -160,7 +160,7 @@ exports.moveToTrash = async (req, res) =>{
 exports.getEventDeletionDate = async (req, res) => {
     try {
         logger.info(`GET video deletion date /event/:id/deletionDate VIDEO ${req.params.id} USER: ${req.user.eppn}`);
-        let deletionDate = await dbService.getArchivedDate(req.params.id);
+        const deletionDate = await dbService.getArchivedDate(req.params.id);
         res.json({
             deletionDate: deletionDate
         });
@@ -170,6 +170,35 @@ exports.getEventDeletionDate = async (req, res) => {
         res.status(500);
         res.json({
             message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_DELETION_DATE,
+            msg
+        });
+    }
+};
+
+exports.updateEventDeletionDate = async (req,res) => {
+    try {
+        logger.info(`PUT video deletion date /event/:id/deletionDate VIDEO ${req.params.id} USER: ${req.user.eppn}`);
+        const rawEventDeletionDateMetadata = req.body;
+
+        const response = await dbService.updateArchivedDate(req.params.id, rawEventDeletionDateMetadata, req.user);
+
+        if (response.status === 200) {
+            logger.info(`PUT video deletion date /event/:id/deletionDate VIDEO ${req.params.id} USER ${req.user.eppn} OK`);
+        } else if (response.status === 404){
+            logger.warn(`PUT video deletion date /event/:id/deletionDate VIDEO ${req.params.id} USER ${req.user.eppn} ${response.statusText}`);
+        }
+        else {
+            logger.error(`PUT video deletion date /event/:id/deletionDate VIDEO ${req.params.id} USER ${req.user.eppn} ${response.statusText}`);
+        }
+
+        res.status(response.status);
+        res.json({message : response.statusText});
+    } catch (error) {
+        const msg = error.message;
+        logger.error(`Error PUT /event/:id/deletionDate ${msg} VIDEO ${req.params.id} USER ${req.user.eppn}`);
+        res.status(500);
+        res.json({
+            message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPDATE_EVENT_DELETION_DATE,
             msg
         });
     }

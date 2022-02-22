@@ -80,3 +80,14 @@ exports.insertVideoArchivedDateMarkedForDeletion = async (videoId) => {
         throw err;
     }
 };
+
+exports.updateVideoArchivedDate = async (videoId, deletionDate) => {
+    try {
+        let archivedDate = new Date(deletionDate.deletionDate);
+        const updateVideoArchivedDateSQL =  fs.readFileSync(path.resolve(__dirname, "../sql/updateVideoArchivedDate.sql"), "utf8");
+        return await database.query(updateVideoArchivedDateSQL, [archivedDate, videoId]);
+    } catch (err) {
+        logger.error(`Error updating deletion date for videoId : ${videoId} ${err} ${err.message}`);
+        throw err;
+    }
+};

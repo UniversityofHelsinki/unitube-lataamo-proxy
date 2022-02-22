@@ -1,5 +1,6 @@
 const dbApi = require('../api/dbApi');
 const logger = require('../config/winstonLogger');
+const messageKeys = require('../utils/message-keys');
 
 const parseVideosFromOpenCast = (inboxEventsWithAcls) => {
     let inboxIds = [];
@@ -72,6 +73,36 @@ exports.getArchivedDate = async (videoId) => {
         }
     } catch (error) {
         logger.error(`error getting deletion date for video ${videoId}`);
+        throw error;
+    }
+};
+
+exports.updateArchivedDate = async (videoId, deletionDate, loggedUser) => {
+    try {
+        logger.info(`update video ${videoId} deletion date for user : ${loggedUser.eppn}`);
+        let videoFromDb = await dbApi.returnVideoIdFromDb(videoId);
+
+        if (videoFromDb && videoFromDb.rowCount > 0) {
+            const response = await dbApi.updateVideoArchivedDate(videoId, deletionDate);
+            if(response && response.rowCount > 0) {
+                return {
+                    status: 200,
+                    statusText: messageKeys.SUCCESS_MESSAGE_TO_UPDATE_EVENT_DELETION_DATE,
+                };
+            }else{
+                return {
+                    status: 500,
+                    statusText: messageKeys.ERROR_MESSAGE_FAILED_TO_UPDATE_EVENT_DELETION_DATE,
+                };
+            }
+        }else{
+            return {
+                status: 404,
+                statusText: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_FOR_UPDATE_DELETION_DATE,
+            };
+        }
+    } catch (error) {
+        logger.error(`error updating deletion date for video ${videoId}`);
         throw error;
     }
 };

@@ -564,4 +564,34 @@ module.exports = function (router) {
      *           description: Unexpected error
      */
     router.get('/event/:id/deletionDate', event.getEventDeletionDate);
+
+    /**
+     * @swagger
+     *     /api/event/:id/deletionDate:
+     *     put:
+     *       tags:
+     *         - update
+     *       summary: Updates deletionDate information by ID.
+     *       consumes:
+     *         - application/json
+     *       parameters:
+     *         - in: body
+     *           description: The deletionDate to be updated.
+     *           schema:
+     *             type: object
+     *             required:
+     *               - identifier
+     *             properties:
+     *               identifier:
+     *                 type: string
+     *                 description: id of the event
+     *       responses:
+     *         200:
+     *           description: OK
+     *         404:
+     *           description: Video not found. Video id wrong or video id is not found.
+     *         500:
+     *           description: Internal server error, an error occurred.
+     */
+    router.put('/event/:id/deletionDate', event.updateEventDeletionDate);
 };
