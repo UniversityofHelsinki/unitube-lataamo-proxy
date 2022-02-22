@@ -421,6 +421,33 @@ describe('user inbox events returned from /userInboxEvents route', () => {
         expect(rows[1].archived_date).to.not.be.null;
     });
 
+
+    it('should return null actual archived date for video which is returned to active state from videos table', async () => {
+        await client.query('INSERT INTO videos (video_id, archived_date, video_creation_date, actual_archived_date) VALUES (11111, \'2018-01-01\'::date, \'2008-01-01\'::date, \'2017-01-01\'::date)');
+
+        await supertest(app)
+            .get(LATAAMO_USER_INBOX_EVENTS_PATH)
+            .set('eppn', 'SeriesOwnerEppn')
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
+            .expect(200)
+            .expect('Content-Type', /json/);
+
+        await wait(100);
+
+        const { rows } = await client.query('SELECT * FROM videos');
+
+        expect(rows).lengthOf(2);
+
+        expect(rows[0].video_id).to.deep.equal(test.constants.TEST_INBOX_EVENT_2);
+        expect(rows[0].archived_date).to.not.be.null;
+        expect(rows[0].actual_archived_date).to.be.null;
+        expect(rows[1].video_id).to.deep.equal(test.constants.TEST_INBOX_EVENT_1);
+        expect(rows[1].archived_date).to.not.be.null;
+        expect(rows[1].actual_archived_date).to.be.null;
+    });
+
     it('should return no inbox events from inbox series', async () => {
         let response = await supertest(app)
             .get(LATAAMO_USER_INBOX_EVENTS_PATH)
