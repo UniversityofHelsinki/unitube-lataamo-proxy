@@ -22,17 +22,34 @@ const filterOnlyNewVideos = (videoIdsFromOpenCast, videosFromDb) => {
     }
 };
 
+const isVideoReturnedToActiveState = async(videosFromDb) => {
+    if (videosFromDb && videosFromDb.rowCount > 0) {
+        const now = new Date();
+        const activeStateVideos = videosFromDb.rows.filter(x => x.actual_archived_date && x.actual_archived_date < now);
+        return activeStateVideos;
+    } else {
+        return [];
+    }
+};
+
+
 exports.insertArchivedAndCreationDates = async (eventsWithAcls, loggedUser) => {
     try {
         logger.info(`insert video deletion dates for user :  ${loggedUser.eppn}`);
         let videosFromOpenCast = parseVideosFromOpenCast(eventsWithAcls);
         let videosFromDb = await dbApi.returnVideoIdsFromDb(videosFromOpenCast);
         const newVideos = filterOnlyNewVideos(videosFromOpenCast, videosFromDb);
-
         if (newVideos && newVideos.length > 0) {
             for (const video of newVideos) {
                 logger.info(`insert deletion date for video id : ${video.id}`);
                 await dbApi.insertArchiveAndVideoCreationDates(video);
+            }
+        }
+        const activeStateVideos = await isVideoReturnedToActiveState(videosFromDb);
+        if (activeStateVideos && activeStateVideos.length > 0) {
+            for (const video of activeStateVideos) {
+                logger.info(`update state to active for video id : ${video.video_id}`);
+                await dbApi.updateVideoToActiveState(video);
             }
         }
     } catch (error) {
