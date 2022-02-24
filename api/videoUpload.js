@@ -5,12 +5,13 @@ const userService = require('../service/userService');
 const uploadLogger = require('../config/uploadLogger');
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 const { v4: uuidv4 } = require('uuid');
-const logger = require('../config/winstonLogger');
 const messageKeys = require('../utils/message-keys');
 const constants = require('../utils/constants');
 const {seriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
 const jobsService = require('../service/jobsService');
 const HttpStatus = require('http-status');
+const dbApi = require("./dbApi");
+const moment = require('moment');
 
 const ERROR_LEVEL = 'error';
 const INFO_LEVEL = 'info';
@@ -70,7 +71,7 @@ exports.upload = async (req, res) => {
 
     uploadLogger.log(INFO_LEVEL, `POST /userVideos - Upload video started. USER: ${req.user.eppn} -- ${uploadId}`);
 
-    if (!ensureUploadDir(uploadPath)) {
+    if (!await ensureUploadDir(uploadPath)) {
         // upload dir failed log and return error
         uploadLogger.log(ERROR_LEVEL, `Upload dir unavailable '${uploadPath}' USER: ${req.user.eppn} -- ${uploadId}`);
         res.status(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -98,7 +99,17 @@ exports.upload = async (req, res) => {
 
     req.pipe(req.busboy); // Pipe it trough busboy
 
-    req.busboy.on('file', (fieldname, file, filename, encoding, mimeType) => {
+    let archivedDate;
+    let identifier;
+
+    req.busboy.on('field', (fieldname, val)  => {
+        if (fieldname === 'archivedDate') {
+            archivedDate = moment(new Date(val));
+        }
+    });
+
+    req.busboy.on('file', (field, file, filename) => {
+
         const startTime = new Date();
         uploadLogger.log(INFO_LEVEL, `Upload of '${filename}' started  USER: ${req.user.eppn} -- ${uploadId}`);
         // path to the file
@@ -111,7 +122,6 @@ exports.upload = async (req, res) => {
 
         // On finish of the file write to disk
         fstream.on('close', async () => {
-
             const timeDiff = new Date() - startTime;
             uploadLogger.log(INFO_LEVEL,
                 `Loading time with busboy ${timeDiff} milliseconds USER: ${req.user.eppn} -- ${uploadId}`);
@@ -127,14 +137,20 @@ exports.upload = async (req, res) => {
 
             if (response && response.status === HttpStatus.CREATED) {
                 // on success clean file from disk and return 200
-                deleteFile(uploadPath, uploadId);
+                await deleteFile(uploadPath, uploadId);
                 await jobsService.setJobStatus(uploadId, constants.JOB_STATUS_FINISHED);
-                res.status(HttpStatus.OK);
                 uploadLogger.log(INFO_LEVEL,
                     `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)} USER: ${req.user.eppn} -- ${uploadId}`);
+                identifier = response.data.identifier;
+
+                const video = {identifier: identifier, created: new Date(), archivedDate: archivedDate};
+                console.log(video);
+                await dbApi.insertArchiveAndVideoCreationDatesForVideoUpload(video);
+
+                res.status(HttpStatus.OK);
             } else {
                 // on failure clean file from disk and return 500
-                deleteFile(uploadPath, uploadId);
+                await deleteFile(uploadPath, uploadId);
                 await jobsService.setJobStatus(uploadId, constants.JOB_STATUS_ERROR);
                 res.status(HttpStatus.INTERNAL_SERVER_ERROR);
                 const msg = `${filename} failed to upload to opencast.`;

@@ -39,6 +39,16 @@ exports.insertArchiveAndVideoCreationDates = async (video) => {
     }
 };
 
+exports.insertArchiveAndVideoCreationDatesForVideoUpload = async (video) => {
+    try {
+        const insertArchivedAndCreationDatesSQL =  fs.readFileSync(path.resolve(__dirname, "../sql/insertArchivedAndVideoCreationDates.sql"), "utf8");
+        await database.query(insertArchivedAndCreationDatesSQL, [video.identifier, video.archivedDate, video.created]);
+    } catch (err) {
+        logger.error(`Error inserting deletion date for videoId : ${video.identifier} ${err} ${err.message}`);
+        throw err;
+    }
+};
+
 exports.returnVideoIdFromDb = async (id) => {
     try {
         const selectVideos =  fs.readFileSync(path.resolve(__dirname, "../sql/selectVideo.sql"), "utf8");
