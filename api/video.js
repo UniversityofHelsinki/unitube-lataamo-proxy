@@ -84,7 +84,7 @@ exports.updateVideo = async (req, res) => {
             logger.error(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} ${response.statusText}`);
         }
 
-        if (isReturnedFromTrash(req.body)) {
+        if (isReturnedFromTrash(rawEventMetadata)) {
             await dbService.updateVideoToActiveState(req.body.identifier, req.user.eppn);
         }
 
