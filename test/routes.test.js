@@ -946,8 +946,29 @@ describe('Updating videos aka events', () => {
     it('Should update videos archived date field when moved back from trash', async () => {
         await client.query('INSERT INTO videos (video_id, archived_date, video_creation_date) VALUES (234234234, \'2019-01-01\'::date, \'2010-01-01\'::date)');
 
+        test.mockOpencastEventNoActiveTransaction('234234234');
+        test.mockOpencastUpdateEventOK('234234234');
+        test.mockOpencastMediaPackageRequest('234234234');
+        test.mockOpencastRepublishMetadataRequest('234234234');
 
+        await supertest(app)
+            .put(LATAAMO_USER_EVENTS_PATH + '/234234234')
+            .send({title: 'Hieno', description: 'Hienon kuvaus', identifier: '234234234', series: 'trashSeriesOwner'}) // id from req body!
+            .set('eppn', 'SeriesOwnerEppn')
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
+            .expect(200)
+            .expect('Content-Type', /json/);
 
+        const { rows } = await client.query('SELECT * FROM videos');
+        expect(rows).lengthOf(1);
+        expect(rows[0].archived_date).to.not.be.null;
+
+        let archivedDateForVideoReturnedFromTrash = new Date();
+        archivedDateForVideoReturnedFromTrash.setFullYear(archivedDateForVideoReturnedFromTrash.getFullYear() + Constants.DEFAULT_VIDEO_ARCHIVED_YEAR_AMOUNT);
+
+        expect(rows[0].archived_date.toDateString()).to.equal(archivedDateForVideoReturnedFromTrash.toDateString());
     });
 
 });
