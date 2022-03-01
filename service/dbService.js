@@ -75,3 +75,20 @@ exports.insertOrUpdateVideoArchivedDate = async (videoId, loggedUser) => {
         throw error;
     }
 };
+
+exports.updateVideoToActiveState = async (videoId, loggedUser) => {
+    try {
+        logger.info(`update video ${videoId} to active state for user : ${loggedUser.eppn}`);
+        let videoFromDb = await dbApi.returnVideoIdFromDb(videoId);
+
+        if (videoFromDb && videoFromDb.rowCount > 0) {
+            const video = {video_id : videoId};
+            await dbApi.updateVideoToActiveState(video);
+        } else {
+            logger.error(`error updating video ${videoId} to active state for user ${loggedUser.eppn} video not found in db`);
+        }
+    } catch (error) {
+        logger.error(`error updating video ${videoId} to active state for user ${loggedUser.eppn} ${error}`);
+        throw error;
+    }
+};

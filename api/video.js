@@ -14,6 +14,7 @@ const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 const { parseSync, stringifySync } = require('subtitle');
 const dbService = require("../service/dbService");
 
+
 exports.getVideoUrl = async (req, res) => {
     let debugStage = 0;
     try {
@@ -77,6 +78,8 @@ exports.updateVideo = async (req, res) => {
         } else {
             logger.error(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} ${response.statusText}`);
         }
+
+        await dbService.updateVideoToActiveState(req.body.identifier, req.user.eppn);
 
         res.status(response.status);
         res.json({message : response.statusText});
