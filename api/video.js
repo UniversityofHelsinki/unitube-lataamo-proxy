@@ -66,7 +66,12 @@ exports.getUserVideos = async (req, res) => {
 };
 
 const isReturnedFromTrash = (video) => {
-    return video.series.toLowerCase().includes(constants.TRASH);
+    if (video.series) {
+        const seriesTitle = video.series.title ? video.series.title : video.series;
+        return seriesTitle.toLowerCase().includes(constants.TRASH);
+    } else {
+        return false;
+    }
 };
 
 exports.updateVideo = async (req, res) => {
