@@ -869,7 +869,7 @@ describe('Updating videos aka events', () => {
         test.mockOpencastUpdateEventOK('234234234');
         test.mockOpencastFailedMediaPackageRequest('234234234');
 
-        let response = await supertest(app)
+        await supertest(app)
             .put(LATAAMO_USER_EVENTS_PATH + '/234234234')
             .send({title: 'Hieno', description: 'Hienon kuvaus', identifier: '234234234'}) // id from req body!
             .set('eppn', 'SeriesOwnerEppn')
@@ -942,6 +942,14 @@ describe('Updating videos aka events', () => {
 
         expect(rows[0].archived_date.toDateString()).to.equal(archivedDateForVideoMarkedForDeletion.toDateString());
     });
+
+    it('Should update videos archived date field when moved back from trash', async () => {
+        await client.query('INSERT INTO videos (video_id, archived_date, video_creation_date) VALUES (234234234, \'2019-01-01\'::date, \'2010-01-01\'::date)');
+
+
+
+    });
+
 });
 
 afterEach(() => {
