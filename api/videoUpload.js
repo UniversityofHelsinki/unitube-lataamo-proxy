@@ -144,7 +144,6 @@ exports.upload = async (req, res) => {
                 identifier = response.data.identifier;
 
                 const video = {identifier: identifier, created: new Date(), archivedDate: archivedDate};
-                console.log(video);
                 await dbApi.insertArchiveAndVideoCreationDatesForVideoUpload(video);
 
                 res.status(HttpStatus.OK);
