@@ -1,1 +1,1 @@
-SELECT video_id FROM videos WHERE video_id = ANY ($1)
+SELECT video_id, actual_archived_date FROM videos WHERE video_id = ANY ($1)
