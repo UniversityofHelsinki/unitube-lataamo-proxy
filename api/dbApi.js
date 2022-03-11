@@ -28,6 +28,16 @@ const getArchivedDateForVideoMarkedForDeletion = () => {
     return archivedDateForVideoMarkedForDeletion;
 };
 
+exports.returnArchivedDateFromDb = async (videoId) => {
+    try{
+        const selectArchivedDateSQL = fs.readFileSync(path.resolve(__dirname, "../sql/selectVideoArchivedDate.sql"), "utf8");
+        return await database.query(selectArchivedDateSQL, [videoId]);
+    }catch (err) {
+        logger.error(`Error returning video deletion date ${err} ${err.message}`);
+        throw err;
+    }
+};
+
 exports.insertArchiveAndVideoCreationDates = async (video) => {
     try {
         let archivedDate = getArchivedDate();
@@ -88,6 +98,17 @@ exports.updateVideoToActiveState = async(video) => {
         await database.query(updateVideoToActiveStateSQL, [archivedDate, null, video.video_id]);
     } catch (err) {
         logger.error(`Error updating video to active state : ${video.video_id} ${err} ${err.message}`);
+        throw err;
+    }
+};
+
+exports.updateVideoArchivedDate = async (videoId, deletionDate) => {
+    try {
+        let archivedDate = new Date(deletionDate.deletionDate);
+        const updateVideoArchivedDateSQL =  fs.readFileSync(path.resolve(__dirname, "../sql/updateVideoArchivedDate.sql"), "utf8");
+        return await database.query(updateVideoArchivedDateSQL, [archivedDate, videoId]);
+    } catch (err) {
+        logger.error(`Error updating deletion date for videoId : ${videoId} ${err} ${err.message}`);
         throw err;
     }
 };
