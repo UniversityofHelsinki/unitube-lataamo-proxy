@@ -13,6 +13,8 @@ const path = require('path');
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 const { parseSync, stringifySync } = require('subtitle');
 const dbService = require("../service/dbService");
+const constants = require("../utils/constants");
+
 
 exports.getVideoUrl = async (req, res) => {
     let debugStage = 0;
@@ -63,6 +65,15 @@ exports.getUserVideos = async (req, res) => {
     }
 };
 
+const isReturnedFromTrash = (video) => {
+    if (video.series) {
+        const seriesTitle = video.series.title ? video.series.title : video.series;
+        return seriesTitle.toLowerCase().includes(constants.TRASH);
+    } else {
+        return false;
+    }
+};
+
 exports.updateVideo = async (req, res) => {
     try {
         logger.info(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn}`);
@@ -76,6 +87,10 @@ exports.updateVideo = async (req, res) => {
             logger.warn(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} ${response.statusText}`);
         } else {
             logger.error(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} ${response.statusText}`);
+        }
+
+        if (isReturnedFromTrash(rawEventMetadata)) {
+            await dbService.updateVideoToActiveState(req.body.identifier, req.user.eppn);
         }
 
         res.status(response.status);
