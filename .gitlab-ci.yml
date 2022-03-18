@@ -1,4 +1,4 @@
-image: node:12-alpine
+image: node:16-alpine
 
 # Cache node modules - speeds up future builds
 cache:
@@ -37,6 +37,12 @@ test:
   stage: test
   services:
     - redis:latest
+    - postgres:12.2-alpine
+  variables:
+    POSTGRES_DB: ${DATABASE}
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${PASSWORD}
+    POSTGRES_HOST_AUTH_METHOD: trust
   tags:
     - ohtu-build-1
   script:

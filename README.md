@@ -1,13 +1,10 @@
 # unitube-lataamo-proxy
 
-## Available Scripts
-
-### `npm install`
-install required packages
+## Getting started
 
 ### Add .env file to project root with environment variables
-LATAAMO_OPENCAST_HOST (OpenCast development url)\
-LATAAMO_OPENCAST_PRESENTATION_HOST (Opencast development url)\
+LATAAMO_OPENCAST_HOST (OpenCast development url or local container's URL)\
+LATAAMO_OPENCAST_PRESENTATION_HOST (OpenCast development url or local container's URL)\
 LATAAMO_OPENCAST_USER (found in keepass)\
 LATAAMO_OPENCAST_PASS (found in keepass)\
 ENVIRONMENT (local development = local, devel environment = devel, test environment = test, prod environment = prod)\
@@ -25,13 +22,11 @@ DATABASE= (locally use the same database for which you used in the docker contai
 
 ### Install Redis for local development with Docker
 `docker run -d -p 6379:6379 --name video-upload-status-storage redis`
-### If you need to run Redis-Cli commands inside Docker container
+
+#### If you need to run Redis-Cli commands inside Docker container
 `docker exec -it video-upload-status-storage sh`\
 \# `redis-cli`\
 127.0.0.1:6379> `ping` --> should return Pong
-
-### `npm start nodemon`
-to start node server to localhost:3000
 
 ### Use opencast docker to fake opencast (local development)
 1. Clone the repository from GitHub: https://github.com/opencast/opencast-docker \
@@ -41,3 +36,11 @@ Find `image: quay.io/opencast/allinone:X.X` and change it to `image: quay.io/ope
 4. To use archive workflow, add 2 xml-files (archive-delete.xml ja full-retract.xml) to opencast container folder /opencast/etc/workflows \
 More info https://workgroups.helsinki.fi/pages/viewpage.action?pageId=128896753
 
+
+## Important commands
+
+### `npm install`
+install required packages
+
+### `npm start nodemon`
+to start node server to localhost:3000
