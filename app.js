@@ -65,6 +65,7 @@ const server = app.listen(port, host,  () => {
 });
 
 server.headersTimeout = 0;
+server.keepAliveTimeout = 120 * 1000;
 
 // for the tests
 module.exports = app;
