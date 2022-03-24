@@ -63,9 +63,9 @@ routes(router);
 const server = app.listen(port, host,  () => {
     logger.info(`lataamo proxy is listening on port ${port}!`);
 });
-
-server.headersTimeout = 0;
-server.keepAliveTimeout = 0;
+server.setTimeout(1000000);
+// server.headersTimeout = 0;
+// server.keepAliveTimeout = 0;
 
 // for the tests
 module.exports = app;
