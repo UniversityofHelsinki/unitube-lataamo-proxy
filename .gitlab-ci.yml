@@ -107,6 +107,13 @@ deploy_test:
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
     - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --exclude=".env" --exclude="/api/uploads" --exclude="/logs" --exclude="/files/licenses.json"  --delete ./ lataamo@lataamo-test.it.helsinki.fi:/home/lataamo/proxy
     - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-test.it.helsinki.fi "pm2 restart app"
+    - echo "====== Test ssh connection to lataamo-test-22.it.helsinki.fi and make api folder if not exist ======"
+    - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-test-22.it.helsinki.fi "mkdir -p /home/lataamo/proxy"
+    - echo "====== Sync local and remote directory ======"
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+    - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --exclude=".env" --exclude="/api/uploads" --exclude="/logs" --exclude="/files/licenses.json" --delete ./ lataamo@lataamo-test-22.it.helsinki.fi:/home/lataamo/proxy
+    - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-test-22.it.helsinki.fi "pm2 restart app"
+
 
 # Define the process for deploy stage to test environment
 deploy_prod:
