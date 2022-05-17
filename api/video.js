@@ -181,7 +181,7 @@ exports.uploadVideoTextTrack = async(req, res) => {
                 vttFile = srtToVtt(vttFile);
             }
             // https://www.npmjs.com/package/node-webvtt#parsing
-            webvttParser.parse(vttFile.buffer.toString(), { strict: false });
+            webvttParser.parse(vttFile.buffer.toString(), { strict: true });
         } catch (err) {
             logger.error(`vtt file seems to be malformed (${err.message}), please check. -- USER ${req.user.eppn}`);
             res.status(400);
