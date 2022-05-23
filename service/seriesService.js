@@ -96,6 +96,7 @@ const updateAclTemplateWriteEntry = (seriesACLTemplateWriteEntry, aclRole) => {
 
 const isMoodleAclRole = aclRole => aclRole.includes(constants.MOODLE_ACL_INSTRUCTOR) || aclRole.includes(constants.MOODLE_ACL_LEARNER);
 const publicRole = publicRole => publicRole.includes(constants.ROLE_ANONYMOUS) || publicRole.includes(constants.ROLE_KATSOMO) || (publicRole.includes(constants.ROLE_KATSOMO_TUOTANTO) || publicRole.includes(constants.ROLE_KATSOMO_TESTI));
+const isUnlistedAclRole = aclRole => aclRole.includes(constants.ROLE_USER_UNLISTED);
 
 const updateSeriesAclList = (aclList) => {
 
@@ -114,7 +115,7 @@ const updateSeriesAclList = (aclList) => {
             seriesACLTemplateReadEntry = updateAclTemplateReadEntry(seriesACLTemplateReadEntry, aclRole);
             seriesACLTemplateWriteEntry = updateAclTemplateWriteEntry(seriesACLTemplateWriteEntry, aclRole);
             seriesAclTemplate.push(seriesACLTemplateReadEntry);
-            if (!publicRole(aclRole) && !isMoodleAclRole(aclRole)) {
+            if (!publicRole(aclRole) && !isMoodleAclRole(aclRole) && !isUnlistedAclRole(aclRole)) {
                 seriesAclTemplate.push(seriesACLTemplateWriteEntry);
             }
             if (publicRole(aclRole)) {
@@ -174,7 +175,9 @@ exports.addPublicityStatusToSeries = async (seriesList) => {
 
 exports.addPublishedInfoInSeriesAndMoodleRoles = async (series) => {
     let roles = await apiService.getSeriesAcldata(series.identifier);
-    if (commonService.publicRoleCount(roles) >= 1) { //series has either constants.ROLE_ANONYMOUS or constants.ROLE_KATSOMO or constants.ROLE_KATSOMO_TUOTANTO roles
+    if (roles.map(r => r.role).includes(constants.ROLE_USER_UNLISTED)) {
+        series.published = constants.ROLE_USER_UNLISTED;
+    } else if (commonService.publicRoleCount(roles) >= 1) { //series has either constants.ROLE_ANONYMOUS or constants.ROLE_KATSOMO or constants.ROLE_KATSOMO_TUOTANTO roles
         series.published = constants.ROLE_ANONYMOUS;
     } else {
         series.published = '';
@@ -211,7 +214,9 @@ const calculateVisibilityProperty = (series) => {
 const setVisibilityForSeries = (series) => {
     const visibility = [];
 
-    if (commonService.publicRoleCount(series.roles) >= 1) { //video has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
+    if (series.roles.map(role => role.role).includes(constants.ROLE_USER_UNLISTED)) {
+        visibility.push(constants.STATUS_UNLISTED);
+    } else if (commonService.publicRoleCount(series.roles) >= 1) { //video has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
         visibility.push(constants.STATUS_PUBLISHED);
     } else {
         visibility.push(constants.STATUS_PRIVATE);
