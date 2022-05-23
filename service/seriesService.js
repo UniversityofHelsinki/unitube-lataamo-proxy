@@ -1,6 +1,7 @@
 const commonService = require('../service/commonService');
 const constants = require('../utils/constants');
 const apiService = require('../service/apiService');
+const logger = require('../config/winstonLogger');
 
 exports.getUserSeries = (series, user) => filterSeriesByUser(series, user);
 
@@ -174,7 +175,9 @@ exports.addPublicityStatusToSeries = async (seriesList) => {
 
 exports.addPublishedInfoInSeriesAndMoodleRoles = async (series) => {
     let roles = await apiService.getSeriesAcldata(series.identifier);
-    if (commonService.publicRoleCount(roles) >= 1) { //series has either constants.ROLE_ANONYMOUS or constants.ROLE_KATSOMO or constants.ROLE_KATSOMO_TUOTANTO roles
+    if (roles.map(r => r.role).includes(constants.ROLE_USER_UNLISTED)) {
+        series.published = constants.ROLE_USER_UNLISTED;
+    } else if (commonService.publicRoleCount(roles) >= 1) { //series has either constants.ROLE_ANONYMOUS or constants.ROLE_KATSOMO or constants.ROLE_KATSOMO_TUOTANTO roles
         series.published = constants.ROLE_ANONYMOUS;
     } else {
         series.published = '';
@@ -211,7 +214,9 @@ const calculateVisibilityProperty = (series) => {
 const setVisibilityForSeries = (series) => {
     const visibility = [];
 
-    if (commonService.publicRoleCount(series.roles) >= 1) { //video has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
+    if (series.roles.map(role => role.role).includes(constants.ROLE_USER_UNLISTED)) {
+        visibility.push(constants.STATUS_UNLISTED);
+    } else if (commonService.publicRoleCount(series.roles) >= 1) { //video has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
         visibility.push(constants.STATUS_PUBLISHED);
     } else {
         visibility.push(constants.STATUS_PRIVATE);

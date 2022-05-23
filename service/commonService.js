@@ -1,4 +1,5 @@
 const constants = require('../utils/constants');
+const logger = require('../config/winstonLogger');
 
 /**
  * Calculates count of public roles, ROLE_ANONYMOUS and ROLE_KATSOMO
@@ -30,7 +31,6 @@ exports.publicRoleCount = (roles) => {
  * @param roleToCompare
  */
 exports.addRoleWhenTestEnvironment = (roleList, roleToCompare) => {
-
     if (roleList && process.env.ENVIRONMENT !== 'prod') {
         let found = false;
         let alreadyInRoleList = false;
