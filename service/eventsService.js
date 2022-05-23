@@ -130,6 +130,8 @@ const calculateVisibilityPropertyForVideoList = (video, loggedUser) => {
         let moodleAclInstructor;
         let moodleAclLearner;
 
+        logger.info(`calculateVisibilityPropertyForVideoList: ${JSON.stringify(video.acl)}`);
+
         if (video.acl.map(acl => acl.role).includes(constants.ROLE_USER_UNLISTED)) {
             visibility.push(constants.STATUS_UNLISTED);
         } else if (commonService.publicRoleCount(video.acl) >= 1) { //video has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
@@ -163,9 +165,11 @@ const calculateVisibilityPropertyForVideo = (video, loggedUser) => {
         let moodleAclInstructor;
         let moodleAclLearner;
 
+        logger.info(`calculateVisibilityPropertyForVideo: ${JSON.stringify(video.acls)}`);
+
         if (video.acls.map(r => r.role).includes(constants.ROLE_USER_UNLISTED)) {
             visibility.push(constants.STATUS_UNLISTED);
-        } if (commonService.publicRoleCount(video.acls) >= 1) { //video has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
+        } else if (commonService.publicRoleCount(video.acls) >= 1) { //video has both (constants.ROLE_ANONYMOUS, constants.ROLE_KATSOMO) roles
             visibility.push(constants.STATUS_PUBLISHED);
         } else {
             visibility.push(constants.STATUS_PRIVATE);
@@ -182,6 +186,8 @@ const calculateVisibilityPropertyForVideo = (video, loggedUser) => {
         if (moodleAclInstructor && moodleAclLearner && moodleAclInstructor.length > 0 && moodleAclLearner.length > 0) {
             visibility.push(constants.STATUS_MOODLE);
         }
+
+        logger.info(`calculateVisibilityPropertyForVideo: ${JSON.stringify([...new Set(visibility)])}`);
         return [...new Set(visibility)];
     } catch (error) {
         logger.error(`error calculating visibility property for video ${error} ${error.message} ${video.identifier} FOR USER ${loggedUser.eppn}`);
