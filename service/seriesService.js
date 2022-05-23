@@ -1,7 +1,6 @@
 const commonService = require('../service/commonService');
 const constants = require('../utils/constants');
 const apiService = require('../service/apiService');
-const logger = require('../config/winstonLogger');
 
 exports.getUserSeries = (series, user) => filterSeriesByUser(series, user);
 
@@ -97,6 +96,7 @@ const updateAclTemplateWriteEntry = (seriesACLTemplateWriteEntry, aclRole) => {
 
 const isMoodleAclRole = aclRole => aclRole.includes(constants.MOODLE_ACL_INSTRUCTOR) || aclRole.includes(constants.MOODLE_ACL_LEARNER);
 const publicRole = publicRole => publicRole.includes(constants.ROLE_ANONYMOUS) || publicRole.includes(constants.ROLE_KATSOMO) || (publicRole.includes(constants.ROLE_KATSOMO_TUOTANTO) || publicRole.includes(constants.ROLE_KATSOMO_TESTI));
+const isUnlistedAclRole = aclRole => aclRole.includes(constants.ROLE_USER_UNLISTED);
 
 const updateSeriesAclList = (aclList) => {
 
@@ -115,7 +115,7 @@ const updateSeriesAclList = (aclList) => {
             seriesACLTemplateReadEntry = updateAclTemplateReadEntry(seriesACLTemplateReadEntry, aclRole);
             seriesACLTemplateWriteEntry = updateAclTemplateWriteEntry(seriesACLTemplateWriteEntry, aclRole);
             seriesAclTemplate.push(seriesACLTemplateReadEntry);
-            if (!publicRole(aclRole) && !isMoodleAclRole(aclRole)) {
+            if (!publicRole(aclRole) && !isMoodleAclRole(aclRole) && !isUnlistedAclRole(aclRole)) {
                 seriesAclTemplate.push(seriesACLTemplateWriteEntry);
             }
             if (publicRole(aclRole)) {
