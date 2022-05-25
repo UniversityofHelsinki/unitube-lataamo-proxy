@@ -151,3 +151,14 @@ exports.createSeries = async (req, res) => {
         });
     }
 };
+
+exports.deleteSeries = async (req, res) => {
+    try {
+        const response = await apiService.deleteSeries(req.params.id);
+        res.status(response.status);
+        res.json({});
+        return res;
+    } catch (error) {
+        res.status(500);
+    }
+};
