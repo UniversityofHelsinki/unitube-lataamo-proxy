@@ -754,9 +754,6 @@ exports.createLataamoSeries = async (seriesName, userId) => {
 };
 
 exports.deleteSeries = async (id) => {
-    if (!id) {
-        logger.warning(`deleteSeries series id is ${id}`);
-    }
     const url = `${constants.OCAST_SERIES_PATH}${id}`;
     try {
         const response = await security.opencastBase.delete(url);

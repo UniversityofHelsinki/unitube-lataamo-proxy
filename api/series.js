@@ -159,6 +159,11 @@ exports.deleteSeries = async (req, res) => {
         res.json({});
         return res;
     } catch (error) {
+        const msg = error.message;
         res.status(500);
+        res.json({
+            message: messageKeys.ERROR_MESSAGE_FAILED_TO_DELETE_SERIES,
+            msg
+        });
     }
 };

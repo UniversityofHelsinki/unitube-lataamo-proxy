@@ -15,6 +15,7 @@ const ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO = 'error-failed-to-upload-video';
 const ERROR_MESSAGE_FAILED_TO_UPDATE_EVENT_DETAILS = 'error-failed-to-update-event-details';
 const ERROR_MESSAGE_FAILED_TO_MOVE_EVENT_TO_TRASH ='error-failed-to-move-event-to-trash';
 const ERROR_MESSAGE_FAILED_TO_SAVE_SERIES = 'error-failed-to-save-series';
+const ERROR_MESSAGE_FAILED_TO_DELETE_SERIES = 'error-failed-to-delete-series';
 const ERROR_MESSAGE_FAILED_TO_GET_IAM_GROUPS = 'error-failed-to-get-iam-groups';
 const ERROR_MESSAGE_FAILED_TO_GET_PERSONS = 'error-failed-to-get-iam-persons';
 const ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED = 'error_failed_to_save_series_inbox_not_allowed';
@@ -45,6 +46,7 @@ module.exports = {
     ERROR_MESSAGE_FAILED_TO_UPDATE_EVENT_DETAILS,
     ERROR_MESSAGE_FAILED_TO_MOVE_EVENT_TO_TRASH,
     ERROR_MESSAGE_FAILED_TO_SAVE_SERIES,
+    ERROR_MESSAGE_FAILED_TO_DELETE_SERIES,
     ERROR_MESSAGE_FAILED_TO_GET_IAM_GROUPS,
     ERROR_MESSAGE_FAILED_TO_GET_PERSONS,
     SUCCESS_MESSAGE_VIDEO_UPLOAD,
