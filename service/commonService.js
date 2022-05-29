@@ -30,7 +30,6 @@ exports.publicRoleCount = (roles) => {
  * @param roleToCompare
  */
 exports.addRoleWhenTestEnvironment = (roleList, roleToCompare) => {
-
     if (roleList && process.env.ENVIRONMENT !== 'prod') {
         let found = false;
         let alreadyInRoleList = false;
