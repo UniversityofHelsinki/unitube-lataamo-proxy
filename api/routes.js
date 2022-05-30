@@ -168,24 +168,10 @@ module.exports = function (router) {
      *       consumes:
      *         - application/json
      *       parameters:
-     *         - in: body
-     *           description: The series to be updated.
-     *           schema:
-     *             type: object
-     *             required:
-     *               - identifier
-     *               - title
-     *               - isPartOf
-     *             properties:
-     *               identifier:
-     *                 type: string
-     *                 description: id of the series
-     *               title:
-     *                 type: string
-     *                 description: title of the series AKA the name
-     *               description:
-     *                 type: string
-     *                 description: description for the series
+     *         - in: path
+     *           name: id 
+     *           required: true
+     *           description: ID of the serie to delete
      *       responses:
      *         200:
      *           description: OK
