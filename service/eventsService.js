@@ -2,6 +2,7 @@ const equal = require('deep-equal');
 const commonService = require('./commonService');
 const seriesService = require('./seriesService');
 const apiService = require('./apiService');
+const publicationService = require('./publicationService');
 const moment = require('moment');
 const momentDurationFormatSetup = require('moment-duration-format');
 momentDurationFormatSetup(moment);
@@ -12,6 +13,17 @@ const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 const JsonFind = require('json-find');
 const messageKeys = require('../utils/message-keys');
 
+const _mapPublications = (videoList, publications) => {
+    const media = publications.map(p => p.media).flatMap(m => m);
+    const result = {};
+    videoList.forEach(url => {
+        if (media.map(m => m.url).indexOf(url) >= 0) {
+            result[url] = media[media.map(m => m.url).indexOf(url)];
+        }
+    });
+    return result;
+};
+
 
 exports.filterEventsForClientList = (ocResponseData, loggedUser) => {
 
@@ -21,6 +33,8 @@ exports.filterEventsForClientList = (ocResponseData, loggedUser) => {
         }
 
         const eventArray = [];
+
+
         ocResponseData.forEach(event => {
             eventArray.push({
                 'identifier': event.identifier,
@@ -33,7 +47,8 @@ exports.filterEventsForClientList = (ocResponseData, loggedUser) => {
                 'visibility': calculateVisibilityPropertyForVideoList(event, loggedUser),
                 'created': event.created,
                 'series': event.series,
-                'media': calculateMediaPropertyForVideoList(event, loggedUser)
+                'media': calculateMediaPropertyForVideoList(event, loggedUser),
+                'publications': _mapPublications(calculateMediaPropertyForVideoList(event, loggedUser), publicationService.filterApiChannelPublication(event.publications))
             });
         });
 
@@ -65,7 +80,8 @@ exports.filterEventsForClientTrash = (ocResponseData, loggedUser) => {
                 'visibility' : calculateVisibilityPropertyForVideoList(event, loggedUser),
                 'created': event.created,
                 'series': event.series,
-                'media' : calculateMediaPropertyForVideoList(event, loggedUser)
+                'media' : calculateMediaPropertyForVideoList(event, loggedUser),
+                'publications': _mapPublications(calculateMediaPropertyForVideoList(event, loggedUser), publicationService.filterApiChannelPublication(event.publications))
             });
         }
     });

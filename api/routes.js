@@ -160,6 +160,30 @@ module.exports = function (router) {
 
     /**
      * @swagger
+     *     /api/series/{id}:
+     *     delete:
+     *       tags:
+     *         - delete
+     *       summary: Deletes empty series by ID.
+     *       consumes:
+     *         - application/json
+     *       parameters:
+     *         - in: path
+     *           name: id 
+     *           required: true
+     *           description: ID of the serie to delete
+     *       responses:
+     *         200:
+     *           description: OK
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         500:
+     *           description: Internal server error, an error occurred.
+     */
+    router.delete('/series/:id', series.deleteSeries);
+
+    /**
+     * @swagger
      *     /api/userInboxEvents:
      *     get:
      *       tags:
