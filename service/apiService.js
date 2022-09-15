@@ -752,3 +752,17 @@ exports.createLataamoSeries = async (seriesName, userId) => {
     }
 
 };
+
+exports.deleteSeries = async (id) => {
+    const url = `${constants.OCAST_SERIES_PATH}${id}`;
+    try {
+        const response = await security.opencastBase.delete(url);
+        return response;
+    } catch (error) {
+        logger.error(`error while deleting series id: ${id} url: ${url}, error: ${error}`);
+        return {
+            status: 500,
+            message: error.message
+        };
+    }
+};

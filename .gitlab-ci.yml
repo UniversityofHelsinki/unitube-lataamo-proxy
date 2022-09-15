@@ -137,7 +137,7 @@ deploy_test:
     - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --exclude=".env" --exclude="/api/uploads" --exclude="/logs" --exclude="/files/licenses.json"  --delete ./ lataamo@lataamo-test.it.helsinki.fi:/home/lataamo/proxy
     - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-test.it.helsinki.fi "pm2 restart app"
 
-# Define the process for deploy stage to test environment
+# Define the process for deploy stage to production environment
 deploy_prod:
   stage: deploy
   tags:
@@ -160,11 +160,11 @@ deploy_prod:
     - echo $SSH_PRIVATE_KEY  >> ~/.ssh/id_rsa
     - chmod 700 ~/.ssh && chmod 600 ~/.ssh/*
     - echo "====== Test ssh connection and make api folder if not exist ======"
-    - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-prod.it.helsinki.fi "mkdir -p /home/lataamo/proxy"
+    - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo.helsinki.fi "mkdir -p /home/lataamo/proxy"
     - echo "====== Sync local and remote directory ======"
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
-    - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --exclude=".env" --exclude="/api/uploads" --exclude="/logs" --exclude="/files/licenses.json"  --delete ./ lataamo@lataamo-prod.it.helsinki.fi:/home/lataamo/proxy
-    - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-prod.it.helsinki.fi "NODE_ENV=production pm2 restart app"
+    - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --exclude=".env" --exclude="/api/uploads" --exclude="/logs" --exclude="/files/licenses.json"  --delete ./ lataamo@lataamo.helsinki.fi:/home/lataamo/proxy
+    - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo.helsinki.fi "NODE_ENV=production pm2 restart app"
 
 # Rules for the scheduled npm audit and outdated scans
 dependency scanning:
