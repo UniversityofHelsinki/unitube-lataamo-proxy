@@ -51,9 +51,9 @@ exports.getUserVideos = async (req, res) => {
         const seriesIdentifiers = seriesService.getSeriesIdentifiers(ownSeriesWithoutTrash, loggedUser);
         const allEventsWithMetaData = await eventsService.getAllEventsBySeriesIdentifiers(seriesIdentifiers);
         const concatenatedEventsArray = eventsService.concatenateArray(allEventsWithMetaData);
-        res.json(eventsService.filterEventsForClientList(concatenatedEventsArray, loggedUser));
         // insert removal date to postgres db
         await dbService.insertArchivedAndCreationDates(concatenatedEventsArray, loggedUser);
+        res.json(eventsService.filterEventsForClientList(concatenatedEventsArray, loggedUser));
     } catch (error) {
         res.status(500);
         const msg = error.message;
