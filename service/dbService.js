@@ -42,7 +42,6 @@ exports.insertArchivedAndCreationDates = async (eventsWithAcls, loggedUser) => {
         const newVideos = filterOnlyNewVideos(videosFromOpenCast, videosFromDb);
         if (newVideos && newVideos.length > 0) {
             for (const video of newVideos) {
-                console.log(JSON.parse(video));
                 logger.info(`insert deletion date with id : ${video.id}`);
                 await dbApi.insertArchiveAndVideoCreationDates(video);
             }
