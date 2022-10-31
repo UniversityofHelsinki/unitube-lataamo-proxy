@@ -205,12 +205,15 @@ const calculateVisibilityPropertyForVideo = (video, loggedUser) => {
     }
 };
 
+const filterUniqueSeriesIdentifiers = (seriesIdentifiers) => [... new Set(seriesIdentifiers)];
+
 exports.getAllEvents = async (seriesIdentifiers) => {
     return await Promise.all(seriesIdentifiers.map(identifier => apiService.getEventsByIdentifier(identifier)));
 };
 
 exports.getAllEventsBySeriesIdentifiers = async (seriesIdentifiers) => {
-    return await Promise.all(seriesIdentifiers.map(identifier => apiService.getEventsBySeriesIdentifier(identifier)));
+    const filteredUniqueSeriesIdentifiers = filterUniqueSeriesIdentifiers(seriesIdentifiers);
+    return await Promise.all(filteredUniqueSeriesIdentifiers.map(identifier => apiService.getEventsBySeriesIdentifier(identifier)));
 };
 
 exports.getAllEventsBySeriesIdentifier = async (seriesIdentifier) => {
