@@ -12,6 +12,10 @@ const logger = require('../config/winstonLogger');
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 const JsonFind = require('json-find');
 const messageKeys = require('../utils/message-keys');
+const pLimit = require('p-limit');
+// Limit number of request fetched concurrently
+const limit = pLimit(5);
+const timer = require('./timer');
 
 const _mapPublications = (videoList, publications) => {
     const media = publications.map(p => p.media).flatMap(m => m);
@@ -212,8 +216,21 @@ exports.getAllEvents = async (seriesIdentifiers) => {
 };
 
 exports.getAllEventsBySeriesIdentifiers = async (seriesIdentifiers) => {
-    const filteredUniqueSeriesIdentifiers = filterUniqueSeriesIdentifiers(seriesIdentifiers);
-    return await Promise.all(filteredUniqueSeriesIdentifiers.map(identifier => apiService.getEventsBySeriesIdentifier(identifier)));
+    try {
+        const filteredUniqueSeriesIdentifiers = filterUniqueSeriesIdentifiers(seriesIdentifiers);
+
+        const promises = filteredUniqueSeriesIdentifiers.map(identifier => limit(() => {
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    resolve(apiService.getEventsBySeriesIdentifier(identifier));
+                }, 1000);
+            });
+        }));
+
+        return Promise.all(promises);
+    } catch (err) {
+        throw new Error('An error occurred' + err);
+    }
 };
 
 exports.getAllEventsBySeriesIdentifier = async (seriesIdentifier) => {
