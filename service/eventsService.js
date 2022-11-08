@@ -15,7 +15,6 @@ const messageKeys = require('../utils/message-keys');
 const pLimit = require('p-limit');
 // Limit number of request fetched concurrently
 const limit = pLimit(5);
-const timer = require('./timer');
 
 const _mapPublications = (videoList, publications) => {
     const media = publications.map(p => p.media).flatMap(m => m);
