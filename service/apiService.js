@@ -12,7 +12,6 @@ const { parseContributor } = require('./userService');
 const { filterCorrectSeriesWithCorrectContributors, transformResponseData, isContributorMigrationActive } =
     require('../utils/ocastMigrationUtils');
 
-
 //
 // This file is the façade for opencast server
 //
@@ -38,6 +37,7 @@ exports.getEventsByIdentifier = async (identifier) => {
 exports.getEventsBySeriesIdentifier = async (identifier) => {
     let userEventsUrl = constants.OCAST_VIDEOS_PATH + constants.OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER;
     userEventsUrl = userEventsUrl + identifier + constants.OCAST_VIDEOS_WITH_METADATA_ACLS_AND_PUBLICATIONS;
+    console.log(userEventsUrl, new Date());
     const response = await security.opencastBase.get(userEventsUrl);
     return response.data;
 };
