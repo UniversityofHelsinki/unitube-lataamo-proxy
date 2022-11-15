@@ -12,6 +12,9 @@ const logger = require('../config/winstonLogger');
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 const JsonFind = require('json-find');
 const messageKeys = require('../utils/message-keys');
+const pLimit = require('p-limit');
+// Limit number of request fetched concurrently
+const limit = pLimit(5);
 
 const _mapPublications = (videoList, publications) => {
     const media = publications.map(p => p.media).flatMap(m => m);
@@ -205,12 +208,28 @@ const calculateVisibilityPropertyForVideo = (video, loggedUser) => {
     }
 };
 
+const filterUniqueSeriesIdentifiers = (seriesIdentifiers) => [... new Set(seriesIdentifiers)];
+
 exports.getAllEvents = async (seriesIdentifiers) => {
     return await Promise.all(seriesIdentifiers.map(identifier => apiService.getEventsByIdentifier(identifier)));
 };
 
 exports.getAllEventsBySeriesIdentifiers = async (seriesIdentifiers) => {
-    return await Promise.all(seriesIdentifiers.map(identifier => apiService.getEventsBySeriesIdentifier(identifier)));
+    try {
+        const filteredUniqueSeriesIdentifiers = filterUniqueSeriesIdentifiers(seriesIdentifiers);
+
+        const promises = filteredUniqueSeriesIdentifiers.map(identifier => limit(() => {
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    resolve(apiService.getEventsBySeriesIdentifier(identifier));
+                }, 1000);
+            });
+        }));
+
+        return Promise.all(promises);
+    } catch (err) {
+        throw new Error('An error occurred' + err);
+    }
 };
 
 exports.getAllEventsBySeriesIdentifier = async (seriesIdentifier) => {
