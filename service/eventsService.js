@@ -222,7 +222,7 @@ exports.getAllEventsBySeriesIdentifiers = async (seriesIdentifiers) => {
             return new Promise(resolve => {
                 setTimeout(() => {
                     resolve(apiService.getEventsBySeriesIdentifier(identifier));
-                }, 1000);
+                }, 500);
             });
         }));
 
