@@ -3,6 +3,7 @@ const logger = require("../config/winstonLogger");
 const fs = require("fs");
 const path = require("path");
 const Constants = require("../utils/constants");
+const {options} = require('pg/lib/defaults');
 
 
 exports.returnVideoIdsFromDb = async (videos) => {
@@ -109,6 +110,16 @@ exports.updateVideoArchivedDate = async (videoId, deletionDate) => {
         return await database.query(updateVideoArchivedDateSQL, [archivedDate, videoId]);
     } catch (err) {
         logger.error(`Error updating deletion date for videoId : ${videoId} ${err} ${err.message}`);
+        throw err;
+    }
+};
+
+exports.updateEmailSendStatus = async (videoId, emailSendStatus) => {
+    try {
+        const updateEmailSendStatusSQL = fs.readFileSync(path.resolve(__dirname, "../sql/updateEmailSendStatus.sql"), "utf8");
+        return await database.query(updateEmailSendStatusSQL, [emailSendStatus, videoId]);
+    } catch (err) {
+        logger.error(`Error updating skip email for videoId : ${videoId} ${err} ${err.message}`);
         throw err;
     }
 };
