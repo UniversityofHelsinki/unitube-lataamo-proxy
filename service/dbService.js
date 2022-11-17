@@ -140,3 +140,20 @@ exports.updateArchivedDate = async (videoId, deletionDate, loggedUser) => {
         throw error;
     }
 };
+
+exports.updateEmailSendStatus = async (videoId, loggedUser, emailSendStatus) => {
+    try {
+        logger.info(`update email send status ${emailSendStatus} for video ${videoId} for user : ${loggedUser.eppn}`);
+        let videoFromDb = await dbApi.returnVideoIdFromDb(videoId);
+
+        if (videoFromDb && videoFromDb.rowCount > 0) {
+            const video = {video_id : videoId};
+            await dbApi.updateEmailSendStatus(video, emailSendStatus);
+        } else {
+            logger.error(`error updating email send status for ${videoId} for user ${loggedUser.eppn} video not found in db`);
+        }
+    } catch (error) {
+        logger.error(`error updating email send status ${emailSendStatus} for video ${videoId} for user ${loggedUser.eppn} ${error}`);
+        throw error;
+    }
+};
