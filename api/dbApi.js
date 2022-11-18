@@ -114,12 +114,12 @@ exports.updateVideoArchivedDate = async (videoId, deletionDate) => {
     }
 };
 
-exports.updateEmailSendStatus = async (videoId, emailSendStatus) => {
+exports.updateSkipEmailStatus = async (video, skipEmailStatus) => {
     try {
-        const updateEmailSendStatusSQL = fs.readFileSync(path.resolve(__dirname, "../sql/updateEmailSendStatus.sql"), "utf8");
-        return await database.query(updateEmailSendStatusSQL, [emailSendStatus, videoId]);
+        const updateSkipEmailStatusSQL =  fs.readFileSync(path.resolve(__dirname, "../sql/updateSkipEmailStatus.sql"), "utf8");
+        return await database.query(updateSkipEmailStatusSQL, [skipEmailStatus, video.video_id]);
     } catch (err) {
-        logger.error(`Error updating skip email for videoId : ${videoId} ${err} ${err.message}`);
+        logger.error(`Error updating skip email status ${skipEmailStatus} for videoId : ${video.video_id} ${err} ${err.message}`);
         throw err;
     }
 };

@@ -54,7 +54,7 @@ before('Mock db connection and load app', async () => {
 });
 
 beforeEach(async () => {
-    await client.query('CREATE TEMPORARY TABLE videos (video_id VARCHAR(255) NOT NULL, archived_date date, actual_archived_date date, deletion_date date, informed_date date, video_creation_date date, PRIMARY KEY(video_id))');
+    await client.query('CREATE TEMPORARY TABLE videos (video_id VARCHAR(255) NOT NULL, archived_date date, actual_archived_date date, deletion_date date, informed_date date, video_creation_date date, skip_email boolean default false, PRIMARY KEY(video_id))');
 });
 
 afterEach('Drop temporary tables', async () => {
@@ -914,7 +914,7 @@ describe('Updating videos aka events', () => {
             .expect('Content-Type', /json/);
     });
 
-    it('Should move event to trash series when deleted', async () => {
+    it('Should move event to trash series when deleted and update skip email status to true', async () => {
         await client.query('INSERT INTO videos (video_id, archived_date, video_creation_date) VALUES (234234234, \'2019-01-01\'::date, \'2010-01-01\'::date)');
 
         test.mockOpencastEventNoActiveTransaction('234234234');
@@ -941,6 +941,7 @@ describe('Updating videos aka events', () => {
         archivedDateForVideoMarkedForDeletion.setMonth(archivedDateForVideoMarkedForDeletion.getMonth() + Constants.DEFAULT_VIDEO_MARKED_FOR_DELETION_MONTHS_AMOUNT);
 
         expect(rows[0].archived_date.toDateString()).to.equal(archivedDateForVideoMarkedForDeletion.toDateString());
+        expect(rows[0].skip_email).to.equal(true);
     });
 
     it('Should update videos archived date field when moved back from trash', async () => {
