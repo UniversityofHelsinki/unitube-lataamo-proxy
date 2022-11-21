@@ -78,7 +78,7 @@ const isReturnedFromTrash = (video) => {
 exports.updateVideo = async (req, res) => {
     try {
         logger.info(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn}`);
-
+        const loggedUser = userService.getLoggedUser(req.user);
         const rawEventMetadata = req.body;
         const response = await apiService.updateEventMetadata(rawEventMetadata, req.body.identifier, false, req.user);
 
@@ -92,6 +92,8 @@ exports.updateVideo = async (req, res) => {
 
         if (isReturnedFromTrash(rawEventMetadata)) {
             await dbService.updateVideoToActiveState(req.body.identifier, req.user.eppn);
+            await dbService.updateSkipEmailStatus(req.body.identifier, loggedUser, false);
+            await dbService.clearNotificationSentAt(req.body.identifier, loggedUser);
         }
 
         res.status(response.status);
