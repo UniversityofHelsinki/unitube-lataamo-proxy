@@ -54,7 +54,7 @@ before('Mock db connection and load app', async () => {
 });
 
 beforeEach(async () => {
-    await client.query('CREATE TEMPORARY TABLE videos (video_id VARCHAR(255) NOT NULL, archived_date date, actual_archived_date date, deletion_date date, informed_date date, video_creation_date date, skip_email boolean default false, PRIMARY KEY(video_id))');
+    await client.query('CREATE TEMPORARY TABLE videos (video_id VARCHAR(255) NOT NULL, archived_date date, actual_archived_date date, deletion_date date, informed_date date, video_creation_date date, first_notification_sent_at timestamp, second_notification_sent_at timestamp, third_notification_sent_at timestamp, skip_email boolean default false, PRIMARY KEY(video_id))');
 });
 
 afterEach('Drop temporary tables', async () => {
@@ -944,8 +944,9 @@ describe('Updating videos aka events', () => {
         expect(rows[0].skip_email).to.equal(true);
     });
 
-    it('Should update videos archived date field when moved back from trash', async () => {
-        await client.query('INSERT INTO videos (video_id, archived_date, video_creation_date) VALUES (234234234, \'2019-01-01\'::date, \'2010-01-01\'::date)');
+    it('Should update videos archived date and skip email fields and clear notification sent at fields when moved back from trash', async () => {
+        await client.query('INSERT INTO videos (video_id, archived_date, video_creation_date, first_notification_sent_at, second_notification_sent_at, third_notification_sent_at, skip_email) ' +
+            'VALUES (234234234, \'2019-01-01\'::date, \'2010-01-01\'::date, \'2020-01-01\'::date, \'2020-01-01\'::date, \'2020-01-01\'::date, true)');
 
         test.mockOpencastEventNoActiveTransaction('234234234');
         test.mockOpencastUpdateEventOK('234234234');
@@ -970,6 +971,10 @@ describe('Updating videos aka events', () => {
         archivedDateForVideoReturnedFromTrash.setFullYear(archivedDateForVideoReturnedFromTrash.getFullYear() + Constants.DEFAULT_VIDEO_ARCHIVED_YEAR_AMOUNT);
 
         expect(rows[0].archived_date.toDateString()).to.equal(archivedDateForVideoReturnedFromTrash.toDateString());
+        expect(rows[0].skip_email).to.equal(false);
+        expect(rows[0].first_notification_sent_at).to.be.null;
+        expect(rows[0].second_notification_sent_at).to.be.null;
+        expect(rows[0].third_notification_sent_at).to.be.null;
     });
 
     it('Should not update videos archived date field when videos metadata is updated', async () => {
