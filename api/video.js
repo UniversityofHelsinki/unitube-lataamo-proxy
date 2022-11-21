@@ -93,6 +93,7 @@ exports.updateVideo = async (req, res) => {
         if (isReturnedFromTrash(rawEventMetadata)) {
             await dbService.updateVideoToActiveState(req.body.identifier, req.user.eppn);
             await dbService.updateSkipEmailStatus(req.body.identifier, loggedUser, false);
+            await dbService.clearNotificationSentAt(req.body.identifier, loggedUser);
         }
 
         res.status(response.status);

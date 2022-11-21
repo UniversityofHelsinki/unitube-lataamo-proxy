@@ -157,3 +157,20 @@ exports.updateSkipEmailStatus = async (videoId, loggedUser, skipEmailStatus) => 
         throw error;
     }
 };
+
+exports.clearNotificationSentAt = async (videoId, loggedUser) => {
+    try {
+        logger.info(`clear notification sent status for video ${videoId} for user : ${loggedUser.eppn}`);
+        let videoFromDb = await dbApi.returnVideoIdFromDb(videoId);
+
+        if (videoFromDb && videoFromDb.rowCount > 0) {
+            const video = {video_id : videoId};
+            await dbApi.clearNotificationSentAt(video);
+        } else {
+            logger.error(`error clearing notification sent status for ${videoId} for user ${loggedUser.eppn} video not found in db`);
+        }
+    } catch (error) {
+        logger.error(`error clearing notification sent status for video ${videoId} for user ${loggedUser.eppn} ${error}`);
+        throw error;
+    }
+};

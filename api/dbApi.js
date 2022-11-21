@@ -123,3 +123,13 @@ exports.updateSkipEmailStatus = async (video, skipEmailStatus) => {
         throw err;
     }
 };
+
+exports.clearNotificationSentAt = async (video) => {
+    try {
+        const updateNotificationSentSQL =  fs.readFileSync(path.resolve(__dirname, "../sql/updateNotificationSent.sql"), "utf8");
+        return await database.query(updateNotificationSentSQL, [null, null, null, video.video_id]);
+    } catch (err) {
+        logger.error(`Error clearing notification sent status for videoId : ${video.video_id} ${err} ${err.message}`);
+        throw err;
+    }
+};
