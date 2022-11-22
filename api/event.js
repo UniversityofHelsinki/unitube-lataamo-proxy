@@ -182,11 +182,16 @@ exports.updateEventDeletionDate = async (req,res) => {
         const rawEventDeletionDateMetadata = req.body;
         const loggedUser = userService.getLoggedUser(req.user);
 
+        const isoDbDeletionDate = (await dbService.getArchivedDate(req.params.id)).toISOString();
+        const isoFormDeletionDate = req.body.deletionDate;
+
         const response = await dbService.updateArchivedDate(req.params.id, rawEventDeletionDateMetadata, req.user);
 
         if (response.status === 200) {
             logger.info(`PUT video deletion date /event/:id/deletionDate VIDEO ${req.params.id} USER ${req.user.eppn} OK`);
-            await dbService.clearNotificationSentAt(req.params.id, loggedUser);
+            if (isoDbDeletionDate !== isoFormDeletionDate) {
+                await dbService.clearNotificationSentAt(req.params.id, loggedUser);
+            }
         } else if (response.status === 404){
             logger.warn(`PUT video deletion date /event/:id/deletionDate VIDEO ${req.params.id} USER ${req.user.eppn} ${response.statusText}`);
         }
