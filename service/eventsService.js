@@ -51,7 +51,8 @@ exports.filterEventsForClientList = (ocResponseData, loggedUser) => {
                 'created': event.created,
                 'series': event.series,
                 'media': calculateMediaPropertyForVideoList(event, loggedUser),
-                'publications': _mapPublications(calculateMediaPropertyForVideoList(event, loggedUser), publicationService.filterApiChannelPublication(event.publications))
+                'publications': _mapPublications(calculateMediaPropertyForVideoList(event, loggedUser), publicationService.filterApiChannelPublication(event.publications)),
+                'archived_date': event.archived_date
             });
         });
 
