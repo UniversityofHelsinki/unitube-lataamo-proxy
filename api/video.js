@@ -14,6 +14,7 @@ const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 const { parseSync, stringifySync } = require('subtitle');
 const dbService = require("../service/dbService");
 const constants = require("../utils/constants");
+const dbApi = require("./dbApi");
 
 
 exports.getVideoUrl = async (req, res) => {
@@ -52,6 +53,7 @@ exports.getUserVideos = async (req, res) => {
         const allEventsWithMetaData = await eventsService.getAllEventsBySeriesIdentifiers(seriesIdentifiers);
         const filteredAllEventsWithMetaData = allEventsWithMetaData.filter(item => item);
         const concatenatedEventsArray = eventsService.concatenateArray(filteredAllEventsWithMetaData);
+        await getArchivedDate(concatenatedEventsArray);
         // insert removal date to postgres db
         await dbService.insertArchivedAndCreationDates(concatenatedEventsArray, loggedUser);
         res.json(eventsService.filterEventsForClientList(concatenatedEventsArray, loggedUser));
@@ -63,6 +65,20 @@ exports.getUserVideos = async (req, res) => {
             message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_LIST_FOR_USER,
             msg
         });
+    }
+};
+
+const getArchivedDate = async (concatenatedEventsArray) => {
+
+    for (const element of concatenatedEventsArray) {
+        try {
+            let archived_date = await dbApi.returnArchivedDateFromDb(element.identifier);
+            if (archived_date.rows.length === 1) {
+                element.archived_date = [...archived_date.rows][0].archived_date;
+            }
+        } catch (error) {
+            logger.error(`error reading archived_date with video_id ` + element.identifier);
+        }
     }
 };
 
