@@ -977,6 +977,37 @@ describe('Updating videos aka events', () => {
         expect(rows[0].third_notification_sent_at).to.be.null;
     });
 
+    it('Should clear notification sent at fields when archived date is updated', async () => {
+        await client.query('INSERT INTO videos (video_id, archived_date, video_creation_date, first_notification_sent_at, second_notification_sent_at, third_notification_sent_at) ' +
+            'VALUES (234234234, \'2019-01-01\'::date, \'2010-01-01\'::date, \'2020-01-01\'::date, \'2020-01-01\'::date, \'2020-01-01\'::date)');
+
+        test.mockOpencastEventNoActiveTransaction('234234234');
+        test.mockOpencastUpdateEventOK('234234234');
+        test.mockOpencastMediaPackageRequest('234234234');
+        test.mockOpencastRepublishMetadataRequest('234234234');
+
+        const newDate = new Date();
+
+        await supertest(app)
+            .put(LATAAMO_USER_EVENT_PATH + '/234234234' + '/deletionDate')
+            .send({deletionDate: newDate})
+            .set('eppn', 'SeriesOwnerEppn')
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
+            .expect(200)
+            .expect('Content-Type', /json/);
+
+        const { rows } = await client.query('SELECT * FROM videos');
+        expect(rows).lengthOf(1);
+        expect(rows[0].archived_date).to.not.be.null;
+
+        expect(rows[0].archived_date.toDateString()).to.equal(newDate.toDateString());
+        expect(rows[0].first_notification_sent_at).be.null;
+        expect(rows[0].second_notification_sent_at).be.null;
+        expect(rows[0].third_notification_sent_at).be.null;
+    });
+
     it('Should not update videos archived date field when videos metadata is updated', async () => {
         await client.query('INSERT INTO videos (video_id, archived_date, video_creation_date) VALUES (234234234, \'2019-01-01\'::date, \'2010-01-01\'::date)');
 
