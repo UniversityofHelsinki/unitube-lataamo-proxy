@@ -986,11 +986,11 @@ describe('Updating videos aka events', () => {
         test.mockOpencastMediaPackageRequest('234234234');
         test.mockOpencastRepublishMetadataRequest('234234234');
 
-        const newDate = new Date();
+        const newArchivedDate = new Date();
 
         await supertest(app)
             .put(LATAAMO_USER_EVENT_PATH + '/234234234' + '/deletionDate')
-            .send({deletionDate: newDate})
+            .send({deletionDate: newArchivedDate})
             .set('eppn', 'SeriesOwnerEppn')
             .set('preferredlanguage', test.mockTestUser.preferredlanguage)
             .set('hyGroupCn', test.mockTestUser.hyGroupCn)
@@ -1002,7 +1002,7 @@ describe('Updating videos aka events', () => {
         expect(rows).lengthOf(1);
         expect(rows[0].archived_date).to.not.be.null;
 
-        expect(rows[0].archived_date.toDateString()).to.equal(newDate.toDateString());
+        expect(rows[0].archived_date.toDateString()).to.equal(newArchivedDate.toDateString());
         expect(rows[0].first_notification_sent_at).be.null;
         expect(rows[0].second_notification_sent_at).be.null;
         expect(rows[0].third_notification_sent_at).be.null;
