@@ -50,7 +50,7 @@ test:
   coverage: /All files\s*\|\s*([\d\.]+)/
 
 # Define the process for deploy stage to development environment
-deploy_dev:
+deploy_oc_test:
   stage: deploy
   tags:
     - ohtu-build-1
@@ -58,6 +58,34 @@ deploy_dev:
     name: development
   only:
     - lataamo-771
+  script:
+    - echo "====== Deploy to oc-test server ========"
+    - echo "====== Install rsync and openssh ========="
+    - apk add --no-cache rsync openssh
+    - echo "====== Activate the ssh-agent ========"
+    - eval $(ssh-agent -s)
+    - echo "======= Add the SSH key stored in SSH_PRIVATE_KEY variable to the agent store ====="
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+    - echo "====== Add target servers secret key ======"
+    - mkdir ~/.ssh
+    - echo $SSH_PRIVATE_KEY  >> ~/.ssh/id_rsa
+    - chmod 700 ~/.ssh && chmod 600 ~/.ssh/*
+    - echo "====== Test ssh connection and make proxy folder if not exist ======"
+    - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-oc-test.it.helsinki.fi "mkdir -p /home/lataamo/proxy"
+    - echo "====== Sync local and remote directory ======"
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+    - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --exclude=".env" --exclude="/api/uploads" --exclude="/logs" --exclude="/files/licenses.json" --delete ./ lataamo@lataamo-oc-test.it.helsinki.fi:/home/lataamo/proxy
+    - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-oc-test.it.helsinki.fi "pm2 restart app"
+
+# Define the process for deploy stage to development environment
+deploy_dev:
+  stage: deploy
+  tags:
+    - ohtu-build-1
+  environment:
+    name: development
+  only:
+    - master
   except:
     # Skip deploy when scheduled npm audit and outdated scans are executed.
     - schedules
