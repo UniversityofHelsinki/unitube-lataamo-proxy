@@ -169,7 +169,7 @@ module.exports = function (router) {
      *         - application/json
      *       parameters:
      *         - in: path
-     *           name: id 
+     *           name: id
      *           required: true
      *           description: ID of the serie to delete
      *       responses:
@@ -255,6 +255,26 @@ module.exports = function (router) {
      *           description: Internal server error, an error occurred.
      */
     router.get('/userSeries', series.getUserSeries);
+
+
+    /**
+     * @swagger
+     *     /api/userSeriesWithOutTrash:
+     *     get:
+     *       tags:
+     *         - retrieve
+     *       summary: Return user's series without trash series.
+     *       description: Returns series for logged in user. These series are the ones user is listed as contributor.
+     *                    Published info of series is also returned.
+     *       responses:
+     *         200:
+     *           description: List of series.
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         500:
+     *           description: Internal server error, an error occurred.
+     */
+    router.get('/userSeriesWithOutTrash', series.getUserSeriesWithOutTrash);
 
 
     /**

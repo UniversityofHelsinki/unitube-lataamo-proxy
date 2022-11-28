@@ -101,10 +101,14 @@ exports.upload = async (req, res) => {
 
     let archivedDate;
     let identifier;
+    let selectedSeries;
 
     req.busboy.on('field', (fieldname, val)  => {
         if (fieldname === 'archivedDate') {
             archivedDate = moment(new Date(val));
+        }
+        if (fieldname === 'selectedSeries') {
+            selectedSeries = val;
         }
     });
 
@@ -133,7 +137,7 @@ exports.upload = async (req, res) => {
             res.json({id: uploadId, status: constants.JOB_STATUS_STARTED});
 
             // try to send the file to opencast
-            const response = await apiService.uploadVideo(filePathOnDisk, filename, inboxSeries.identifier);
+            const response = await apiService.uploadVideo(filePathOnDisk, filename, selectedSeries ? selectedSeries : inboxSeries.identifier);
 
             if (response && response.status === HttpStatus.CREATED) {
                 // on success clean file from disk and return 200
