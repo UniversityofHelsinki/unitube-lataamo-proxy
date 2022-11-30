@@ -140,16 +140,18 @@ exports.upload = async (req, res) => {
             const response = await apiService.uploadVideo(filePathOnDisk, filename, selectedSeries ? selectedSeries : inboxSeries.identifier);
 
             if (response && response.status === HttpStatus.CREATED) {
+                identifier = response.data.identifier;
                 // on success clean file from disk and return 200
                 await deleteFile(uploadPath, uploadId);
                 await jobsService.setJobStatus(uploadId, constants.JOB_STATUS_FINISHED);
                 uploadLogger.log(INFO_LEVEL,
                     `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)} USER: ${req.user.eppn} -- ${uploadId}`);
-                identifier = response.data.identifier;
 
                 const video = {identifier: identifier, created: new Date(), archivedDate: archivedDate};
                 await dbApi.insertArchiveAndVideoCreationDatesForVideoUpload(video);
-
+                const metadata = {title : filename, isPartOf : selectedSeries ? selectedSeries : inboxSeries.identifier, description: 'test description', license : 'UNITUBE-ALLRIGHTS' };
+                // republish metadata in background operation
+                apiService.updateEventMetadata(metadata, identifier, false, req.user.eppn);
                 res.status(HttpStatus.OK);
             } else {
                 // on failure clean file from disk and return 500
