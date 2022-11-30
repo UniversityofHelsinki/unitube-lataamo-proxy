@@ -503,12 +503,12 @@ exports.createSeries = async (user, seriesMetadata, seriesAcl) => {
 //     "identifier": "9ad24ff8-abda-4681-8f02-184b49364677"
 // }
 // from opencast server
-exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) => {
+exports.uploadVideo = async (filePathOnDisk, videoFilename, userSeriesId) => {
     const videoUploadUrl = constants.OCAST_VIDEOS_PATH;
     const videoDescription = '';
     const startDate = format(new Date(), 'yyyy-MM-dd'); // '2016-06-22'
     const startTime = format(new Date(), 'HH:mm:ss'); // '10:03:52'
-    const inboxSeriesId = inboxUserSeriesId;  // User's INBOX series id
+    const selectedSeriesId = userSeriesId;  // user selected series id
 
     // refactor this array to constants.js
     const metadataArray = [
@@ -538,7 +538,7 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
                 {
                     'id': 'isPartOf',
                     'type': 'text',
-                    'value': inboxSeriesId
+                    'value': selectedSeriesId
                 }
             ]
         }
