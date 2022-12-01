@@ -427,6 +427,8 @@ exports.updateEventMetadata = async (metadata, eventId, isTrash, user) => {
         }
         const modifiedMetadata = eventsService.modifyEventMetadataForOpencast(metadata);
 
+        console.log(modifiedMetadata);
+
         // republish paths
         const republishMetadataUrl = '/workflow/start';
         const mediaPackageUrl = '/assets/episode/' + eventId;
