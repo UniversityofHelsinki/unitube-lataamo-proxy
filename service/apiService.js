@@ -403,10 +403,11 @@ exports.updateEventMetadata = async (metadata, eventId, isTrash, user) => {
         await jobsService.setJobStatus(updateEventMetadataId, constants.JOB_STATUS_STARTED);
         while (await jobsService.getJob(updateEventMetadataId) != null) {
             const transactionStatusPath = constants.OCAST_EVENT_MEDIA_PATH_PREFIX + eventId + '/hasActiveTransaction';
-            let responseX = await security.opencastBase.get(transactionStatusPath);
+            let transactionResponse = await security.opencastBase.get(transactionStatusPath);
 
-            if (responseX.data && responseX.data.active !== true) {
+            if (transactionResponse.data && transactionResponse.data.active !== true) {
                 await jobsService.removeJob(updateEventMetadataId);
+                break;
             } else {
                 // transaction active, try again after minute
                 await new Promise(resolve => setTimeout(resolve, 60000));
@@ -474,7 +475,7 @@ exports.updateEventMetadata = async (metadata, eventId, isTrash, user) => {
         // do the republish request
         const resp = await security.opencastBase.post(republishMetadataUrl, bodyFormData, {headers});
 
-        logger.info(`Update event metadata for video finished. USER: ${user} -- ${updateEventMetadataId}`);
+        logger.info(`Update event metadata for video finished. USER: ${user.eppn} -- ${updateEventMetadataId}`);
 
         return {
             status: resp.status,
