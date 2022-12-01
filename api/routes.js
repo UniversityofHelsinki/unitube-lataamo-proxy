@@ -10,10 +10,10 @@ const videoUpload = require('./videoUpload');
 const iamGroups = require('./iamGroups');
 const persons = require('./persons');
 const jobs = require('./jobs');
-
+const licenseService = require('../service/licenseService');
 
 const swaggerUi = require('swagger-ui-express');
-const apiSpecs = require('../config/swagger'); // swagger config
+const apiSpecs = require('../config/swagger');
 
 module.exports = function (router) {
     // https://www.npmjs.com/package/swagger-ui-express
@@ -638,4 +638,6 @@ module.exports = function (router) {
      *           description: Internal server error, an error occurred.
      */
     router.put('/event/:id/deletionDate', event.updateEventDeletionDate);
+
+    router.get('/licenses', licenseService.getLicenses);
 };

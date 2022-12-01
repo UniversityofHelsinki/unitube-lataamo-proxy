@@ -104,6 +104,8 @@ exports.upload = async (req, res) => {
     let archivedDate;
     let identifier;
     let selectedSeries;
+    let description;
+    let license;
 
     req.busboy.on('field', (fieldname, val)  => {
         if (fieldname === 'archivedDate') {
@@ -111,6 +113,12 @@ exports.upload = async (req, res) => {
         }
         if (fieldname === 'selectedSeries') {
             selectedSeries = val;
+        }
+        if (fieldname === 'description') {
+            description = val;
+        }
+        if (fieldname === 'license') {
+            license = val;
         }
     });
 
@@ -154,7 +162,7 @@ exports.upload = async (req, res) => {
                 res.status(HttpStatus.OK);
 
                 // republish metadata in background operation
-                const metadata = {title : filename, isPartOf : selectedSeries ? selectedSeries : inboxSeries.identifier, description: 'test description', license : 'UNITUBE-ALLRIGHTS' };
+                const metadata = {title : filename, isPartOf : selectedSeries ? selectedSeries : inboxSeries.identifier, description: description, license : license };
                 const updateEventMetadataResponse = await apiService.updateEventMetadata(metadata, identifier, false, req.user.eppn);
 
                 if (updateEventMetadataResponse.status === 200) {

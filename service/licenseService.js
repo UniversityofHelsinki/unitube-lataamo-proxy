@@ -9,3 +9,9 @@ exports.getLicenseOptions = (event) => {
         licenses : licenses
     };
 };
+
+exports.getLicenses = (req, res) => {
+    let rawData = fs.readFileSync(path.join(__dirname, '../files/licenses.json'));
+    let licenses = JSON.parse(rawData);
+    return res.json(licenses);
+};
