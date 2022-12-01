@@ -6,11 +6,13 @@ const constants = require('../utils/constants');
 const {seriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
 const logger = require('../config/winstonLogger');
 const eventsService = require('./eventsService');
-const messageKeys = require('../utils/message-keys');
 const fetch = require('node-fetch');
 const { parseContributor } = require('./userService');
 const { filterCorrectSeriesWithCorrectContributors, transformResponseData, isContributorMigrationActive } =
     require('../utils/ocastMigrationUtils');
+const {v4: uuidv4} = require("uuid");
+const uploadLogger = require("../config/uploadLogger");
+const jobsService = require("./jobsService");
 
 //
 // This file is the façade for opencast server
@@ -395,22 +397,22 @@ exports.updateEventAcl = async (event, acl) => {
 
 exports.updateEventMetadata = async (metadata, eventId, isTrash, user) => {
     try {
-        let hasActiveTransaction = true;
-        while (hasActiveTransaction) {
-            console.log(hasActiveTransaction);
+        const updateEventMetadataId = uuidv4();
+        logger.info(`Update event metadata for video started. USER: ${user} -- ${updateEventMetadataId}`);
+        // set upload job status
+        await jobsService.setJobStatus(updateEventMetadataId, constants.JOB_STATUS_STARTED);
+        while (await jobsService.getJob(updateEventMetadataId) != null) {
+            console.log(await jobsService.getJob(updateEventMetadataId));
             const transactionStatusPath = constants.OCAST_EVENT_MEDIA_PATH_PREFIX + eventId + '/hasActiveTransaction';
             let responseX = await security.opencastBase.get(transactionStatusPath);
 
             if (responseX.data && responseX.data.active !== true) {
-                hasActiveTransaction = false;
+                await jobsService.removeJob(updateEventMetadataId);
             } else {
                 // transaction active, try again after minute
                 await new Promise(resolve => setTimeout(resolve, 60000));
             }
         }
-
-        console.log("hit");
-        console.log(hasActiveTransaction);
 
         const videoMetaDataUrl = constants.OCAST_VIDEOS_PATH + eventId + constants.OCAST_METADATA_PATH + constants.OCAST_TYPE_QUERY_PARAMETER + constants.OCAST_TYPE_DUBLINCORE_EPISODE;
         if (isTrash) {
@@ -424,8 +426,6 @@ exports.updateEventMetadata = async (metadata, eventId, isTrash, user) => {
             }
         }
         const modifiedMetadata = eventsService.modifyEventMetadataForOpencast(metadata);
-
-        console.log(modifiedMetadata);
 
         // republish paths
         const republishMetadataUrl = '/workflow/start';

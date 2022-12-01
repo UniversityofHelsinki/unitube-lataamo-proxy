@@ -12,6 +12,8 @@ const jobsService = require('../service/jobsService');
 const HttpStatus = require('http-status');
 const dbApi = require("./dbApi");
 const moment = require('moment');
+const logger = require("../config/winstonLogger");
+const dbService = require("../service/dbService");
 
 const ERROR_LEVEL = 'error';
 const INFO_LEVEL = 'info';
@@ -149,10 +151,20 @@ exports.upload = async (req, res) => {
 
                 const video = {identifier: identifier, created: new Date(), archivedDate: archivedDate};
                 await dbApi.insertArchiveAndVideoCreationDatesForVideoUpload(video);
-                const metadata = {title : filename, isPartOf : selectedSeries ? selectedSeries : inboxSeries.identifier, description: 'test description', license : 'UNITUBE-ALLRIGHTS' };
-                // republish metadata in background operation
-                apiService.updateEventMetadata(metadata, identifier, false, req.user.eppn);
                 res.status(HttpStatus.OK);
+
+                // republish metadata in background operation
+                const metadata = {title : filename, isPartOf : selectedSeries ? selectedSeries : inboxSeries.identifier, description: 'test description', license : 'UNITUBE-ALLRIGHTS' };
+                const updateEventMetadataResponse = await apiService.updateEventMetadata(metadata, identifier, false, req.user.eppn);
+
+                if (updateEventMetadataResponse.status === 200) {
+                    logger.info(`update event metadata for VIDEO ${identifier} USER ${req.user.eppn} OK`);
+                } else if (updateEventMetadataResponse.status === 403){
+                    logger.warn(`update event metadata for VIDEO ${identifier} USER ${req.user.eppn} failed ${updateEventMetadataResponse.statusText}`);
+                } else {
+                    logger.warn(`update event metadata for VIDEO ${identifier} USER ${req.user.eppn} failed ${updateEventMetadataResponse.statusText}`);
+                }
+
             } else {
                 // on failure clean file from disk and return 500
                 await deleteFile(uploadPath, uploadId);
