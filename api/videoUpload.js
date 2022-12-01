@@ -147,7 +147,7 @@ exports.upload = async (req, res) => {
             res.json({id: uploadId, status: constants.JOB_STATUS_STARTED});
 
             // try to send the file to opencast
-            const response = await apiService.uploadVideo(filePathOnDisk, filename, selectedSeries ? selectedSeries : inboxSeries.identifier);
+            const response = await apiService.uploadVideo(filePathOnDisk, filename, selectedSeries ? selectedSeries : inboxSeries.identifier, description);
 
             if (response && response.status === HttpStatus.CREATED) {
                 identifier = response.data.identifier;
