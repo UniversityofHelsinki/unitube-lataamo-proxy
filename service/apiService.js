@@ -474,6 +474,8 @@ exports.updateEventMetadata = async (metadata, eventId, isTrash, user) => {
         // do the republish request
         const resp = await security.opencastBase.post(republishMetadataUrl, bodyFormData, {headers});
 
+        logger.info(`Update event metadata for video finished. USER: ${user} -- ${updateEventMetadataId}`);
+
         return {
             status: resp.status,
             statusText: resp.statusText,
