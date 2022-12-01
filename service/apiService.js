@@ -402,7 +402,6 @@ exports.updateEventMetadata = async (metadata, eventId, isTrash, user) => {
         // set upload job status
         await jobsService.setJobStatus(updateEventMetadataId, constants.JOB_STATUS_STARTED);
         while (await jobsService.getJob(updateEventMetadataId) != null) {
-            console.log(await jobsService.getJob(updateEventMetadataId));
             const transactionStatusPath = constants.OCAST_EVENT_MEDIA_PATH_PREFIX + eventId + '/hasActiveTransaction';
             let responseX = await security.opencastBase.get(transactionStatusPath);
 
