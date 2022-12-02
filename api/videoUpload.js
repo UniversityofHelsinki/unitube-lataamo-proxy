@@ -106,6 +106,7 @@ exports.upload = async (req, res) => {
     let selectedSeries;
     let description;
     let license;
+    let title;
 
     req.busboy.on('field', (fieldname, val)  => {
         if (fieldname === 'archivedDate') {
@@ -113,6 +114,9 @@ exports.upload = async (req, res) => {
         }
         if (fieldname === 'selectedSeries') {
             selectedSeries = val;
+        }
+        if (fieldname === 'title') {
+            title = val;
         }
         if (fieldname === 'description') {
             description = val;
@@ -147,7 +151,7 @@ exports.upload = async (req, res) => {
             res.json({id: uploadId, status: constants.JOB_STATUS_STARTED});
 
             // try to send the file to opencast
-            const response = await apiService.uploadVideo(filePathOnDisk, filename, selectedSeries ? selectedSeries : inboxSeries.identifier, description);
+            const response = await apiService.uploadVideo(filePathOnDisk, filename, selectedSeries ? selectedSeries : inboxSeries.identifier, description, title);
 
             if (response && response.status === HttpStatus.CREATED) {
                 identifier = response.data.identifier;
@@ -162,7 +166,7 @@ exports.upload = async (req, res) => {
                 res.status(HttpStatus.OK);
 
                 // republish metadata in background operation
-                const metadata = {title : filename, isPartOf : selectedSeries ? selectedSeries : inboxSeries.identifier, description: description, license : license };
+                const metadata = {title : title, isPartOf : selectedSeries ? selectedSeries : inboxSeries.identifier, description: description, license : license };
                 const updateEventMetadataResponse = await apiService.updateEventMetadata(metadata, identifier, false, req.user.eppn);
 
                 if (updateEventMetadataResponse.status === 200) {
