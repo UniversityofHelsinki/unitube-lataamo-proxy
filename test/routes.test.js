@@ -1056,7 +1056,7 @@ describe('Fetching event from /event/id route', () => {
         test.mockLataamoPostSeriesCall();
     });
 
-    it('GET /event/:id', async () => {
+    xit('GET /event/:id', async () => {
 
         const expectedAcls = [ { allow: true, role: 'ROLE_USER_ADMIN', action: 'read' },
             { allow: true, role: 'ROLE_USER_ADMIN', action: 'write' },
