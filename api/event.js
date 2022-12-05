@@ -26,6 +26,7 @@ exports.getEvent = async (req, res) => {
         const eventWithLicenseOptions = licenseService.getLicenseOptions(eventWithLicense);
         const eventWithLicenseOptionsAndVideoViews = await eventsService.getEventViews(req.params.id, eventWithLicenseOptions);
         res.json(eventWithLicenseOptionsAndVideoViews);
+        
     } catch (error) {
         const msg = error.message;
         logger.error(`Error GET /event/:id ${msg} VIDEO ${req.params.id} USER ${req.user.eppn}`);
