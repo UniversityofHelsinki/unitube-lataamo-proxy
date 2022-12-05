@@ -521,6 +521,14 @@ const deleteFile = (filename) => {
     });
 };
 
+exports.getEventViews = async (id, eventWithLicenseOptions) => {
+    const eventViews = await apiService.getEventViews(id);
+    return {
+        ...eventWithLicenseOptions, 
+        views: eventViews.stats.views
+    }
+}
+
 /* Not in use
 const returnOrCreateUsersInboxSeries = async (loggedUser) => {
     const lataamoInboxSeriesTitle = inboxSeriesTitleForLoggedUser(loggedUser.eppn);
