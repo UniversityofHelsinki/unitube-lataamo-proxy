@@ -1,7 +1,7 @@
 const security = require('../config/security');
 const FormData = require('form-data'); // https://www.npmjs.com/package/form-data
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
-const {format} = require('date-fns'); // https://www.npmjs.com/package/date-fns
+const { zonedTimeToUtc } = require('date-fns-tz');
 const constants = require('../utils/constants');
 const {seriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
 const logger = require('../config/winstonLogger');
@@ -507,8 +507,11 @@ exports.createSeries = async (user, seriesMetadata, seriesAcl) => {
 exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) => {
     const videoUploadUrl = constants.OCAST_VIDEOS_PATH;
     const videoDescription = '';
-    const startDate = format(new Date(), 'yyyy-MM-dd'); // '2016-06-22'
-    const startTime = format(new Date(), 'HH:mm:ss'); // '10:03:52'
+    const timeZone = 'Europe/Helsinki';
+    const utcDate = zonedTimeToUtc(Date.now(), timeZone);
+    const startDate = utcDate.toISOString().split("T")[0];
+    const startTime = utcDate.toISOString().split("T")[1];
+
     const inboxSeriesId = inboxUserSeriesId;  // User's INBOX series id
 
     // refactor this array to constants.js
