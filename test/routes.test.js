@@ -1054,9 +1054,10 @@ describe('Fetching event from /event/id route', () => {
         test.mockOCastEvent1MediaMetadataCall();
         test.mockOCastEvent1AclCall();
         test.mockLataamoPostSeriesCall();
+        test.mockOcastVideoViewsCall();
     });
 
-    xit('GET /event/:id', async () => {
+    it('GET /event/:id', async () => {
 
         const expectedAcls = [ { allow: true, role: 'ROLE_USER_ADMIN', action: 'read' },
             { allow: true, role: 'ROLE_USER_ADMIN', action: 'write' },

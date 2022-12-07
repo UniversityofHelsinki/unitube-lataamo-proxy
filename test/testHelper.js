@@ -5,6 +5,7 @@ const constPaths = require('../utils/constants');
 const CONSTANTS = Object.freeze({
     OCAST_BASE_URL : process.env.LATAAMO_OPENCAST_HOST,
     OCAST_SERIES_PATH : '/api/series/',
+    OCAST_VIDEO_VIEWS_PATH : '/usertracking/',
     OCAST_ACL : '/acl',
     OCAST_UPDATE_SERIES_PATH : '/api/series/123456',
     OCAST_UPDATE_SERIES_METADATA_PATH :  '/metadata?type=dublincore/series',
@@ -3844,6 +3845,12 @@ const lataamoPostSeries = () =>
         .post(CONSTANTS.OCAST_SERIES_PATH)
         .reply(200, { identifier: CONSTANTS.SUCCESSFUL_UPDATE_ID });
 
+const mockOcastVideoViewsCall = () => {
+    nock(CONSTANTS.OCAST_BASE_URL)
+        .get(CONSTANTS.OCAST_VIDEO_VIEWS_PATH + 'stats.json?id=' + CONSTANTS.TEST_EVENT_1_ID)
+        .reply(200, { "stats":{"id":"3821e09f-9af2-4598-a84d-3c724715d19e","views":5}});
+};
+
 const lataamoSeries9 = () =>
     nock(CONSTANTS.OCAST_BASE_URL)
         .get(CONSTANTS.OCAST_SERIES_PATH + CONSTANTS.TEST_SERIES_1_ID)
@@ -3994,6 +4001,7 @@ module.exports.mockOCastEvent1AclCall = eventAclsFromSeries;
 module.exports.mockOcastEvent2AclCall = eventAclsFromSerie2;
 module.exports.mockOcastEvent3AclCall = eventAclsFromSerie3;
 module.exports.mockLataamoPostSeriesCall = lataamoPostSeries;
+module.exports.mockOcastVideoViewsCall = mockOcastVideoViewsCall;
 module.exports.mockEventPublicationCall = event1Publications;
 module.exports.mockEvent2PubcliationCall = event2Publications;
 module.exports.mockEventEpisodeCall = eventEpisode;
