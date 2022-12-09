@@ -1114,7 +1114,18 @@ describe('Fetching event from /event/id route', () => {
             .expect('Content-Type', /json/);
         assert.equal(response.body.message, 'error_failed_to_get_event');
     });
+
+    it('Should return views from usertracking api', async () => {
+
+        let response = await supertest(app)
+            .get(LATAAMO_USER_EVENT_PATH + '/' + test.constants.TEST_EVENT_1_ID)
+            .set('eppn', 'SeriesOwnerEppn')
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .expect(200)
+            .expect('Content-Type', /json/);
+        assert.equal(response.body.identifier, test.constants.TEST_EVENT_1_ID);
+        assert.equal(response.body.views, 5);
+    });
 });
-
-
 

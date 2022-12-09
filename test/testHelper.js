@@ -300,6 +300,11 @@ const mockUserSeries6 =
         title: 'title-LATAAMO-132'
     };
 
+const mockVideoStats =
+    { 
+        "stats":{"id": CONSTANTS.TEST_EVENT_1_ID,"views":5}
+    };
+    
 const mockUserSeriesEmpty = [];
 
 const mockUserEventsForInboxSeriesForList = [
@@ -3848,7 +3853,7 @@ const lataamoPostSeries = () =>
 const mockOcastVideoViewsCall = () => {
     nock(CONSTANTS.OCAST_BASE_URL)
         .get(CONSTANTS.OCAST_VIDEO_VIEWS_PATH + 'stats.json?id=' + CONSTANTS.TEST_EVENT_1_ID)
-        .reply(200, { "stats":{"id":"3821e09f-9af2-4598-a84d-3c724715d19e","views":5}});
+        .reply(200, mockVideoStats);
 };
 
 const lataamoSeries9 = () =>
