@@ -169,7 +169,7 @@ module.exports = function (router) {
      *         - application/json
      *       parameters:
      *         - in: path
-     *           name: id 
+     *           name: id
      *           required: true
      *           description: ID of the serie to delete
      *       responses:
@@ -189,7 +189,7 @@ module.exports = function (router) {
      *       tags:
      *         - retrieve
      *       summary: Return user's inbox events.
-     *       description: Returns inbox series events for logged in user.
+     *       description: Returns inbox series events for logged in user.
      *       responses:
      *         200:
      *           description: List of inbox series events.
