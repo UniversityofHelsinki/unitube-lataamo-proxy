@@ -215,6 +215,10 @@ exports.getAllEvents = async (seriesIdentifiers) => {
     return await Promise.all(seriesIdentifiers.map(identifier => apiService.getEventsByIdentifier(identifier)));
 };
 
+exports.getAllSerieEvents = async (seriesIdentifier) => {
+    return await apiService.getEventsByIdentifier(seriesIdentifier);
+};
+
 exports.getAllEventsBySeriesIdentifiers = async (seriesIdentifiers) => {
     try {
         const filteredUniqueSeriesIdentifiers = filterUniqueSeriesIdentifiers(seriesIdentifiers);

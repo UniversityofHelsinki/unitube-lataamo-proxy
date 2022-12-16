@@ -68,6 +68,40 @@ exports.getUserVideos = async (req, res) => {
     }
 };
 
+exports.updateAchivedDateOfVideosInSerie = async (req, res) => {
+    try {
+        logger.info(`PUT /updateAchivedDateOfVideosInSerie USER: ${req.user.eppn}`);
+        const loggedUser = userService.getLoggedUser(req.user);
+        const seriesIdentifier = req.params.id;
+        const rawEventDeletionDateMetadata = req.body;
+        const allEventsWithMetaData = await eventsService.getAllSerieEvents(seriesIdentifier);
+
+        if (allEventsWithMetaData && allEventsWithMetaData.length > 0) {
+            for (const video of allEventsWithMetaData) {
+                logger.info(`insert deletion date with id : ${video.identifier}`);
+                let response = await dbService.updateArchivedDate(video.identifier, rawEventDeletionDateMetadata, loggedUser);
+                if (response.status === 200) {
+                    logger.info(`PUT video deletion date /event/:id/updateAchivedDateOfVideosInSerie VIDEO ${req.params.id} USER ${req.user.eppn} OK`);
+                    await dbService.clearNotificationSentAt(video.identifier, loggedUser);
+                } else if (response.status === 404) {
+                    logger.warn(`PUT video deletion date /event/:id/updateAchivedDateOfVideosInSerie VIDEO ${req.params.id} USER ${req.user.eppn} ${response.statusText}`);
+                } else {
+                    logger.error(`PUT video deletion date /event/:id/updateAchivedDateOfVideosInSerie VIDEO ${req.params.id} USER ${req.user.eppn} ${response.statusText}`);
+                }
+            }
+            res.json({message: 'OK'});
+        }
+    } catch (error) {
+        res.status(500);
+        const msg = error.message;
+        logger.error(`Error PUT /updateAchivedDateOfVideosInSerie ${error} ${msg} USER ${req.user.eppn}`);
+        res.json({
+            message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_LIST_FOR_USER,
+            msg
+        });
+    }
+};
+
 const getArchivedDate = async (concatenatedEventsArray) => {
 
     for (const element of concatenatedEventsArray) {
