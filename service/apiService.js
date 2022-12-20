@@ -351,7 +351,7 @@ exports.addWebVttFile = async (vttFile, eventId) => {
 exports.deleteWebVttFile = async (vttFile, eventId) => {
     const assetsUrl = constants.OCAST_ADMIN_EVENT + eventId + constants.OCAST_ASSETS_PATH;
     let bodyFormData = new FormData();
-    bodyFormData.append('attachment_captions_webvtt', vttFile, {
+    bodyFormData.append('attachment_captions_webvtt.0', vttFile, {
         filename: 'empty.vtt'
     });
     bodyFormData.append('metadata', JSON.stringify(constants.WEBVTT_TEMPLATE));
@@ -768,4 +768,19 @@ exports.deleteSeries = async (id) => {
             message: error.message
         };
     }
+};
+
+exports.getEventViews = async (id) => {
+    const url = `${constants.OCAST_EVENT_VIEWS_PATH}${id}`;
+    try {
+        const videoViews = await security.opencastBase.get(url);
+        return videoViews.data;
+    } catch (error) {
+        logger.error(`error while fetching video views for video id: ${id} from url: ${url}, error: ${error}`);
+        return {
+            status: 500,
+            message: error.message
+        };
+    }
+
 };
