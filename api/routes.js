@@ -618,4 +618,34 @@ module.exports = function (router) {
      *           description: Internal server error, an error occurred.
      */
     router.put('/event/:id/deletionDate', event.updateEventDeletionDate);
+
+    /**
+     * @swagger
+     *     /api/event/:id/updateArchivedDateOfVideosInSerie:
+     *     put:
+     *       tags:
+     *         - update
+     *       summary: Updates archived_date by serieId and given archived_date.
+     *       consumes:
+     *         - application/json
+     *       parameters:
+     *         - in: body
+     *           description: The archived_date to be updated.
+     *           schema:
+     *             type: object
+     *             required:
+     *               - identifier
+     *             properties:
+     *               identifier:
+     *                 type: string
+     *                 description: id of the series
+     *       responses:
+     *         200:
+     *           description: OK
+     *         404:
+     *           description: Video not found. Video id wrong or video id is not found.
+     *         500:
+     *           description: Internal server error, an error occurred.
+     */
+    router.put('/event/:id/updateArchivedDateOfVideosInSerie', video.updateArchivedDateOfVideosInSerie);
 };
