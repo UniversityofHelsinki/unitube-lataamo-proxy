@@ -621,7 +621,7 @@ module.exports = function (router) {
 
     /**
      * @swagger
-     *     /api/event/:id/updateAchivedDateOfVideosInSerie:
+     *     /api/event/:id/updateArchivedDateOfVideosInSerie:
      *     put:
      *       tags:
      *         - update
@@ -647,5 +647,5 @@ module.exports = function (router) {
      *         500:
      *           description: Internal server error, an error occurred.
      */
-    router.put('/event/:id/updateAchivedDateOfVideosInSerie', video.updateAchivedDateOfVideosInSerie);
+    router.put('/event/:id/updateArchivedDateOfVideosInSerie', video.updateArchivedDateOfVideosInSerie);
 };
