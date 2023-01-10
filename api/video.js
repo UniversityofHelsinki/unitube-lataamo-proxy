@@ -43,6 +43,29 @@ exports.getVideoUrl = async (req, res) => {
     }
 };
 
+exports.getUserVideosBySelectedSeries = async (req, res) => {
+    try {
+        logger.info(`GET /userVideosBySelectedSeries USER: ${req.user.eppn} , selected series : ${req.params.selectedSeries}` );
+        const selectedSeries = req.params.selectedSeries;
+        const loggedUser = userService.getLoggedUser(req.user);
+        const allEventsWithMetaData = await eventsService.getAllEventsBySeriesIdentifier(selectedSeries);
+        const filteredAllEventsWithMetaData = allEventsWithMetaData.filter(item => item);
+        const concatenatedEventsArray = eventsService.concatenateArray(filteredAllEventsWithMetaData);
+        await getArchivedDate(concatenatedEventsArray);
+        // insert removal date to postgres db
+        await dbService.insertArchivedAndCreationDates(concatenatedEventsArray, loggedUser);
+        res.json(eventsService.filterEventsForClientList(concatenatedEventsArray, loggedUser));
+    } catch (error) {
+        res.status(500);
+        const msg = error.message;
+        logger.error(`Error GET /userVideos ${error} ${msg} USER ${req.user.eppn}`);
+        res.json({
+            message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_LIST_FOR_USER,
+            msg
+        });
+    }
+};
+
 exports.getUserVideos = async (req, res) => {
     try {
         logger.info(`GET /userVideos USER: ${req.user.eppn}`);
