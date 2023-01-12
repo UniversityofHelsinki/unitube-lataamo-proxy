@@ -156,6 +156,12 @@ const updateSeriesPublicity = (series) => {
     };
 };
 
+exports.getSerieRoles = async (identifier) => {
+    return Promise.resolve(
+        await apiService.getSeriesAcldata(identifier)
+    );
+};
+
 // Looping array of series elements
 //
 // Adds published value in series array for each series:
