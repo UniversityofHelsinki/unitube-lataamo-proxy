@@ -13,6 +13,7 @@ const testXXX = require('./testHelperXXX');
 
 // Unitube-lataamo proxy APIs under the test
 const LATAAMO_USER_SERIES_PATH = '/api/userSeries';
+const LATAAMO_USER_SERIES_BY_SELECTED_SERIES = '/api/userVideosBySelectedSeries/';
 const LATAAMO_USER_EVENTS_PATH = '/api/userVideos';
 const LATAAMO_MOVE_EVENT_TO_TRASH_SERIES = '/api/moveEventToTrash';
 const LATAAMO_USER_INBOX_EVENTS_PATH = '/api/userInboxEvents';
@@ -99,6 +100,49 @@ describe('user eppn, preferredlanguage and hyGroupCn returned from /user route',
         let response = await supertest(app)
             .get(LATAAMO_USER_PATH)
             .expect(401);
+    });
+});
+
+describe('selected users series list returned from /userVideosBySelectedSeries route', () => {
+    beforeEach(() => {
+        // mock needed opencast apis
+        test.mockOCastUserApiCall();
+        test.mockOCastEvents_1_New_ApiCall();
+        test.mockOCastEvents_2_New_ApiCall();
+    });
+
+    it('should return one event in selected series ', async () => {
+        let response = await supertest(app)
+            .get(LATAAMO_USER_SERIES_BY_SELECTED_SERIES + test.constants.TEST_SERIES_1_ID)
+            .set('eppn', test.mockTestUser.eppn)
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
+            .expect(200)
+            .expect('Content-Type', /json/);
+
+        assert.isArray(response.body, 'Response should be an array');
+        assert.lengthOf(response.body, 1, 'Response array should contain one event');
+        assert.equal(response.body[0].identifier, '6394a9b7-3c06-477e-841a-70862eb07bfb');
+    });
+
+    it('should return one event in selected series ', async () => {
+        let response = await supertest(app)
+            .get(LATAAMO_USER_SERIES_BY_SELECTED_SERIES + test.constants.TEST_SERIES_2_ID)
+            .set('eppn', test.mockTestUser.eppn)
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
+            .expect(200)
+            .expect('Content-Type', /json/);
+
+        assert.isArray(response.body, 'Response should be an array');
+        assert.lengthOf(response.body, 1, 'Response array should contain one event');
+        assert.equal(response.body[0].identifier, '1fb5245f-ee1b-44cd-89f3-5ccf456ea0d4');
+    });
+
+    afterEach(() => {
+        test.cleanAll();
     });
 });
 
