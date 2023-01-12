@@ -10,10 +10,10 @@ const videoUpload = require('./videoUpload');
 const iamGroups = require('./iamGroups');
 const persons = require('./persons');
 const jobs = require('./jobs');
-
+const licenseService = require('../service/licenseService');
 
 const swaggerUi = require('swagger-ui-express');
-const apiSpecs = require('../config/swagger'); // swagger config
+const apiSpecs = require('../config/swagger');
 
 module.exports = function (router) {
     // https://www.npmjs.com/package/swagger-ui-express
@@ -255,6 +255,26 @@ module.exports = function (router) {
      *           description: Internal server error, an error occurred.
      */
     router.get('/userSeries', series.getUserSeries);
+
+
+    /**
+     * @swagger
+     *     /api/userSeriesWithOutTrash:
+     *     get:
+     *       tags:
+     *         - retrieve
+     *       summary: Return user's series without trash series.
+     *       description: Returns series for logged in user. These series are the ones user is listed as contributor.
+     *                    Published info of series is also returned.
+     *       responses:
+     *         200:
+     *           description: List of series.
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         500:
+     *           description: Internal server error, an error occurred.
+     */
+    router.get('/userSeriesWithOutTrash', series.getUserSeriesWithOutTrash);
 
 
     /**
@@ -618,6 +638,8 @@ module.exports = function (router) {
      *           description: Internal server error, an error occurred.
      */
     router.put('/event/:id/deletionDate', event.updateEventDeletionDate);
+
+    router.get('/licenses', licenseService.getLicenses);
 
     /**
      * @swagger
