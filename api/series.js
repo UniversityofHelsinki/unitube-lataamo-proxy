@@ -84,7 +84,8 @@ exports.getUserSeriesDropDownList = async (req, res) => {
         const loggedUser = userService.getLoggedUser(req.user);
         const userSeries = await apiService.getUserSeries(loggedUser);
         const userSeriesWithoutTrash = await seriesService.filterTrashSeries(userSeries);
-        res.json(userSeriesWithoutTrash);
+        const userSeriesWithoutInbox = await seriesService.filterInboxSeries(userSeriesWithoutTrash, loggedUser);
+        res.json(userSeriesWithoutInbox);
     } catch (error) {
         res.status(500);
         const msg = error.message;
