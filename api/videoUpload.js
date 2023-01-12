@@ -12,6 +12,8 @@ const jobsService = require('../service/jobsService');
 const HttpStatus = require('http-status');
 const dbApi = require("./dbApi");
 const moment = require('moment');
+const logger = require("../config/winstonLogger");
+const dbService = require("../service/dbService");
 
 const ERROR_LEVEL = 'error';
 const INFO_LEVEL = 'info';
@@ -101,10 +103,26 @@ exports.upload = async (req, res) => {
 
     let archivedDate;
     let identifier;
+    let selectedSeries;
+    let description;
+    let license;
+    let title;
 
     req.busboy.on('field', (fieldname, val)  => {
         if (fieldname === 'archivedDate') {
             archivedDate = moment(new Date(val));
+        }
+        if (fieldname === 'selectedSeries') {
+            selectedSeries = val;
+        }
+        if (fieldname === 'title') {
+            title = val;
+        }
+        if (fieldname === 'description') {
+            description = val;
+        }
+        if (fieldname === 'license') {
+            license = val;
         }
     });
 
@@ -133,20 +151,32 @@ exports.upload = async (req, res) => {
             res.json({id: uploadId, status: constants.JOB_STATUS_STARTED});
 
             // try to send the file to opencast
-            const response = await apiService.uploadVideo(filePathOnDisk, filename, inboxSeries.identifier);
+            const response = await apiService.uploadVideo(filePathOnDisk, filename, selectedSeries ? selectedSeries : inboxSeries.identifier, description, title);
 
             if (response && response.status === HttpStatus.CREATED) {
+                identifier = response.data.identifier;
                 // on success clean file from disk and return 200
                 await deleteFile(uploadPath, uploadId);
                 await jobsService.setJobStatus(uploadId, constants.JOB_STATUS_FINISHED);
                 uploadLogger.log(INFO_LEVEL,
                     `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)} USER: ${req.user.eppn} -- ${uploadId}`);
-                identifier = response.data.identifier;
 
                 const video = {identifier: identifier, created: new Date(), archivedDate: archivedDate};
                 await dbApi.insertArchiveAndVideoCreationDatesForVideoUpload(video);
-
                 res.status(HttpStatus.OK);
+
+                // republish metadata in background operation
+                const metadata = {title : title, isPartOf : selectedSeries ? selectedSeries : inboxSeries.identifier, description: description, license : license };
+                const updateEventMetadataResponse = await apiService.updateEventMetadata(metadata, identifier, false, req.user.eppn);
+
+                if (updateEventMetadataResponse.status === 200) {
+                    logger.info(`update event metadata for VIDEO ${identifier} USER ${req.user.eppn} OK`);
+                } else if (updateEventMetadataResponse.status === 403){
+                    logger.warn(`update event metadata for VIDEO ${identifier} USER ${req.user.eppn} failed ${updateEventMetadataResponse.statusText}`);
+                } else {
+                    logger.warn(`update event metadata for VIDEO ${identifier} USER ${req.user.eppn} failed ${updateEventMetadataResponse.statusText}`);
+                }
+
             } else {
                 // on failure clean file from disk and return 500
                 await deleteFile(uploadPath, uploadId);

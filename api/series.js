@@ -117,6 +117,26 @@ exports.getUserSeries = async (req, res) => {
     }
 };
 
+exports.getUserSeriesWithOutTrash = async (req, res) => {
+    try {
+        logger.info(`GET /userSeries USER: ${req.user.eppn}`);
+        const loggedUser = userService.getLoggedUser(req.user);
+        const userSeries = await apiService.getUserSeries(loggedUser);
+        const userSeriesWithoutTrash = await seriesService.filterTrashSeries(userSeries);
+        const seriesWithAllEventsCount = await eventsService.getAllSeriesEventsCount(userSeriesWithoutTrash);
+        const userSeriesWithPublicity = await seriesService.addPublicityStatusToSeries(seriesWithAllEventsCount);
+        res.json(userSeriesWithPublicity);
+    } catch (error) {
+        res.status(500);
+        const msg = error.message;
+        logger.error(`Error GET /userSeries ${msg} USER ${req.user.eppn}`);
+        res.json({
+            message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_SERIES_LIST_FOR_USER,
+            msg
+        });
+    }
+};
+
 exports.createSeries = async (req, res) => {
     try {
         let series = req.body;
