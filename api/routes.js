@@ -160,6 +160,44 @@ module.exports = function (router) {
 
     /**
      * @swagger
+     *     /api/series/acl/{id}:
+     *     put:
+     *       tags:
+     *         - update
+     *       summary: Updates videos acls in series by ID.
+     *       consumes:
+     *         - application/json
+     *       parameters:
+     *         - in: body
+     *           description: The series to be updated.
+     *           schema:
+     *             type: object
+     *             required:
+     *               - identifier
+     *               - title
+     *               - isPartOf
+     *             properties:
+     *               identifier:
+     *                 type: string
+     *                 description: id of the series
+     *               title:
+     *                 type: string
+     *                 description: title of the series AKA the name
+     *               description:
+     *                 type: string
+     *                 description: description for the series
+     *       responses:
+     *         200:
+     *           description: OK
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         500:
+     *           description: Internal server error, an error occurred.
+     */
+    router.put('/series/acl/:id', series.updateSeriesAcls);
+
+    /**
+     * @swagger
      *     /api/series/{id}:
      *     delete:
      *       tags:
