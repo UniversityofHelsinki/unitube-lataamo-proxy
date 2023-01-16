@@ -49,12 +49,13 @@ exports.getUserVideosBySelectedSeries = async (req, res) => {
         const selectedSeries = req.params.selectedSeries;
         const loggedUser = userService.getLoggedUser(req.user);
         const allEventsWithMetaData = await eventsService.getAllEventsBySeriesIdentifier(selectedSeries);
-        const filteredAllEventsWithMetaData = allEventsWithMetaData.filter(item => item);
-        const concatenatedEventsArray = eventsService.concatenateArray(filteredAllEventsWithMetaData);
-        await getArchivedDate(concatenatedEventsArray);
+        console.log(allEventsWithMetaData);
+        // const filteredAllEventsWithMetaData = allEventsWithMetaData.filter(item => item);
+        // const concatenatedEventsArray = eventsService.concatenateArray(filteredAllEventsWithMetaData);
+        await getArchivedDate(allEventsWithMetaData);
         // insert removal date to postgres db
-        await dbService.insertArchivedAndCreationDates(concatenatedEventsArray, loggedUser);
-        res.json(eventsService.filterEventsForClientList(concatenatedEventsArray, loggedUser));
+        await dbService.insertArchivedAndCreationDates(allEventsWithMetaData, loggedUser);
+        res.json(eventsService.filterEventsForClientList(allEventsWithMetaData, loggedUser));
     } catch (error) {
         res.status(500);
         const msg = error.message;
