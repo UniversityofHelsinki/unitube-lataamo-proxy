@@ -9,6 +9,7 @@ const SUCCESS_MESSAGE_TO_UPDATE_EVENT_DELETION_DATE = 'success_to_update_deletio
 const ERROR_MESSAGE_FAILED_TO_GET_EVENT_VIDEO_URL = 'error-failed-to-get-event-video-url';
 const ERROR_MESSAGE_FAILED_TO_GET_SERIES_DETAILS = 'error-failed-to-get-series-details';
 const ERROR_MESSAGE_FAILED_TO_UPDATE_SERIES_DETAILS = 'error-failed-to-update-series-details';
+const ERROR_MESSAGE_FAILED_TO_UPDATE_SERIES_ACLS = 'error-failed-to-update-series-acls';
 const ERROR_MESSAGE_FAILED_TO_GET_SERIES_LIST_FOR_USER = 'error-failed-to-get-series-list-for-user';
 const ERROR_MESSAGE_FAILED_TO_GET_EVENT_LIST_FOR_USER = 'error-failed-to-get-event-list-for-user';
 const ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO = 'error-failed-to-upload-video';
@@ -40,6 +41,7 @@ module.exports = {
     ERROR_MESSAGE_FAILED_TO_GET_EVENT_VIDEO_URL,
     ERROR_MESSAGE_FAILED_TO_GET_SERIES_DETAILS,
     ERROR_MESSAGE_FAILED_TO_UPDATE_SERIES_DETAILS,
+    ERROR_MESSAGE_FAILED_TO_UPDATE_SERIES_ACLS,
     ERROR_MESSAGE_FAILED_TO_GET_SERIES_LIST_FOR_USER,
     ERROR_MESSAGE_FAILED_TO_GET_EVENT_LIST_FOR_USER,
     ERROR_MESSAGE_FAILED_TO_UPLOAD_VIDEO,

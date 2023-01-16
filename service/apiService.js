@@ -487,6 +487,40 @@ exports.updateEventMetadata = async (metadata, eventId, isTrash, user) => {
     }
 };
 
+exports.republishMetaData = async (eventId) => {
+    // republish paths
+    const republishMetadataUrl = '/workflow/start';
+    const mediaPackageUrl = '/assets/episode/' + eventId;
+    // get mediapackage for the republish query
+    const response3 = await security.opencastBase.get(mediaPackageUrl);
+    if (response3.status !== 200) {
+        return {
+            status: response3.status,
+            statusText: response3.statusText,
+            eventId: eventId
+        };
+    }
+
+    // form data for the republish request
+    let bodyFormData = new FormData();
+    bodyFormData.append('definition', 'republish-metadata');
+    bodyFormData.append('mediapackage', response3.data);
+    bodyFormData.append('properties', constants.PROPERTIES_REPUBLISH_METADATA);
+
+    let headers = {
+        ...bodyFormData.getHeaders(),
+        'Content-Length': bodyFormData.getLengthSync()
+    };
+    // do the republish request
+    const resp = await security.opencastBase.post(republishMetadataUrl, bodyFormData, {headers});
+
+    return {
+        status: resp.status,
+        statusText: resp.statusText,
+        eventId: eventId
+    };
+};
+
 exports.createSeries = async (user, seriesMetadata, seriesAcl) => {
     const seriesUploadUrl = constants.OCAST_SERIES_PATH;
     let bodyFormData = new FormData();
