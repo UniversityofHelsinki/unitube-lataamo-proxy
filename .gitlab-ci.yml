@@ -85,7 +85,7 @@ deploy_dev:
   environment:
     name: development
   only:
-    - lataamo-811
+    - master
   except:
     # Skip deploy when scheduled npm audit and outdated scans are executed.
     - schedules
