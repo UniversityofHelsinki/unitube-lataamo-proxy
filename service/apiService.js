@@ -6,11 +6,13 @@ const constants = require('../utils/constants');
 const {seriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
 const logger = require('../config/winstonLogger');
 const eventsService = require('./eventsService');
-const messageKeys = require('../utils/message-keys');
 const fetch = require('node-fetch');
 const { parseContributor } = require('./userService');
 const { filterCorrectSeriesWithCorrectContributors, transformResponseData, isContributorMigrationActive } =
     require('../utils/ocastMigrationUtils');
+const {v4: uuidv4} = require("uuid");
+const uploadLogger = require("../config/uploadLogger");
+const jobsService = require("./jobsService");
 
 //
 // This file is the façade for opencast server
@@ -35,14 +37,10 @@ exports.getEventsByIdentifier = async (identifier) => {
 };
 
 exports.getEventsBySeriesIdentifier = async (identifier) => {
-    try {
-        let userEventsUrl = constants.OCAST_VIDEOS_PATH + constants.OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER;
-        userEventsUrl = userEventsUrl + identifier + constants.OCAST_VIDEOS_WITH_METADATA_ACLS_AND_PUBLICATIONS;
-        const response = await security.opencastBase.get(userEventsUrl);
-        return response.data;
-    } catch (e) {
-        console.log(e);
-    }
+    let userEventsUrl = constants.OCAST_VIDEOS_PATH + constants.OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER;
+    userEventsUrl = userEventsUrl + identifier + constants.OCAST_VIDEOS_WITH_METADATA_ACLS_AND_PUBLICATIONS;
+    const response = await security.opencastBase.get(userEventsUrl);
+    return response.data;
 };
 
 exports.getEventsWithSeriesByIdentifier = async (series) => {
@@ -399,19 +397,23 @@ exports.updateEventAcl = async (event, acl) => {
 
 exports.updateEventMetadata = async (metadata, eventId, isTrash, user) => {
     try {
-        // check event transaction status
-        // http://localhost:8080/admin-ng/event/99f13fe3-2e07-4cbf-bf1e-789e1f0c2a5e/hasActiveTransaction
-        const transactionStatusPath = constants.OCAST_EVENT_MEDIA_PATH_PREFIX + eventId + '/hasActiveTransaction';
-        const response1 = await security.opencastBase.get(transactionStatusPath);
+        const updateEventMetadataId = uuidv4();
+        logger.info(`Update event metadata for video started. USER: ${user} -- ${updateEventMetadataId}`);
+        // set upload job status
+        await jobsService.setJobStatus(updateEventMetadataId, constants.JOB_STATUS_STARTED);
+        while (await jobsService.getJob(updateEventMetadataId) != null) {
+            const transactionStatusPath = constants.OCAST_EVENT_MEDIA_PATH_PREFIX + eventId + '/hasActiveTransaction';
+            let transactionResponse = await security.opencastBase.get(transactionStatusPath);
 
-        if (response1.data && response1.data.active === true) {
-            // transaction active, return
-            return {
-                status: 403,
-                statusText: messageKeys.ERROR_MESSAGE_FAILED_TO_UPDATE_EVENT_DETAILS,
-                eventId: eventId
-            };
+            if (transactionResponse.data && transactionResponse.data.active !== true) {
+                await jobsService.removeJob(updateEventMetadataId);
+                break;
+            } else {
+                // transaction active, try again after minute
+                await new Promise(resolve => setTimeout(resolve, 60000));
+            }
         }
+
         const videoMetaDataUrl = constants.OCAST_VIDEOS_PATH + eventId + constants.OCAST_METADATA_PATH + constants.OCAST_TYPE_QUERY_PARAMETER + constants.OCAST_TYPE_DUBLINCORE_EPISODE;
         if (isTrash) {
             const trashSeriesUrl = constants.OCAST_SERIES_PATH + constants.OCAST_VIDEOS_FILTER_USER_NAME + encodeURI(constants.TRASH + ' ' + user.eppn);
@@ -440,7 +442,7 @@ exports.updateEventMetadata = async (metadata, eventId, isTrash, user) => {
         const response2 = await security.opencastBase.put(videoMetaDataUrl, bodyFormData, {headers});
 
         // let's break if response from PUT not ok
-        if(response2.status !== 204){
+        if (response2.status !== 204){
             return {
                 status: response2.status,
                 statusText: response2.statusText,
@@ -473,6 +475,8 @@ exports.updateEventMetadata = async (metadata, eventId, isTrash, user) => {
         // do the republish request
         const resp = await security.opencastBase.post(republishMetadataUrl, bodyFormData, {headers});
 
+        logger.info(`Update event metadata for video finished. USER: ${user} -- ${updateEventMetadataId}`);
+
         return {
             status: resp.status,
             statusText: resp.statusText,
@@ -481,6 +485,40 @@ exports.updateEventMetadata = async (metadata, eventId, isTrash, user) => {
     } catch (error) {
         throw error;
     }
+};
+
+exports.republishMetaData = async (eventId) => {
+    // republish paths
+    const republishMetadataUrl = '/workflow/start';
+    const mediaPackageUrl = '/assets/episode/' + eventId;
+    // get mediapackage for the republish query
+    const response3 = await security.opencastBase.get(mediaPackageUrl);
+    if (response3.status !== 200) {
+        return {
+            status: response3.status,
+            statusText: response3.statusText,
+            eventId: eventId
+        };
+    }
+
+    // form data for the republish request
+    let bodyFormData = new FormData();
+    bodyFormData.append('definition', 'republish-metadata');
+    bodyFormData.append('mediapackage', response3.data);
+    bodyFormData.append('properties', constants.PROPERTIES_REPUBLISH_METADATA);
+
+    let headers = {
+        ...bodyFormData.getHeaders(),
+        'Content-Length': bodyFormData.getLengthSync()
+    };
+    // do the republish request
+    const resp = await security.opencastBase.post(republishMetadataUrl, bodyFormData, {headers});
+
+    return {
+        status: resp.status,
+        statusText: resp.statusText,
+        eventId: eventId
+    };
 };
 
 exports.createSeries = async (user, seriesMetadata, seriesAcl) => {
@@ -507,15 +545,13 @@ exports.createSeries = async (user, seriesMetadata, seriesAcl) => {
 //     "identifier": "9ad24ff8-abda-4681-8f02-184b49364677"
 // }
 // from opencast server
-exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) => {
+exports.uploadVideo = async (filePathOnDisk, videoFilename, userSeriesId, videoDescription, videoTitle) => {
     const videoUploadUrl = constants.OCAST_VIDEOS_PATH;
-    const videoDescription = '';
     const timeZone = 'Europe/Helsinki';
     const utcDate = zonedTimeToUtc(Date.now(), timeZone);
     const startDate = utcDate.toISOString().split("T")[0];
     const startTime = utcDate.toISOString().split("T")[1];
-
-    const inboxSeriesId = inboxUserSeriesId;  // User's INBOX series id
+    const selectedSeriesId = userSeriesId;  // user selected series id
 
     // refactor this array to constants.js
     const metadataArray = [
@@ -524,7 +560,7 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
             'fields': [
                 {
                     'id': 'title',
-                    'value': videoFilename
+                    'value': videoTitle
                 },
                 {
                     'id': 'subjects',
@@ -533,6 +569,10 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
                 {
                     'id': 'description',
                     'value': videoDescription
+                },
+                {
+                    'id': 'license',
+                    'value': '',
                 },
                 {
                     'id': 'startDate',
@@ -545,7 +585,7 @@ exports.uploadVideo = async (filePathOnDisk, videoFilename, inboxUserSeriesId) =
                 {
                     'id': 'isPartOf',
                     'type': 'text',
-                    'value': inboxSeriesId
+                    'value': selectedSeriesId
                 }
             ]
         }

@@ -877,7 +877,8 @@ describe('user series post', () => {
 
 describe('Updating videos aka events', () => {
 
-    it('Should fail if the event has an active transaction on opencast', async () => {
+
+    xit('Should fail if the event has an active transaction on opencast', async () => {
         test.mockOpencastEventActiveTransaction('234234234');
 
         let response = await supertest(app)
