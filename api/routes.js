@@ -352,6 +352,25 @@ module.exports = function (router) {
      */
     router.get('/userVideos', video.getUserVideos);
 
+
+    /**
+     * @swagger
+     *     /api/userVideosBySelectedSeries:
+     *     get:
+     *       tags:
+     *         - retrieve
+     *       summary: Returns user's videos by selected series.
+     *       description: Returns videos for logged user. Returns the videos that are selected by user.
+     *       responses:
+     *         200:
+     *           description: List of videos.
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         500:
+     *           description: Internal server error, an error occurred.
+     */
+    router.get('/userVideosBySelectedSeries/:selectedSeries', video.getUserVideosBySelectedSeries);
+
     /**
      * @swagger
      *     /api/userVideos:
