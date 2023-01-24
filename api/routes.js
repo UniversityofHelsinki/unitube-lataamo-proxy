@@ -10,10 +10,10 @@ const videoUpload = require('./videoUpload');
 const iamGroups = require('./iamGroups');
 const persons = require('./persons');
 const jobs = require('./jobs');
-
+const licenseService = require('../service/licenseService');
 
 const swaggerUi = require('swagger-ui-express');
-const apiSpecs = require('../config/swagger'); // swagger config
+const apiSpecs = require('../config/swagger');
 
 module.exports = function (router) {
     // https://www.npmjs.com/package/swagger-ui-express
@@ -160,6 +160,44 @@ module.exports = function (router) {
 
     /**
      * @swagger
+     *     /api/series/acl/{id}:
+     *     put:
+     *       tags:
+     *         - update
+     *       summary: Updates videos acls in series by ID.
+     *       consumes:
+     *         - application/json
+     *       parameters:
+     *         - in: body
+     *           description: The series to be updated.
+     *           schema:
+     *             type: object
+     *             required:
+     *               - identifier
+     *               - title
+     *               - isPartOf
+     *             properties:
+     *               identifier:
+     *                 type: string
+     *                 description: id of the series
+     *               title:
+     *                 type: string
+     *                 description: title of the series AKA the name
+     *               description:
+     *                 type: string
+     *                 description: description for the series
+     *       responses:
+     *         200:
+     *           description: OK
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         500:
+     *           description: Internal server error, an error occurred.
+     */
+    router.put('/series/acl/:id', series.updateSeriesAcls);
+
+    /**
+     * @swagger
      *     /api/series/{id}:
      *     delete:
      *       tags:
@@ -169,7 +207,7 @@ module.exports = function (router) {
      *         - application/json
      *       parameters:
      *         - in: path
-     *           name: id 
+     *           name: id
      *           required: true
      *           description: ID of the serie to delete
      *       responses:
@@ -189,7 +227,7 @@ module.exports = function (router) {
      *       tags:
      *         - retrieve
      *       summary: Return user's inbox events.
-     *       description: Returns inbox series events for logged in user.
+     *       description: Returns inbox series events for logged in user.
      *       responses:
      *         200:
      *           description: List of inbox series events.
@@ -259,6 +297,26 @@ module.exports = function (router) {
 
     /**
      * @swagger
+     *     /api/userSeriesWithOutTrash:
+     *     get:
+     *       tags:
+     *         - retrieve
+     *       summary: Return user's series without trash series.
+     *       description: Returns series for logged in user. These series are the ones user is listed as contributor.
+     *                    Published info of series is also returned.
+     *       responses:
+     *         200:
+     *           description: List of series.
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         500:
+     *           description: Internal server error, an error occurred.
+     */
+    router.get('/userSeriesWithOutTrash', series.getUserSeriesWithOutTrash);
+
+
+    /**
+     * @swagger
      *     /api/userSeries:
      *     get:
      *       tags:
@@ -293,6 +351,25 @@ module.exports = function (router) {
      *           description: Internal server error, an error occurred.
      */
     router.get('/userVideos', video.getUserVideos);
+
+
+    /**
+     * @swagger
+     *     /api/userVideosBySelectedSeries:
+     *     get:
+     *       tags:
+     *         - retrieve
+     *       summary: Returns user's videos by selected series.
+     *       description: Returns videos for logged user. Returns the videos that are selected by user.
+     *       responses:
+     *         200:
+     *           description: List of videos.
+     *         401:
+     *           description: Not authenticated. Required Shibboleth headers not present in the request.
+     *         500:
+     *           description: Internal server error, an error occurred.
+     */
+    router.get('/userVideosBySelectedSeries/:selectedSeries', video.getUserVideosBySelectedSeries);
 
     /**
      * @swagger
@@ -618,4 +695,36 @@ module.exports = function (router) {
      *           description: Internal server error, an error occurred.
      */
     router.put('/event/:id/deletionDate', event.updateEventDeletionDate);
+
+    router.get('/licenses', licenseService.getLicenses);
+
+    /**
+     * @swagger
+     *     /api/event/:id/updateArchivedDateOfVideosInSerie:
+     *     put:
+     *       tags:
+     *         - update
+     *       summary: Updates archived_date by serieId and given archived_date.
+     *       consumes:
+     *         - application/json
+     *       parameters:
+     *         - in: body
+     *           description: The archived_date to be updated.
+     *           schema:
+     *             type: object
+     *             required:
+     *               - identifier
+     *             properties:
+     *               identifier:
+     *                 type: string
+     *                 description: id of the series
+     *       responses:
+     *         200:
+     *           description: OK
+     *         404:
+     *           description: Video not found. Video id wrong or video id is not found.
+     *         500:
+     *           description: Internal server error, an error occurred.
+     */
+    router.put('/event/:id/updateArchivedDateOfVideosInSerie', video.updateArchivedDateOfVideosInSerie);
 };

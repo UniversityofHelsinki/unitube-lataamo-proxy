@@ -14,6 +14,7 @@ const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 const { parseSync, stringifySync } = require('subtitle');
 const dbService = require("../service/dbService");
 const constants = require("../utils/constants");
+const dbApi = require("./dbApi");
 
 
 exports.getVideoUrl = async (req, res) => {
@@ -42,6 +43,27 @@ exports.getVideoUrl = async (req, res) => {
     }
 };
 
+exports.getUserVideosBySelectedSeries = async (req, res) => {
+    try {
+        logger.info(`GET /userVideosBySelectedSeries USER: ${req.user.eppn} , selected series : ${req.params.selectedSeries}` );
+        const selectedSeries = req.params.selectedSeries;
+        const loggedUser = userService.getLoggedUser(req.user);
+        const allEventsWithMetaData = await eventsService.getAllEventsBySeriesIdentifier(selectedSeries);
+        await getArchivedDate(allEventsWithMetaData);
+        // insert removal date to postgres db
+        await dbService.insertArchivedAndCreationDates(allEventsWithMetaData, loggedUser);
+        res.json(eventsService.filterEventsForClientList(allEventsWithMetaData, loggedUser));
+    } catch (error) {
+        res.status(500);
+        const msg = error.message;
+        logger.error(`Error GET /userVideos ${error} ${msg} USER ${req.user.eppn}`);
+        res.json({
+            message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_LIST_FOR_USER,
+            msg
+        });
+    }
+};
+
 exports.getUserVideos = async (req, res) => {
     try {
         logger.info(`GET /userVideos USER: ${req.user.eppn}`);
@@ -52,6 +74,7 @@ exports.getUserVideos = async (req, res) => {
         const allEventsWithMetaData = await eventsService.getAllEventsBySeriesIdentifiers(seriesIdentifiers);
         const filteredAllEventsWithMetaData = allEventsWithMetaData.filter(item => item);
         const concatenatedEventsArray = eventsService.concatenateArray(filteredAllEventsWithMetaData);
+        await getArchivedDate(concatenatedEventsArray);
         // insert removal date to postgres db
         await dbService.insertArchivedAndCreationDates(concatenatedEventsArray, loggedUser);
         res.json(eventsService.filterEventsForClientList(concatenatedEventsArray, loggedUser));
@@ -63,6 +86,54 @@ exports.getUserVideos = async (req, res) => {
             message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_LIST_FOR_USER,
             msg
         });
+    }
+};
+
+exports.updateArchivedDateOfVideosInSerie = async (req, res) => {
+    try {
+        logger.info(`PUT /updateArchivedDateOfVideosInSerie USER: ${req.user.eppn}`);
+        const loggedUser = userService.getLoggedUser(req.user);
+        const seriesIdentifier = req.params.id;
+        const rawEventDeletionDateMetadata = req.body;
+        const allEventsWithMetaData = await eventsService.getAllSerieEvents(seriesIdentifier);
+
+        if (allEventsWithMetaData && allEventsWithMetaData.length > 0) {
+            for (const video of allEventsWithMetaData) {
+                logger.info(`insert deletion date with id : ${video.identifier}`);
+                let response = await dbService.updateArchivedDate(video.identifier, rawEventDeletionDateMetadata, loggedUser);
+                if (response.status === 200) {
+                    logger.info(`PUT video deletion date /event/:id/updateArchivedDateOfVideosInSerie VIDEO ${req.params.id} USER ${req.user.eppn} OK`);
+                    await dbService.clearNotificationSentAt(video.identifier, loggedUser);
+                } else if (response.status === 404) {
+                    logger.warn(`PUT video deletion date /event/:id/updateArchivedDateOfVideosInSerie VIDEO ${req.params.id} USER ${req.user.eppn} ${response.statusText}`);
+                } else {
+                    logger.error(`PUT video deletion date /event/:id/updateArchivedDateOfVideosInSerie VIDEO ${req.params.id} USER ${req.user.eppn} ${response.statusText}`);
+                }
+            }
+            res.json({message: 'OK'});
+        }
+    } catch (error) {
+        res.status(500);
+        const msg = error.message;
+        logger.error(`Error PUT /updateArchivedDateOfVideosInSerie ${error} ${msg} USER ${req.user.eppn}`);
+        res.json({
+            message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_LIST_FOR_USER,
+            msg
+        });
+    }
+};
+
+const getArchivedDate = async (concatenatedEventsArray) => {
+
+    for (const element of concatenatedEventsArray) {
+        try {
+            let archived_date = await dbApi.returnArchivedDateFromDb(element.identifier);
+            if (archived_date.rows.length === 1) {
+                element.archived_date = [...archived_date.rows][0].archived_date;
+            }
+        } catch (error) {
+            logger.error(`error reading archived_date with video_id ` + element.identifier);
+        }
     }
 };
 
@@ -78,7 +149,7 @@ const isReturnedFromTrash = (video) => {
 exports.updateVideo = async (req, res) => {
     try {
         logger.info(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn}`);
-
+        const loggedUser = userService.getLoggedUser(req.user);
         const rawEventMetadata = req.body;
         const response = await apiService.updateEventMetadata(rawEventMetadata, req.body.identifier, false, req.user);
 
@@ -92,6 +163,8 @@ exports.updateVideo = async (req, res) => {
 
         if (isReturnedFromTrash(rawEventMetadata)) {
             await dbService.updateVideoToActiveState(req.body.identifier, req.user.eppn);
+            await dbService.updateSkipEmailStatus(req.body.identifier, loggedUser, false);
+            await dbService.clearNotificationSentAt(req.body.identifier, loggedUser);
         }
 
         res.status(response.status);
