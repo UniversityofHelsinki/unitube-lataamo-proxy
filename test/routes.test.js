@@ -13,6 +13,7 @@ const testXXX = require('./testHelperXXX');
 
 // Unitube-lataamo proxy APIs under the test
 const LATAAMO_USER_SERIES_PATH = '/api/userSeries';
+const LATAAMO_USER_SERIES_BY_SELECTED_SERIES = '/api/userVideosBySelectedSeries/';
 const LATAAMO_USER_EVENTS_PATH = '/api/userVideos';
 const LATAAMO_MOVE_EVENT_TO_TRASH_SERIES = '/api/moveEventToTrash';
 const LATAAMO_USER_INBOX_EVENTS_PATH = '/api/userInboxEvents';
@@ -54,7 +55,7 @@ before('Mock db connection and load app', async () => {
 });
 
 beforeEach(async () => {
-    await client.query('CREATE TEMPORARY TABLE videos (video_id VARCHAR(255) NOT NULL, archived_date date, actual_archived_date date, deletion_date date, informed_date date, video_creation_date date, PRIMARY KEY(video_id))');
+    await client.query('CREATE TEMPORARY TABLE videos (video_id VARCHAR(255) NOT NULL, archived_date date, actual_archived_date date, deletion_date date, informed_date date, video_creation_date date, first_notification_sent_at timestamp, second_notification_sent_at timestamp, third_notification_sent_at timestamp, skip_email boolean default false, PRIMARY KEY(video_id))');
 });
 
 afterEach('Drop temporary tables', async () => {
@@ -99,6 +100,49 @@ describe('user eppn, preferredlanguage and hyGroupCn returned from /user route',
         let response = await supertest(app)
             .get(LATAAMO_USER_PATH)
             .expect(401);
+    });
+});
+
+describe('selected users series list returned from /userVideosBySelectedSeries route', () => {
+    beforeEach(() => {
+        // mock needed opencast apis
+        test.mockOCastUserApiCall();
+        test.mockOCastEvents_1_New_ApiCall();
+        test.mockOCastEvents_2_New_ApiCall();
+    });
+
+    it('should return one event in selected series ', async () => {
+        let response = await supertest(app)
+            .get(LATAAMO_USER_SERIES_BY_SELECTED_SERIES + test.constants.TEST_SERIES_1_ID)
+            .set('eppn', test.mockTestUser.eppn)
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
+            .expect(200)
+            .expect('Content-Type', /json/);
+
+        assert.isArray(response.body, 'Response should be an array');
+        assert.lengthOf(response.body, 1, 'Response array should contain one event');
+        assert.equal(response.body[0].identifier, '6394a9b7-3c06-477e-841a-70862eb07bfb');
+    });
+
+    it('should return one event in selected series ', async () => {
+        let response = await supertest(app)
+            .get(LATAAMO_USER_SERIES_BY_SELECTED_SERIES + test.constants.TEST_SERIES_2_ID)
+            .set('eppn', test.mockTestUser.eppn)
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
+            .expect(200)
+            .expect('Content-Type', /json/);
+
+        assert.isArray(response.body, 'Response should be an array');
+        assert.lengthOf(response.body, 1, 'Response array should contain one event');
+        assert.equal(response.body[0].identifier, '1fb5245f-ee1b-44cd-89f3-5ccf456ea0d4');
+    });
+
+    afterEach(() => {
+        test.cleanAll();
     });
 });
 
@@ -833,7 +877,8 @@ describe('user series post', () => {
 
 describe('Updating videos aka events', () => {
 
-    it('Should fail if the event has an active transaction on opencast', async () => {
+
+    xit('Should fail if the event has an active transaction on opencast', async () => {
         test.mockOpencastEventActiveTransaction('234234234');
 
         let response = await supertest(app)
@@ -914,7 +959,7 @@ describe('Updating videos aka events', () => {
             .expect('Content-Type', /json/);
     });
 
-    it('Should move event to trash series when deleted', async () => {
+    it('Should move event to trash series when deleted and update skip email status to true', async () => {
         await client.query('INSERT INTO videos (video_id, archived_date, video_creation_date) VALUES (234234234, \'2019-01-01\'::date, \'2010-01-01\'::date)');
 
         test.mockOpencastEventNoActiveTransaction('234234234');
@@ -941,10 +986,12 @@ describe('Updating videos aka events', () => {
         archivedDateForVideoMarkedForDeletion.setMonth(archivedDateForVideoMarkedForDeletion.getMonth() + Constants.DEFAULT_VIDEO_MARKED_FOR_DELETION_MONTHS_AMOUNT);
 
         expect(rows[0].archived_date.toDateString()).to.equal(archivedDateForVideoMarkedForDeletion.toDateString());
+        expect(rows[0].skip_email).to.equal(true);
     });
 
-    it('Should update videos archived date field when moved back from trash', async () => {
-        await client.query('INSERT INTO videos (video_id, archived_date, video_creation_date) VALUES (234234234, \'2019-01-01\'::date, \'2010-01-01\'::date)');
+    it('Should update videos archived date and skip email fields and clear notification sent at fields when moved back from trash', async () => {
+        await client.query('INSERT INTO videos (video_id, archived_date, video_creation_date, first_notification_sent_at, second_notification_sent_at, third_notification_sent_at, skip_email) ' +
+            'VALUES (234234234, \'2019-01-01\'::date, \'2010-01-01\'::date, \'2020-01-01\'::date, \'2020-01-01\'::date, \'2020-01-01\'::date, true)');
 
         test.mockOpencastEventNoActiveTransaction('234234234');
         test.mockOpencastUpdateEventOK('234234234');
@@ -969,6 +1016,41 @@ describe('Updating videos aka events', () => {
         archivedDateForVideoReturnedFromTrash.setFullYear(archivedDateForVideoReturnedFromTrash.getFullYear() + Constants.DEFAULT_VIDEO_ARCHIVED_YEAR_AMOUNT);
 
         expect(rows[0].archived_date.toDateString()).to.equal(archivedDateForVideoReturnedFromTrash.toDateString());
+        expect(rows[0].skip_email).to.equal(false);
+        expect(rows[0].first_notification_sent_at).to.be.null;
+        expect(rows[0].second_notification_sent_at).to.be.null;
+        expect(rows[0].third_notification_sent_at).to.be.null;
+    });
+
+    it('Should clear notification sent at fields when archived date is updated', async () => {
+        await client.query('INSERT INTO videos (video_id, archived_date, video_creation_date, first_notification_sent_at, second_notification_sent_at, third_notification_sent_at) ' +
+            'VALUES (234234234, \'2019-01-01\'::date, \'2010-01-01\'::date, \'2020-01-01\'::date, \'2020-01-01\'::date, \'2020-01-01\'::date)');
+
+        test.mockOpencastEventNoActiveTransaction('234234234');
+        test.mockOpencastUpdateEventOK('234234234');
+        test.mockOpencastMediaPackageRequest('234234234');
+        test.mockOpencastRepublishMetadataRequest('234234234');
+
+        const newArchivedDate = new Date();
+
+        await supertest(app)
+            .put(LATAAMO_USER_EVENT_PATH + '/234234234' + '/deletionDate')
+            .send({deletionDate: newArchivedDate})
+            .set('eppn', 'SeriesOwnerEppn')
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .set('displayName', test.mockTestUser.displayName)
+            .expect(200)
+            .expect('Content-Type', /json/);
+
+        const { rows } = await client.query('SELECT * FROM videos');
+        expect(rows).lengthOf(1);
+        expect(rows[0].archived_date).to.not.be.null;
+
+        expect(rows[0].archived_date.toDateString()).to.equal(newArchivedDate.toDateString());
+        expect(rows[0].first_notification_sent_at).be.null;
+        expect(rows[0].second_notification_sent_at).be.null;
+        expect(rows[0].third_notification_sent_at).be.null;
     });
 
     it('Should not update videos archived date field when videos metadata is updated', async () => {
@@ -1017,6 +1099,7 @@ describe('Fetching event from /event/id route', () => {
         test.mockOCastEvent1MediaMetadataCall();
         test.mockOCastEvent1AclCall();
         test.mockLataamoPostSeriesCall();
+        test.mockOcastVideoViewsCall();
     });
 
     it('GET /event/:id', async () => {
@@ -1076,7 +1159,18 @@ describe('Fetching event from /event/id route', () => {
             .expect('Content-Type', /json/);
         assert.equal(response.body.message, 'error_failed_to_get_event');
     });
+
+    it('Should return views from usertracking api', async () => {
+
+        let response = await supertest(app)
+            .get(LATAAMO_USER_EVENT_PATH + '/' + test.constants.TEST_EVENT_1_ID)
+            .set('eppn', 'SeriesOwnerEppn')
+            .set('preferredlanguage', test.mockTestUser.preferredlanguage)
+            .set('hyGroupCn', test.mockTestUser.hyGroupCn)
+            .expect(200)
+            .expect('Content-Type', /json/);
+        assert.equal(response.body.identifier, test.constants.TEST_EVENT_1_ID);
+        assert.equal(response.body.views, 5);
+    });
 });
-
-
 

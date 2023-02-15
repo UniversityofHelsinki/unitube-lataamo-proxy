@@ -51,7 +51,8 @@ exports.filterEventsForClientList = (ocResponseData, loggedUser) => {
                 'created': event.created,
                 'series': event.series,
                 'media': calculateMediaPropertyForVideoList(event, loggedUser),
-                'publications': _mapPublications(calculateMediaPropertyForVideoList(event, loggedUser), publicationService.filterApiChannelPublication(event.publications))
+                'publications': _mapPublications(calculateMediaPropertyForVideoList(event, loggedUser), publicationService.filterApiChannelPublication(event.publications)),
+                'archived_date': event.archived_date
             });
         });
 
@@ -214,6 +215,10 @@ exports.getAllEvents = async (seriesIdentifiers) => {
     return await Promise.all(seriesIdentifiers.map(identifier => apiService.getEventsByIdentifier(identifier)));
 };
 
+exports.getAllSerieEvents = async (seriesIdentifier) => {
+    return await apiService.getEventsByIdentifier(seriesIdentifier);
+};
+
 exports.getAllEventsBySeriesIdentifiers = async (seriesIdentifiers) => {
     try {
         const filteredUniqueSeriesIdentifiers = filterUniqueSeriesIdentifiers(seriesIdentifiers);
@@ -222,7 +227,7 @@ exports.getAllEventsBySeriesIdentifiers = async (seriesIdentifiers) => {
             return new Promise(resolve => {
                 setTimeout(() => {
                     resolve(apiService.getEventsBySeriesIdentifier(identifier));
-                }, 1000);
+                }, 500);
             });
         }));
 
@@ -518,6 +523,14 @@ const deleteFile = (filename) => {
             logger.info(`Removed ${filename}`);
         }
     });
+};
+
+exports.getEventViews = async (id, eventWithLicenseOptions) => {
+    const eventViews = await apiService.getEventViews(id);
+    return {
+        ...eventWithLicenseOptions,
+        views: eventViews.stats.views
+    };
 };
 
 /* Not in use

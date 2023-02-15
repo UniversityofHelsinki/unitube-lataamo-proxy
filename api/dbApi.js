@@ -3,6 +3,7 @@ const logger = require("../config/winstonLogger");
 const fs = require("fs");
 const path = require("path");
 const Constants = require("../utils/constants");
+const {options} = require('pg/lib/defaults');
 
 
 exports.returnVideoIdsFromDb = async (videos) => {
@@ -109,6 +110,26 @@ exports.updateVideoArchivedDate = async (videoId, deletionDate) => {
         return await database.query(updateVideoArchivedDateSQL, [archivedDate, videoId]);
     } catch (err) {
         logger.error(`Error updating deletion date for videoId : ${videoId} ${err} ${err.message}`);
+        throw err;
+    }
+};
+
+exports.updateSkipEmailStatus = async (video, skipEmailStatus) => {
+    try {
+        const updateSkipEmailStatusSQL =  fs.readFileSync(path.resolve(__dirname, "../sql/updateSkipEmailStatus.sql"), "utf8");
+        return await database.query(updateSkipEmailStatusSQL, [skipEmailStatus, video.video_id]);
+    } catch (err) {
+        logger.error(`Error updating skip email status ${skipEmailStatus} for videoId : ${video.video_id} ${err} ${err.message}`);
+        throw err;
+    }
+};
+
+exports.clearNotificationSentAt = async (video) => {
+    try {
+        const updateNotificationSentSQL =  fs.readFileSync(path.resolve(__dirname, "../sql/updateNotificationSent.sql"), "utf8");
+        return await database.query(updateNotificationSentSQL, [null, null, null, video.video_id]);
+    } catch (err) {
+        logger.error(`Error clearing notification sent status for videoId : ${video.video_id} ${err} ${err.message}`);
         throw err;
     }
 };

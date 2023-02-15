@@ -24,7 +24,9 @@ exports.getEvent = async (req, res) => {
         const eventWithDuration = eventsService.getDurationFromMediaFileMetadataForEvent(eventWithMediaFileMetadata);
         const eventWithLicense = eventsService.getLicenseFromEventMetadata(eventWithDuration);
         const eventWithLicenseOptions = licenseService.getLicenseOptions(eventWithLicense);
-        res.json(eventWithLicenseOptions);
+        const eventWithLicenseOptionsAndVideoViews = await eventsService.getEventViews(req.params.id, eventWithLicenseOptions);
+        res.json(eventWithLicenseOptionsAndVideoViews);
+        
     } catch (error) {
         const msg = error.message;
         logger.error(`Error GET /event/:id ${msg} VIDEO ${req.params.id} USER ${req.user.eppn}`);
@@ -138,6 +140,7 @@ exports.moveToTrash = async (req, res) =>{
         if (response.status === 200) {
             logger.info(`PUT /moveEventToTrash/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} OK`);
             await dbService.insertOrUpdateVideoArchivedDate(req.body.identifier, loggedUser);
+            await dbService.updateSkipEmailStatus(req.body.identifier, loggedUser, true);
         } else if (response.status === 403){
             logger.warn(`PUT /moveEventToTrash/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} ${response.statusText}`);
         } else {
@@ -179,11 +182,18 @@ exports.updateEventDeletionDate = async (req,res) => {
     try {
         logger.info(`PUT video deletion date /event/:id/deletionDate VIDEO ${req.params.id} USER: ${req.user.eppn}`);
         const rawEventDeletionDateMetadata = req.body;
+        const loggedUser = userService.getLoggedUser(req.user);
+
+        const isoDbDeletionDate = (await dbService.getArchivedDate(req.params.id)).toISOString();
+        const isoFormDeletionDate = req.body.deletionDate;
 
         const response = await dbService.updateArchivedDate(req.params.id, rawEventDeletionDateMetadata, req.user);
 
         if (response.status === 200) {
             logger.info(`PUT video deletion date /event/:id/deletionDate VIDEO ${req.params.id} USER ${req.user.eppn} OK`);
+            if (isoDbDeletionDate !== isoFormDeletionDate) {
+                await dbService.clearNotificationSentAt(req.params.id, loggedUser);
+            }
         } else if (response.status === 404){
             logger.warn(`PUT video deletion date /event/:id/deletionDate VIDEO ${req.params.id} USER ${req.user.eppn} ${response.statusText}`);
         }

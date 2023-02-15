@@ -78,6 +78,41 @@ exports.updateSeries = async (req, res) => {
     }
 };
 
+exports.updateSeriesAcls = async (req, res) => {
+    try {
+        const rawEventMetadata = req.body;
+        const loggedUser = userService.getLoggedUser(req.user);
+        seriesService.addUserToEmptyContributorsList(rawEventMetadata, loggedUser);
+        let modifiedSeriesAclMetadata = await seriesService.getSerieRoles(req.body.identifier);
+        const events = await eventsService.getAllEvents([req.body.identifier]);
+        const concatenatedEventsArray = eventsService.concatenateArray(events);
+
+        if (concatenatedEventsArray && concatenatedEventsArray.length > 0) {
+            await eventsService.updateEventAcl(concatenatedEventsArray, modifiedSeriesAclMetadata, req.body.identifier);
+        }
+
+        let videos = rawEventMetadata.eventColumns;
+        for (const item of videos) {
+            const response = await apiService.republishMetaData(item.id);
+            if (response.status === 200) {
+                logger.info(`PUT /series/acl/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} OK`);
+            } else if (response.status === 403){
+                logger.warn(`PUT /series/acl/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} ${response.statusText}`);
+            } else {
+                logger.error(`PUT /series/acl/:id VIDEO ${req.body.identifier} USER ${req.user.eppn} ${response.statusText}`);
+            }
+        }
+        res.json({message: 'OK'});
+    } catch (error) {
+        res.status(500);
+        const msg = error.message;
+        res.json({
+            message: messageKeys.ERROR_MESSAGE_FAILED_TO_UPDATE_SERIES_ACLS,
+            msg
+        });
+    }
+};
+
 exports.getUserSeriesDropDownList = async (req, res) => {
     try {
         logger.info(`GET /userSeries USER: ${req.user.eppn}`);
@@ -104,6 +139,26 @@ exports.getUserSeries = async (req, res) => {
         const userSeriesWithoutTrash = await seriesService.filterTrashSeries(userSeries);
         const userSeriesWithoutInbox = await seriesService.filterInboxSeries(userSeriesWithoutTrash, loggedUser);
         const seriesWithAllEventsCount = await eventsService.getAllSeriesEventsCount(userSeriesWithoutInbox);
+        const userSeriesWithPublicity = await seriesService.addPublicityStatusToSeries(seriesWithAllEventsCount);
+        res.json(userSeriesWithPublicity);
+    } catch (error) {
+        res.status(500);
+        const msg = error.message;
+        logger.error(`Error GET /userSeries ${msg} USER ${req.user.eppn}`);
+        res.json({
+            message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_SERIES_LIST_FOR_USER,
+            msg
+        });
+    }
+};
+
+exports.getUserSeriesWithOutTrash = async (req, res) => {
+    try {
+        logger.info(`GET /userSeries USER: ${req.user.eppn}`);
+        const loggedUser = userService.getLoggedUser(req.user);
+        const userSeries = await apiService.getUserSeries(loggedUser);
+        const userSeriesWithoutTrash = await seriesService.filterTrashSeries(userSeries);
+        const seriesWithAllEventsCount = await eventsService.getAllSeriesEventsCount(userSeriesWithoutTrash);
         const userSeriesWithPublicity = await seriesService.addPublicityStatusToSeries(seriesWithAllEventsCount);
         res.json(userSeriesWithPublicity);
     } catch (error) {
