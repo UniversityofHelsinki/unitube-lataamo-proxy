@@ -20,7 +20,7 @@ stages:
 setup:
   stage: setup
   tags:
-    - ohtu-build-1
+    - ohtu-build-3
   script:
     - npm install
 
@@ -28,7 +28,7 @@ setup:
 build:
   stage: build
   tags:
-    - ohtu-build-1
+    - ohtu-build-3
   script:
     - npm run build
 
@@ -44,7 +44,7 @@ test:
     POSTGRES_PASSWORD: ${PASSWORD}
     POSTGRES_HOST_AUTH_METHOD: trust
   tags:
-    - ohtu-build-1
+    - ohtu-build-3
   script:
     - npm run coverage
   coverage: /All files\s*\|\s*([\d\.]+)/
@@ -53,7 +53,7 @@ test:
 deploy_oc_test:
   stage: deploy
   tags:
-    - ohtu-build-1
+    - ohtu-build-3
   environment:
     name: development
   only:
@@ -82,7 +82,7 @@ deploy_oc_test:
 deploy_dev:
   stage: deploy
   tags:
-    - ohtu-build-1
+    - ohtu-build-3
   environment:
     name: development
   only:
@@ -113,7 +113,7 @@ deploy_dev:
 deploy_test:
   stage: deploy
   tags:
-    - ohtu-build-1
+    - ohtu-build-3
   environment:
     name: test
   only:
@@ -141,7 +141,7 @@ deploy_test:
 deploy_prod:
   stage: deploy
   tags:
-    - ohtu-build-1
+    - ohtu-build-3
   environment:
     name: prod
   only:
@@ -170,7 +170,7 @@ deploy_prod:
 dependency scanning:
   stage: audit_scan
   tags:
-    - ohtu-build-1
+    - ohtu-build-3
   allow_failure: true
   only:
     - schedules
