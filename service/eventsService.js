@@ -51,7 +51,7 @@ exports.filterEventsForClientList = (ocResponseData, loggedUser) => {
                 'created': event.created,
                 'series': event.series,
                 'media': calculateMediaPropertyForVideoList(event, loggedUser),
-                'publications': _mapPublications(calculateMediaPropertyForVideoList(event, loggedUser), publicationService.filterApiChannelPublication(event.publications)),
+                'publications': _mapPublications(calculateMediaPropertyForVideoList(event, loggedUser), event.publications),
                 'archived_date': event.archived_date
             });
         });
@@ -85,7 +85,7 @@ exports.filterEventsForClientTrash = (ocResponseData, loggedUser) => {
                 'created': event.created,
                 'series': event.series,
                 'media' : calculateMediaPropertyForVideoList(event, loggedUser),
-                'publications': _mapPublications(calculateMediaPropertyForVideoList(event, loggedUser), publicationService.filterApiChannelPublication(event.publications))
+                'publications': _mapPublications(calculateMediaPropertyForVideoList(event, loggedUser), event.publications)
             });
         }
     });
@@ -118,7 +118,19 @@ const calculateMediaPropertyForVideoList = (event, loggedUser) => {
     try {
         let mediaUrls = [];
         if (event.publications) {
-            let apiChannel = event.publications.find(publication => publication.channel === 'api');
+            //let apiChannel = event.publications.find(publication => publication.channel === 'api');
+
+            event.publications.forEach(publication => {
+                if (publication.media) {
+                    publication.media.forEach(media => {
+                        if (media.has_video && event.processing_state === constants.OPENCAST_STATE_SUCCEEDED) {
+                            mediaUrls.push(media.url);
+                        }
+                    });
+                }
+            });
+
+            /*
 
             if (apiChannel && apiChannel.media) {
                 apiChannel.media.forEach(media => {
@@ -127,6 +139,8 @@ const calculateMediaPropertyForVideoList = (event, loggedUser) => {
                     }
                 });
             }
+
+             */
         } else {
             logger.warn(`publications missing in media property ${event.identifier} FOR USER ${loggedUser.eppn}`);
         }
