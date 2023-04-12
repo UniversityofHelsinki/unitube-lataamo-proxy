@@ -18,23 +18,17 @@ const dbApi = require("./dbApi");
 
 
 exports.getVideoUrl = async (req, res) => {
-    let debugStage = 0;
     try {
         logger.info(`GET video media url /videoUrl/:id VIDEO ${req.params.id} USER: ${req.user.eppn}`);
         const publications = await apiService.getPublicationsForEvent(req.params.id);
-        debugStage = 1;
-        const filteredPublication = publicationService.filterApiChannelPublication(publications);
-        debugStage = 2;
+        const filteredPublication = publicationService.filterEngagePlayerChannelPublication(publications);
         const mediaUrls = publicationService.getMediaUrlsFromPublication(req.params.id, filteredPublication);
-        debugStage = 3;
         const episode = await apiService.getEpisodeForEvent(req.params.id);
-        debugStage = 4;
         const episodeWithMediaUrls = await eventsService.getVttWithMediaUrls(episode, mediaUrls);
-        debugStage = 5;
         res.json(episodeWithMediaUrls);
     } catch (error) {
         const msg = error.message;
-        logger.error(`GET /videoUrl/:id VIDEO: ${req.params.id} USER: ${req.user.eppn} DEBUG-STAGE: ${debugStage} CAUSE: ${error}`);
+        logger.error(`GET /videoUrl/:id VIDEO: ${req.params.id} USER: ${req.user.eppn} CAUSE: ${error}`);
         res.status(500);
         res.json({
             message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_VIDEO_URL,

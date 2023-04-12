@@ -2,7 +2,6 @@ const equal = require('deep-equal');
 const commonService = require('./commonService');
 const seriesService = require('./seriesService');
 const apiService = require('./apiService');
-const publicationService = require('./publicationService');
 const moment = require('moment');
 const momentDurationFormatSetup = require('moment-duration-format');
 momentDurationFormatSetup(moment);
@@ -55,7 +54,6 @@ exports.filterEventsForClientList = (ocResponseData, loggedUser) => {
                 'archived_date': event.archived_date
             });
         });
-
         return eventArray;
     } catch (error) {
         logger.error(`error filtering events for client ${error} ${error.message} USER ${loggedUser}`);
@@ -118,8 +116,6 @@ const calculateMediaPropertyForVideoList = (event, loggedUser) => {
     try {
         let mediaUrls = [];
         if (event.publications) {
-            //let apiChannel = event.publications.find(publication => publication.channel === 'api');
-
             event.publications.forEach(publication => {
                 if (publication.media) {
                     publication.media.forEach(media => {
@@ -129,18 +125,6 @@ const calculateMediaPropertyForVideoList = (event, loggedUser) => {
                     });
                 }
             });
-
-            /*
-
-            if (apiChannel && apiChannel.media) {
-                apiChannel.media.forEach(media => {
-                    if (media.has_video && event.processing_state === constants.OPENCAST_STATE_SUCCEEDED) {
-                        mediaUrls.push(media.url);
-                    }
-                });
-            }
-
-             */
         } else {
             logger.warn(`publications missing in media property ${event.identifier} FOR USER ${loggedUser.eppn}`);
         }

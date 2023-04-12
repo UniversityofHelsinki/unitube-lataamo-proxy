@@ -244,6 +244,7 @@ exports.getEpisodeForEvent = async (eventId) => {
 
 exports.getPublicationsForEvent = async (eventId) => {
     const publicationsUrl = constants.OCAST_VIDEOS_PATH + eventId + constants.OCAST_VIDEO_PUBLICATION_PATH;
+    console.log(publicationsUrl);
     const response = await security.opencastBase.get(publicationsUrl);
     return response.data;
 };

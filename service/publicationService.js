@@ -1,9 +1,9 @@
 const constants = require('../utils/constants');
 const moment = require('moment');
 
-exports.filterApiChannelPublication = (publications) => {
+exports.filterEngagePlayerChannelPublication = (publications) => {
     const filteredPublications = publications.filter(publication => {
-        return publication.channel == 'api';
+        return publication.channel == 'engage-player';
     });
     return filteredPublications;
 };
