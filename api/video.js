@@ -21,8 +21,8 @@ exports.getVideoUrl = async (req, res) => {
     try {
         logger.info(`GET video media url /videoUrl/:id VIDEO ${req.params.id} USER: ${req.user.eppn}`);
         const publications = await apiService.getPublicationsForEvent(req.params.id);
-        const filteredPublication = publicationService.filterEngagePlayerChannelPublication(publications);
-        const mediaUrls = publicationService.getMediaUrlsFromPublication(req.params.id, filteredPublication);
+        //const filteredPublication = publicationService.filterEngagePlayerChannelPublication(publications);
+        const mediaUrls = publicationService.getMediaUrlsFromPublication(req.params.id, publications);
         const episode = await apiService.getEpisodeForEvent(req.params.id);
         const episodeWithMediaUrls = await eventsService.getVttWithMediaUrls(episode, mediaUrls);
         res.json(episodeWithMediaUrls);

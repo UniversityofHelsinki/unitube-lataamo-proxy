@@ -42,8 +42,8 @@ exports.getVttFileForEvent = async (req, res) => {
     try {
         const episode = await apiService.getEpisodeForEvent(req.params.id);
         const publications = await apiService.getPublicationsForEvent(req.params.id);
-        const filteredPublication = publicationService.filterEngagePlayerChannelPublication(publications);
-        const mediaUrls = publicationService.getMediaUrlsFromPublication(req.params.id, filteredPublication);
+        //const filteredPublication = publicationService.filterEngagePlayerChannelPublication(publications);
+        const mediaUrls = publicationService.getMediaUrlsFromPublication(req.params.id, publications);
         const vttFile = await eventsService.getVttFile(episode, mediaUrls);
         const response = await apiService.downloadVttFile(vttFile);
         res.set({

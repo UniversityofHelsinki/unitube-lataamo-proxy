@@ -8,6 +8,13 @@ exports.filterEngagePlayerChannelPublication = (publications) => {
     return filteredPublications;
 };
 
+const filterPublicationWithMediaArrayFromPublications = (publications) => {
+    const filteredMediaArray = publications.filter(publication => {
+        return publication.media != null && publication.media.length > 0;
+    });
+    return filteredMediaArray;
+};
+
 const filterMediaTypes = (mediaArray, mediaPresenterDelivery, mediaPresentationDelivery) => {
     mediaArray.some(media => {
         if (media.flavor === constants.VIDEO_PRESENTER_DELIVERY) {
@@ -57,11 +64,14 @@ const filterOnlyHighestQualityPublications = (mediaArray) => {
     return allMedias;
 };
 
+
+
 exports.getMediaUrlsFromPublication = (eventId , publication) => {
     let mediaUrls = [];
     let filteredMedias = [];
-    if (publication[0].media && publication[0].media.length > 0) {
-        filteredMedias = filterOnlyHighestQualityPublications(publication[0].media);
+    let filteredPublication = filterPublicationWithMediaArrayFromPublications(publication);
+    if (filteredPublication && filteredPublication[0] && filteredPublication[0].media) {
+        filteredMedias = filterOnlyHighestQualityPublications(filteredPublication[0].media);
         if (filteredMedias && filteredMedias.length > 0) {
             filteredMedias.some(media =>  {
                 mediaUrls.push({id: eventId, url: media.url, duration: moment.duration(media.duration, 'milliseconds').format('HH:mm:ss', {trim:false}), resolution: `${media.width}x${media.height}`});
