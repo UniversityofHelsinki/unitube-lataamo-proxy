@@ -112,6 +112,18 @@ const calculateMediaDurationForVideoList = (event, loggedUser) => {
     }
 };
 
+const isValidUrl = urlString => {
+    try {
+        let url;
+        url =new URL(urlString);
+        return url.protocol === "http:" || url.protocol === "https:";
+    }
+    catch (exception) {
+        console.log(exception);
+        return false;
+    }
+};
+
 const calculateMediaPropertyForVideoList = (event, loggedUser) => {
     try {
         let mediaUrls = [];
@@ -120,7 +132,9 @@ const calculateMediaPropertyForVideoList = (event, loggedUser) => {
                 if (publication.media) {
                     publication.media.forEach(media => {
                         if (media.has_video && event.processing_state === constants.OPENCAST_STATE_SUCCEEDED) {
-                            mediaUrls.push(media.url);
+                            if (isValidUrl(media.url)) {
+                                mediaUrls.push(media.url);
+                            }
                         }
                     });
                 }
@@ -128,6 +142,7 @@ const calculateMediaPropertyForVideoList = (event, loggedUser) => {
         } else {
             logger.warn(`publications missing in media property ${event.identifier} FOR USER ${loggedUser.eppn}`);
         }
+        console.log([...new Set(mediaUrls)]);
         return [...new Set(mediaUrls)];
     } catch (error) {
         logger.error(`error calculating media property for video list  ${error}  ${error.message} ${event.identifier} FOR USER ${loggedUser.eppn}`);
