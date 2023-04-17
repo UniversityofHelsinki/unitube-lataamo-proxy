@@ -142,7 +142,7 @@ const calculateMediaPropertyForVideoList = (event, loggedUser) => {
         } else {
             logger.warn(`publications missing in media property ${event.identifier} FOR USER ${loggedUser.eppn}`);
         }
-        
+
         let unique = mediaArrayOfObjects.filter((elem, index) => mediaArrayOfObjects.findIndex(obj => obj.quality === elem.quality) === index);
         let resultUrls = unique.map(obj => obj.url);
         return resultUrls;

@@ -57,7 +57,7 @@ deploy_oc_test:
   environment:
     name: development
   only:
-    - OC_11.12
+    - oc-test
   script:
     - echo "====== Deploy to oc-test server ========"
     - echo "====== Install rsync and openssh ========="
