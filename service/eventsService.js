@@ -126,14 +126,14 @@ const isValidUrl = urlString => {
 
 const calculateMediaPropertyForVideoList = (event, loggedUser) => {
     try {
-        let mediaUrls = [];
+        let mediaArrayOfObjects = [];
         if (event.publications) {
             event.publications.forEach(publication => {
-                if (publication.media) {
+                if (publication.channel === 'api' || publication.channel === 'engage-player' && publication.media) {
                     publication.media.forEach(media => {
                         if (media.has_video && event.processing_state === constants.OPENCAST_STATE_SUCCEEDED) {
-                            if (isValidUrl(media.url)) {
-                                mediaUrls.push(media.url);
+                            if (media.tags[0] !== undefined || isValidUrl(media.url)) {
+                                mediaArrayOfObjects.push({ "quality" : media.tags[0] , "url" : media.url });
                             }
                         }
                     });
@@ -142,8 +142,10 @@ const calculateMediaPropertyForVideoList = (event, loggedUser) => {
         } else {
             logger.warn(`publications missing in media property ${event.identifier} FOR USER ${loggedUser.eppn}`);
         }
-        console.log([...new Set(mediaUrls)]);
-        return [...new Set(mediaUrls)];
+        
+        let unique = mediaArrayOfObjects.filter((elem, index) => mediaArrayOfObjects.findIndex(obj => obj.quality === elem.quality) === index);
+        let resultUrls = unique.map(obj => obj.url);
+        return resultUrls;
     } catch (error) {
         logger.error(`error calculating media property for video list  ${error}  ${error.message} ${event.identifier} FOR USER ${loggedUser.eppn}`);
     }
@@ -457,16 +459,16 @@ exports.modifySeriesEventMetadataForOpencast = (metadata) => {
     const metadataArray = [];
 
     metadataArray.push({
-        'id' : 'title',
-        'value': metadata.title },
-    {
-        'id' : 'description',
-        'value': metadata.description
-    },
-    {
-        'id' : 'contributor',
-        'value': metadata.contributors
-    }
+            'id' : 'title',
+            'value': metadata.title },
+        {
+            'id' : 'description',
+            'value': metadata.description
+        },
+        {
+            'id' : 'contributor',
+            'value': metadata.contributors
+        }
     );
 
     return metadataArray;
