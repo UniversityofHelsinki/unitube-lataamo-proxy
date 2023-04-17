@@ -132,8 +132,8 @@ const calculateMediaPropertyForVideoList = (event, loggedUser) => {
                 if (publication.channel === 'api' || publication.channel === 'engage-player' && publication.media) {
                     publication.media.forEach(media => {
                         if (media.has_video && event.processing_state === constants.OPENCAST_STATE_SUCCEEDED) {
-                            if (media.tags[0] !== undefined || isValidUrl(media.url)) {
-                                mediaArrayOfObjects.push({ "quality" : media.tags[0] , "url" : media.url });
+                            if (media.height !== undefined || isValidUrl(media.url)) {
+                                mediaArrayOfObjects.push({ "quality" : media.height , "url" : media.url });
                             }
                         }
                     });
