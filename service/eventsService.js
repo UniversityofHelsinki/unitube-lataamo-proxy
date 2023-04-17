@@ -2,7 +2,6 @@ const equal = require('deep-equal');
 const commonService = require('./commonService');
 const seriesService = require('./seriesService');
 const apiService = require('./apiService');
-const publicationService = require('./publicationService');
 const moment = require('moment');
 const momentDurationFormatSetup = require('moment-duration-format');
 momentDurationFormatSetup(moment);
@@ -51,11 +50,10 @@ exports.filterEventsForClientList = (ocResponseData, loggedUser) => {
                 'created': event.created,
                 'series': event.series,
                 'media': calculateMediaPropertyForVideoList(event, loggedUser),
-                'publications': _mapPublications(calculateMediaPropertyForVideoList(event, loggedUser), publicationService.filterApiChannelPublication(event.publications)),
+                'publications': _mapPublications(calculateMediaPropertyForVideoList(event, loggedUser), event.publications),
                 'archived_date': event.archived_date
             });
         });
-
         return eventArray;
     } catch (error) {
         logger.error(`error filtering events for client ${error} ${error.message} USER ${loggedUser}`);
@@ -85,7 +83,7 @@ exports.filterEventsForClientTrash = (ocResponseData, loggedUser) => {
                 'created': event.created,
                 'series': event.series,
                 'media' : calculateMediaPropertyForVideoList(event, loggedUser),
-                'publications': _mapPublications(calculateMediaPropertyForVideoList(event, loggedUser), publicationService.filterApiChannelPublication(event.publications))
+                'publications': _mapPublications(calculateMediaPropertyForVideoList(event, loggedUser), event.publications)
             });
         }
     });
@@ -114,23 +112,40 @@ const calculateMediaDurationForVideoList = (event, loggedUser) => {
     }
 };
 
+const isValidUrl = urlString => {
+    try {
+        let url;
+        url =new URL(urlString);
+        return url.protocol === "http:" || url.protocol === "https:";
+    }
+    catch (exception) {
+        console.log(exception);
+        return false;
+    }
+};
+
 const calculateMediaPropertyForVideoList = (event, loggedUser) => {
     try {
-        let mediaUrls = [];
+        let mediaArrayOfObjects = [];
         if (event.publications) {
-            let apiChannel = event.publications.find(publication => publication.channel === 'api');
-
-            if (apiChannel && apiChannel.media) {
-                apiChannel.media.forEach(media => {
-                    if (media.has_video && event.processing_state === constants.OPENCAST_STATE_SUCCEEDED) {
-                        mediaUrls.push(media.url);
-                    }
-                });
-            }
+            event.publications.forEach(publication => {
+                if (publication.channel === 'api' || publication.channel === 'engage-player' && publication.media) {
+                    publication.media.forEach(media => {
+                        if (media.has_video && event.processing_state === constants.OPENCAST_STATE_SUCCEEDED) {
+                            if (media.tags[0] !== undefined || isValidUrl(media.url)) {
+                                mediaArrayOfObjects.push({ "quality" : media.tags[0] , "url" : media.url });
+                            }
+                        }
+                    });
+                }
+            });
         } else {
             logger.warn(`publications missing in media property ${event.identifier} FOR USER ${loggedUser.eppn}`);
         }
-        return [...new Set(mediaUrls)];
+
+        let unique = mediaArrayOfObjects.filter((elem, index) => mediaArrayOfObjects.findIndex(obj => obj.quality === elem.quality) === index);
+        let resultUrls = unique.map(obj => obj.url);
+        return resultUrls;
     } catch (error) {
         logger.error(`error calculating media property for video list  ${error}  ${error.message} ${event.identifier} FOR USER ${loggedUser.eppn}`);
     }
@@ -444,16 +459,16 @@ exports.modifySeriesEventMetadataForOpencast = (metadata) => {
     const metadataArray = [];
 
     metadataArray.push({
-        'id' : 'title',
-        'value': metadata.title },
-    {
-        'id' : 'description',
-        'value': metadata.description
-    },
-    {
-        'id' : 'contributor',
-        'value': metadata.contributors
-    }
+            'id' : 'title',
+            'value': metadata.title },
+        {
+            'id' : 'description',
+            'value': metadata.description
+        },
+        {
+            'id' : 'contributor',
+            'value': metadata.contributors
+        }
     );
 
     return metadataArray;

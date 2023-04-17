@@ -124,10 +124,6 @@ const SERIES_ACL_TEMPLATE_TUOTANTO = [
 const PROCESSING_METADATA = {
     'workflow': 'schedule-and-upload',
     'configuration': {
-        'flagForCutting': 'false',
-        'flagForReview': 'false',
-        'publishToEngage': 'true',
-        'publishToHarvesting': 'true',
         'straightToPublishing': 'true'
     }
 };
