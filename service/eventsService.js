@@ -14,6 +14,7 @@ const messageKeys = require('../utils/message-keys');
 const pLimit = require('p-limit');
 // Limit number of request fetched concurrently
 const limit = pLimit(5);
+const { createHash } = require('crypto');
 
 const _mapPublications = (videoList, publications) => {
     const media = publications.map(p => p.media).flatMap(m => m);
@@ -124,16 +125,36 @@ const isValidUrl = urlString => {
     }
 };
 
+const hash = (string) => {
+    return createHash('sha256').update(string).digest('hex');
+};
+
+const filterOnlyTwoOfTheBestQualityVideos = (mediaArrayOfObjects) => {
+    let twoOfTheHighestQualityVideos = [];
+    if (mediaArrayOfObjects) {
+        if (mediaArrayOfObjects.length > 1) {
+            const sortedMediaArrayOfObjects = mediaArrayOfObjects.sort((a, b) => {
+                return b.quality - a.quality;
+            });
+            twoOfTheHighestQualityVideos.push(sortedMediaArrayOfObjects[0]);
+            twoOfTheHighestQualityVideos.push(sortedMediaArrayOfObjects[1]);
+        } else {
+            twoOfTheHighestQualityVideos.push(mediaArrayOfObjects[0]);
+        }
+    }
+    return twoOfTheHighestQualityVideos;
+};
+
 const calculateMediaPropertyForVideoList = (event, loggedUser) => {
     try {
         let mediaArrayOfObjects = [];
         if (event.publications) {
             event.publications.forEach(publication => {
-                if (publication.channel === 'api' || publication.channel === 'engage-player' && publication.media) {
+                if (publication.channel === constants.API_CHANNEL || publication.channel === constants.ENGAGE_PLAYER_CHANNEL && publication.media) {
                     publication.media.forEach(media => {
                         if (media.has_video && event.processing_state === constants.OPENCAST_STATE_SUCCEEDED) {
                             if (media.height !== undefined || isValidUrl(media.url)) {
-                                mediaArrayOfObjects.push({ "quality" : media.height , "url" : media.url });
+                                mediaArrayOfObjects.push({ "hash" : hash(media.height + media.url), "quality" : media.height , "url" : media.url });
                             }
                         }
                     });
@@ -143,8 +164,9 @@ const calculateMediaPropertyForVideoList = (event, loggedUser) => {
             logger.warn(`publications missing in media property ${event.identifier} FOR USER ${loggedUser.eppn}`);
         }
 
-        let unique = mediaArrayOfObjects.filter((elem, index) => mediaArrayOfObjects.findIndex(obj => obj.quality === elem.quality) === index);
-        let resultUrls = unique.map(obj => obj.url);
+        const unique = mediaArrayOfObjects.filter((elem, index) => mediaArrayOfObjects.findIndex(obj => obj.hash === elem.hash) === index);
+        const filteredMediaArrays =  filterOnlyTwoOfTheBestQualityVideos(unique);
+        let resultUrls = filteredMediaArrays.map(obj => obj.url);
         return resultUrls;
     } catch (error) {
         logger.error(`error calculating media property for video list  ${error}  ${error.message} ${event.identifier} FOR USER ${loggedUser.eppn}`);

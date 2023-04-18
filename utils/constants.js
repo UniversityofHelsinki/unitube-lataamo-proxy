@@ -58,6 +58,9 @@ const OCAST_VIDEOS_FILTER_USER_NAME = '?filter=title:';
 const UPDATE_SERIES = 'update_series';
 const CREATE_SERIES = 'create_series';
 
+const API_CHANNEL = 'api';
+const ENGAGE_PLAYER_CHANNEL = 'engage-player';
+
 const WEBVTT_TEMPLATE =  {
     "assets": {
         "options": [
@@ -235,5 +238,7 @@ module.exports = {
     OCAST_VIDEOS_WITH_METADATA_ACLS_AND_PUBLICATIONS,
     DEFAULT_VIDEO_ARCHIVED_YEAR_AMOUNT,
     DEFAULT_VIDEO_MARKED_FOR_DELETION_MONTHS_AMOUNT,
-    OCAST_EVENT_VIEWS_PATH
+    OCAST_EVENT_VIEWS_PATH,
+    API_CHANNEL,
+    ENGAGE_PLAYER_CHANNEL
 };
