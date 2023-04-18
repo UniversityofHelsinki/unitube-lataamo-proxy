@@ -131,7 +131,7 @@ const hash = (string) => {
 
 const filterOnlyTwoOfTheBestQualityVideos = (mediaArrayOfObjects) => {
     let twoOfTheHighestQualityVideos = [];
-    if (mediaArrayOfObjects) {
+    if (mediaArrayOfObjects && mediaArrayOfObjects.length > 0) {
         if (mediaArrayOfObjects.length > 1) {
             const sortedMediaArrayOfObjects = mediaArrayOfObjects.sort((a, b) => {
                 return b.quality - a.quality;
