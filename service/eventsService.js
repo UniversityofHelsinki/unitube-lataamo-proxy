@@ -145,6 +145,10 @@ const filterOnlyTwoOfTheBestQualityVideos = (mediaArrayOfObjects) => {
     return twoOfTheHighestQualityVideos;
 };
 
+const filterOnlyUniqueVideos = (mediaArrayOfObjects) => {
+    return mediaArrayOfObjects.filter((elem, index) => mediaArrayOfObjects.findIndex(obj => obj.hash === elem.hash) === index);
+};
+
 const calculateMediaPropertyForVideoList = (event, loggedUser) => {
     try {
         let mediaArrayOfObjects = [];
@@ -164,7 +168,7 @@ const calculateMediaPropertyForVideoList = (event, loggedUser) => {
             logger.warn(`publications missing in media property ${event.identifier} FOR USER ${loggedUser.eppn}`);
         }
 
-        const unique = mediaArrayOfObjects.filter((elem, index) => mediaArrayOfObjects.findIndex(obj => obj.hash === elem.hash) === index);
+        const unique = filterOnlyUniqueVideos(mediaArrayOfObjects);
         const filteredMediaArrays =  filterOnlyTwoOfTheBestQualityVideos(unique);
         let resultUrls = filteredMediaArrays.map(obj => obj.url);
         return resultUrls;
