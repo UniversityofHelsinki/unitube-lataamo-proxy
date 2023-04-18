@@ -129,15 +129,40 @@ const hash = (string) => {
     return createHash('sha256').update(string).digest('hex');
 };
 
+const filterVideosByDifferentFlavor = (sortedMediaArrayOfObjects, mediaPresenterDeliveryArray, mediaPresentationDeliveryArray) => {
+    for (const mediaObject of sortedMediaArrayOfObjects) {
+        if (mediaObject.flavor === constants.VIDEO_PRESENTER_DELIVERY) {
+            mediaPresenterDeliveryArray.push(mediaObject);
+        }
+        if (mediaObject.flavor === constants.VIDEO_PRESENTATION_DELIVERY) {
+            mediaPresentationDeliveryArray.push(mediaObject);
+        }
+    }
+};
+
+const fillHighestQualityVideosArray = (mediaPresenterDeliveryArray, twoOfTheHighestQualityVideos, mediaPresentationDeliveryArray) => {
+    mediaPresenterDeliveryArray[0] ? twoOfTheHighestQualityVideos.push(mediaPresenterDeliveryArray[0]) : '';
+    mediaPresenterDeliveryArray[1] ? twoOfTheHighestQualityVideos.push(mediaPresenterDeliveryArray[1]) : '';
+    mediaPresentationDeliveryArray[0] ? twoOfTheHighestQualityVideos.push(mediaPresentationDeliveryArray[0]) : '';
+    mediaPresentationDeliveryArray[1] ? twoOfTheHighestQualityVideos.push(mediaPresentationDeliveryArray[1]) : '';
+};
+
+const sortVideosByQuality = (mediaArrayOfObjects) => {
+    const sortedMediaArrayOfObjects = mediaArrayOfObjects.sort((a, b) => {
+        return b.quality - a.quality;
+    });
+    return sortedMediaArrayOfObjects;
+};
+
 const filterOnlyTwoOfTheBestQualityVideos = (mediaArrayOfObjects) => {
     let twoOfTheHighestQualityVideos = [];
+    let mediaPresenterDeliveryArray = [];
+    let mediaPresentationDeliveryArray = [];
     if (mediaArrayOfObjects && mediaArrayOfObjects.length > 0) {
         if (mediaArrayOfObjects.length > 1) {
-            const sortedMediaArrayOfObjects = mediaArrayOfObjects.sort((a, b) => {
-                return b.quality - a.quality;
-            });
-            twoOfTheHighestQualityVideos.push(sortedMediaArrayOfObjects[0]);
-            twoOfTheHighestQualityVideos.push(sortedMediaArrayOfObjects[1]);
+            const sortedMediaArrayOfObjects = sortVideosByQuality(mediaArrayOfObjects);
+            filterVideosByDifferentFlavor(sortedMediaArrayOfObjects, mediaPresenterDeliveryArray, mediaPresentationDeliveryArray);
+            fillHighestQualityVideosArray(mediaPresenterDeliveryArray, twoOfTheHighestQualityVideos, mediaPresentationDeliveryArray);
         } else {
             twoOfTheHighestQualityVideos.push(mediaArrayOfObjects[0]);
         }
@@ -157,8 +182,8 @@ const calculateMediaPropertyForVideoList = (event, loggedUser) => {
                 if (publication.channel === constants.API_CHANNEL || publication.channel === constants.ENGAGE_PLAYER_CHANNEL && publication.media) {
                     publication.media.forEach(media => {
                         if (media.has_video && event.processing_state === constants.OPENCAST_STATE_SUCCEEDED) {
-                            if (media.height !== undefined || isValidUrl(media.url)) {
-                                mediaArrayOfObjects.push({ "hash" : hash(media.height + media.url), "quality" : media.height , "url" : media.url });
+                            if (media.height !== undefined && media.flavor !== undefined && isValidUrl(media.url)) {
+                                mediaArrayOfObjects.push({ "hash" : hash(media.height + media.url), "quality" : media.height , "url" : media.url , flavor : media.flavor});
                             }
                         }
                     });
