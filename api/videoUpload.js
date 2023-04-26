@@ -129,9 +129,9 @@ exports.upload = async (req, res) => {
     req.busboy.on('file', (field, file, filename) => {
 
         const startTime = new Date();
-        uploadLogger.log(INFO_LEVEL, `Upload of '${filename}' started  USER: ${req.user.eppn} -- ${uploadId}`);
+        uploadLogger.log(INFO_LEVEL, `Upload of '${filename.filename}' started  USER: ${req.user.eppn} -- ${uploadId}`);
         // path to the file
-        const filePathOnDisk = path.join(uploadPath, filename);
+        const filePathOnDisk = path.join(uploadPath, filename.filename);
 
         // Create a write stream of the new file
         const fstream = fs.createWriteStream(filePathOnDisk);
@@ -151,7 +151,7 @@ exports.upload = async (req, res) => {
             res.json({id: uploadId, status: constants.JOB_STATUS_STARTED});
 
             // try to send the file to opencast
-            const response = await apiService.uploadVideo(filePathOnDisk, filename, selectedSeries ? selectedSeries : inboxSeries.identifier, description, title);
+            const response = await apiService.uploadVideo(filePathOnDisk, filename.filename, selectedSeries ? selectedSeries : inboxSeries.identifier, description, title);
 
             if (response && response.status === HttpStatus.CREATED) {
                 identifier = response.data.identifier;
@@ -159,7 +159,7 @@ exports.upload = async (req, res) => {
                 await deleteFile(uploadPath, uploadId);
                 await jobsService.setJobStatus(uploadId, constants.JOB_STATUS_FINISHED);
                 uploadLogger.log(INFO_LEVEL,
-                    `${filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)} USER: ${req.user.eppn} -- ${uploadId}`);
+                    `${filename.filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)} USER: ${req.user.eppn} -- ${uploadId}`);
 
                 const video = {identifier: identifier, created: new Date(), archivedDate: archivedDate};
                 await dbApi.insertArchiveAndVideoCreationDatesForVideoUpload(video);
@@ -182,7 +182,7 @@ exports.upload = async (req, res) => {
                 await deleteFile(uploadPath, uploadId);
                 await jobsService.setJobStatus(uploadId, constants.JOB_STATUS_ERROR);
                 res.status(HttpStatus.INTERNAL_SERVER_ERROR);
-                const msg = `${filename} failed to upload to opencast.`;
+                const msg = `${filename.filename} failed to upload to opencast.`;
                 uploadLogger.log(ERROR_LEVEL, `POST /userVideos ${msg} USER: ${req.user.eppn} -- ${uploadId} ${response}`);
             }
         });
