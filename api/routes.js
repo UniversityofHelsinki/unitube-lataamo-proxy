@@ -97,6 +97,8 @@ module.exports = function (router) {
      */
     router.get('/videoUrl/:id', video.getVideoUrl);
 
+    router.get('/video/play/:url', video.playVideo);
+
     /**
      * @swagger
      *     /api/series/{id}:

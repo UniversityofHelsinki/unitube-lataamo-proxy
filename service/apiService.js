@@ -236,6 +236,11 @@ exports.getUserSeries = async (user) => {
     return uniqueSeriesList;
 };
 
+exports.playVideo = async (url) => {
+    const response = await security.opencastBaseStream.get(url);
+    return response.data;
+};
+
 exports.getEpisodeForEvent = async (eventId) => {
     const episodeUrl = constants.OCAST_EPISODE_PATH + '?id=' + eventId;
     const response = await security.opencastPresentationBase.get(episodeUrl);

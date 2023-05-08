@@ -16,6 +16,21 @@ const dbService = require("../service/dbService");
 const constants = require("../utils/constants");
 const dbApi = require("./dbApi");
 
+exports.playVideo = async (req, res) => {
+    try {
+        logger.info(`GET play video url /video/play/:url VIDEO ${req.params.url} USER: ${req.user.eppn}`);
+        const response = await apiService.playVideo(req.params.url);
+        response.pipe(res);
+    } catch (error) {
+        const msg = error.message;
+        logger.error(`GET /video/play/:url VIDEO: ${req.params.id} USER: ${req.user.eppn} CAUSE: ${error}`);
+        res.status(500);
+        res.json({
+            message: messageKeys.ERROR_MESSAGE_FAILED_TO_PLAY_VIDEO_FROM_URL,
+            msg
+        });
+    }
+};
 
 exports.getVideoUrl = async (req, res) => {
     try {
