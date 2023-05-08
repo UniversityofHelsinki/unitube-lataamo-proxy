@@ -320,7 +320,7 @@ describe('user video urls returned from /video/id events route', () => {
 
         assert.isArray(response.body, 'Response should be an array');
         assert.lengthOf(response.body, 1, 'One video should be returned');
-        assert.equal(response.body[0].url, 'https://ocast-devel-i1.it.helsinki.fi/static/mh_default_org/api/b419f01d-c203-4610-a1d4-a4b8904083d4/a9f5e413-1dcc-4832-a750-251a16893b2f/Samsung_and_RedBull_See_the_Unexpected_HDR_UHD_4K_Demo.mp4');
+        assert.equal(response.body[0].url, 'ZjZhZTk1NDIwZWRjZGYwZWNkODM3MGJkMGU0Y2UzNTc5OGMxNzUzNWQ1ZGFiN2UyYTYwMjJkNzUxNzFlMzhmMGVhMTRjMTM5YTNjYzIyMTkzYTQ0N2E3ODBiYmUxZGU0YWNmZDhhYjdhOGNiNmJjNTlhZTRiOTVhYTYyNzU3MDkxMGQ3NDQyNDUzMWQzYjg4ODc0YzVjYmY2OTMyYzViNGViMTY1ZjNmOGY2YzgwZTExYzFjOGY3ZjJiZGEwNDhlNDg1YWU1ZmFhY2RhZGEwZDVjMjg5MDk0ZWJhMTRhMzVkM2ViM2JlYWFjMTVhMDRhMzJmMWZlZjM1Zjg1MDkwZDdmZWIyN2M0MWFhNDM2NDk5NjNlMTUyYTA2MGNlNWRhZDA5MDc3MWI3NmM1YjY4MTU2ZmUwOWFkYzQxYzU5OTc1MmZkOTY5OGVkODkxMjVkMjRiN2NjNjM3ZmUzYTY3OWIyZGE4NGE2ZDk3MzkyNzkzZTY1ZjdhZTY2NjRiMjFkZWZmNzE2MDNiZTljMjY4MWM4OTJkNDUxOWU1ZmUwZjQ=');
     });
 
     it('should return highest quality video url with correct vtt file', async () => {
@@ -335,7 +335,7 @@ describe('user video urls returned from /video/id events route', () => {
 
         assert.isArray(response.body, 'Response should be an array');
         assert.lengthOf(response.body, 1, 'One video should be returned');
-        assert.equal(response.body[0].url, 'https://ocast-devel-i1.it.helsinki.fi/static/mh_default_org/api/b419f01d-c203-4610-a1d4-a4b8904083d4/a9f5e413-1dcc-4832-a750-251a16893b2f/Samsung_and_RedBull_See_the_Unexpected_HDR_UHD_4K_Demo.mp4');
+        assert.equal(response.body[0].url, 'ZjZhZTk1NDIwZWRjZGYwZWNkODM3MGJkMGU0Y2UzNTc5OGMxNzUzNWQ1ZGFiN2UyYTYwMjJkNzUxNzFlMzhmMGVhMTRjMTM5YTNjYzIyMTkzYTQ0N2E3ODBiYmUxZGU0YWNmZDhhYjdhOGNiNmJjNTlhZTRiOTVhYTYyNzU3MDkxMGQ3NDQyNDUzMWQzYjg4ODc0YzVjYmY2OTMyYzViNGViMTY1ZjNmOGY2YzgwZTExYzFjOGY3ZjJiZGEwNDhlNDg1YWU1ZmFhY2RhZGEwZDVjMjg5MDk0ZWJhMTRhMzVkM2ViM2JlYWFjMTVhMDRhMzJmMWZlZjM1Zjg1MDkwZDdmZWIyN2M0MWFhNDM2NDk5NjNlMTUyYTA2MGNlNWRhZDA5MDc3MWI3NmM1YjY4MTU2ZmUwOWFkYzQxYzU5OTc1MmZkOTY5OGVkODkxMjVkMjRiN2NjNjM3ZmUzYTY3OWIyZGE4NGE2ZDk3MzkyNzkzZTY1ZjdhZTY2NjRiMjFkZWZmNzE2MDNiZTljMjY4MWM4OTJkNDUxOWU1ZmUwZjQ=');
         assert.equal(response.body[0].vttFile.id, 'd74f0d42-5084-468d-b224-f2ec5f058492');
         assert.equal(response.body[0].vttFile.url, 'http://localhost:8080/static/mh_default_org/engage-player/2d72b653-02f6-4638-ba58-281b2d49af33/7578df20-9939-40dc-a305-7f83e225e9af/testwebvtt.vtt');
         assert.isNotNull(response.body[0].vttFile.track);
@@ -353,8 +353,8 @@ describe('user video urls returned from /video/id events route', () => {
 
         assert.isArray(response.body, 'Response should be an array');
         assert.lengthOf(response.body, 2, 'Two videos should be returned');
-        assert.equal(response.body[0].url, 'https://ocast-devel-i1.it.helsinki.fi/static/mh_default_org/api/9059828c-8cef-4caf-a878-d6fa0a359857/a4227095-2b28-4846-b538-a0c8129d54b8/SHOT4_4K_CC_injected.mp4');
-        assert.equal(response.body[1].url, 'https://ocast-devel-i1.it.helsinki.fi/static/mh_default_org/api/9059828c-8cef-4caf-a878-d6fa0a359857/e11d592c-f67c-423c-a275-fb4d39868510/SHOT4_4K_CC_injected.mp4');
+        assert.equal(response.body[0].url, 'ZjZhZTk1NDIwZWRjZGYwZWNkODM3MGJkMGU0Y2UzNTc5OGMxNzUzNWQ1ZGFiN2UyYTYwMjJkNzUxNzFlMzhmMGVhMTRjMTM5YTNjYzIyMTkzYTQ0N2E3ODBiYmUxZGU0YWNmZDhhYjdhOGNiNmJjNTlhZTRiOTVhYTYyNzU3MDlhZjEyZmFhNTVjMmM5ZTI4YmJhM2UzODQ0N2YwODQxNzJhODFjOTUxNzMxYmFkMjA4NDI4YjcyOWQ1MWE5NmM2OTQ2ZTI4YmEyNDNmMTJkMDEyNDRkMmU0YTNiM2E3ODhhNzBlZWM0MDUzNGQzNzEyYTI1MWU4NTNlMDRlZTYxZDlkNGZjNzFmYjA1NzE4NjU1ZjkxOGVmZTEzYWJmOTNiZWE2ZWZmYzAwMmZjMTQ2Y2Y3NWY5ZWMxZTFiZjQ0YTA1YWVjMTNlZThkNDg2ZWY3NWJlMThhNThiNDE3MGVjOQ==');
+        assert.equal(response.body[1].url, 'ZjZhZTk1NDIwZWRjZGYwZWNkODM3MGJkMGU0Y2UzNTc5OGMxNzUzNWQ1ZGFiN2UyYTYwMjJkNzUxNzFlMzhmMGVhMTRjMTM5YTNjYzIyMTkzYTQ0N2E3ODBiYmUxZGU0YWNmZDhhYjdhOGNiNmJjNTlhZTRiOTVhYTYyNzU3MDlhZjEyZmFhNTVjMmM5ZTI4YmJhM2UzODQ0N2YwODQxNzJhODFjOTUxNzMxYmFkMjA4NDI4YjcyOWQ1MWE5NmM2MTUwZWYzZTNiMDRhY2Y5NmQwODA1NTRkNTk1MjNkNjc3YzJlYjQzZTQ5ZjM1ZDFhMmJiYzk1ZjM5ZDZhNTQ5MDM3ZmI5ZDRmMmU4ZDdhMjMzMmE5NjNlZWNiYzQxY2M3NDMxMGZiMjU4NTY2NTIzOTJhYWFmNzE5MjFkYjU0NDQzNGRlZDc5MDVkM2RkMmNiZDM5NmE5MmY5ODI0YWY3OA==');
         assert.isNotNull(response.body[0].vttFile.track);
         assert.isNotNull(response.body[1].vttFile.track);
     });
@@ -371,8 +371,8 @@ describe('user video urls returned from /video/id events route', () => {
 
         assert.isArray(response.body, 'Response should be an array');
         assert.lengthOf(response.body, 2, 'Two videos should be returned');
-        assert.equal(response.body[0].url, 'https://ocast-devel-i1.it.helsinki.fi/static/mh_default_org/api/9059828c-8cef-4caf-a878-d6fa0a359857/a4227095-2b28-4846-b538-a0c8129d54b8/SHOT4_4K_CC_injected.mp4');
-        assert.equal(response.body[1].url, 'https://ocast-devel-i1.it.helsinki.fi/static/mh_default_org/api/9059828c-8cef-4caf-a878-d6fa0a359857/e11d592c-f67c-423c-a275-fb4d39868510/SHOT4_4K_CC_injected.mp4');
+        assert.equal(response.body[0].url, 'ZjZhZTk1NDIwZWRjZGYwZWNkODM3MGJkMGU0Y2UzNTc5OGMxNzUzNWQ1ZGFiN2UyYTYwMjJkNzUxNzFlMzhmMGVhMTRjMTM5YTNjYzIyMTkzYTQ0N2E3ODBiYmUxZGU0YWNmZDhhYjdhOGNiNmJjNTlhZTRiOTVhYTYyNzU3MDlhZjEyZmFhNTVjMmM5ZTI4YmJhM2UzODQ0N2YwODQxNzJhODFjOTUxNzMxYmFkMjA4NDI4YjcyOWQ1MWE5NmM2OTQ2ZTI4YmEyNDNmMTJkMDEyNDRkMmU0YTNiM2E3ODhhNzBlZWM0MDUzNGQzNzEyYTI1MWU4NTNlMDRlZTYxZDlkNGZjNzFmYjA1NzE4NjU1ZjkxOGVmZTEzYWJmOTNiZWE2ZWZmYzAwMmZjMTQ2Y2Y3NWY5ZWMxZTFiZjQ0YTA1YWVjMTNlZThkNDg2ZWY3NWJlMThhNThiNDE3MGVjOQ==');
+        assert.equal(response.body[1].url, 'ZjZhZTk1NDIwZWRjZGYwZWNkODM3MGJkMGU0Y2UzNTc5OGMxNzUzNWQ1ZGFiN2UyYTYwMjJkNzUxNzFlMzhmMGVhMTRjMTM5YTNjYzIyMTkzYTQ0N2E3ODBiYmUxZGU0YWNmZDhhYjdhOGNiNmJjNTlhZTRiOTVhYTYyNzU3MDlhZjEyZmFhNTVjMmM5ZTI4YmJhM2UzODQ0N2YwODQxNzJhODFjOTUxNzMxYmFkMjA4NDI4YjcyOWQ1MWE5NmM2MTUwZWYzZTNiMDRhY2Y5NmQwODA1NTRkNTk1MjNkNjc3YzJlYjQzZTQ5ZjM1ZDFhMmJiYzk1ZjM5ZDZhNTQ5MDM3ZmI5ZDRmMmU4ZDdhMjMzMmE5NjNlZWNiYzQxY2M3NDMxMGZiMjU4NTY2NTIzOTJhYWFmNzE5MjFkYjU0NDQzNGRlZDc5MDVkM2RkMmNiZDM5NmE5MmY5ODI0YWY3OA==');
         assert.equal(response.body[0].vttFile.url, 'http://localhost:8080/static/mh_default_org/engage-player/2d72b653-02f6-4638-ba58-281b2d49af33/7578df20-9939-40dc-a305-7f83e225e9af/testwebvtt.vtt');
         assert.equal(response.body[1].vttFile.url, 'http://localhost:8080/static/mh_default_org/engage-player/2d72b653-02f6-4638-ba58-281b2d49af33/7578df20-9939-40dc-a305-7f83e225e9af/testwebvtt.vtt');
         assert.isNotNull(response.body[0].vttFile.track);
