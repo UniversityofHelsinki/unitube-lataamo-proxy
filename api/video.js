@@ -15,11 +15,34 @@ const { parseSync, stringifySync } = require('subtitle');
 const dbService = require("../service/dbService");
 const constants = require("../utils/constants");
 const dbApi = require("./dbApi");
+const { algorithm, key, encryptionIV } = require("../config/security");
+const crypto = require("crypto");
+
+const encryptVideoUrl = episodeWithMediaUrls => {
+    episodeWithMediaUrls.some(episodeWithMediaUrl => {
+        let url = episodeWithMediaUrl.url;
+        const cipher = crypto.createCipheriv(algorithm, key, encryptionIV);
+        const encrypted = Buffer.from(
+            cipher.update(url, 'utf8', 'hex') + cipher.final('hex')
+        ).toString('base64'); // Encrypts data and converts to hex and base64
+        episodeWithMediaUrl.url = encrypted;
+    });
+    return episodeWithMediaUrls;
+};
+
+const decryptVideoUrl = url => {
+    const buff = Buffer.from(url, 'base64');
+    const decipher = crypto.createDecipheriv(algorithm, key, encryptionIV);
+    return (
+        decipher.update(buff.toString('utf8'), 'hex', 'utf8') +
+        decipher.final('utf8'));
+};
 
 exports.playVideo = async (req, res) => {
     try {
         logger.info(`GET play video url /video/play/:url VIDEO ${req.params.url} USER: ${req.user.eppn}`);
-        const response = await apiService.playVideo(req.params.url);
+        const url = decryptVideoUrl(req.params.url);
+        const response = await apiService.playVideo(url);
         response.pipe(res);
     } catch (error) {
         const msg = error.message;
@@ -40,7 +63,7 @@ exports.getVideoUrl = async (req, res) => {
         const mediaUrls = publicationService.getMediaUrlsFromPublication(req.params.id, publications);
         const episode = await apiService.getEpisodeForEvent(req.params.id);
         const episodeWithMediaUrls = await eventsService.getVttWithMediaUrls(episode, mediaUrls);
-        res.json(episodeWithMediaUrls);
+        res.json(encryptVideoUrl(episodeWithMediaUrls));
     } catch (error) {
         const msg = error.message;
         logger.error(`GET /videoUrl/:id VIDEO: ${req.params.id} USER: ${req.user.eppn} CAUSE: ${error}`);

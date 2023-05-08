@@ -8,6 +8,9 @@ const password = process.env.LATAAMO_OPENCAST_PASS;
 const userpass = Buffer.from(`${username}:${password}`).toString('base64');
 const auth = `Basic ${userpass}`;
 const axios = require('axios'); // https://www.npmjs.com/package/axios
+const crypto = require('crypto');
+const secretKey = process.env.CRYPTO_SECRET_KEY;
+const secretIV = process.env.CRYPTO_SECRET_IV;
 
 const ipaddr = require('ipaddr.js');
 const localhostIP = ipaddr.process('127.0.0.1');
@@ -80,3 +83,18 @@ module.exports.esbGroupsBase = axios.create({
 module.exports.authentication = () => {
     return auth;
 };
+
+module.exports.algorithm = 'aes-256-cbc'; //Using AES encryption
+// Generate secret hash with crypto to use for encryption
+module.exports.key = crypto
+    .createHash('sha512')
+    .update(secretKey)
+    .digest('hex')
+    .substring(0, 32);
+
+module.exports.encryptionIV = crypto
+    .createHash('sha512')
+    .update(secretIV)
+    .digest('hex')
+    .substring(0, 16);
+
