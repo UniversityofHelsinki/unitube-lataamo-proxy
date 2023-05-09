@@ -61,8 +61,8 @@ module.exports.opencastPresentationBase = axios.create({
 
 
 module.exports.opencastBaseStream = axios.create({
-    baseURL: adminHost,
-    headers: {'authorization': auth},
+    maxContentLength: Infinity,
+    headers: {'authorization': auth, },
     responseType: 'stream',
 });
 
