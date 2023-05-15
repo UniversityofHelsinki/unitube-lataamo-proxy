@@ -42,7 +42,8 @@ exports.playVideo = async (req, res) => {
     try {
         logger.info(`GET play video url /video/play/:url VIDEO ${req.params.url} USER: ${req.user.eppn}`);
         const url = decryptVideoUrl(req.params.url);
-        const response = await apiService.playVideo(url);
+        const response = await apiService.playVideo(url, req.headers.range);
+        res.writeHead(206, response.headers);
         response.pipe(res);
     } catch (error) {
         const msg = error.message;

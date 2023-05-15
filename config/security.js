@@ -59,12 +59,14 @@ module.exports.opencastPresentationBase = axios.create({
     }
 });
 
-
-module.exports.opencastBaseStream = axios.create({
-    maxContentLength: Infinity,
-    headers: {'authorization': auth, },
-    responseType: 'stream',
-});
+module.exports.opencastBaseStream = (url, range) => {
+    const streamBase = axios.create({
+        maxContentLength: Infinity,
+        headers: {'authorization': auth, 'Range': range},
+        responseType: 'stream',
+    });
+    return streamBase.get(url);
+};
 
 module.exports.esbPersonBase = axios.create({
     baseURL: esbHost,
