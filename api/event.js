@@ -46,9 +46,6 @@ exports.getVttFileForEvent = async (req, res) => {
         const mediaUrls = publicationService.getMediaUrlsFromPublication(req.params.id, publications);
         const vttFile = await eventsService.getVttFile(episode, mediaUrls);
         const response = await apiService.downloadVttFile(vttFile);
-        res.set({
-            'content-length': response.headers.get('content-length'),
-        });
         response.body.pipe(res);
     } catch(error) {
         console.log('ERROR', error.message);

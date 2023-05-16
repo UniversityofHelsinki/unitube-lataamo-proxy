@@ -18,19 +18,15 @@ const dbApi = require("./dbApi");
 const { algorithm, key, encryptionIV } = require("../config/security");
 const crypto = require("crypto");
 
-const encryptVideoUrl = episodeWithMediaUrls => {
-    episodeWithMediaUrls.some(episodeWithMediaUrl => {
-        let url = episodeWithMediaUrl.url;
-        const cipher = crypto.createCipheriv(algorithm, key, encryptionIV);
-        const encrypted = Buffer.from(
-            cipher.update(url, 'utf8', 'hex') + cipher.final('hex')
-        ).toString('base64'); // Encrypts data and converts to hex and base64
-        episodeWithMediaUrl.url = encrypted;
-    });
-    return episodeWithMediaUrls;
+const encrypt = url => {
+    const cipher = crypto.createCipheriv(algorithm, key, encryptionIV);
+    const encrypted = Buffer.from(
+        cipher.update(url, 'utf8', 'hex') + cipher.final('hex')
+    ).toString('base64');
+    return encrypted;
 };
 
-const decryptVideoUrl = url => {
+const decrypt = url => {
     const buff = Buffer.from(url, 'base64');
     const decipher = crypto.createDecipheriv(algorithm, key, encryptionIV);
     return (
@@ -38,10 +34,32 @@ const decryptVideoUrl = url => {
         decipher.final('utf8'));
 };
 
+const encryptUrl = videoUrl =>  encrypt(videoUrl);
+
+const encryptVideoAndVTTUrls = episodeWithMediaUrls => {
+    episodeWithMediaUrls.some(episodeWithMediaUrl => {
+        const videoUrl = episodeWithMediaUrl.url;
+        const encryptedUrl = encryptUrl(videoUrl);
+        episodeWithMediaUrl.url = encryptedUrl;
+        if (episodeWithMediaUrl.vttFile && episodeWithMediaUrl.vttFile.url) {
+            episodeWithMediaUrl.vttFile.filename = episodeWithMediaUrl.vttFile.url.substring(episodeWithMediaUrl.vttFile.url.lastIndexOf('/') + 1);
+            const encryptedVTTFileUrl = encryptUrl(episodeWithMediaUrl.vttFile.url);
+            episodeWithMediaUrl.vttFile.url = encryptedVTTFileUrl;
+        }
+    });
+    return episodeWithMediaUrls;
+};
+
+exports.vttFile = async (req, res) => {
+    const url = decrypt(req.params.url);
+    const response = await apiService.downloadVttFile(url);
+    response.body.pipe(res);
+};
+
 exports.playVideo = async (req, res) => {
     try {
         logger.info(`GET play video url /video/play/:url VIDEO ${req.params.url} USER: ${req.user.eppn}`);
-        const url = decryptVideoUrl(req.params.url);
+        const url = decrypt(req.params.url);
         const response = await apiService.playVideo(url, req.headers.range);
         res.writeHead(206, response.headers);
         response.pipe(res);
@@ -64,7 +82,7 @@ exports.getVideoUrl = async (req, res) => {
         const mediaUrls = publicationService.getMediaUrlsFromPublication(req.params.id, publications);
         const episode = await apiService.getEpisodeForEvent(req.params.id);
         const episodeWithMediaUrls = await eventsService.getVttWithMediaUrls(episode, mediaUrls);
-        res.json(encryptVideoUrl(episodeWithMediaUrls));
+        res.json(encryptVideoAndVTTUrls(episodeWithMediaUrls));
     } catch (error) {
         const msg = error.message;
         logger.error(`GET /videoUrl/:id VIDEO: ${req.params.id} USER: ${req.user.eppn} CAUSE: ${error}`);
