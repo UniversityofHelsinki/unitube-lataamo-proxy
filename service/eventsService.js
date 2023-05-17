@@ -94,11 +94,9 @@ exports.filterEventsForClientTrash = (ocResponseData, loggedUser) => {
 const calculateMediaDurationForVideoList = (event, loggedUser) => {
     try {
         let duration = '00:00:00';
-        if (event.publications) {
-            let apiChannel = event.publications.find(publication => publication.channel === 'api');
-
-            if (apiChannel && apiChannel.media) {
-                apiChannel.media.forEach(media => {
+        if (event.publications && event.publications.length > 0) {
+            if (event.publications[0].media) {
+                event.publications[0].media.forEach(media => {
                     if (media.has_video) {
                         duration = moment.duration(media.duration, 'milliseconds').format('HH:mm:ss', {trim: false});
                     }
