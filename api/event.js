@@ -26,7 +26,7 @@ exports.getEvent = async (req, res) => {
         const eventWithLicenseOptions = licenseService.getLicenseOptions(eventWithLicense);
         const eventWithLicenseOptionsAndVideoViews = await eventsService.getEventViews(req.params.id, eventWithLicenseOptions);
         res.json(eventWithLicenseOptionsAndVideoViews);
-        
+
     } catch (error) {
         const msg = error.message;
         logger.error(`Error GET /event/:id ${msg} VIDEO ${req.params.id} USER ${req.user.eppn}`);
@@ -42,13 +42,10 @@ exports.getVttFileForEvent = async (req, res) => {
     try {
         const episode = await apiService.getEpisodeForEvent(req.params.id);
         const publications = await apiService.getPublicationsForEvent(req.params.id);
-        const filteredPublication = publicationService.filterApiChannelPublication(publications);
-        const mediaUrls = publicationService.getMediaUrlsFromPublication(req.params.id, filteredPublication);
+        //const filteredPublication = publicationService.filterEngagePlayerChannelPublication(publications);
+        const mediaUrls = publicationService.getMediaUrlsFromPublication(req.params.id, publications);
         const vttFile = await eventsService.getVttFile(episode, mediaUrls);
         const response = await apiService.downloadVttFile(vttFile);
-        res.set({
-            'content-length': response.headers.get('content-length'),
-        });
         response.body.pipe(res);
     } catch(error) {
         console.log('ERROR', error.message);

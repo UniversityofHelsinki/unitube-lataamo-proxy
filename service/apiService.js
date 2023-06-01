@@ -14,6 +14,7 @@ const {v4: uuidv4} = require("uuid");
 const uploadLogger = require("../config/uploadLogger");
 const jobsService = require("./jobsService");
 
+
 //
 // This file is the façade for opencast server
 //
@@ -234,6 +235,11 @@ exports.getUserSeries = async (user) => {
         [item[key], item])).values()];
 
     return uniqueSeriesList;
+};
+
+exports.playVideo = async (url, range) => {
+    const response = await security.opencastBaseStream(url, range);
+    return response.data;
 };
 
 exports.getEpisodeForEvent = async (eventId) => {

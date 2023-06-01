@@ -301,10 +301,10 @@ const mockUserSeries6 =
     };
 
 const mockVideoStats =
-    { 
+    {
         "stats":{"id": CONSTANTS.TEST_EVENT_1_ID,"views":5}
     };
-    
+
 const mockUserSeriesEmpty = [];
 
 const mockUserEventsForInboxSeriesForList = [
@@ -2876,7 +2876,7 @@ const mockEventPublicationContainsOneVideoWithDifferentQualities = [
                 ]
             }
         ],
-        'channel': 'api',
+        'channel': 'engage-player',
         'id': 'cd5695db-e95f-4075-bd31-33f3bb00082d',
         'media': [
             {
@@ -3022,15 +3022,6 @@ const mockEvent1VttFile = 'WEBVTT\n' +
     'and the way we access it is changing';
 
 const mockEventPublicationContainsTwoVideosWithDifferentQualities = [
-    {
-        'metadata': [],
-        'attachments': [],
-        'channel': 'engage-player',
-        'id': 'f4b317c1-3c37-47ca-a0c4-51b7b365867e',
-        'media': [],
-        'mediatype': 'text/html',
-        'url': 'https://ocast-devel-i1.it.helsinki.fi/unitube/index.html?id=9059828c-8cef-4caf-a878-d6fa0a359857'
-    },
     {
         'metadata': [
             {
@@ -3492,7 +3483,7 @@ const mockEventPublicationContainsTwoVideosWithDifferentQualities = [
                 ]
             }
         ],
-        'channel': 'api',
+        'channel': 'engage-player',
         'id': '74617da7-425e-4bed-a91f-5ae83d96588d',
         'media': [
             {

@@ -15,26 +15,77 @@ const { parseSync, stringifySync } = require('subtitle');
 const dbService = require("../service/dbService");
 const constants = require("../utils/constants");
 const dbApi = require("./dbApi");
+const { algorithm, key, encryptionIV } = require("../config/security");
+const crypto = require("crypto");
 
+const encrypt = url => {
+    const cipher = crypto.createCipheriv(algorithm, key, encryptionIV);
+    const encrypted = Buffer.from(
+        cipher.update(url, 'utf8', 'hex') + cipher.final('hex')
+    ).toString('base64');
+    return encrypted;
+};
+
+const decrypt = url => {
+    const buff = Buffer.from(url, 'base64');
+    const decipher = crypto.createDecipheriv(algorithm, key, encryptionIV);
+    return (
+        decipher.update(buff.toString('utf8'), 'hex', 'utf8') +
+        decipher.final('utf8'));
+};
+
+const encryptUrl = videoUrl =>  encrypt(videoUrl);
+
+const encryptVideoAndVTTUrls = episodeWithMediaUrls => {
+    episodeWithMediaUrls.some(episodeWithMediaUrl => {
+        const videoUrl = episodeWithMediaUrl.url;
+        const encryptedUrl = encryptUrl(videoUrl);
+        episodeWithMediaUrl.url = encryptedUrl;
+        if (episodeWithMediaUrl.vttFile && episodeWithMediaUrl.vttFile.url) {
+            episodeWithMediaUrl.vttFile.filename = episodeWithMediaUrl.vttFile.url.substring(episodeWithMediaUrl.vttFile.url.lastIndexOf('/') + 1);
+            const encryptedVTTFileUrl = encryptUrl(episodeWithMediaUrl.vttFile.url);
+            episodeWithMediaUrl.vttFile.url = encryptedVTTFileUrl;
+        }
+    });
+    return episodeWithMediaUrls;
+};
+
+exports.vttFile = async (req, res) => {
+    const url = decrypt(req.params.url);
+    const response = await apiService.downloadVttFile(url);
+    response.body.pipe(res);
+};
+
+exports.playVideo = async (req, res) => {
+    try {
+        logger.info(`GET play video url /video/play/:url VIDEO ${req.params.url} USER: ${req.user.eppn}`);
+        const url = decrypt(req.params.url);
+        const response = await apiService.playVideo(url, req.headers.range);
+        res.writeHead(206, response.headers);
+        response.pipe(res);
+    } catch (error) {
+        const msg = error.message;
+        logger.error(`GET /video/play/:url VIDEO: ${req.params.id} USER: ${req.user.eppn} CAUSE: ${error}`);
+        res.status(500);
+        res.json({
+            message: messageKeys.ERROR_MESSAGE_FAILED_TO_PLAY_VIDEO_FROM_URL,
+            msg
+        });
+    }
+};
 
 exports.getVideoUrl = async (req, res) => {
-    let debugStage = 0;
     try {
         logger.info(`GET video media url /videoUrl/:id VIDEO ${req.params.id} USER: ${req.user.eppn}`);
         const publications = await apiService.getPublicationsForEvent(req.params.id);
-        debugStage = 1;
-        const filteredPublication = publicationService.filterApiChannelPublication(publications);
-        debugStage = 2;
-        const mediaUrls = publicationService.getMediaUrlsFromPublication(req.params.id, filteredPublication);
-        debugStage = 3;
+        //const filteredPublication = publicationService.filterEngagePlayerChannelPublication(publications);
+        const mediaUrls = publicationService.getMediaUrlsFromPublication(req.params.id, publications);
         const episode = await apiService.getEpisodeForEvent(req.params.id);
-        debugStage = 4;
         const episodeWithMediaUrls = await eventsService.getVttWithMediaUrls(episode, mediaUrls);
-        debugStage = 5;
-        res.json(episodeWithMediaUrls);
+        res.json(encryptVideoAndVTTUrls(episodeWithMediaUrls));
     } catch (error) {
         const msg = error.message;
-        logger.error(`GET /videoUrl/:id VIDEO: ${req.params.id} USER: ${req.user.eppn} DEBUG-STAGE: ${debugStage} CAUSE: ${error}`);
+        logger.error(`GET /videoUrl/:id VIDEO: ${req.params.id} USER: ${req.user.eppn} CAUSE: ${error}`);
         res.status(500);
         res.json({
             message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_VIDEO_URL,
