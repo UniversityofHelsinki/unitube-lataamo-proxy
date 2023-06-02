@@ -822,7 +822,7 @@ exports.deleteSeries = async (id) => {
 exports.getEventViews = async (id) => {
     const url = `${constants.OCAST_EVENT_VIEWS_PATH}${id}`;
     try {
-        const videoViews = await security.opencastBase.get(url);
+        const videoViews = await security.opencastPresentationBase.get(url);
         return videoViews.data;
     } catch (error) {
         logger.error(`error while fetching video views for video id: ${id} from url: ${url}, error: ${error}`);
