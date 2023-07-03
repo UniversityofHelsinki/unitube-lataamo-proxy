@@ -2,7 +2,6 @@ const equal = require('deep-equal');
 const commonService = require('./commonService');
 const seriesService = require('./seriesService');
 const apiService = require('./apiService');
-const publicationService = require('./publicationService');
 const moment = require('moment');
 const momentDurationFormatSetup = require('moment-duration-format');
 momentDurationFormatSetup(moment);
@@ -15,6 +14,7 @@ const messageKeys = require('../utils/message-keys');
 const pLimit = require('p-limit');
 // Limit number of request fetched concurrently
 const limit = pLimit(5);
+const { createHash } = require('crypto');
 
 const _mapPublications = (videoList, publications) => {
     const media = publications.map(p => p.media).flatMap(m => m);
@@ -51,11 +51,10 @@ exports.filterEventsForClientList = (ocResponseData, loggedUser) => {
                 'created': event.created,
                 'series': event.series,
                 'media': calculateMediaPropertyForVideoList(event, loggedUser),
-                'publications': _mapPublications(calculateMediaPropertyForVideoList(event, loggedUser), publicationService.filterApiChannelPublication(event.publications)),
+                'publications': _mapPublications(calculateMediaPropertyForVideoList(event, loggedUser), event.publications),
                 'archived_date': event.archived_date
             });
         });
-
         return eventArray;
     } catch (error) {
         logger.error(`error filtering events for client ${error} ${error.message} USER ${loggedUser}`);
@@ -85,7 +84,7 @@ exports.filterEventsForClientTrash = (ocResponseData, loggedUser) => {
                 'created': event.created,
                 'series': event.series,
                 'media' : calculateMediaPropertyForVideoList(event, loggedUser),
-                'publications': _mapPublications(calculateMediaPropertyForVideoList(event, loggedUser), publicationService.filterApiChannelPublication(event.publications))
+                'publications': _mapPublications(calculateMediaPropertyForVideoList(event, loggedUser), event.publications)
             });
         }
     });
@@ -95,11 +94,9 @@ exports.filterEventsForClientTrash = (ocResponseData, loggedUser) => {
 const calculateMediaDurationForVideoList = (event, loggedUser) => {
     try {
         let duration = '00:00:00';
-        if (event.publications) {
-            let apiChannel = event.publications.find(publication => publication.channel === 'api');
-
-            if (apiChannel && apiChannel.media) {
-                apiChannel.media.forEach(media => {
+        if (event.publications && event.publications.length > 0) {
+            if (event.publications[0].media) {
+                event.publications[0].media.forEach(media => {
                     if (media.has_video) {
                         duration = moment.duration(media.duration, 'milliseconds').format('HH:mm:ss', {trim: false});
                     }
@@ -114,23 +111,90 @@ const calculateMediaDurationForVideoList = (event, loggedUser) => {
     }
 };
 
+const isValidUrl = urlString => {
+    try {
+        let url;
+        url =new URL(urlString);
+        return url.protocol === "http:" || url.protocol === "https:";
+    }
+    catch (exception) {
+        console.log(exception);
+        return false;
+    }
+};
+
+const hash = (string) => {
+    return createHash('sha256').update(string).digest('hex');
+};
+
+const filterVideosByDifferentFlavor = (sortedMediaArrayOfObjects, mediaPresenterDeliveryArray, mediaPresentationDeliveryArray) => {
+    for (const mediaObject of sortedMediaArrayOfObjects) {
+        if (mediaObject.flavor === constants.VIDEO_PRESENTER_DELIVERY) {
+            mediaPresenterDeliveryArray.push(mediaObject);
+        }
+        if (mediaObject.flavor === constants.VIDEO_PRESENTATION_DELIVERY) {
+            mediaPresentationDeliveryArray.push(mediaObject);
+        }
+    }
+};
+
+const fillHighestQualityVideosArray = (mediaPresenterDeliveryArray, twoOfTheHighestQualityVideos, mediaPresentationDeliveryArray) => {
+    mediaPresenterDeliveryArray[0] ? twoOfTheHighestQualityVideos.push(mediaPresenterDeliveryArray[0]) : '';
+    mediaPresenterDeliveryArray[1] ? twoOfTheHighestQualityVideos.push(mediaPresenterDeliveryArray[1]) : '';
+    mediaPresentationDeliveryArray[0] ? twoOfTheHighestQualityVideos.push(mediaPresentationDeliveryArray[0]) : '';
+    mediaPresentationDeliveryArray[1] ? twoOfTheHighestQualityVideos.push(mediaPresentationDeliveryArray[1]) : '';
+};
+
+const sortVideosByQuality = (mediaArrayOfObjects) => {
+    const sortedMediaArrayOfObjects = mediaArrayOfObjects.sort((a, b) => {
+        return b.quality - a.quality;
+    });
+    return sortedMediaArrayOfObjects;
+};
+
+const filterOnlyTwoOfTheBestQualityVideos = (mediaArrayOfObjects) => {
+    let twoOfTheHighestQualityVideos = [];
+    let mediaPresenterDeliveryArray = [];
+    let mediaPresentationDeliveryArray = [];
+    if (mediaArrayOfObjects && mediaArrayOfObjects.length > 0) {
+        if (mediaArrayOfObjects.length > 1) {
+            const sortedMediaArrayOfObjects = sortVideosByQuality(mediaArrayOfObjects);
+            filterVideosByDifferentFlavor(sortedMediaArrayOfObjects, mediaPresenterDeliveryArray, mediaPresentationDeliveryArray);
+            fillHighestQualityVideosArray(mediaPresenterDeliveryArray, twoOfTheHighestQualityVideos, mediaPresentationDeliveryArray);
+        } else {
+            twoOfTheHighestQualityVideos.push(mediaArrayOfObjects[0]);
+        }
+    }
+    return twoOfTheHighestQualityVideos;
+};
+
+const filterOnlyUniqueVideos = (mediaArrayOfObjects) => {
+    return mediaArrayOfObjects.filter((elem, index) => mediaArrayOfObjects.findIndex(obj => obj.hash === elem.hash) === index);
+};
+
 const calculateMediaPropertyForVideoList = (event, loggedUser) => {
     try {
-        let mediaUrls = [];
+        let mediaArrayOfObjects = [];
         if (event.publications) {
-            let apiChannel = event.publications.find(publication => publication.channel === 'api');
-
-            if (apiChannel && apiChannel.media) {
-                apiChannel.media.forEach(media => {
-                    if (media.has_video && event.processing_state === constants.OPENCAST_STATE_SUCCEEDED) {
-                        mediaUrls.push(media.url);
-                    }
-                });
-            }
+            event.publications.forEach(publication => {
+                if (publication.channel === constants.API_CHANNEL || publication.channel === constants.ENGAGE_PLAYER_CHANNEL && publication.media) {
+                    publication.media.forEach(media => {
+                        if (media.has_video && event.processing_state === constants.OPENCAST_STATE_SUCCEEDED) {
+                            if (media.height !== undefined && media.flavor !== undefined && isValidUrl(media.url)) {
+                                mediaArrayOfObjects.push({ "hash" : hash(media.height + media.url), "quality" : media.height , "url" : media.url , flavor : media.flavor});
+                            }
+                        }
+                    });
+                }
+            });
         } else {
             logger.warn(`publications missing in media property ${event.identifier} FOR USER ${loggedUser.eppn}`);
         }
-        return [...new Set(mediaUrls)];
+
+        const unique = filterOnlyUniqueVideos(mediaArrayOfObjects);
+        const filteredMediaArrays =  filterOnlyTwoOfTheBestQualityVideos(unique);
+        let resultUrls = filteredMediaArrays.map(obj => obj.url);
+        return resultUrls;
     } catch (error) {
         logger.error(`error calculating media property for video list  ${error}  ${error.message} ${event.identifier} FOR USER ${loggedUser.eppn}`);
     }
@@ -444,16 +508,16 @@ exports.modifySeriesEventMetadataForOpencast = (metadata) => {
     const metadataArray = [];
 
     metadataArray.push({
-        'id' : 'title',
-        'value': metadata.title },
-    {
-        'id' : 'description',
-        'value': metadata.description
-    },
-    {
-        'id' : 'contributor',
-        'value': metadata.contributors
-    }
+            'id' : 'title',
+            'value': metadata.title },
+        {
+            'id' : 'description',
+            'value': metadata.description
+        },
+        {
+            'id' : 'contributor',
+            'value': metadata.contributors
+        }
     );
 
     return metadataArray;

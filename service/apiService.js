@@ -14,6 +14,7 @@ const {v4: uuidv4} = require("uuid");
 const uploadLogger = require("../config/uploadLogger");
 const jobsService = require("./jobsService");
 
+
 //
 // This file is the façade for opencast server
 //
@@ -234,6 +235,11 @@ exports.getUserSeries = async (user) => {
         [item[key], item])).values()];
 
     return uniqueSeriesList;
+};
+
+exports.playVideo = async (url, range) => {
+    const response = await security.opencastBaseStream(url, range);
+    return response.data;
 };
 
 exports.getEpisodeForEvent = async (eventId) => {
@@ -816,7 +822,7 @@ exports.deleteSeries = async (id) => {
 exports.getEventViews = async (id) => {
     const url = `${constants.OCAST_EVENT_VIEWS_PATH}${id}`;
     try {
-        const videoViews = await security.opencastBase.get(url);
+        const videoViews = await security.opencastPresentationBase.get(url);
         return videoViews.data;
     } catch (error) {
         logger.error(`error while fetching video views for video id: ${id} from url: ${url}, error: ${error}`);
