@@ -405,15 +405,17 @@ exports.getAllEventsWithAcls = async (events) => {
 };
 
 exports.getLicenseFromEventMetadata = (event) => {
+    /*
     const foundEpisodeFlavorMetadata = event.metadata.find(field => {
         return field.flavor === 'dublincore/episode';
     });
     const foundFieldWithLicenseInfo = foundEpisodeFlavorMetadata.fields.find(field => {
         return field.id === 'license';
     });
+     */
     return {
         ...event,
-        license : foundFieldWithLicenseInfo ? foundFieldWithLicenseInfo.value : ''
+        license : event.license
     };
 };
 
