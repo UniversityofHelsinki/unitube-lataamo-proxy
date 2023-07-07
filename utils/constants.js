@@ -51,7 +51,7 @@ const JOB_STATUS_ERROR = 'ERROR';
 
 const OCAST_VIDEOS_FILTER_SERIES_IDENTIFIER = '?filter=series:';
 
-const OCAST_VIDEOS_WITH_METADATA_ACLS_AND_PUBLICATIONS = '&withmetadata=true&withacl=true&withpublications=true';
+const OCAST_VIDEOS_WITH_METADATA_ACLS_AND_PUBLICATIONS = '&withmetadata=false&withacl=true&withpublications=true';
 
 const OCAST_VIDEOS_FILTER_USER_NAME = '?filter=title:';
 
