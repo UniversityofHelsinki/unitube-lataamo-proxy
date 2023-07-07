@@ -392,10 +392,10 @@ exports.getVttWithMediaUrls = async (episode, mediaUrls) => {
 
 exports.getAllEventsWithAcls = async (events) => {
     return Promise.all(events.map(async event => {
-        let metadata = event.metadata;
-        let seriesField = seriesService.getSeriesFromEventMetadata(metadata);
-        let acls = await apiService.getEventAclsFromSeries(seriesField.value);
-        let series = await apiService.getSeries(seriesField.value);
+        //let metadata = event.metadata;
+        //let seriesField = seriesService.getSeriesFromEventMetadata(metadata);
+        let acls = await apiService.getEventAclsFromSeries(event.isPartOf);
+        let series = await apiService.getSeries(event.isPartOf);
         return {
             ...event,
             acls : acls,
@@ -420,18 +420,18 @@ exports.getLicenseFromEventMetadata = (event) => {
 };
 
 exports.getEventWithSeries = async (event) => {
-    const metadata = await apiService.getMetadataForEvent(event);
-    const seriesMetadata = seriesService.getSeriesFromEventMetadata(metadata);
-    const series = await apiService.getSeries(seriesMetadata.value);
+    //const metadata = await apiService.getMetadataForEvent(event);
+    //const seriesMetadata = seriesService.getSeriesFromEventMetadata(metadata);
+    const series = await apiService.getSeries(event.is_part_of);
     return {
         ...event,
-        isPartOf : seriesMetadata.value,
+        isPartOf : event.is_part_of,
         series: series
     };
 };
 
 exports.getEventAclsFromSeries = async (eventWithSerie) => {
-    const eventAcls = await apiService.getEventAclsFromSeries(eventWithSerie.isPartOf);
+    const eventAcls = await apiService.getEventAclsFromSeries(eventWithSerie.is_part_of);
     return {
         ...eventWithSerie,
         acls : eventAcls
