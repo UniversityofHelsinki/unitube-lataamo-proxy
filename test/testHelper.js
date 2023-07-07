@@ -43,7 +43,7 @@ const CONSTANTS = Object.freeze({
     SERIES_OWNER_EPPN : 'SeriesOwnerEppn',
     INBOX: 'inbox',
     TRASH: 'trash',
-    OCAST_VIDEOS_WITH_METADATA_ACLS_AND_PUBLICATIONS : '&withmetadata=true&withacl=true&withpublications=true'
+    OCAST_VIDEOS_WITH_METADATA_ACLS_AND_PUBLICATIONS : '&withmetadata=false&withacl=true&withpublications=true'
 });
 
 
