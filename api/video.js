@@ -61,10 +61,16 @@ const calculateRangeHeaders = (req) => {
     console.log(range);
     if (range) {
         range = range.split('bytes=');
-        let start = range[1].split('-')[0];
-        let end = parseInt(start) + 5 * 2 ** 20; // add 5 MB to start header value
-        let rangeHeaders = `bytes=${start}-${end}`;
-        return rangeHeaders;
+        let startAndEnd = range[1].split('-');
+        if (startAndEnd) {
+            let start = startAndEnd[0];
+            let end = startAndEnd[1];
+            if (!end || parseInt(end) > parseInt(start) + 5 * 2 ** 20) {
+                end = parseInt(start) + 5 * 2 ** 20;
+            }
+            let rangeHeaders = `bytes=${start}-${end}`;
+            return rangeHeaders;
+        }
     } else {
         return range;
     }
