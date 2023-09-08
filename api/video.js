@@ -58,11 +58,16 @@ exports.vttFile = async (req, res) => {
 
 const calculateRangeHeaders = (req) => {
     let range = req.headers.range;
-    range = range.split('bytes=');
-    let start = range[1].split('-')[0];
-    let end = parseInt(start) + 5 * 2 ** 20; // add 5 MB to start header value
-    let rangeHeaders = `bytes=${start}-${end}`;
-    return rangeHeaders;
+    console.log(range);
+    if (range) {
+        range = range.split('bytes=');
+        let start = range[1].split('-')[0];
+        let end = parseInt(start) + 5 * 2 ** 20; // add 5 MB to start header value
+        let rangeHeaders = `bytes=${start}-${end}`;
+        return rangeHeaders;
+    } else {
+        return range;
+    }
 };
 
 exports.playVideo = async (req, res) => {
