@@ -56,11 +56,21 @@ exports.vttFile = async (req, res) => {
     response.body.pipe(res);
 };
 
+const calculateRangeHeaders = (req) => {
+    let range = req.headers.range;
+    range = range.split('bytes=');
+    let start = range[1].split('-')[0];
+    let end = parseInt(start) + 5 * 2 ** 20; // add 5 MB to start header value
+    let rangeHeaders = `bytes=${start}-${end}`;
+    return rangeHeaders;
+};
+
 exports.playVideo = async (req, res) => {
     try {
         logger.info(`GET play video url /video/play/:url VIDEO ${req.params.url} USER: ${req.user.eppn}`);
         const url = decrypt(req.params.url);
-        const response = await apiService.playVideo(url, req.headers.range);
+        let rangeHeaders = calculateRangeHeaders(req);
+        const response = await apiService.playVideo(url, rangeHeaders);
         res.writeHead(206, response.headers);
         response.pipe(res);
     } catch (error) {
