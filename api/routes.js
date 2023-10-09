@@ -101,7 +101,7 @@ module.exports = function (router) {
 
     router.get('/video/play/:url', video.playVideo);
 
-    router.get('/urlForVttFile/:url', video.decryptVideoUrl);
+    router.get('/vttFileName/:url', video.vttFileFromUrl);
 
     /**
      * @swagger
