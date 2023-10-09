@@ -1,6 +1,5 @@
 const equal = require('deep-equal');
 const commonService = require('./commonService');
-const seriesService = require('./seriesService');
 const apiService = require('./apiService');
 const moment = require('moment');
 const momentDurationFormatSetup = require('moment-duration-format');
