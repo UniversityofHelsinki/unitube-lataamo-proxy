@@ -50,6 +50,16 @@ const encryptVideoAndVTTUrls = episodeWithMediaUrls => {
     return episodeWithMediaUrls;
 };
 
+const parseVTTFileFromUrl = (response) => {
+    return response.substring(response.lastIndexOf('/') + 1);
+};
+
+exports.vttFileFromUrl = (req, res) => {
+    const url = decrypt(req.params.url);
+    const vttFile = parseVTTFileFromUrl(url);
+    res.json(vttFile);
+};
+
 exports.vttFile = async (req, res) => {
     const url = decrypt(req.params.url);
     const response = await apiService.downloadVttFile(url);
