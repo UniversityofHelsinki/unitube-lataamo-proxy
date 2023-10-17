@@ -78,7 +78,8 @@ const WEBVTT_TEMPLATE =  {
         "workflow": "publish-uploaded-assets",
         "configuration": {
             "downloadSourceflavorsExist": "true",
-            "download-source-flavors": "text/vtt"
+            "download-source-flavors": "text/vtt",
+            "publishToEngage": "true"
         }
     }
 };
