@@ -70,7 +70,8 @@ const WEBVTT_TEMPLATE =  {
                 "flavorType": "text",
                 "flavorSubType": "vtt",
                 "displayOrder": 3,
-                "title": "EVENTS.EVENTS.NEW.UPLOAD_ASSET.OPTION.CAPTIONS_WEBVTT"
+                "title": "EVENTS.EVENTS.NEW.UPLOAD_ASSET.OPTION.CAPTIONS_WEBVTT",
+                "showAs" : "uploadAsset"
             }
         ]
     },
@@ -78,8 +79,7 @@ const WEBVTT_TEMPLATE =  {
         "workflow": "publish-uploaded-assets",
         "configuration": {
             "downloadSourceflavorsExist": "true",
-            "download-source-flavors": "text/vtt",
-            "publishToEngage": "true"
+            "download-source-flavors": "text/vtt"
         }
     }
 };
@@ -173,7 +173,7 @@ const SERIES_METADATA = [
 // Opencast instantiates a java.util.Properties from the value, so key=value pairs and \n as a delimeter.
 // https://docs.oracle.com/javase/7/docs/api/java/util/Properties.html#load(java.io.InputStream)
 const PROPERTIES_REPUBLISH_METADATA =
-    'publishLive=false\nuploadedSearchPreview=true\npublishToOaiPmh=false\ncomment=false\npublishToMediaModule=true';
+    'publishLive=false\nuploadedSearchPreview=true\npublishToOaiPmh=false\ncomment=false\npublishToMediaModule=true\ndownloadSourceflavorsExist=true\npublishToEngage=true\ndownload-source-flavors=text/vtt';
 
 const DEFAULT_VIDEO_ARCHIVED_YEAR_AMOUNT = 3;
 
