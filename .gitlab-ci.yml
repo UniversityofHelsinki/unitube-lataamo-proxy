@@ -49,6 +49,27 @@ test:
     - npm run coverage
   coverage: /All files\s*\|\s*([\d\.]+)/
 
+# Define the process for sonarcube check
+sonarqube-check:
+  stage: test
+  tags:
+    - ohtu-build-4
+  image:
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [ "" ]
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+    GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script:
+    - sonar-scanner
+  allow_failure: true
+  only:
+    - master
+
 # Define the process for deploy stage to development environment
 deploy_oc_test:
   stage: deploy
@@ -107,27 +128,6 @@ deploy_dev:
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
     - rsync -azPq -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --exclude=".env" --exclude="/api/uploads" --exclude="/logs" --exclude="/files/licenses.json" --delete ./ lataamo@lataamo-dev.it.helsinki.fi:/home/lataamo/proxy
     - ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T lataamo@lataamo-dev.it.helsinki.fi "pm2 restart app"
-
-# Define the process for sonarcube check
-sonarqube-check:
-  stage: test
-  tags:
-    - ohtu-build-3
-  image:
-    name: sonarsource/sonar-scanner-cli:latest
-    entrypoint: [ "" ]
-  variables:
-    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
-    GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
-  cache:
-    key: "${CI_JOB_NAME}"
-    paths:
-      - .sonar/cache
-  script:
-    - sonar-scanner
-  allow_failure: true
-  only:
-    - main
 
 # Define the process for deploy stage to test environment
 deploy_test:
