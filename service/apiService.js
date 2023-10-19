@@ -11,7 +11,6 @@ const { parseContributor } = require('./userService');
 const { filterCorrectSeriesWithCorrectContributors, transformResponseData, isContributorMigrationActive } =
     require('../utils/ocastMigrationUtils');
 const {v4: uuidv4} = require("uuid");
-const uploadLogger = require("../config/uploadLogger");
 const jobsService = require("./jobsService");
 
 
@@ -279,58 +278,85 @@ exports.getMetadataForEvent = async (event) => {
     return response.data;
 };
 
+exports.getMetadataByEventId = async (eventId) => {
+    const metadata = constants.OCAST_API_PATH + eventId + constants.OCAST_METADATA_PATH;
+    const response = await security.opencastBase.get(metadata);
+    return response.data;
+};
+
 exports.getMediaPackageForEvent = async (eventId) => {
     const mediaPackageUrl = constants.OCAST_EVENT_ASSET_EPISODE + eventId;
     const response = await security.opencastBase.get(mediaPackageUrl);
     return response.data;
 };
 
-exports.republishWebVttFile = async (eventId) => {
-    const republishMetadataUrl = '/workflow/start';
-    const mediaPackageUrl = '/assets/episode/' + eventId;
-    try{
-        let bodyFormData = new FormData();
-        // get mediapackage for the republish query
-        const response = await security.opencastBase.get(mediaPackageUrl);
+exports.republishWebVttFile = async (event) => {
+    event.isPartOf = event.is_part_of;
+    const modifiedMetadata = eventsService.modifyEventMetadataForOpencast(event);
 
-        if (response.status !== 200) {
-            return {
-                status: response.status,
-                statusText: response.statusText,
-                eventId: eventId
-            };
-        }
-        // form data for the republish request
-        bodyFormData = new FormData();
-        bodyFormData.append('definition', 'republish-metadata');
-        bodyFormData.append('mediapackage', response.data);
-        bodyFormData.append('properties', constants.PROPERTIES_REPUBLISH_METADATA);
+    const videoMetaDataUrl = constants.OCAST_VIDEOS_PATH + event.identifier + constants.OCAST_METADATA_PATH + constants.OCAST_TYPE_QUERY_PARAMETER + constants.OCAST_TYPE_DUBLINCORE_EPISODE;
 
-        let headers = {
-            ...bodyFormData.getHeaders(),
-            'Content-Length': bodyFormData.getLengthSync()
+    let bodyFormData = new FormData();
+    bodyFormData.append('metadata', JSON.stringify(modifiedMetadata));
+
+    let headers = {
+        ...bodyFormData.getHeaders(),
+        'Content-Length': bodyFormData.getLengthSync()
+    };
+    // update event metadata
+    const response2 = await security.opencastBase.put(videoMetaDataUrl, bodyFormData, {headers});
+
+    // let's break if response from PUT not ok
+    if (response2.status !== 204){
+        return {
+            status: response2.status,
+            statusText: response2.statusText,
+            eventId: event.identifier
         };
-
-        let hasActiveTransaction = true;
-        let count = 0;
-        await new Promise(resolve => setTimeout(resolve, 30000));
-        while (hasActiveTransaction && count <= 10){
-            const transactionStatusPath = constants.OCAST_EVENT_MEDIA_PATH_PREFIX + eventId + '/hasActiveTransaction';
-            let responseX = await security.opencastBase.get(transactionStatusPath);
-
-            if (responseX.data && responseX.data.active !== true) {
-                hasActiveTransaction = false;
-            }else{
-                // transaction active, try again after minute
-                count = count + 1;
-                await new Promise(resolve => setTimeout(resolve, 60000));
-            }
-        }
-        await security.opencastBase.post(republishMetadataUrl, bodyFormData, {headers});
-    }catch(error){
-        logger.error(`error republishing event ${eventId}`);
-        throw error;
     }
+
+    const republishMetadataUrl = '/workflow/start';
+    const mediaPackageUrl = '/assets/episode/' + event.identifier;
+
+    bodyFormData = new FormData();
+    // get mediapackage for the republish query
+    const response = await security.opencastBase.get(mediaPackageUrl);
+
+    if (response.status !== 200) {
+        return {
+            status: response.status,
+            statusText: response.statusText,
+            eventId: event.identifier
+        };
+    }
+
+    const updateEventMetadataId = uuidv4();
+    // set upload job status
+    await jobsService.setJobStatus(updateEventMetadataId, constants.JOB_STATUS_STARTED);
+    while (await jobsService.getJob(updateEventMetadataId) != null) {
+        const transactionStatusPath = constants.OCAST_EVENT_MEDIA_PATH_PREFIX + event.identifier + '/hasActiveTransaction';
+        let transactionResponse = await security.opencastBase.get(transactionStatusPath);
+
+        if (transactionResponse.data && transactionResponse.data.active !== true) {
+            await jobsService.removeJob(updateEventMetadataId);
+            break;
+        } else {
+            // transaction active, try again after 10 seconds
+            await new Promise(resolve => setTimeout(resolve, 10000));
+        }
+    }
+
+    // form data for the republish request
+    bodyFormData = new FormData();
+    bodyFormData.append('definition', 'republish-metadata');
+    bodyFormData.append('mediapackage', response.data);
+    bodyFormData.append('properties', constants.PROPERTIES_REPUBLISH_METADATA);
+
+    headers = {
+        ...bodyFormData.getHeaders(),
+        'Content-Length': bodyFormData.getLengthSync()
+    };
+    await security.opencastBase.post(republishMetadataUrl, bodyFormData, {headers});
 };
 
 exports.addWebVttFile = async (vttFile, eventId) => {
