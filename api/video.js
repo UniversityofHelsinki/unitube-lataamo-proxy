@@ -377,8 +377,9 @@ exports.deleteVideoTextTrack = async(req, res) => {
         const response = await apiService.deleteWebVttFile(vttFile, eventId);
         if (response.status === 201) {
             logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} DELETED`);
+            let event = await apiService.getEvent(eventId);
             res.status(response.status);
-            await apiService.republishWebVttFile(eventId);
+            await apiService.republishWebVttFile(event);
             res.json({message: messageKeys.SUCCESS_WEBVTT_UPLOAD});
         } else {
             logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
