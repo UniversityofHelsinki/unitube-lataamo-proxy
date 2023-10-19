@@ -330,6 +330,8 @@ exports.republishWebVttFile = async (event) => {
         };
     }
 
+    await new Promise(resolve => setTimeout(resolve, 30000));
+
     const updateEventMetadataId = uuidv4();
     // set upload job status
     await jobsService.setJobStatus(updateEventMetadataId, constants.JOB_STATUS_STARTED);
