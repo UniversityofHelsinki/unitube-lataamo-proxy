@@ -341,8 +341,8 @@ exports.republishWebVttFile = async (event) => {
             await jobsService.removeJob(updateEventMetadataId);
             break;
         } else {
-            // transaction active, try again after 10 seconds
-            await new Promise(resolve => setTimeout(resolve, 10000));
+            // transaction active, try again after 30 seconds
+            await new Promise(resolve => setTimeout(resolve, 30000));
         }
     }
 
