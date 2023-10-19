@@ -11,7 +11,6 @@ const { parseContributor } = require('./userService');
 const { filterCorrectSeriesWithCorrectContributors, transformResponseData, isContributorMigrationActive } =
     require('../utils/ocastMigrationUtils');
 const {v4: uuidv4} = require("uuid");
-const uploadLogger = require("../config/uploadLogger");
 const jobsService = require("./jobsService");
 
 
@@ -331,21 +330,21 @@ exports.republishWebVttFile = async (event) => {
         };
     }
 
-    let hasActiveTransaction = true;
-    let count = 0;
-    await new Promise(resolve => setTimeout(resolve, 10000));
-    while (hasActiveTransaction && count <= 10){
+    const updateEventMetadataId = uuidv4();
+    // set upload job status
+    await jobsService.setJobStatus(updateEventMetadataId, constants.JOB_STATUS_STARTED);
+    while (await jobsService.getJob(updateEventMetadataId) != null) {
         const transactionStatusPath = constants.OCAST_EVENT_MEDIA_PATH_PREFIX + event.identifier + '/hasActiveTransaction';
-        let responseX = await security.opencastBase.get(transactionStatusPath);
-        if (responseX.data && responseX.data.active !== true) {
-            hasActiveTransaction = false;
-        } else{
-            // transaction active, try again after 30 seconds
-            count = count + 1;
-            await new Promise(resolve => setTimeout(resolve, 30000));
+        let transactionResponse = await security.opencastBase.get(transactionStatusPath);
+
+        if (transactionResponse.data && transactionResponse.data.active !== true) {
+            await jobsService.removeJob(updateEventMetadataId);
+            break;
+        } else {
+            // transaction active, try again after 10 seconds
+            await new Promise(resolve => setTimeout(resolve, 10000));
         }
     }
-
 
     // form data for the republish request
     bodyFormData = new FormData();
