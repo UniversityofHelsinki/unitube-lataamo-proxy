@@ -351,10 +351,9 @@ exports.uploadVideoTextTrack = async(req, res) => {
             const response = await apiService.addWebVttFile(vttFile, eventId);
             if (response.status === 201) {
                 logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
-                let event = await apiService.getEvent(eventId);
                 res.status(response.status);
                 res.json({message: messageKeys.SUCCESS_WEBVTT_UPLOAD});
-                await apiService.republishWebVttFile(event);
+                await apiService.republishWebVttFile(eventId);
             } else {
                 logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
                 res.status(response.status);
@@ -377,9 +376,8 @@ exports.deleteVideoTextTrack = async(req, res) => {
         const response = await apiService.deleteWebVttFile(vttFile, eventId);
         if (response.status === 201) {
             logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} DELETED`);
-            let event = await apiService.getEvent(eventId);
             res.status(response.status);
-            await apiService.republishWebVttFile(event);
+            await apiService.republishWebVttFile(eventId);
             res.json({message: messageKeys.SUCCESS_WEBVTT_UPLOAD});
         } else {
             logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);

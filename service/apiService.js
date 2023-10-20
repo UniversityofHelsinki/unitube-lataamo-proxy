@@ -290,35 +290,13 @@ exports.getMediaPackageForEvent = async (eventId) => {
     return response.data;
 };
 
-exports.republishWebVttFile = async (event) => {
-    event.isPartOf = event.is_part_of;
-    const modifiedMetadata = eventsService.modifyEventMetadataForOpencast(event);
+exports.republishWebVttFile = async (eventId) => {
+    const republishMetadataUrl = '/workflow/start';
+    const mediaPackageUrl = '/assets/episode/' + eventId;
 
-    const videoMetaDataUrl = constants.OCAST_VIDEOS_PATH + event.identifier + constants.OCAST_METADATA_PATH + constants.OCAST_TYPE_QUERY_PARAMETER + constants.OCAST_TYPE_DUBLINCORE_EPISODE;
+    await new Promise(resolve => setTimeout(resolve, 60000));
 
     let bodyFormData = new FormData();
-    bodyFormData.append('metadata', JSON.stringify(modifiedMetadata));
-
-    let headers = {
-        ...bodyFormData.getHeaders(),
-        'Content-Length': bodyFormData.getLengthSync()
-    };
-    // update event metadata
-    const response2 = await security.opencastBase.put(videoMetaDataUrl, bodyFormData, {headers});
-
-    // let's break if response from PUT not ok
-    if (response2.status !== 204){
-        return {
-            status: response2.status,
-            statusText: response2.statusText,
-            eventId: event.identifier
-        };
-    }
-
-    const republishMetadataUrl = '/workflow/start';
-    const mediaPackageUrl = '/assets/episode/' + event.identifier;
-
-    bodyFormData = new FormData();
     // get mediapackage for the republish query
     const response = await security.opencastBase.get(mediaPackageUrl);
 
@@ -326,17 +304,17 @@ exports.republishWebVttFile = async (event) => {
         return {
             status: response.status,
             statusText: response.statusText,
-            eventId: event.identifier
+            eventId: eventId
         };
     }
 
-    await new Promise(resolve => setTimeout(resolve, 30000));
+    await new Promise(resolve => setTimeout(resolve, 60000));
 
     const updateEventMetadataId = uuidv4();
     // set upload job status
     await jobsService.setJobStatus(updateEventMetadataId, constants.JOB_STATUS_STARTED);
     while (await jobsService.getJob(updateEventMetadataId) != null) {
-        const transactionStatusPath = constants.OCAST_EVENT_MEDIA_PATH_PREFIX + event.identifier + '/hasActiveTransaction';
+        const transactionStatusPath = constants.OCAST_EVENT_MEDIA_PATH_PREFIX + eventId + '/hasActiveTransaction';
         let transactionResponse = await security.opencastBase.get(transactionStatusPath);
 
         if (transactionResponse.data && transactionResponse.data.active !== true) {
@@ -354,7 +332,7 @@ exports.republishWebVttFile = async (event) => {
     bodyFormData.append('mediapackage', response.data);
     bodyFormData.append('properties', constants.PROPERTIES_REPUBLISH_METADATA);
 
-    headers = {
+    let headers = {
         ...bodyFormData.getHeaders(),
         'Content-Length': bodyFormData.getLengthSync()
     };
