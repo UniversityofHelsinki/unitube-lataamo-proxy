@@ -50,6 +50,16 @@ const encryptVideoAndVTTUrls = episodeWithMediaUrls => {
     return episodeWithMediaUrls;
 };
 
+const parseVTTFileFromUrl = (response) => {
+    return response.substring(response.lastIndexOf('/') + 1);
+};
+
+exports.vttFileFromUrl = (req, res) => {
+    const url = decrypt(req.params.url);
+    const vttFile = parseVTTFileFromUrl(url);
+    res.json(vttFile);
+};
+
 exports.vttFile = async (req, res) => {
     const url = decrypt(req.params.url);
     const response = await apiService.downloadVttFile(url);
@@ -57,16 +67,16 @@ exports.vttFile = async (req, res) => {
 };
 
 const calculateRangeHeaders = (req) => {
+    const chunk_size = 5 * 2 ** 20; // 5MB
     let range = req.headers.range;
-    console.log(range);
     if (range) {
         range = range.split('bytes=');
         let startAndEnd = range[1].split('-');
         if (startAndEnd) {
             let start = startAndEnd[0];
             let end = startAndEnd[1];
-            if (!end || parseInt(end) > parseInt(start) + 5 * 2 ** 20) {
-                end = parseInt(start) + 5 * 2 ** 20;
+            if (!end || parseInt(end) > parseInt(start) + chunk_size) {
+                end = parseInt(start) + chunk_size;
             }
             let rangeHeaders = `bytes=${start}-${end}`;
             return rangeHeaders;
@@ -367,8 +377,8 @@ exports.deleteVideoTextTrack = async(req, res) => {
         if (response.status === 201) {
             logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} DELETED`);
             res.status(response.status);
-            res.json({message: messageKeys.SUCCESS_WEBVTT_UPLOAD});
             await apiService.republishWebVttFile(eventId);
+            res.json({message: messageKeys.SUCCESS_WEBVTT_UPLOAD});
         } else {
             logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
             res.status(response.status);
