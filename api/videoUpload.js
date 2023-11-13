@@ -1,7 +1,7 @@
-
 const path = require('path');
 const apiService = require('../service/apiService');
 const userService = require('../service/userService');
+const azureService = require('../service/azureService');
 const uploadLogger = require('../config/uploadLogger');
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 const { v4: uuidv4 } = require('uuid');
@@ -10,10 +10,9 @@ const constants = require('../utils/constants');
 const {seriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
 const jobsService = require('../service/jobsService');
 const HttpStatus = require('http-status');
-const dbApi = require("./dbApi");
+const dbApi = require('./dbApi');
 const moment = require('moment');
-const logger = require("../config/winstonLogger");
-const dbService = require("../service/dbService");
+const logger = require('../config/winstonLogger');
 
 const ERROR_LEVEL = 'error';
 const INFO_LEVEL = 'info';
@@ -155,8 +154,6 @@ exports.upload = async (req, res) => {
 
             if (response && response.status === HttpStatus.CREATED) {
                 identifier = response.data.identifier;
-                // on success clean file from disk and return 200
-                await deleteFile(uploadPath, uploadId);
                 await jobsService.setJobStatus(uploadId, constants.JOB_STATUS_FINISHED);
                 uploadLogger.log(INFO_LEVEL,
                     `${filename.filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)} USER: ${req.user.eppn} -- ${uploadId}`);
@@ -171,12 +168,25 @@ exports.upload = async (req, res) => {
 
                 if (updateEventMetadataResponse.status === 200) {
                     logger.info(`update event metadata for VIDEO ${identifier} USER ${req.user.eppn} OK`);
+                    // generate VTT file for the video
+                    if (process.env.ENVIRONMENT != "local") {
+                        const vttFileLocation = await azureService.startProcess(filePathOnDisk, uploadPath);
+                        const buffer = fs.readFileSync(vttFileLocation);
+                        const response = await apiService.addWebVttFile({buffer}, identifier, path.basename(vttFileLocation));
+                        if (response.status === 201) {
+                            logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
+                            await apiService.republishWebVttFile(identifier);
+                        } else {
+                            logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
+                        }
+                    }
                 } else if (updateEventMetadataResponse.status === 403){
                     logger.warn(`update event metadata for VIDEO ${identifier} USER ${req.user.eppn} failed ${updateEventMetadataResponse.statusText}`);
                 } else {
                     logger.warn(`update event metadata for VIDEO ${identifier} USER ${req.user.eppn} failed ${updateEventMetadataResponse.statusText}`);
                 }
-
+                // on success clean file from disk and return 200
+                //await deleteFile(uploadPath, uploadId);
             } else {
                 // on failure clean file from disk and return 500
                 await deleteFile(uploadPath, uploadId);
