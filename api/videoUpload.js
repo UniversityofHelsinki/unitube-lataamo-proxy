@@ -186,7 +186,7 @@ exports.upload = async (req, res) => {
                     logger.warn(`update event metadata for VIDEO ${identifier} USER ${req.user.eppn} failed ${updateEventMetadataResponse.statusText}`);
                 }
                 // on success clean file from disk and return 200
-                //await deleteFile(uploadPath, uploadId);
+                await deleteFile(uploadPath, uploadId);
             } else {
                 // on failure clean file from disk and return 500
                 await deleteFile(uploadPath, uploadId);
