@@ -170,9 +170,8 @@ exports.upload = async (req, res) => {
                     logger.info(`update event metadata for VIDEO ${identifier} USER ${req.user.eppn} OK`);
                     // generate VTT file for the video
                     if (process.env.ENVIRONMENT != "local") {
-                        const vttFileLocation = await azureService.startProcess(filePathOnDisk, uploadPath);
-                        const buffer = fs.readFileSync(vttFileLocation);
-                        const response = await apiService.addWebVttFile({buffer}, identifier, path.basename(vttFileLocation));
+                        const vttFile = await azureService.startProcess(filePathOnDisk, uploadPath);
+                        const response = await apiService.addWebVttFile(vttFile, identifier);
                         if (response.status === 201) {
                             logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
                             await apiService.republishWebVttFile(identifier);

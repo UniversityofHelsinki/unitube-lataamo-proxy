@@ -23,7 +23,10 @@ exports.startProcess = async (filePathOnDisk, uploadPath) => {
         });
         console.log('Sound ready');
         await processFile(path.join(uploadPath, audioFile), uploadPath);
-        return path.join(uploadPath + outputFile);
+        return {
+            buffer : fs.readFileSync(path.join(uploadPath, outputFile)),
+            originalname : path.join(uploadPath + outputFile)
+        };
     } catch (error) {
         console.error('Error processing audio:', error);
     }
