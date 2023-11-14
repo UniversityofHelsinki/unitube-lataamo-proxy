@@ -106,6 +106,7 @@ exports.upload = async (req, res) => {
     let description;
     let license;
     let title;
+    let translationLanguage;
 
     req.busboy.on('field', (fieldname, val)  => {
         if (fieldname === 'archivedDate') {
@@ -122,6 +123,9 @@ exports.upload = async (req, res) => {
         }
         if (fieldname === 'license') {
             license = val;
+        }
+        if (fieldname === 'translationLanguage') {
+            translationLanguage = val;
         }
     });
 
@@ -169,8 +173,8 @@ exports.upload = async (req, res) => {
                 if (updateEventMetadataResponse.status === 200) {
                     logger.info(`update event metadata for VIDEO ${identifier} USER ${req.user.eppn} OK`);
                     // generate VTT file for the video
-                    if (process.env.ENVIRONMENT != "local") {
-                        const vttFile = await azureService.startProcess(filePathOnDisk, uploadPath);
+                    if (translationLanguage && process.env.ENVIRONMENT != "local") {
+                        const vttFile = await azureService.startProcess(filePathOnDisk, uploadPath, translationLanguage);
                         const response = await apiService.addWebVttFile(vttFile, identifier);
                         if (response.status === 201) {
                             logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
@@ -184,7 +188,7 @@ exports.upload = async (req, res) => {
                 } else {
                     logger.warn(`update event metadata for VIDEO ${identifier} USER ${req.user.eppn} failed ${updateEventMetadataResponse.statusText}`);
                 }
-                // on success clean file from disk and return 200
+                // clean file from disk
                 await deleteFile(uploadPath, uploadId);
             } else {
                 // on failure clean file from disk and return 500

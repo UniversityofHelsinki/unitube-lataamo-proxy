@@ -8,9 +8,8 @@ const subscriptionKey = process.env.SUBSCRIPTION_KEY;
 const serviceRegion = 'northeurope'; // e.g., "westus"
 const audioFile = 'output_audio.wav'; // 16000 Hz, Mono
 const outputFile = 'transcript.vtt';
-const language = 'fi-FI';
 
-exports.startProcess = async (filePathOnDisk, uploadPath) => {
+exports.startProcess = async (filePathOnDisk, uploadPath, translationLanguage) => {
     try {
         //extract audio from video file
         await extractAudio({
@@ -22,7 +21,7 @@ exports.startProcess = async (filePathOnDisk, uploadPath) => {
             }
         });
         console.log('Sound ready');
-        await processFile(path.join(uploadPath, audioFile), uploadPath);
+        await processFile(path.join(uploadPath, audioFile), uploadPath, translationLanguage);
         return {
             buffer : fs.readFileSync(path.join(uploadPath, outputFile)),
             originalname : path.join(uploadPath + outputFile)
@@ -69,13 +68,13 @@ const formatTimestamp = (timestamp100ns) => {
 };
 
 
-const processFile = async (audioFile, uploadPath) => {
+const processFile = async (audioFile, uploadPath, translationLanguage) => {
     const outputStream = fs.createWriteStream(path.join(uploadPath + outputFile));
     await new Promise((resolve, reject) => {
         outputStream.once('open', () => {
             outputStream.write('WEBVTT\r\n\r\n');
 
-            let recognizer = createRecognizer(audioFile, language);
+            let recognizer = createRecognizer(audioFile, translationLanguage);
 
             recognizer.recognized = (s, e) => {
                 if (e.result.reason === sdk.ResultReason.NoMatch) {
