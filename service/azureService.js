@@ -4,7 +4,7 @@ const fs = require('fs');
 const extractAudio = require('ffmpeg-extract-audio');
 const path = require('path');
 
-const subscriptionKey = process.env.SUBSCRIPTION_KEY;
+const subscriptionKey = process.env.AZURE_SPEECH_SUBSCRIPTION_KEY;
 const serviceRegion = 'northeurope'; // e.g., "westus"
 const audioFile = 'output_audio.wav'; // 16000 Hz, Mono
 const outputFile = 'transcript.vtt';
