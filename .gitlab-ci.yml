@@ -78,7 +78,7 @@ deploy_oc_test:
   environment:
     name: development
   only:
-    - oc-test
+    - azure_translations # CHANGE THIS BACK TO oc-test
   script:
     - echo "====== Deploy to oc-test server ========"
     - echo "====== Install rsync and openssh ========="
