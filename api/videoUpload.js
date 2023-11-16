@@ -3,7 +3,8 @@ const apiService = require('../service/apiService');
 const userService = require('../service/userService');
 const azureService = require('../service/azureService');
 const uploadLogger = require('../config/uploadLogger');
-const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
+const fsExtra = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
+const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const messageKeys = require('../utils/message-keys');
 const constants = require('../utils/constants');
@@ -24,7 +25,7 @@ const INFO_LEVEL = 'info';
 const ensureUploadDir = async (directory) => {
     try {
         // https://github.com/jprichardson/node-fs-extra/blob/HEAD/docs/ensureDir.md
-        await fs.ensureDir(directory);
+        await fsExtra.ensureDir(directory);
         uploadLogger.log(INFO_LEVEL,`Using uploadPath ${directory}`);
         return true;
     } catch (err) {
@@ -37,7 +38,7 @@ const ensureUploadDir = async (directory) => {
 const deleteFile = async (filename, uploadId) => {
     try{
         // https://github.com/jprichardson/node-fs-extra/blob/2b97fe3e502ab5d5abd92f19d588bd1fc113c3f2/docs/remove.md#removepath-callback
-        await fs.remove(filename);
+        await fs.unlinkSync(filename);
         uploadLogger.log(INFO_LEVEL, `Cleaning - removed: ${filename} -- ${uploadId}`);
         return true;
     }catch (err){
@@ -182,6 +183,8 @@ exports.upload = async (req, res) => {
                         } else {
                             logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
                         }
+                        await deleteFile(vttFile.originalname, uploadId);
+                        await deleteFile(vttFile.audioFile, uploadId);
                     }
                 } else if (updateEventMetadataResponse.status === 403){
                     logger.warn(`update event metadata for VIDEO ${identifier} USER ${req.user.eppn} failed ${updateEventMetadataResponse.statusText}`);

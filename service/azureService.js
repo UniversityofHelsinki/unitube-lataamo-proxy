@@ -24,8 +24,9 @@ exports.startProcess = async (filePathOnDisk, uploadPath, translationLanguage, f
         logger.info('Sound ready for video : ' + filePathOnDisk + ' with translation language '+ translationLanguage);
         await processFile(path.join(uploadPath, fileName + '_' + audioFile), uploadPath, translationLanguage, fileName);
         return {
-            buffer : fs.readFileSync(path.join(uploadPath, fileName + '_' + audioFile)),
-            originalname : path.join(uploadPath, fileName + '_' + outputFile)
+            buffer : fs.readFileSync(path.join(uploadPath, fileName + '_' + outputFile)),
+            originalname : path.join(uploadPath, fileName + '_' + outputFile),
+            audioFile : path.join(uploadPath, fileName + '_' + audioFile)
         };
     } catch (error) {
         logger.error('Error processing audio:', error);
