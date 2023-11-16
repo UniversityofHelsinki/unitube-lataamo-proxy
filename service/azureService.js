@@ -10,8 +10,26 @@ const serviceRegion = 'northeurope'; // e.g., "westus"
 const audioFile = 'output_audio.wav'; // 16000 Hz, Mono
 const outputFile = 'transcript.vtt';
 
+const replaceDotsWithUnderscores = (filename) => {
+    // Replace dots with underscores in the filename
+    const newFilename = filename.replace(/\./g, '_');
+
+    // Rename the file
+    fs.rename(filename, newFilename, (err) => {
+        if (err) {
+            console.error(`Error renaming file: ${err.message}`);
+        } else {
+            console.log(`File renamed successfully to ${newFilename}`);
+        }
+    });
+    return newFilename;
+};
+
 exports.startProcess = async (filePathOnDisk, uploadPath, translationLanguage, fileName) => {
     try {
+        // replace filename dots with underscores
+        fileName = replaceDotsWithUnderscores(fileName);
+
         //extract audio from video file
         await extractAudio({
             input: filePathOnDisk,
