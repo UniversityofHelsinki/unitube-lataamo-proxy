@@ -191,7 +191,7 @@ exports.upload = async (req, res) => {
                 if (updateEventMetadataResponse.status === 200) {
                     logger.info(`update event metadata for VIDEO ${identifier} USER ${req.user.eppn} OK`);
                     // generate VTT file for the video
-                    if (translationLanguage && process.env.ENVIRONMENT != "local") {
+                    if (translationLanguage) {
                         const vttFile = await azureService.startProcess(filePathOnDisk, uploadPath, translationLanguage, filename.filename);
                         const response = await apiService.addWebVttFile(vttFile, identifier);
                         if (response.status === 201) {
@@ -210,10 +210,12 @@ exports.upload = async (req, res) => {
                 }
                 // clean file from disk
                 await deleteFile(filePathOnDisk, uploadId);
+                // remove upload directory from disk
                 await removeDirectory(uploadPath, uploadId);
             } else {
                 // on failure clean file from disk and return 500
                 await deleteFile(filePathOnDisk, uploadId);
+                // remove upload directory from disk
                 await removeDirectory(uploadPath, uploadId);
                 await jobsService.setJobStatus(uploadId, constants.JOB_STATUS_ERROR);
                 res.status(HttpStatus.INTERNAL_SERVER_ERROR);
