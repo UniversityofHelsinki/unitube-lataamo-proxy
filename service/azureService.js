@@ -10,22 +10,22 @@ const serviceRegion = 'northeurope'; // e.g., "westus"
 const audioFile = 'output_audio.wav'; // 16000 Hz, Mono
 const outputFile = 'transcript.vtt';
 
-exports.startProcess = async (filePathOnDisk, uploadPath, translationLanguage) => {
+exports.startProcess = async (filePathOnDisk, uploadPath, translationLanguage, fileName) => {
     try {
         //extract audio from video file
         await extractAudio({
             input: filePathOnDisk,
-            output: path.join(uploadPath, audioFile),
+            output: path.join(uploadPath, fileName + '_' + audioFile),
             transform: (cmd) => {
                 cmd.audioChannels(1)
                     .audioFrequency(16000);
             }
         });
         logger.info('Sound ready for video : ' + filePathOnDisk + ' with translation language '+ translationLanguage);
-        await processFile(path.join(uploadPath, audioFile), uploadPath, translationLanguage);
+        await processFile(path.join(uploadPath, fileName + '_' + audioFile), uploadPath, translationLanguage);
         return {
-            buffer : fs.readFileSync(path.join(uploadPath, outputFile)),
-            originalname : path.join(uploadPath + outputFile)
+            buffer : fs.readFileSync(path.join(uploadPath, fileName + '_' + audioFile)),
+            originalname : path.join(uploadPath + fileName + '_' + outputFile)
         };
     } catch (error) {
         logger.error('Error processing audio:', error);
