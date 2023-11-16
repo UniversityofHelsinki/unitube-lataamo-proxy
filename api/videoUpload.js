@@ -38,16 +38,16 @@ const isEmptyDirectory = (path) => {
     return fs.readdirSync(path).length === 0;
 };
 
-const removeDirectory = async (filename, uploadId) => {
+const removeDirectory = async (uplaodPath, uploadId) => {
     try {
-        if (isEmptyDirectory(path.dirname(filename))) {
-            await fs.rmdirSync(path.dirname(filename));
-            uploadLogger.log(INFO_LEVEL, `Cleaning - removed directory: ${path.dirname(filename)} -- ${uploadId}`);
+        if (isEmptyDirectory(uplaodPath)) {
+            await fs.rmdirSync(uplaodPath);
+            uploadLogger.log(INFO_LEVEL, `Cleaning - removed directory: ${uplaodPath} -- ${uploadId}`);
         } else {
-            uploadLogger.log(INFO_LEVEL, `Cleaning - directory not empty: ${path.dirname(filename)} -- ${uploadId}`);
+            uploadLogger.log(INFO_LEVEL, `Cleaning - directory not empty: ${uplaodPath} -- ${uploadId}`);
         }
     } catch(err) {
-        uploadLogger.log(ERROR_LEVEL, `Failed to remove directory ${path.dirname(filename)} | ${err} -- ${uploadId}`);
+        uploadLogger.log(ERROR_LEVEL, `Failed to remove directory ${uplaodPath} | ${err} -- ${uploadId}`);
     }
 };
 
@@ -209,12 +209,12 @@ exports.upload = async (req, res) => {
                     logger.warn(`update event metadata for VIDEO ${identifier} USER ${req.user.eppn} failed ${updateEventMetadataResponse.statusText}`);
                 }
                 // clean file from disk
-                await deleteFile(uploadPath, uploadId);
-                await removeDirectory(filePathOnDisk, uploadId);
+                await deleteFile(filePathOnDisk, uploadId);
+                await removeDirectory(uploadPath, uploadId);
             } else {
                 // on failure clean file from disk and return 500
-                await deleteFile(uploadPath, uploadId);
-                await removeDirectory(filePathOnDisk, uploadId);
+                await deleteFile(filePathOnDisk, uploadId);
+                await removeDirectory(uploadPath, uploadId);
                 await jobsService.setJobStatus(uploadId, constants.JOB_STATUS_ERROR);
                 res.status(HttpStatus.INTERNAL_SERVER_ERROR);
                 const msg = `${filename.filename} failed to upload to opencast.`;
