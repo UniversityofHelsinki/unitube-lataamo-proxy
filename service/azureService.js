@@ -3,6 +3,7 @@ const sdk = require('microsoft-cognitiveservices-speech-sdk');
 const fs = require('fs');
 const extractAudio = require('ffmpeg-extract-audio');
 const path = require('path');
+const logger = require('../config/winstonLogger');
 
 const subscriptionKey = process.env.AZURE_SPEECH_SUBSCRIPTION_KEY;
 const serviceRegion = 'northeurope'; // e.g., "westus"
@@ -20,14 +21,14 @@ exports.startProcess = async (filePathOnDisk, uploadPath, translationLanguage) =
                     .audioFrequency(16000);
             }
         });
-        console.log('Sound ready');
+        logger.info('Sound ready for video : ' + filePathOnDisk + ' with translation language '+ translationLanguage);
         await processFile(path.join(uploadPath, audioFile), uploadPath, translationLanguage);
         return {
             buffer : fs.readFileSync(path.join(uploadPath, outputFile)),
             originalname : path.join(uploadPath + outputFile)
         };
     } catch (error) {
-        console.error('Error processing audio:', error);
+        logger.error('Error processing audio:', error);
     }
 };
 
@@ -50,7 +51,6 @@ const createRecognizer = (audiofilename, audioLanguage) => {
     speechConfig.speechRecognitionLanguage = audioLanguage;
     speechConfig.setProperty(sdk.PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, '14400000');
     if (process.env.ENVIRONMENT === 'oc-test') {
-        console.log("proxy config set");
         speechConfig.setProxy('scan-proxy.it.helsinki.fi', '8080');
     }
     return new sdk.SpeechRecognizer(speechConfig, audioConfig);
@@ -83,10 +83,10 @@ const processFile = async (audioFile, uploadPath, translationLanguage) => {
             recognizer.recognized = (s, e) => {
                 if (e.result.reason === sdk.ResultReason.NoMatch) {
                     const noMatchDetail = sdk.NoMatchDetails.fromResult(e.result);
-                    console.log('\r\n(recognized)  Reason: ' + sdk.ResultReason[e.result.reason] + ' | NoMatchReason: ' + sdk.NoMatchReason[noMatchDetail.reason]);
+                    logger.error('\r\n(recognized)  Reason: ' + sdk.ResultReason[e.result.reason] + ' | NoMatchReason: ' + sdk.NoMatchReason[noMatchDetail.reason]);
                 } else {
-                    console.log(`\r\n(recognized)  Reason: ${sdk.ResultReason[e.result.reason]} | Duration: ${e.result.duration} | Offset: ${e.result.offset}`);
-                    console.log(`Text: ${e.result.text}`);
+                    //console.log(`\r\n(recognized)  Reason: ${sdk.ResultReason[e.result.reason]} | Duration: ${e.result.duration} | Offset: ${e.result.offset}`);
+                    //console.log(`Text: ${e.result.text}`);
                     outputStream.write(`${formatTimestamp(e.result.offset)} --> ${formatTimestamp(e.result.offset + e.result.duration)}\r\n`);
                     outputStream.write(`${e.result.text}\r\n\r\n`);
                 }
@@ -97,12 +97,11 @@ const processFile = async (audioFile, uploadPath, translationLanguage) => {
                 if (e.reason === sdk.CancellationReason.Error) {
                     str += ': ' + e.errorDetails;
                 }
-
-                console.log(str);
+                logger.info(str);
             };
 
             recognizer.speechEndDetected = (s, e) => {
-                console.log(`(speechEndDetected) SessionId: ${e.sessionId}`);
+                logger.info(`(speechEndDetected) SessionId: ${e.sessionId}`);
                 outputStream.close();
                 recognizer.close();
                 recognizer = undefined;
@@ -110,10 +109,10 @@ const processFile = async (audioFile, uploadPath, translationLanguage) => {
             };
 
             recognizer.startContinuousRecognitionAsync(() => {
-                console.log('Recognition started');
+                logger.info('Recognition started');
             },
             err => {
-                console.trace('err - ' + err);
+                logger.error('err - ' + err);
                 outputStream.close();
                 recognizer.close();
                 recognizer = undefined;
