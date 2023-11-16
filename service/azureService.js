@@ -25,7 +25,7 @@ exports.startProcess = async (filePathOnDisk, uploadPath, translationLanguage, f
         await processFile(path.join(uploadPath, fileName + '_' + audioFile), uploadPath, translationLanguage, fileName);
         return {
             buffer : fs.readFileSync(path.join(uploadPath, fileName + '_' + audioFile)),
-            originalname : path.join(uploadPath + fileName + '_' + outputFile)
+            originalname : path.join(uploadPath, fileName + '_' + outputFile)
         };
     } catch (error) {
         logger.error('Error processing audio:', error);
@@ -73,7 +73,7 @@ const formatTimestamp = (timestamp100ns) => {
 
 
 const processFile = async (audioFile, uploadPath, translationLanguage, fileName) => {
-    const outputStream = fs.createWriteStream(path.join(uploadPath + fileName + '_' + outputFile));
+    const outputStream = fs.createWriteStream(path.join(uploadPath, fileName + '_' + outputFile));
     await new Promise((resolve, reject) => {
         outputStream.once('open', () => {
             outputStream.write('WEBVTT\r\n\r\n');
