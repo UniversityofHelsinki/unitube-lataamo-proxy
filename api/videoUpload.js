@@ -34,6 +34,23 @@ const ensureUploadDir = async (directory) => {
     }
 };
 
+const isEmptyDirectory = (path) => {
+    return fs.readdirSync(path).length === 0;
+};
+
+const removeDirectory = async (filename, uploadId) => {
+    try {
+        if (isEmptyDirectory(path.dirname(filename))) {
+            await fs.rmdirSync(path.dirname(filename));
+            uploadLogger.log(INFO_LEVEL, `Cleaning - removed directory: ${path.dirname(filename)} -- ${uploadId}`);
+        } else {
+            uploadLogger.log(INFO_LEVEL, `Cleaning - directory not empty: ${path.dirname(filename)} -- ${uploadId}`);
+        }
+    } catch(err) {
+        uploadLogger.log(ERROR_LEVEL, `Failed to remove directory ${path.dirname(filename)} | ${err} -- ${uploadId}`);
+    }
+};
+
 // clean after post
 const deleteFile = async (filename, uploadId) => {
     try{
@@ -193,9 +210,11 @@ exports.upload = async (req, res) => {
                 }
                 // clean file from disk
                 await deleteFile(uploadPath, uploadId);
+                await removeDirectory(filePathOnDisk, uploadId);
             } else {
                 // on failure clean file from disk and return 500
                 await deleteFile(uploadPath, uploadId);
+                await removeDirectory(filePathOnDisk, uploadId);
                 await jobsService.setJobStatus(uploadId, constants.JOB_STATUS_ERROR);
                 res.status(HttpStatus.INTERNAL_SERVER_ERROR);
                 const msg = `${filename.filename} failed to upload to opencast.`;
