@@ -22,7 +22,7 @@ exports.startProcess = async (filePathOnDisk, uploadPath, translationLanguage, f
             }
         });
         logger.info('Sound ready for video : ' + filePathOnDisk + ' with translation language '+ translationLanguage);
-        await processFile(path.join(uploadPath, fileName + '_' + audioFile), uploadPath, translationLanguage);
+        await processFile(path.join(uploadPath, fileName + '_' + audioFile), uploadPath, translationLanguage, fileName);
         return {
             buffer : fs.readFileSync(path.join(uploadPath, fileName + '_' + audioFile)),
             originalname : path.join(uploadPath + fileName + '_' + outputFile)
@@ -72,8 +72,8 @@ const formatTimestamp = (timestamp100ns) => {
 };
 
 
-const processFile = async (audioFile, uploadPath, translationLanguage) => {
-    const outputStream = fs.createWriteStream(path.join(uploadPath + outputFile));
+const processFile = async (audioFile, uploadPath, translationLanguage, fileName) => {
+    const outputStream = fs.createWriteStream(path.join(uploadPath + fileName + '_' + outputFile));
     await new Promise((resolve, reject) => {
         outputStream.once('open', () => {
             outputStream.write('WEBVTT\r\n\r\n');
