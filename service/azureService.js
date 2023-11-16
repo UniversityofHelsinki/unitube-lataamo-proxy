@@ -49,6 +49,10 @@ const createRecognizer = (audiofilename, audioLanguage) => {
     const speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
     speechConfig.speechRecognitionLanguage = audioLanguage;
     speechConfig.setProperty(sdk.PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, '14400000');
+    if (process.env.ENVIRONMENT === 'oc-test') {
+        console.log("proxy config set");
+        speechConfig.setProxy('http://scan-proxy.it.helsinki.fi', '8080');
+    }
     return new sdk.SpeechRecognizer(speechConfig, audioConfig);
 };
 
