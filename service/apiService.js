@@ -697,7 +697,7 @@ exports.createLataamoSeries = async (seriesName, userId) => {
     const lataamoSeriesSubject = 'Lataamo-' + seriesName;
     const seriesUrl = constants.OCAST_SERIES_PATH;
 
-    metadataArray = [
+    let metadataArray = [
         {
             'flavor': 'dublincore/series',
             'title': 'Opencast Series DublinCore',

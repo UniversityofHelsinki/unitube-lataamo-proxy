@@ -10,25 +10,23 @@ const serviceRegion = 'northeurope'; // e.g., "westus"
 const audioFile = 'output_audio.wav'; // 16000 Hz, Mono
 const outputFile = 'transcript.vtt';
 
-const replaceDotsWithUnderscores = (filename) => {
-    // Replace dots with underscores in the filename
-    const newFilename = filename.replace(/\./g, '_');
+const sanitizeFilename = (filename) => {
+    // Replace spaces with underscores
+    let sanitizedFilename = filename.replace(/\s+/g, '_');
 
-    // Rename the file
-    fs.rename(filename, newFilename, (err) => {
-        if (err) {
-            console.error(`Error renaming file: ${err.message}`);
-        } else {
-            console.log(`File renamed successfully to ${newFilename}`);
-        }
-    });
-    return newFilename;
+    // Replace dots with underscores
+    sanitizedFilename = sanitizedFilename.replace(/\./g, '_');
+
+    // Remove special characters and leave only alphanumeric, underscores, and hyphens
+    sanitizedFilename = sanitizedFilename.replace(/[^a-zA-Z0-9_-]/g, '');
+
+    return sanitizedFilename;
 };
 
 exports.startProcess = async (filePathOnDisk, uploadPath, translationLanguage, fileName) => {
     try {
-        // replace filename dots with underscores
-        fileName = replaceDotsWithUnderscores(fileName);
+        // sanitize filename
+        fileName = sanitizeFilename(fileName);
 
         //extract audio from video file
         await extractAudio({
@@ -92,6 +90,7 @@ const formatTimestamp = (timestamp100ns) => {
 
 
 const processFile = async (audioFile, uploadPath, translationLanguage, fileName) => {
+    logger.info('Creating VTT file for video : ' + path.join(uploadPath, fileName + '_' + outputFile));
     const outputStream = fs.createWriteStream(path.join(uploadPath, fileName + '_' + outputFile));
     await new Promise((resolve, reject) => {
         outputStream.once('open', () => {
