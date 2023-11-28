@@ -190,8 +190,10 @@ exports.upload = async (req, res) => {
 
                 if (updateEventMetadataResponse.status === 200) {
                     logger.info(`update event metadata for VIDEO ${identifier} USER ${req.user.eppn} OK`);
+                    logger.info (`selected translation for VIDEO ${identifier} with language ${translationLanguage}`);
                     // generate VTT file for the video
                     if (translationLanguage) {
+                        logger.info(`starting translation for VIDEO ${identifier} with translation language ${translationLanguage} with USER ${req.user.eppn}`);
                         const vttFile = await azureService.startProcess(filePathOnDisk, uploadPath, translationLanguage, filename.filename);
                         const response = await apiService.addWebVttFile(vttFile, identifier);
                         if (response.status === 201) {
