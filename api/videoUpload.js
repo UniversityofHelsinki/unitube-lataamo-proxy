@@ -86,7 +86,7 @@ const returnUsersInboxSeries = async (loggedUser) => {
 exports.upload = async (req, res) => {
     const uploadId = uuidv4();
     const loggedUser = userService.getLoggedUser(req.user);
-    const uploadPath = path.join(__dirname, `uploads/${loggedUser.eppn}/`);
+    const uploadPath = path.join(__dirname, `uploads/${loggedUser.eppn}/${uploadId}`);
 
     uploadLogger.log(INFO_LEVEL, `POST /userVideos - Upload video started. USER: ${req.user.eppn} -- ${uploadId}`);
 
