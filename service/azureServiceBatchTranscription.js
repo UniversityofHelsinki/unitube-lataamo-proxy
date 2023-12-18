@@ -61,6 +61,8 @@ const sanitizeFilename = (filename) => {
 
 const uploadAudioToStorage = async (blobClient, outputAudio) => {
     // Upload audio file to Azure Storage
+    console.log("Uploading audio file to Azure Storage...");
+    console.log("Audio file:", outputAudio);
     await blobClient.uploadFile(outputAudio);
 };
 
@@ -275,59 +277,50 @@ const deleteAudioFromStorage = async (blobClient) => {
     console.log("Audio file deleted from Azure Storage");
 };
 
-exports.startProcess = async (filePathOnDisk, uploadPath, translationLanguage, fileName) => {
+exports.startProcess = async (filePathOnDisk, uploadPath, translationLanguage, fileName, uploadId, eppn) => {
     try {
         // sanitize filename
         fileName = sanitizeFilename(fileName);
 
-        extractAudio({
+        await extractAudio({
             input: filePathOnDisk,
             output: path.join(uploadPath, fileName + '_' + audioFile),
             transform: (cmd) => {
                 cmd.audioChannels(1)
                     .audioFrequency(16000);
             }
-        }).then(async () => {
-            logger.info('Sound ready for video : ' + filePathOnDisk + ' with translation language '+ translationLanguage);
-
-            // Set up Azure Storage connection string
-            const storageConnectionString = `DefaultEndpointsProtocol=https;AccountName=${storageAccountName};AccountKey=${storageAccountKey};EndpointSuffix=core.windows.net`;
-            const blobServiceClient = BlobServiceClient.fromConnectionString(storageConnectionString);
-            const containerClient = blobServiceClient.getContainerClient(storageContainerName);
-            const blobClient = containerClient.getBlockBlobClient(path.join(uploadPath, fileName + '_' + audioFile));
-
-            await uploadAudioToStorage(blobClient, path.join(uploadPath, fileName + '_' + audioFile));
-            console.log("Audio file uploaded to Azure Storage");
-
-            const jobInfo = await initiateTranscriptionJob(blobClient, translationLanguage);
-
-            console.log("Transcription job initiated:", jobInfo);
-
-            const jobStatus = await waitForJobCompletion(jobInfo);
-
-            if (jobStatus === "Succeeded") {
-                const transcriptionResult = await getTranscriptionResult(jobInfo);
-                const vtt = jsonToVtt(transcriptionResult);
-                saveVttToFile(vtt, path.join(uploadPath, fileName + '_' + outputFile));
-                await deleteTranscription(jobInfo);
-            } else {
-                console.error("Transcription job failed");
-            }
-
-            await deleteAudioFromStorage(blobClient);
-        }).catch((error) => {
-            console.error("Error:", error.message);
-            if (error.response) {
-                console.error("Response status:", error.response.status);
-                console.error("Response data:", error.response.data);
-            }
         });
+
         logger.info('Sound ready for video : ' + filePathOnDisk + ' with translation language '+ translationLanguage);
+        logger.info("Sound file location: " + path.join(uploadPath, fileName + '_' + audioFile));
 
+        // Set up Azure Storage connection string
+        const storageConnectionString = `DefaultEndpointsProtocol=https;AccountName=${storageAccountName};AccountKey=${storageAccountKey};EndpointSuffix=core.windows.net`;
+        const blobServiceClient = BlobServiceClient.fromConnectionString(storageConnectionString);
+        const containerClient = blobServiceClient.getContainerClient(storageContainerName);
+        const relativeUploadPath = path.join('api','uploads', eppn, uploadId, fileName + '_' + audioFile);
+        logger.info("Relative upload path: " + relativeUploadPath);
+        const blobClient = containerClient.getBlockBlobClient(relativeUploadPath);
 
+        await uploadAudioToStorage(blobClient, relativeUploadPath);
+        console.log("Audio file uploaded to Azure Storage");
 
+        const jobInfo = await initiateTranscriptionJob(blobClient, translationLanguage);
 
+        console.log("Transcription job initiated:", jobInfo);
 
+        const jobStatus = await waitForJobCompletion(jobInfo);
+
+        if (jobStatus === "Succeeded") {
+            const transcriptionResult = await getTranscriptionResult(jobInfo);
+            const vtt = jsonToVtt(transcriptionResult);
+            saveVttToFile(vtt, path.join(uploadPath, fileName + '_' + outputFile));
+            await deleteTranscription(jobInfo);
+        } else {
+            console.error("Transcription job failed");
+        }
+
+        await deleteAudioFromStorage(blobClient);
         return {
             buffer : fs.readFileSync(path.join(uploadPath, fileName + '_' + outputFile)),
             originalname : path.join(uploadPath, fileName + '_' + outputFile),
@@ -336,5 +329,4 @@ exports.startProcess = async (filePathOnDisk, uploadPath, translationLanguage, f
     } catch (error) {
         logger.error('Error processing audio:', error);
     }
-
 };
