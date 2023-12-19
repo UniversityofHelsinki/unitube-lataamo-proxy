@@ -15,8 +15,8 @@ const transcriptionApiKey = process.env.TRANSCRIPTION_API_KEY;
 
 // Set up headers for Batch Transcription API request
 const headers = {
-    "Ocp-Apim-Subscription-Key": transcriptionApiKey,
-    "Content-Type": "application/json",
+    'Ocp-Apim-Subscription-Key': transcriptionApiKey,
+    'Content-Type': 'application/json',
 };
 
 const proxyConfig = {
@@ -46,7 +46,8 @@ const speechEndpoint = 'https://tike-vn.cognitiveservices.azure.com';
 // Set up Azure Batch Transcription API endpoint
 const transcriptionEndpoint = `${speechEndpoint}/speechtotext/v3.2-preview.1/transcriptions`;
 
-const sanitizeFilename = (filename) => {
+const sanitizeFilename = (filename, uploadId, eppn) => {
+    logger.info(`Sanitizing filename ${filename} for uploadId ${uploadId} and username ${eppn}`);
     // Replace spaces with underscores
     let sanitizedFilename = filename.replace(/\s+/g, '_');
 
@@ -55,73 +56,74 @@ const sanitizeFilename = (filename) => {
 
     // Remove special characters and leave only alphanumeric, underscores, and hyphens
     sanitizedFilename = sanitizedFilename.replace(/[^a-zA-Z0-9_-]/g, '');
+    logger.info(`Sanitizing complete for filename ${sanitizedFilename} for uploadId ${uploadId} and username ${eppn}`);
 
     return sanitizedFilename;
 };
 
 const uploadAudioToStorage = async (blobClient, outputAudio) => {
     // Upload audio file to Azure Storage
-    console.log("Uploading audio file to Azure Storage...");
-    console.log("Audio file:", outputAudio);
+    logger.info('Uploading audio file to Azure Storage...');
+    logger.info('Audio file:', outputAudio);
     await blobClient.uploadFile(outputAudio);
 };
 
-const initiateTranscriptionJob = async (blobClient, translationLanguage) => {
+const initiateTranscriptionJob = async (blobClient, translationLanguage, uploadId, eppn) => {
     try {
         // Initiate transcription job
-        console.log("Initiating transcription job...");
+        logger.info('Initiating transcription job for uploadId ' + uploadId + ' and username ' + eppn + '...');
         const transcriptionRequest = {
             contentUrls: [blobClient.url],
             locale: translationLanguage, // Translation language code
-            displayName: "YourTranscriptionJobName", // Replace with a custom name for your job
-            description: "YourTranscriptionJobDescription", // Replace with a custom description for your job
+            displayName: 'YourTranscriptionJobName', // Replace with a custom name for your job
+            description: 'YourTranscriptionJobDescription', // Replace with a custom description for your job
             properties: {
                 diarizationEnabled: false, // Set to true if you want speaker diarization
-                profanityFilterMode: "None", // Set to "Removed" if you want to remove profanity from the transcript
+                profanityFilterMode: 'None', // Set to "Removed" if you want to remove profanity from the transcript
                 addWordLevelTimestamps: true, // Set to true if you want word-level timestamps in the transcript
             },
             model: {
-                self: "https://tike-vn.cognitiveservices.azure.com/speechtotext/v3.2-preview.1/models/base/5e075808-d616-4e6b-bd44-2d965db08b99"
+                self: 'https://tike-vn.cognitiveservices.azure.com/speechtotext/v3.2-preview.1/models/base/5e075808-d616-4e6b-bd44-2d965db08b99'
             }
         };
 
         const response = await axios.post(transcriptionEndpoint, transcriptionRequest, getConfig());
         return response.data;
     }  catch (error) {
-        console.error("Error initiating transcription job:", error.message);
+        logger.error('Error initiating transcription job:', error.message);
         if (error.response) {
-            console.error("Response status:", error.response.status);
-            console.error("Response data:", error.response.data);
+            logger.error('Response status:', error.response.status);
+            logger.error('Response data:', error.response.data);
         }
-        await deleteAudioFromStorage();
+        await deleteAudioFromStorage(blobClient, uploadId, eppn);
         throw error; // rethrow the error to be caught in the main try-catch block
     }
 };
 
-const waitForJobCompletion = async (jobInfo) => {
+const waitForJobCompletion = async (jobInfo, uploadId, eppn, blobClient) => {
     if (!jobInfo || !jobInfo.self) {
-        console.error("Transcription job self URL not found in the initiation response.");
-        return "Failed"; // Return a failure status
+        logger.error('Transcription job self URL not found in the initiation response.');
+        return 'Failed'; // Return a failure status
     }
 
     const jobId = jobInfo.self.split('/').pop();
 
     if (!jobId) {
-        console.error("Failed to extract transcription job ID from the self URL.");
-        console.error("Self URL:", jobInfo.self);
-        return "Failed"; // Return a failure status
+        logger.error('Failed to extract transcription job ID from the self URL.');
+        logger.error('Self URL:', jobInfo.self);
+        return 'Failed'; // Return a failure status
     }
 
-    console.log(`Waiting for transcription job ${jobId} to complete...`);
+    logger.info(`Waiting for transcription job ${jobId} for ${uploadId} and user ${eppn} to complete...`);
 
     try {
-        let status = "NotStarted";
-        while (status !== "Succeeded" && status !== "Failed") {
+        let status = 'NotStarted';
+        while (status !== 'Succeeded' && status !== 'Failed') {
             const response = await axios.get(jobInfo.self,  getConfig());
             status = response.data.status;
-            console.log(`Transcription job status: ${status}`);
+            logger.info(`Transcription job status: ${status}`);
 
-            if (status !== "Succeeded" && status !== "Failed") {
+            if (status !== 'Succeeded' && status !== 'Failed') {
                 await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait for 5 seconds before checking again
             }
         }
@@ -129,27 +131,27 @@ const waitForJobCompletion = async (jobInfo) => {
         // Update jobInfo with the latest status
         jobInfo.status = status;
 
-        if (status === "Failed") {
-            console.log("Transcription job failed. Deleting the audio file from Azure Storage...");
-            await deleteAudioFromStorage();
+        if (status === 'Failed') {
+            logger.error('Transcription job failed. Deleting the audio file from Azure Storage...');
+            await deleteAudioFromStorage(blobClient, uploadId, eppn);
         }
 
         return status; // Return the final status
     } catch (error) {
-        console.error("Error checking transcription job status:", error.message);
+        logger.error('Error checking transcription job status:', error.message);
         if (error.response) {
-            console.error("Response status:", error.response.status);
-            console.error("Response data:", error.response.data);
+            logger.error('Response status:', error.response.status);
+            logger.error('Response data:', error.response.data);
         }
-        await deleteAudioFromStorage();
-        return "Failed"; // Return a failure status
+        await deleteAudioFromStorage(blobClient, uploadId, eppn);
+        return 'Failed'; // Return a failure status
     }
 };
 
-const getTranscriptionResult = async (jobInfo) => {
+const getTranscriptionResult = async (jobInfo, uploadId, eppn, blobClient) => {
     try {
         // Check if jobInfo has a 'status' property indicating the job status
-        if (jobInfo.status === "Succeeded") {
+        if (jobInfo.status === 'Succeeded') {
             const jobId = jobInfo.self.split('/').pop();
 
             // Construct the endpoint to get information about the files associated with the transcription job
@@ -160,7 +162,7 @@ const getTranscriptionResult = async (jobInfo) => {
 
             if (Array.isArray(filesResponse.data.values)) {
                 // Find the VTT file in the list of files
-                const vttFile = filesResponse.data.values.find((file) => file.kind === "Transcription");
+                const vttFile = filesResponse.data.values.find((file) => file.kind === 'Transcription');
 
                 if (vttFile) {
                     const vttResultUrl = vttFile.links.contentUrl;
@@ -171,32 +173,32 @@ const getTranscriptionResult = async (jobInfo) => {
                     // Return the VTT content
                     return vttResultResponse.data;
                 } else {
-                    console.error("Transcription result (VTT) file not found in the response.");
-                    await deleteAudioFromStorage();
+                    logger.error(`Transcription result (VTT) file not found in the response for job ${jobId} and uploadId ${uploadId} and user ${eppn}`);
+                    await deleteAudioFromStorage(blobClient, uploadId, eppn);
                     return null;
                 }
             } else {
-                console.error("Invalid response data format. Expected an array of files.");
-                await deleteAudioFromStorage();
+                logger.error(`Invalid response data format. Expected an array of files. for job ${jobId} and uploadId ${uploadId} and user ${eppn}`);
+                await deleteAudioFromStorage(blobClient, uploadId, eppn);
                 return null;
             }
         } else {
-            console.error("Transcription job is not in a successful state. Current status:", jobInfo.status);
-            await deleteAudioFromStorage();
+            logger.error(`Transcription job is not in a successful state. Current status:` + ' ' + jobInfo.status + ' for uploadId ' + uploadId + ' and username ' + eppn);
+            await deleteAudioFromStorage(blobClient, uploadId, eppn);
             return null;
         }
     } catch (error) {
-        console.error("Error retrieving transcription result:", error.message);
+        logger.error(`Error retrieving transcription result: ${error.message} for uploadId ${uploadId} and username ${eppn}`);
         if (error.response) {
-            console.error("Response status:", error.response.status);
-            console.error("Response data:", error.response.data);
+            logger.error(`Response status: ${error.response.status} for uploadId ${uploadId} and username ${eppn}`);
+            logger.error(`Response data: ${error.response.data} for uploadId ${uploadId} and username ${eppn}`);
         }
-        await deleteAudioFromStorage();
+        await deleteAudioFromStorage(blobClient, uploadId, eppn);
         return null;
     }
 };
 
-const jsonToVtt = (jsonData) => {
+const jsonToVtt = (jsonData, uploadId, eppn) => {
     const { recognizedPhrases } = jsonData;
     const vttLines = [];
 
@@ -235,7 +237,7 @@ const jsonToVtt = (jsonData) => {
 
             vttLines.push(vttEntry.join('\n'));
         } else {
-            console.error(`Missing required properties in phrase in index ${index}` + ' ' + JSON.stringify(phrase));
+            logger.error(`Missing required properties in phrase in index ${index}` + ' ' + JSON.stringify(phrase) + ' for uploadId ' + uploadId + ' and username ' + eppn);
         }
     });
 
@@ -251,36 +253,36 @@ const formatTime = (timeInSeconds) => {
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(3, '0')}`;
 };
 
-const saveVttToFile = (vttContent, filePath) => {
+const saveVttToFile = (vttContent, filePath, uploadId, eppn) => {
     if (!vttContent) {
-        console.error("No VTT content to save.");
+        logger.error(`No VTT content to save. for uploadId ${uploadId} and username ${eppn}`);
         return;
     }
 
     fs.writeFileSync(filePath, vttContent);
-    console.log(`VTT content saved to: ${filePath}`);
+    logger.info(`VTT content saved to: ${filePath} for uploadId ${uploadId} and username ${eppn}`);
 };
 
-const deleteTranscription = async (jobInfo) => {
+const deleteTranscription = async (jobInfo, uploadId, eppn) => {
     try {
         const jobId = jobInfo.self.split('/').pop();
         await axios.delete(`${transcriptionEndpoint}/${jobId}`, getConfig());
-        console.log('Transcription deleted:');
+        logger.info(`Transcription deleted: ${jobId} for uploadId ${uploadId} and username ${eppn}`);
     } catch (error) {
-        console.error('Error deleting transcription:', error.response ? error.response.data : error.message);
+        logger.error(`Error deleting transcription:  ${error.message} for uploadId  ${uploadId} and username ${eppn}`);
     }
 };
 
 const deleteAudioFromStorage = async (blobClient) => {
     // Delete the audio file from Azure Storage
     await blobClient.delete();
-    console.log("Audio file deleted from Azure Storage");
+    console.log('Audio file deleted from Azure Storage');
 };
 
 exports.startProcess = async (filePathOnDisk, uploadPath, translationLanguage, fileName, uploadId, eppn) => {
     try {
         // sanitize filename
-        fileName = sanitizeFilename(fileName);
+        fileName = sanitizeFilename(fileName, uploadId, eppn);
 
         await extractAudio({
             input: filePathOnDisk,
@@ -291,36 +293,35 @@ exports.startProcess = async (filePathOnDisk, uploadPath, translationLanguage, f
             }
         });
 
-        logger.info('Sound ready for video : ' + filePathOnDisk + ' with translation language '+ translationLanguage);
-        logger.info("Sound file location: " + path.join(uploadPath, fileName + '_' + audioFile));
+        logger.info('Sound ready for video : ' + filePathOnDisk + ' with translation language '+ translationLanguage + ' for uploadId ' + uploadId + ' and username ' + eppn);
+        logger.info('Sound file location: ' + path.join(uploadPath, fileName + '_' + audioFile) + ' for uploadId ' + uploadId + ' and username ' + eppn);
 
         // Set up Azure Storage connection string
         const storageConnectionString = `DefaultEndpointsProtocol=https;AccountName=${storageAccountName};AccountKey=${storageAccountKey};EndpointSuffix=core.windows.net`;
         const blobServiceClient = BlobServiceClient.fromConnectionString(storageConnectionString);
         const containerClient = blobServiceClient.getContainerClient(storageContainerName);
         const relativeUploadPath = path.join('api','uploads', eppn, uploadId, fileName + '_' + audioFile);
-        logger.info("Relative upload path: " + relativeUploadPath);
         const blobClient = containerClient.getBlockBlobClient(relativeUploadPath);
 
         await uploadAudioToStorage(blobClient, relativeUploadPath);
-        console.log("Audio file uploaded to Azure Storage");
+        logger.info('Audio file uploaded to Azure Storage successfully' + ' for uploadId ' + uploadId + ' and username ' + eppn);
 
-        const jobInfo = await initiateTranscriptionJob(blobClient, translationLanguage);
+        const jobInfo = await initiateTranscriptionJob(blobClient, translationLanguage, uploadId, eppn);
 
-        console.log("Transcription job initiated:", jobInfo);
+        logger.info('Transcription job initiated:', jobInfo + ' for uploadId ' + uploadId + ' and username ' + eppn);
 
-        const jobStatus = await waitForJobCompletion(jobInfo);
+        const jobStatus = await waitForJobCompletion(jobInfo, uploadId, eppn, blobClient);
 
-        if (jobStatus === "Succeeded") {
-            const transcriptionResult = await getTranscriptionResult(jobInfo);
-            const vtt = jsonToVtt(transcriptionResult);
-            saveVttToFile(vtt, path.join(uploadPath, fileName + '_' + outputFile));
-            await deleteTranscription(jobInfo);
+        if (jobStatus === 'Succeeded') {
+            const transcriptionResult = await getTranscriptionResult(jobInfo, uploadId, eppn, blobClient);
+            const vtt = jsonToVtt(transcriptionResult, uploadId, eppn);
+            saveVttToFile(vtt, path.join(uploadPath, fileName + '_' + outputFile), uploadId, eppn);
+            await deleteTranscription(jobInfo, uploadId, eppn);
         } else {
-            console.error("Transcription job failed");
+            logger.error('Transcription job failed with status:' + jobStatus + ' for uploadId ' + uploadId + ' and username ' + eppn);
         }
 
-        await deleteAudioFromStorage(blobClient);
+        await deleteAudioFromStorage(blobClient, uploadId, eppn);
         return {
             buffer : fs.readFileSync(path.join(uploadPath, fileName + '_' + outputFile)),
             originalname : path.join(uploadPath, fileName + '_' + outputFile),
