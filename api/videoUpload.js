@@ -126,6 +126,7 @@ exports.upload = async (req, res) => {
     let license;
     let title;
     let translationLanguage;
+    let translationModel;
 
     req.busboy.on('field', (fieldname, val)  => {
         if (fieldname === 'archivedDate') {
@@ -145,6 +146,9 @@ exports.upload = async (req, res) => {
         }
         if (fieldname === 'translationLanguage') {
             translationLanguage = val;
+        }
+        if (fieldname === 'translationModel') {
+            translationModel = val;
         }
     });
 
@@ -193,12 +197,18 @@ exports.upload = async (req, res) => {
                     logger.info(`update event metadata for VIDEO ${identifier} USER ${req.user.eppn} OK`);
                     logger.info (`selected translation for VIDEO ${identifier} with language ${translationLanguage}`);
                     // generate VTT file for the video
-                    if (translationLanguage) {
-                        logger.info(`starting translation for VIDEO ${identifier} with translation language ${translationLanguage} with USER ${req.user.eppn}`);
+                    if (translationModel && translationLanguage) {
+                        logger.info(`starting translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
+                        let vttFile;
                         // using Azure Speech to Text API to generate VTT file
-                        //const vttFile = await azureService.startProcess(filePathOnDisk, uploadPath, translationLanguage, filename.filename);
-                        // using Azure Speech to Text Batch Transcription API With Whisper Model to generate VTT file
-                        const vttFile = await azureServiceBatchTranscription.startProcess(filePathOnDisk, uploadPath, translationLanguage, filename.filename, uploadId, loggedUser.eppn);
+                        if (translationModel === constants.TRANSLATION_MODEL_MS_ASR) {
+                            logger.info(`starting MS_ASR translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
+                            vttFile = await azureService.startProcess(filePathOnDisk, uploadPath, translationLanguage, filename.filename);
+                        } else if (translationModel === constants.TRANSLATION_MODEL_MS_WHISPER) {
+                            // using Azure Speech to Text Batch Transcription API With Whisper Model to generate VTT file
+                            logger.info(`starting WHISPER translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
+                            vttFile = await azureServiceBatchTranscription.startProcess(filePathOnDisk, uploadPath, translationLanguage, filename.filename, uploadId, loggedUser.eppn);
+                        }
                         const response = await apiService.addWebVttFile(vttFile, identifier);
                         if (response.status === 201) {
                             logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
