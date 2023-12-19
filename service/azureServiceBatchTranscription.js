@@ -273,10 +273,10 @@ const deleteTranscription = async (jobInfo, uploadId, eppn) => {
     }
 };
 
-const deleteAudioFromStorage = async (blobClient) => {
+const deleteAudioFromStorage = async (blobClient, uploadId, eppn) => {
     // Delete the audio file from Azure Storage
     await blobClient.delete();
-    console.log('Audio file deleted from Azure Storage');
+    logger.info(`Audio file deleted from Azure Storage for uploadId ${uploadId} and username ${eppn}`);
 };
 
 exports.startProcess = async (filePathOnDisk, uploadPath, translationLanguage, fileName, uploadId, eppn) => {
