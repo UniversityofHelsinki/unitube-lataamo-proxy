@@ -52,6 +52,8 @@ module.exports = function (router) {
      */
     router.get('/user', user.userInfo);
 
+    router.get('/user/isAuthorizedToTranslation', user.isAuthorizedToTranslation);
+
 
     router.get('/logout', user.logout);
 

@@ -64,6 +64,8 @@ const CREATE_SERIES = 'create_series';
 const API_CHANNEL = 'api';
 const ENGAGE_PLAYER_CHANNEL = 'engage-player';
 
+const TRANSLATION_GROUP_NAME = 'grp-unitube-tekstitystesti';
+
 const WEBVTT_TEMPLATE =  {
     "assets": {
         "options": [
@@ -246,5 +248,6 @@ module.exports = {
     API_CHANNEL,
     ENGAGE_PLAYER_CHANNEL,
     TRANSLATION_MODEL_MS_ASR,
-    TRANSLATION_MODEL_MS_WHISPER
+    TRANSLATION_MODEL_MS_WHISPER,
+    TRANSLATION_GROUP_NAME
 };
