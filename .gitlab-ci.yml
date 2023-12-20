@@ -106,7 +106,7 @@ deploy_dev:
   environment:
     name: development
   only:
-    - azure_translations # put back master
+    - master
   except:
     # Skip deploy when scheduled npm audit and outdated scans are executed.
     - schedules
@@ -137,7 +137,7 @@ deploy_test:
   environment:
     name: test
   only:
-    - test
+    - azure_translations # put back test
   script:
     - echo "====== Deploy to test server ========"
     - echo "====== Install rsync and openssh ========="
