@@ -209,15 +209,17 @@ exports.upload = async (req, res) => {
                             logger.info(`starting WHISPER translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
                             vttFile = await azureServiceBatchTranscription.startProcess(filePathOnDisk, uploadPath, translationLanguage, filename.filename, uploadId, loggedUser.eppn);
                         }
-                        const response = await apiService.addWebVttFile(vttFile, identifier);
-                        if (response.status === 201) {
-                            logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
-                            await apiService.republishWebVttFile(identifier);
-                        } else {
-                            logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
+                        if (vttFile.buffer && vttFile.buffer.length > 0 && vttFile.originalname && vttFile.audioFile) {
+                            const response = await apiService.addWebVttFile(vttFile, identifier);
+                            if (response.status === 201) {
+                                logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
+                                await apiService.republishWebVttFile(identifier);
+                            } else {
+                                logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
+                            }
+                            await deleteFile(vttFile.originalname, uploadId);
+                            await deleteFile(vttFile.audioFile, uploadId);
                         }
-                        await deleteFile(vttFile.originalname, uploadId);
-                        await deleteFile(vttFile.audioFile, uploadId);
                     }
                 } else if (updateEventMetadataResponse.status === 403){
                     logger.warn(`update event metadata for VIDEO ${identifier} USER ${req.user.eppn} failed ${updateEventMetadataResponse.statusText}`);

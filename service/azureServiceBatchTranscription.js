@@ -1,5 +1,5 @@
 require('dotenv').config();
-const fs = require('fs');
+const fsPromises = require('fs/promises');
 const extractAudio = require('ffmpeg-extract-audio');
 const path = require('path');
 const logger = require('../config/winstonLogger');
@@ -253,13 +253,16 @@ const formatTime = (timeInSeconds) => {
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(3, '0')}`;
 };
 
-const saveVttToFile = (vttContent, filePath, uploadId, eppn) => {
+const saveVttToFile = async (vttContent, filePath, uploadId, eppn) => {
     if (!vttContent) {
         logger.error(`No VTT content to save. for uploadId ${uploadId} and username ${eppn}`);
         return;
     }
-
-    fs.writeFileSync(filePath, vttContent);
+    try {
+        await fsPromises.writeFile(filePath, vttContent);
+    } catch (error) {
+        logger.error(`Error saving VTT content to file: ${error.message} for uploadId ${uploadId} and username ${eppn}`);
+    }
     logger.info(`VTT content saved to: ${filePath} for uploadId ${uploadId} and username ${eppn}`);
 };
 
@@ -315,7 +318,7 @@ exports.startProcess = async (filePathOnDisk, uploadPath, translationLanguage, f
         if (jobStatus === 'Succeeded') {
             const transcriptionResult = await getTranscriptionResult(jobInfo, uploadId, eppn, blobClient);
             const vtt = jsonToVtt(transcriptionResult, uploadId, eppn);
-            saveVttToFile(vtt, path.join(uploadPath, fileName + '_' + outputFile), uploadId, eppn);
+            await saveVttToFile(vtt, path.join(uploadPath, fileName + '_' + outputFile), uploadId, eppn);
             await deleteTranscription(jobInfo, uploadId, eppn);
         } else {
             logger.error('Transcription job failed with status:' + jobStatus + ' for uploadId ' + uploadId + ' and username ' + eppn);
@@ -323,7 +326,7 @@ exports.startProcess = async (filePathOnDisk, uploadPath, translationLanguage, f
 
         await deleteAudioFromStorage(blobClient, uploadId, eppn);
         return {
-            buffer : fs.readFileSync(path.join(uploadPath, fileName + '_' + outputFile)),
+            buffer : await fsPromises.readFile(path.join(uploadPath, fileName + '_' + outputFile)),
             originalname : path.join(uploadPath, fileName + '_' + outputFile),
             audioFile : path.join(uploadPath, fileName + '_' + audioFile)
         };
