@@ -137,7 +137,7 @@ deploy_test:
   environment:
     name: test
   only:
-    - azure_translations # put back test
+    - test
   script:
     - echo "====== Deploy to test server ========"
     - echo "====== Install rsync and openssh ========="
