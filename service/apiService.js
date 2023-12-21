@@ -339,11 +339,11 @@ exports.republishWebVttFile = async (eventId) => {
     await security.opencastBase.post(republishMetadataUrl, bodyFormData, {headers});
 };
 
-exports.addWebVttFile = async (vttFile, eventId) => {
+exports.addWebVttFile = async (translationObject, eventId) => {
     const assetsUrl = constants.OCAST_ADMIN_EVENT + eventId + constants.OCAST_ASSETS_PATH;
     let bodyFormData = new FormData();
-    bodyFormData.append('attachment_captions_webvtt.0', vttFile.buffer, {
-        filename: vttFile.originalname
+    bodyFormData.append('attachment_captions_webvtt.0', translationObject.buffer, {
+        filename: translationObject.originalname
     });
     bodyFormData.append('metadata', JSON.stringify(constants.WEBVTT_TEMPLATE));
     try {
