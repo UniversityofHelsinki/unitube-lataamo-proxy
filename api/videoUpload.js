@@ -15,6 +15,7 @@ const HttpStatus = require('http-status');
 const dbApi = require('./dbApi');
 const moment = require('moment');
 const logger = require('../config/winstonLogger');
+const webvttParser = require('node-webvtt');
 
 const ERROR_LEVEL = 'error';
 const INFO_LEVEL = 'info';
@@ -83,6 +84,25 @@ const returnUsersInboxSeries = async (loggedUser) => {
     }
 };
 
+const isValidVttFile = (vttFile, identifier, user) => {
+    try {
+        webvttParser.parse(vttFile.buffer.toString(), { strict: true });
+        return true;
+    } catch (err) {
+        logger.error(`vtt file seems to be malformed (${err.message}) for video ${identifier}, please check. -- USER ${user}`);
+        return false;
+    }
+};
+
+
+const areAllRequiredFiles = (vttFile, user, uploadId) => {
+    if (vttFile.buffer && vttFile.buffer.length > 0 && vttFile.originalname && vttFile.audioFile) {
+        return true;
+    } else {
+        logger.error(`vttFile is missing some required fields for user ${user} with uploadId ${uploadId}`);
+        return false;
+    }
+};
 
 exports.upload = async (req, res) => {
     const uploadId = uuidv4();
@@ -199,26 +219,29 @@ exports.upload = async (req, res) => {
                     // generate VTT file for the video
                     if (translationModel && translationLanguage) {
                         logger.info(`starting translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
-                        let vttFile;
+                        let translationObject;
                         // using Azure Speech to Text API to generate VTT file
                         if (translationModel === constants.TRANSLATION_MODEL_MS_ASR) {
                             logger.info(`starting MS_ASR translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
-                            vttFile = await azureService.startProcess(filePathOnDisk, uploadPath, translationLanguage, filename.filename);
+                            translationObject = await azureService.startProcess(filePathOnDisk, uploadPath, translationLanguage, filename.filename);
                         } else if (translationModel === constants.TRANSLATION_MODEL_MS_WHISPER) {
                             // using Azure Speech to Text Batch Transcription API With Whisper Model to generate VTT file
                             logger.info(`starting WHISPER translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
-                            vttFile = await azureServiceBatchTranscription.startProcess(filePathOnDisk, uploadPath, translationLanguage, filename.filename, uploadId, loggedUser.eppn);
+                            translationObject = await azureServiceBatchTranscription.startProcess(filePathOnDisk, uploadPath, translationLanguage, filename.filename, uploadId, loggedUser.eppn);
                         }
-                        if (vttFile.buffer && vttFile.buffer.length > 0 && vttFile.originalname && vttFile.audioFile) {
-                            const response = await apiService.addWebVttFile(vttFile, identifier);
+                        if (areAllRequiredFiles(translationObject, req.user.eppn, identifier) && isValidVttFile(translationObject, identifier, req.user.eppn)) {
+                            const response = await apiService.addWebVttFile(translationObject, identifier);
                             if (response.status === 201) {
                                 logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
                                 await apiService.republishWebVttFile(identifier);
+                                await deleteFile(translationObject.originalname, uploadId);
+                                await deleteFile(translationObject.audioFile, uploadId);
                             } else {
                                 logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
+                                await deleteFile(translationObject.audioFile, uploadId);
                             }
-                            await deleteFile(vttFile.originalname, uploadId);
-                            await deleteFile(vttFile.audioFile, uploadId);
+                        } else {
+                            await deleteFile(translationObject.audioFile, uploadId);
                         }
                     }
                 } else if (updateEventMetadataResponse.status === 403){
