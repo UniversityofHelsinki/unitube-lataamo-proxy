@@ -13,6 +13,10 @@ const storageAccountKey = process.env.STORAGE_ACCOUNT_KEY;
 const storageContainerName = process.env.STORAGE_CONTAINER_NAME;
 const transcriptionApiKey = process.env.TRANSCRIPTION_API_KEY;
 
+// Speech Service Base URL and model information
+const speechToTextBaseUrl = process.env.SPEECH_TO_TEXT_BASE_URL;
+const speechToTextModel = process.env.SPEECH_TO_TEXT_MODEL;
+
 // Set up headers for Batch Transcription API request
 const headers = {
     'Ocp-Apim-Subscription-Key': transcriptionApiKey,
@@ -41,10 +45,8 @@ const getConfig = () => {
 const audioFile = 'output_audio.wav'; // 16000 Hz, Mono
 const outputFile = 'transcript.vtt';
 
-const speechEndpoint = 'https://tike-vn.cognitiveservices.azure.com';
-
 // Set up Azure Batch Transcription API endpoint
-const transcriptionEndpoint = `${speechEndpoint}/speechtotext/v3.2-preview.1/transcriptions`;
+const transcriptionEndpoint = `${speechToTextBaseUrl}/transcriptions`;
 
 const sanitizeFilename = (filename, uploadId, eppn) => {
     logger.info(`Sanitizing filename ${filename} for uploadId ${uploadId} and username ${eppn}`);
@@ -64,7 +66,7 @@ const sanitizeFilename = (filename, uploadId, eppn) => {
 const uploadAudioToStorage = async (blobClient, outputAudio) => {
     // Upload audio file to Azure Storage
     logger.info('Uploading audio file to Azure Storage...');
-    logger.info('Audio file:', outputAudio);
+    logger.info('Audio file: ' + outputAudio);
     await blobClient.uploadFile(outputAudio);
 };
 
@@ -80,10 +82,10 @@ const initiateTranscriptionJob = async (blobClient, translationLanguage, uploadI
             properties: {
                 diarizationEnabled: false, // Set to true if you want speaker diarization
                 profanityFilterMode: 'None', // Set to "Removed" if you want to remove profanity from the transcript
-                addWordLevelTimestamps: true, // Set to true if you want word-level timestamps in the transcript
+                addWordLevelTimestamps: false, // Set to true if you want word-level timestamps in the transcript
             },
             model: {
-                self: 'https://tike-vn.cognitiveservices.azure.com/speechtotext/v3.2-preview.1/models/base/5e075808-d616-4e6b-bd44-2d965db08b99'
+                self: `${speechToTextBaseUrl}/models/base/${speechToTextModel}`
             }
         };
 
