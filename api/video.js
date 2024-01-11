@@ -22,6 +22,7 @@ const fileService = require('../service/fileService');
 const {v4: uuidv4} = require("uuid");
 const HttpStatus = require("http-status");
 const httpStatus = require("http-status");
+const azureServiceBatchTranscription = require("../service/azureServiceBatchTranscription");
 
 const encrypt = url => {
     const cipher = crypto.createCipheriv(algorithm, key, encryptionIV);
@@ -181,6 +182,7 @@ const removeDirectory = async (uplaodPath, uploadId) => {
 exports.generateAutomaticTranscriptionsForVideo = async (req, res) => {
     try {
         const transcriptionId = uuidv4();
+        const loggedUser = userService.getLoggedUser(req.user);
         logger.info(`POST /generateAutomaticTranscriptionsForVideo VIDEO ${req.body.identifier} USER: ${req.user.eppn}`);
         let identifier = req.body.identifier;
         let translationModel = req.body.translationModel;
@@ -200,6 +202,10 @@ exports.generateAutomaticTranscriptionsForVideo = async (req, res) => {
             if (translationModel === constants.TRANSLATION_MODEL_MS_ASR) {
                 logger.info(`starting MS_ASR translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
                 translationObject = await azureService.startProcess(result.videoPath, result.videoBasePath, translationLanguage, result.fileName);
+            } else if (translationModel === constants.TRANSLATION_MODEL_MS_WHISPER) {
+                // using Azure Speech to Text Batch Transcription API With Whisper Model to generate VTT file
+                logger.info(`starting WHISPER translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
+                translationObject = await azureServiceBatchTranscription.startProcess(result.videoPath, result.videoBasePath, translationLanguage, result.fileName, transcriptionId, loggedUser.eppn );
             }
             if (areAllRequiredFiles(translationObject, req.user.eppn, identifier) && isValidVttFile(translationObject, identifier, req.user.eppn)) {
                 const response = await apiService.addWebVttFile(translationObject, identifier);
