@@ -1,7 +1,6 @@
 const path = require('path');
 const apiService = require('../service/apiService');
 const userService = require('../service/userService');
-const azureService = require('../service/azureService');
 const azureServiceBatchTranscription = require('../service/azureServiceBatchTranscription');
 const uploadLogger = require('../config/uploadLogger');
 const fsExtra = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
