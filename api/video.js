@@ -17,12 +17,10 @@ const constants = require('../utils/constants');
 const dbApi = require('./dbApi');
 const { algorithm, key, encryptionIV } = require('../config/security');
 const crypto = require('crypto');
-const azureService = require('../service/azureService');
 const fileService = require('../service/fileService');
-const {v4: uuidv4} = require("uuid");
-const HttpStatus = require("http-status");
-const httpStatus = require("http-status");
-const azureServiceBatchTranscription = require("../service/azureServiceBatchTranscription");
+const {v4: uuidv4} = require('uuid');
+const HttpStatus = require('http-status');
+const azureServiceBatchTranscription = require('../service/azureServiceBatchTranscription');
 
 const encrypt = url => {
     const cipher = crypto.createCipheriv(algorithm, key, encryptionIV);
@@ -198,15 +196,10 @@ exports.generateAutomaticTranscriptionsForVideo = async (req, res) => {
             const result = await fileService.streamVideoToFile(req, res, videoUrl, transcriptionId);
             logger.info(`starting translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
             let translationObject;
-            // using Azure Speech to Text API to generate VTT file
-            if (translationModel === constants.TRANSLATION_MODEL_MS_ASR) {
-                logger.info(`starting MS_ASR translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
-                translationObject = await azureService.startProcess(result.videoPath, result.videoBasePath, translationLanguage, result.fileName);
-            } else if (translationModel === constants.TRANSLATION_MODEL_MS_WHISPER) {
-                // using Azure Speech to Text Batch Transcription API With Whisper Model to generate VTT file
-                logger.info(`starting WHISPER translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
-                translationObject = await azureServiceBatchTranscription.startProcess(result.videoPath, result.videoBasePath, translationLanguage, result.fileName, transcriptionId, loggedUser.eppn );
-            }
+            // using Azure Speech to Text Batch Transcription API With Whisper Model to generate VTT file
+            logger.info(`starting WHISPER translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
+            translationObject = await azureServiceBatchTranscription.startProcess(result.videoPath, result.videoBasePath, translationLanguage, result.fileName, transcriptionId, loggedUser.eppn, translationModel );
+
             if (areAllRequiredFiles(translationObject, req.user.eppn, identifier) && isValidVttFile(translationObject, identifier, req.user.eppn)) {
                 const response = await apiService.addWebVttFile(translationObject, identifier);
                 if (response.status === 201) {
@@ -229,7 +222,7 @@ exports.generateAutomaticTranscriptionsForVideo = async (req, res) => {
         }
     } catch (error) {
         logger.error(`POST /generateAutomaticTranscriptionsForVideo VIDEO: ${req.body.identifier} USER: ${req.user.eppn} CAUSE: ${error}`);
-        res.status(httpStatus.INTERNAL_SERVER_ERROR);
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 };
 

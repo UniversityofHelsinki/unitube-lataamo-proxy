@@ -6,6 +6,7 @@ const logger = require('../config/winstonLogger');
 
 const { BlobServiceClient } = require('@azure/storage-blob');
 const axios = require('axios');
+const constants = require("../utils/constants");
 
 // Set your Azure Storage account and Batch Transcription API key
 const storageAccountName = process.env.STORAGE_ACCOUNT_NAME;
@@ -70,7 +71,7 @@ const uploadAudioToStorage = async (blobClient, outputAudio) => {
     await blobClient.uploadFile(outputAudio);
 };
 
-const initiateTranscriptionJob = async (blobClient, translationLanguage, uploadId, eppn) => {
+const initiateTranscriptionJob = async (blobClient, translationLanguage, uploadId, eppn, model) => {
     try {
         // Initiate transcription job
         logger.info('Initiating transcription job for uploadId ' + uploadId + ' and username ' + eppn + '...');
@@ -83,11 +84,15 @@ const initiateTranscriptionJob = async (blobClient, translationLanguage, uploadI
                 diarizationEnabled: false, // Set to true if you want speaker diarization
                 profanityFilterMode: 'None', // Set to "Removed" if you want to remove profanity from the transcript
                 addWordLevelTimestamps: false, // Set to true if you want word-level timestamps in the transcript
-            },
-            model: {
-                self: `${speechToTextBaseUrl}/models/base/${speechToTextModel}`
             }
         };
+
+        // Set the model property if a custom model is used
+        if (model === constants.TRANSLATION_MODEL_MS_WHISPER) {
+            transcriptionRequest.model = {
+                self: `${speechToTextBaseUrl}/models/base/${speechToTextModel}`
+            };
+        }
 
         const response = await axios.post(transcriptionEndpoint, transcriptionRequest, getConfig());
         return response.data;
@@ -284,7 +289,7 @@ const deleteAudioFromStorage = async (blobClient, uploadId, eppn) => {
     logger.info(`Audio file deleted from Azure Storage for uploadId ${uploadId} and username ${eppn}`);
 };
 
-exports.startProcess = async (filePathOnDisk, uploadPath, translationLanguage, fileName, uploadId, eppn) => {
+exports.startProcess = async (filePathOnDisk, uploadPath, translationLanguage, fileName, uploadId, eppn, model) => {
     try {
         // sanitize filename
         fileName = sanitizeFilename(fileName, uploadId, eppn);
@@ -311,7 +316,7 @@ exports.startProcess = async (filePathOnDisk, uploadPath, translationLanguage, f
         await uploadAudioToStorage(blobClient, relativeUploadPath);
         logger.info('Audio file uploaded to Azure Storage successfully' + ' for uploadId ' + uploadId + ' and username ' + eppn);
 
-        const jobInfo = await initiateTranscriptionJob(blobClient, translationLanguage, uploadId, eppn);
+        const jobInfo = await initiateTranscriptionJob(blobClient, translationLanguage, uploadId, eppn, model);
 
         logger.info('Transcription job initiated:', jobInfo + ' for uploadId ' + uploadId + ' and username ' + eppn);
 

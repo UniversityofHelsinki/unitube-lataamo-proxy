@@ -220,15 +220,9 @@ exports.upload = async (req, res) => {
                     if (translationModel && translationLanguage) {
                         logger.info(`starting translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
                         let translationObject;
-                        // using Azure Speech to Text API to generate VTT file
-                        if (translationModel === constants.TRANSLATION_MODEL_MS_ASR) {
-                            logger.info(`starting MS_ASR translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
-                            translationObject = await azureService.startProcess(filePathOnDisk, uploadPath, translationLanguage, filename.filename);
-                        } else if (translationModel === constants.TRANSLATION_MODEL_MS_WHISPER) {
-                            // using Azure Speech to Text Batch Transcription API With Whisper Model to generate VTT file
-                            logger.info(`starting WHISPER translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
-                            translationObject = await azureServiceBatchTranscription.startProcess(filePathOnDisk, uploadPath, translationLanguage, filename.filename, uploadId,loggedUser.eppn );
-                        }
+                        // using Azure Speech to Text Batch Transcription API With Whisper Model to generate VTT file
+                        logger.info(`starting WHISPER translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
+                        translationObject = await azureServiceBatchTranscription.startProcess(filePathOnDisk, uploadPath, translationLanguage, filename.filename, uploadId,loggedUser.eppn, translationModel);
                         if (areAllRequiredFiles(translationObject, req.user.eppn, identifier) && isValidVttFile(translationObject, identifier, req.user.eppn)) {
                             const response = await apiService.addWebVttFile(translationObject, identifier);
                             if (response.status === 201) {
