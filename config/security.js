@@ -59,10 +59,19 @@ module.exports.opencastPresentationBase = axios.create({
     }
 });
 
-module.exports.opencastBaseStream = (url, range) => {
+module.exports.opencastBaseStreamWithRangeHeaders = (url, range) => {
     const streamBase = axios.create({
         maxContentLength: Infinity,
         headers: {'authorization': auth, 'Range': range},
+        responseType: 'stream',
+    });
+    return streamBase.get(url);
+};
+
+module.exports.opencastBaseStream = (url) => {
+    const streamBase = axios.create({
+        maxContentLength: Infinity,
+        headers: {'authorization': auth},
         responseType: 'stream',
     });
     return streamBase.get(url);

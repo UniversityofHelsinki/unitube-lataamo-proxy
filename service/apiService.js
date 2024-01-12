@@ -236,8 +236,13 @@ exports.getUserSeries = async (user) => {
     return uniqueSeriesList;
 };
 
+exports.streamVideo = async (url) => {
+    const response = await security.opencastBaseStream(url);
+    return response.data;
+};
+
 exports.playVideo = async (url, range) => {
-    const response = await security.opencastBaseStream(url, range);
+    const response = await security.opencastBaseStreamWithRangeHeaders(url, range);
     return response.data;
 };
 
@@ -339,11 +344,11 @@ exports.republishWebVttFile = async (eventId) => {
     await security.opencastBase.post(republishMetadataUrl, bodyFormData, {headers});
 };
 
-exports.addWebVttFile = async (vttFile, eventId) => {
+exports.addWebVttFile = async (translationObject, eventId) => {
     const assetsUrl = constants.OCAST_ADMIN_EVENT + eventId + constants.OCAST_ASSETS_PATH;
     let bodyFormData = new FormData();
-    bodyFormData.append('attachment_captions_webvtt.0', vttFile.buffer, {
-        filename: vttFile.originalname
+    bodyFormData.append('attachment_captions_webvtt.0', translationObject.buffer, {
+        filename: translationObject.originalname
     });
     bodyFormData.append('metadata', JSON.stringify(constants.WEBVTT_TEMPLATE));
     try {
@@ -697,7 +702,7 @@ exports.createLataamoSeries = async (seriesName, userId) => {
     const lataamoSeriesSubject = 'Lataamo-' + seriesName;
     const seriesUrl = constants.OCAST_SERIES_PATH;
 
-    metadataArray = [
+    let metadataArray = [
         {
             'flavor': 'dublincore/series',
             'title': 'Opencast Series DublinCore',

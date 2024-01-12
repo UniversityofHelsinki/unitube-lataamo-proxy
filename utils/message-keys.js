@@ -31,6 +31,7 @@ const ERROR_MALFORMED_WEBVTT_FILE = 'error-vtt-file-malformed';
 const SUCCESS_WEBVTT_UPLOAD = 'success-vtt-file-upload';
 const ERROR_LIMIT_FILE_SIZE = 'error-limit-file-size';
 const ERROR_WEBVTT_FILE_UPLOAD = 'error-webvtt-file-upload';
+const ERROR_MESSAGE_FAILED_TO_GENERATE_AUTOMATIC_TRANSCRIPTIONS_FOR_VIDEO = 'error-failed-to-generate-automatic-transcriptions-for-video';
 
 module.exports = {
     ERROR_MESSAGE_FAILED_TO_GET_USER,
@@ -63,5 +64,6 @@ module.exports = {
     SUCCESS_WEBVTT_UPLOAD,
     ERROR_LIMIT_FILE_SIZE,
     ERROR_WEBVTT_FILE_UPLOAD,
-    ERROR_MESSAGE_FAILED_TO_GET_JOB
+    ERROR_MESSAGE_FAILED_TO_GET_JOB,
+    ERROR_MESSAGE_FAILED_TO_GENERATE_AUTOMATIC_TRANSCRIPTIONS_FOR_VIDEO
 };

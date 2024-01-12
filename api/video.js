@@ -12,11 +12,16 @@ const upload = require('../utils/upload');
 const path = require('path');
 const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 const { parseSync, stringifySync } = require('subtitle');
-const dbService = require("../service/dbService");
-const constants = require("../utils/constants");
-const dbApi = require("./dbApi");
-const { algorithm, key, encryptionIV } = require("../config/security");
-const crypto = require("crypto");
+const dbService = require('../service/dbService');
+const constants = require('../utils/constants');
+const dbApi = require('./dbApi');
+const { algorithm, key, encryptionIV } = require('../config/security');
+const crypto = require('crypto');
+const fileService = require('../service/fileService');
+const {v4: uuidv4} = require('uuid');
+const HttpStatus = require('http-status');
+const azureServiceBatchTranscription = require('../service/azureServiceBatchTranscription');
+const { areAllRequiredFiles , isValidVttFile, deleteFile, removeDirectory } = require('../utils/fileUtils');
 
 const encrypt = url => {
     const cipher = crypto.createCipheriv(algorithm, key, encryptionIV);
@@ -125,6 +130,56 @@ exports.getVideoUrl = async (req, res) => {
     }
 };
 
+
+exports.generateAutomaticTranscriptionsForVideo = async (req, res) => {
+    try {
+        const transcriptionId = uuidv4();
+        const loggedUser = userService.getLoggedUser(req.user);
+        logger.info(`POST /generateAutomaticTranscriptionsForVideo VIDEO ${req.body.identifier} USER: ${req.user.eppn}`);
+        let identifier = req.body.identifier;
+        let translationModel = req.body.translationModel;
+        let translationLanguage = req.body.translationLanguage;
+        if (identifier && translationModel && translationLanguage) {
+            res.status(HttpStatus.ACCEPTED);
+            res.jobId = transcriptionId;
+            res.json({id: transcriptionId, status: constants.JOB_STATUS_STARTED});
+            // get video url from api and stream it to disk
+            const publications = await apiService.getPublicationsForEvent(identifier);
+            const mediaUrls = publicationService.getMediaUrlsFromPublication(identifier, publications);
+            const videoUrl = mediaUrls[0].url;
+            const result = await fileService.streamVideoToFile(req, res, videoUrl, transcriptionId);
+            logger.info(`starting translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
+            let translationObject;
+            // using Azure Speech to Text Batch Transcription API With Whisper Model to generate VTT file
+            logger.info(`starting WHISPER translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
+            translationObject = await azureServiceBatchTranscription.startProcess(result.videoPath, result.videoBasePath, translationLanguage, result.fileName, transcriptionId, loggedUser.eppn, translationModel );
+
+            if (areAllRequiredFiles(translationObject, req.user.eppn, identifier) && isValidVttFile(translationObject, identifier, req.user.eppn)) {
+                const response = await apiService.addWebVttFile(translationObject, identifier);
+                if (response.status === 201) {
+                    logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
+                    await apiService.republishWebVttFile(identifier);
+                    await deleteFile(translationObject.originalname, transcriptionId, false);
+                    await deleteFile(translationObject.audioFile, transcriptionId, false);
+                    await deleteFile(result.videoPath, transcriptionId, false);
+                    // remove upload directory from disk
+                    await removeDirectory(result.videoBasePath, transcriptionId, false);
+                } else {
+                    logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
+                    await deleteFile(translationObject.audioFile, transcriptionId, false);
+                }
+            } else {
+                await deleteFile(translationObject.audioFile, transcriptionId, false);
+            }
+        } else {
+            res.status(HttpStatus.BAD_REQUEST);
+        }
+    } catch (error) {
+        logger.error(`POST /generateAutomaticTranscriptionsForVideo VIDEO: ${req.body.identifier} USER: ${req.user.eppn} CAUSE: ${error}`);
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+};
+
 exports.getUserVideosBySelectedSeries = async (req, res) => {
     try {
         logger.info(`GET /userVideosBySelectedSeries USER: ${req.user.eppn} , selected series : ${req.params.selectedSeries}` );
@@ -214,7 +269,7 @@ const getArchivedDate = async (concatenatedEventsArray) => {
                 element.archived_date = [...archived_date.rows][0].archived_date;
             }
         } catch (error) {
-            logger.error(`error reading archived_date with video_id ` + element.identifier);
+            logger.error('error reading archived_date with video_id ' + element.identifier);
         }
     }
 };
@@ -368,7 +423,7 @@ exports.uploadVideoTextTrack = async(req, res) => {
 
 exports.deleteVideoTextTrack = async(req, res) => {
     logger.info('deleteVideoTextTrack called.');
-    const filePath = path.join(__dirname, `../files/empty.vtt`);
+    const filePath = path.join(__dirname, '../files/empty.vtt');
     const vttFile = fs.createReadStream(filePath);
     const eventId = req.params.eventId;
 

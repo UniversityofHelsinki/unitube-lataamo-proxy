@@ -14,6 +14,13 @@ ESB_PERSONS_API_KEY (found in keepass)
 REDIS_URL = redis://localhost
 CRYPTO_SECRET_KEY=(found in keepass)
 CRYPTO_SECRET_IV=(found in keepass)
+AZURE_SPEECH_SUBSCRIPTION_KEY (found in keepass)
+STORAGE_ACCOUNT_NAME=(found in keepass)
+STORAGE_ACCOUNT_KEY=(found in keepass)
+STORAGE_CONTAINER_NAME=(found in keepass)
+TRANSCRIPTION_API_KEY=(found in keepass)
+SPEECH_TO_TEXT_BASE_URL=(found in keepass)
+SPEECH_TO_TEXT_MODEL=(found in keepass)
 
 #### Poistamo environment variables
 POSTGRES_USER = (locally use the same username for which you used in the docker container otherwise username is found in keepass)

@@ -25,6 +25,9 @@ const OPENCAST_STATE_SUCCEEDED = 'SUCCEEDED';
 const VIDEO_PRESENTER_DELIVERY = 'presenter/delivery';
 const VIDEO_PRESENTATION_DELIVERY = 'presentation/delivery';
 
+const TRANSLATION_MODEL_MS_ASR = 'MS_ASR';
+const TRANSLATION_MODEL_MS_WHISPER = 'MS_WHISPER';
+
 // opencast service paths
 const OCAST_API_PATH = '/api/';
 const OCAST_SERIES_PATH = '/api/series/';
@@ -60,6 +63,8 @@ const CREATE_SERIES = 'create_series';
 
 const API_CHANNEL = 'api';
 const ENGAGE_PLAYER_CHANNEL = 'engage-player';
+
+const TRANSLATION_GROUP_NAME = 'grp-unitube-tekstitystesti';
 
 const WEBVTT_TEMPLATE =  {
     "assets": {
@@ -241,5 +246,8 @@ module.exports = {
     DEFAULT_VIDEO_MARKED_FOR_DELETION_MONTHS_AMOUNT,
     OCAST_EVENT_VIEWS_PATH,
     API_CHANNEL,
-    ENGAGE_PLAYER_CHANNEL
+    ENGAGE_PLAYER_CHANNEL,
+    TRANSLATION_MODEL_MS_ASR,
+    TRANSLATION_MODEL_MS_WHISPER,
+    TRANSLATION_GROUP_NAME
 };
