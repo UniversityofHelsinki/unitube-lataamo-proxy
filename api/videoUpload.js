@@ -3,7 +3,6 @@ const apiService = require('../service/apiService');
 const userService = require('../service/userService');
 const azureServiceBatchTranscription = require('../service/azureServiceBatchTranscription');
 const uploadLogger = require('../config/uploadLogger');
-const fsExtra = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const messageKeys = require('../utils/message-keys');
@@ -14,56 +13,10 @@ const HttpStatus = require('http-status');
 const dbApi = require('./dbApi');
 const moment = require('moment');
 const logger = require('../config/winstonLogger');
-const webvttParser = require('node-webvtt');
+const { areAllRequiredFiles, deleteFile, isValidVttFile, ensureUploadDir, removeDirectory} = require('../utils/fileUtils');
 
 const ERROR_LEVEL = 'error';
 const INFO_LEVEL = 'info';
-
-
-
-
-// make sure the upload dir exists
-const ensureUploadDir = async (directory) => {
-    try {
-        // https://github.com/jprichardson/node-fs-extra/blob/HEAD/docs/ensureDir.md
-        await fsExtra.ensureDir(directory);
-        uploadLogger.log(INFO_LEVEL,`Using uploadPath ${directory}`);
-        return true;
-    } catch (err) {
-        uploadLogger.log(ERROR_LEVEL,`Error in ensureUploadDir ${err}`);
-        return false;
-    }
-};
-
-const isEmptyDirectory = (path) => {
-    return fs.readdirSync(path).length === 0;
-};
-
-const removeDirectory = async (uplaodPath, uploadId) => {
-    try {
-        if (isEmptyDirectory(uplaodPath)) {
-            await fs.rmdirSync(uplaodPath);
-            uploadLogger.log(INFO_LEVEL, `Cleaning - removed directory: ${uplaodPath} -- ${uploadId}`);
-        } else {
-            uploadLogger.log(INFO_LEVEL, `Cleaning - directory not empty: ${uplaodPath} -- ${uploadId}`);
-        }
-    } catch(err) {
-        uploadLogger.log(ERROR_LEVEL, `Failed to remove directory ${uplaodPath} | ${err} -- ${uploadId}`);
-    }
-};
-
-// clean after post
-const deleteFile = async (filename, uploadId) => {
-    try{
-        // https://github.com/jprichardson/node-fs-extra/blob/2b97fe3e502ab5d5abd92f19d588bd1fc113c3f2/docs/remove.md#removepath-callback
-        await fs.unlinkSync(filename);
-        uploadLogger.log(INFO_LEVEL, `Cleaning - removed: ${filename} -- ${uploadId}`);
-        return true;
-    }catch (err){
-        uploadLogger.log(ERROR_LEVEL, `Failed to clean ${filename} | ${err} -- ${uploadId}`);
-        return false;
-    }
-};
 
 const returnUsersInboxSeries = async (loggedUser) => {
     const lataamoInboxSeriesTitle = seriesTitleForLoggedUser(constants.INBOX, loggedUser.eppn);
@@ -79,26 +32,6 @@ const returnUsersInboxSeries = async (loggedUser) => {
         return inboxSeries;
     } catch (err) {
         uploadLogger.log(ERROR_LEVEL,`Error in returnOrCreateUsersInboxSeries USER: ${ loggedUser.eppn } ${ err }`);
-        return false;
-    }
-};
-
-const isValidVttFile = (vttFile, identifier, user) => {
-    try {
-        webvttParser.parse(vttFile.buffer.toString(), { strict: true });
-        return true;
-    } catch (err) {
-        logger.error(`vtt file seems to be malformed (${err.message}) for video ${identifier}, please check. -- USER ${user}`);
-        return false;
-    }
-};
-
-
-const areAllRequiredFiles = (vttFile, user, uploadId) => {
-    if (vttFile.buffer && vttFile.buffer.length > 0 && vttFile.originalname && vttFile.audioFile) {
-        return true;
-    } else {
-        logger.error(`vttFile is missing some required fields for user ${user} with uploadId ${uploadId}`);
         return false;
     }
 };
@@ -227,14 +160,14 @@ exports.upload = async (req, res) => {
                             if (response.status === 201) {
                                 logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
                                 await apiService.republishWebVttFile(identifier);
-                                await deleteFile(translationObject.originalname, uploadId);
-                                await deleteFile(translationObject.audioFile, uploadId);
+                                await deleteFile(translationObject.originalname, uploadId, true);
+                                await deleteFile(translationObject.audioFile, uploadId, true);
                             } else {
                                 logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
-                                await deleteFile(translationObject.audioFile, uploadId);
+                                await deleteFile(translationObject.audioFile, uploadId, true);
                             }
                         } else {
-                            await deleteFile(translationObject.audioFile, uploadId);
+                            await deleteFile(translationObject.audioFile, uploadId, true);
                         }
                     }
                 } else if (updateEventMetadataResponse.status === 403){
@@ -243,14 +176,14 @@ exports.upload = async (req, res) => {
                     logger.warn(`update event metadata for VIDEO ${identifier} USER ${req.user.eppn} failed ${updateEventMetadataResponse.statusText}`);
                 }
                 // clean file from disk
-                await deleteFile(filePathOnDisk, uploadId);
+                await deleteFile(filePathOnDisk, uploadId, true);
                 // remove upload directory from disk
-                await removeDirectory(uploadPath, uploadId);
+                await removeDirectory(uploadPath, uploadId, true);
             } else {
                 // on failure clean file from disk and return 500
-                await deleteFile(filePathOnDisk, uploadId);
+                await deleteFile(filePathOnDisk, uploadId, true);
                 // remove upload directory from disk
-                await removeDirectory(uploadPath, uploadId);
+                await removeDirectory(uploadPath, uploadId, true);
                 await jobsService.setJobStatus(uploadId, constants.JOB_STATUS_ERROR);
                 res.status(HttpStatus.INTERNAL_SERVER_ERROR);
                 const msg = `${filename.filename} failed to upload to opencast.`;

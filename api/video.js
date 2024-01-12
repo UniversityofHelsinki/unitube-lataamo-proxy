@@ -21,6 +21,7 @@ const fileService = require('../service/fileService');
 const {v4: uuidv4} = require('uuid');
 const HttpStatus = require('http-status');
 const azureServiceBatchTranscription = require('../service/azureServiceBatchTranscription');
+const { areAllRequiredFiles , isValidVttFile, deleteFile, removeDirectory } = require('../utils/fileUtils');
 
 const encrypt = url => {
     const cipher = crypto.createCipheriv(algorithm, key, encryptionIV);
@@ -129,53 +130,6 @@ exports.getVideoUrl = async (req, res) => {
     }
 };
 
-const areAllRequiredFiles = (vttFile, user, uploadId) => {
-    if (vttFile.buffer && vttFile.buffer.length > 0 && vttFile.originalname && vttFile.audioFile) {
-        return true;
-    } else {
-        logger.error(`vttFile is missing some required fields for user ${user} with uploadId ${uploadId}`);
-        return false;
-    }
-};
-
-const isValidVttFile = (vttFile, identifier, user) => {
-    try {
-        webvttParser.parse(vttFile.buffer.toString(), { strict: true });
-        return true;
-    } catch (err) {
-        logger.error(`vtt file seems to be malformed (${err.message}) for video ${identifier}, please check. -- USER ${user}`);
-        return false;
-    }
-};
-
-const deleteFile = async (filename, uploadId) => {
-    try{
-        // https://github.com/jprichardson/node-fs-extra/blob/2b97fe3e502ab5d5abd92f19d588bd1fc113c3f2/docs/remove.md#removepath-callback
-        await fs.unlinkSync(filename);
-        logger.info(`Cleaning - removed: ${filename} -- ${uploadId}`);
-        return true;
-    } catch (err){
-        logger.error(`Failed to clean ${filename} | ${err} -- ${uploadId}`);
-        return false;
-    }
-};
-
-const isEmptyDirectory = (path) => {
-    return fs.readdirSync(path).length === 0;
-};
-
-const removeDirectory = async (uplaodPath, uploadId) => {
-    try {
-        if (isEmptyDirectory(uplaodPath)) {
-            await fs.rmdirSync(uplaodPath);
-            logger.info(`Cleaning - removed directory: ${uplaodPath} -- ${uploadId}`);
-        } else {
-            logger.info(`Cleaning - directory not empty: ${uplaodPath} -- ${uploadId}`);
-        }
-    } catch(err) {
-        logger.error(`Failed to remove directory ${uplaodPath} | ${err} -- ${uploadId}`);
-    }
-};
 
 exports.generateAutomaticTranscriptionsForVideo = async (req, res) => {
     try {
@@ -205,17 +159,17 @@ exports.generateAutomaticTranscriptionsForVideo = async (req, res) => {
                 if (response.status === 201) {
                     logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
                     await apiService.republishWebVttFile(identifier);
-                    await deleteFile(translationObject.originalname, transcriptionId);
-                    await deleteFile(translationObject.audioFile, transcriptionId);
-                    await deleteFile(result.videoPath, transcriptionId);
+                    await deleteFile(translationObject.originalname, transcriptionId, false);
+                    await deleteFile(translationObject.audioFile, transcriptionId, false);
+                    await deleteFile(result.videoPath, transcriptionId, false);
                     // remove upload directory from disk
-                    await removeDirectory(result.videoBasePath, transcriptionId);
+                    await removeDirectory(result.videoBasePath, transcriptionId, false);
                 } else {
                     logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
-                    await deleteFile(translationObject.audioFile, transcriptionId);
+                    await deleteFile(translationObject.audioFile, transcriptionId, false);
                 }
             } else {
-                await deleteFile(translationObject.audioFile, transcriptionId);
+                await deleteFile(translationObject.audioFile, transcriptionId, false);
             }
         } else {
             res.status(HttpStatus.BAD_REQUEST);
