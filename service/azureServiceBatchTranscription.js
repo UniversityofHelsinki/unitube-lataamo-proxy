@@ -94,6 +94,14 @@ const initiateTranscriptionJob = async (blobClient, translationLanguage, uploadI
             };
         }
 
+        if (model === constants.TRANSLATION_MODEL_MS_ASR) {
+            // Dynamically add the languageIdentification property, only supported in the MS_ASR model
+            transcriptionRequest.properties.languageIdentification = {
+                candidateLocales: ["en-US", "sv-SE", "fi-FI"]
+            };
+        }
+
+
         const response = await axios.post(transcriptionEndpoint, transcriptionRequest, getConfig());
         return response.data;
     }  catch (error) {
