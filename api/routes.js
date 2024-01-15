@@ -54,6 +54,8 @@ module.exports = function (router) {
 
     router.get('/user/isAuthorizedToTranslation', user.isAuthorizedToTranslation);
 
+    router.post('/generateAutomaticTranscriptionForVideo', video.generateAutomaticTranscriptionsForVideo);
+
 
     router.get('/logout', user.logout);
 

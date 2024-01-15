@@ -236,8 +236,13 @@ exports.getUserSeries = async (user) => {
     return uniqueSeriesList;
 };
 
+exports.streamVideo = async (url) => {
+    const response = await security.opencastBaseStream(url);
+    return response.data;
+};
+
 exports.playVideo = async (url, range) => {
-    const response = await security.opencastBaseStream(url, range);
+    const response = await security.opencastBaseStreamWithRangeHeaders(url, range);
     return response.data;
 };
 

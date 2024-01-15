@@ -1,3 +1,5 @@
+// Deprecated - not used anymore - replaced by batch processing in azureServiceBatchTranscription.js
+
 require('dotenv').config();
 const sdk = require('microsoft-cognitiveservices-speech-sdk');
 const fs = require('fs');
