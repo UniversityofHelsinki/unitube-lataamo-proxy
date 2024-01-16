@@ -22,6 +22,7 @@ const {v4: uuidv4} = require('uuid');
 const HttpStatus = require('http-status');
 const azureServiceBatchTranscription = require('../service/azureServiceBatchTranscription');
 const { areAllRequiredFiles , isValidVttFile, deleteFile, removeDirectory } = require('../utils/fileUtils');
+const jobsService = require("../service/jobsService");
 
 const encrypt = url => {
     const cipher = crypto.createCipheriv(algorithm, key, encryptionIV);
@@ -132,14 +133,15 @@ exports.getVideoUrl = async (req, res) => {
 
 
 exports.generateAutomaticTranscriptionsForVideo = async (req, res) => {
+    let identifier = req.body.identifier;
     try {
         const transcriptionId = uuidv4();
         const loggedUser = userService.getLoggedUser(req.user);
         logger.info(`POST /generateAutomaticTranscriptionsForVideo VIDEO ${req.body.identifier} USER: ${req.user.eppn}`);
-        let identifier = req.body.identifier;
         let translationModel = req.body.translationModel;
         let translationLanguage = req.body.translationLanguage;
         if (identifier && translationModel && translationLanguage) {
+            await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_STARTED, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
             res.status(HttpStatus.ACCEPTED);
             res.jobId = transcriptionId;
             res.json({id: transcriptionId, status: constants.JOB_STATUS_STARTED});
@@ -164,18 +166,24 @@ exports.generateAutomaticTranscriptionsForVideo = async (req, res) => {
                     await deleteFile(result.videoPath, transcriptionId, false);
                     // remove upload directory from disk
                     await removeDirectory(result.videoBasePath, transcriptionId, false);
+                    await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_FINISHED, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
                 } else {
                     logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
                     await deleteFile(translationObject.audioFile, transcriptionId, false);
+                    await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_ERROR, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
                 }
             } else {
                 await deleteFile(translationObject.audioFile, transcriptionId, false);
+                await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_ERROR, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
             }
         } else {
+            logger.error(`POST /generateAutomaticTranscriptionsForVideo VIDEO: ${req.body.identifier} USER: ${req.user.eppn} CAUSE: ${messageKeys.ERROR_MESSAGE_MISSING_VIDEO_ID_OR_TRANSLATION_MODEL_OR_TRANSLATION_LANGUAGE}`);
+            await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_ERROR, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
             res.status(HttpStatus.BAD_REQUEST);
         }
     } catch (error) {
         logger.error(`POST /generateAutomaticTranscriptionsForVideo VIDEO: ${req.body.identifier} USER: ${req.user.eppn} CAUSE: ${error}`);
+        await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_ERROR, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
         res.status(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 };
