@@ -25,16 +25,14 @@ exports.getJobStatus = async (req, res) => {
             }
             res.json(parsedJob);
         } else {
-            logger.error(`[Jobs] Failed to get status for job from jobService. JOB: ${job} USER: ${req.user.eppn}`);
-            res.status(HttpStatus.INTERNAL_SERVER_ERROR);
-            res.json({
-                message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_JOB
-            });
+            logger.info(`No jobs found for JOB: ${job} USER: ${req.user.eppn}`);
+            res.status(HttpStatus.OK);
+            res.json({status : 'NOT_FOUND'});
         }
     } catch (error) {
         const msg = error.message;
         logger.error(`[Jobs] Failed to get job. JOB_ID: ${req.params.jobId} ERROR: ${error} USER: ${req.user.eppn}`);
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR);
+        res.status(HttpStatus.OK);
         res.json({
             message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_JOB,
             msg

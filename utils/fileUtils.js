@@ -79,16 +79,24 @@ exports.deleteFile = async (filename, id, isUpload) => {
     }
 };
 
-exports.removeDirectory = async (uplaodPath, uploadId) => {
+exports.removeDirectory = async (uplaodPath, id, isUpload) => {
     try {
         if (isEmptyDirectory(uplaodPath)) {
             await fs.rmdirSync(uplaodPath);
-            logger.info(`Cleaning - removed directory: ${uplaodPath} -- ${uploadId}`);
+            if (isUpload) {
+                uploadLogger.log(INFO_LEVEL, `Cleaning - removed directory: ${uplaodPath} -- ${id}`);
+            } else {
+                logger.info(`Cleaning - removed directory: ${uplaodPath} -- ${id}`);
+            }
         } else {
-            logger.info(`Cleaning - directory not empty: ${uplaodPath} -- ${uploadId}`);
+            if (isUpload) {
+                uploadLogger.log(INFO_LEVEL, `Cleaning - directory not empty: ${uplaodPath} -- ${id}`);
+            } else {
+                logger.info(`Cleaning - directory not empty: ${uplaodPath} -- ${id}`);
+            }
         }
     } catch(err) {
-        logger.error(`Failed to remove directory ${uplaodPath} | ${err} -- ${uploadId}`);
+        logger.error(`Failed to remove directory ${uplaodPath} | ${err} -- ${id}`);
     }
 };
 
