@@ -150,6 +150,7 @@ exports.upload = async (req, res) => {
                     logger.info (`selected translation for VIDEO ${identifier} with language ${translationLanguage}`);
                     // generate VTT file for the video
                     if (translationModel && translationLanguage) {
+                        await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_STARTED, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
                         logger.info(`starting translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
                         let translationObject;
                         // using Azure Speech to Text Batch Transcription API With Whisper Model to generate VTT file
@@ -162,12 +163,15 @@ exports.upload = async (req, res) => {
                                 await apiService.republishWebVttFile(identifier);
                                 await deleteFile(translationObject.originalname, uploadId, true);
                                 await deleteFile(translationObject.audioFile, uploadId, true);
+                                await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_FINISHED, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
                             } else {
                                 logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
                                 await deleteFile(translationObject.audioFile, uploadId, true);
+                                await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_ERROR, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
                             }
                         } else {
                             await deleteFile(translationObject.audioFile, uploadId, true);
+                            await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_ERROR, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
                         }
                     }
                 } else if (updateEventMetadataResponse.status === 403){
