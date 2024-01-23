@@ -354,10 +354,8 @@ const generateWebVttFileName = (translationModel, translationLanguage, originalN
 
     const formattedDate = `${year}-${month}-${day}-${hours}:${minutes}`;
     if (translationModel && translationLanguage) {
-        console.log(formattedDate + '-' + translationModel + '-' + translationLanguage + '.vtt');
         return formattedDate + '-' + translationModel + '-' + translationLanguage + '.vtt';
     } else {
-        console.log("original name");
         return originalName;
     }
 };
