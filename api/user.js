@@ -19,6 +19,21 @@ exports.userInfo = (req, res) => {
     }
 };
 
+exports.isAuthorizedToTranslation = (req, res) => {
+    try {
+        logger.info(`GET /user/isAuthorizedToTranslation USER: ${req.user.eppn}`);
+        res.json(userService.isAuthorizedToTranslation(req.user));
+    } catch(err) {
+        const msg = err.message;
+        logger.error(`Error GET /user/isAuthorizedToTranslation ${msg} USER ${req.user.eppn}`);
+        res.status(500);
+        res.json({
+            message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_USER,
+            msg
+        });
+    }
+};
+
 exports.logout = (req, res) => {
     logger.info(`GET /logout USER: ${req.user.eppn} redirect url: ${req.query.return}` );
     const action = req.query.action;

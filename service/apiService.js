@@ -236,8 +236,13 @@ exports.getUserSeries = async (user) => {
     return uniqueSeriesList;
 };
 
+exports.streamVideo = async (url) => {
+    const response = await security.opencastBaseStream(url);
+    return response.data;
+};
+
 exports.playVideo = async (url, range) => {
-    const response = await security.opencastBaseStream(url, range);
+    const response = await security.opencastBaseStreamWithRangeHeaders(url, range);
     return response.data;
 };
 
@@ -339,11 +344,28 @@ exports.republishWebVttFile = async (eventId) => {
     await security.opencastBase.post(republishMetadataUrl, bodyFormData, {headers});
 };
 
-exports.addWebVttFile = async (vttFile, eventId) => {
+const generateWebVttFileName = (translationModel, translationLanguage, originalName) => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+
+    const formattedDate = `${year}-${month}-${day}-${hours}:${minutes}`;
+    if (translationModel && translationLanguage) {
+        return formattedDate + '-' + translationModel + '-' + translationLanguage + '.vtt';
+    } else {
+        return originalName;
+    }
+};
+
+exports.addWebVttFile = async (translationObject, eventId, translationModel, translationLanguage) => {
     const assetsUrl = constants.OCAST_ADMIN_EVENT + eventId + constants.OCAST_ASSETS_PATH;
+    const vttFileOriginalName = generateWebVttFileName(translationModel, translationLanguage, translationObject.originalname);
     let bodyFormData = new FormData();
-    bodyFormData.append('attachment_captions_webvtt.0', vttFile.buffer, {
-        filename: vttFile.originalname
+    bodyFormData.append('attachment_captions_webvtt.0', translationObject.buffer, {
+        filename: vttFileOriginalName
     });
     bodyFormData.append('metadata', JSON.stringify(constants.WEBVTT_TEMPLATE));
     try {
@@ -697,7 +719,7 @@ exports.createLataamoSeries = async (seriesName, userId) => {
     const lataamoSeriesSubject = 'Lataamo-' + seriesName;
     const seriesUrl = constants.OCAST_SERIES_PATH;
 
-    metadataArray = [
+    let metadataArray = [
         {
             'flavor': 'dublincore/series',
             'title': 'Opencast Series DublinCore',
