@@ -344,11 +344,30 @@ exports.republishWebVttFile = async (eventId) => {
     await security.opencastBase.post(republishMetadataUrl, bodyFormData, {headers});
 };
 
-exports.addWebVttFile = async (translationObject, eventId) => {
+const generateWebVttFileName = (translationModel, translationLanguage, originalName) => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+
+    const formattedDate = `${year}-${month}-${day}-${hours}:${minutes}`;
+    if (translationModel && translationLanguage) {
+        console.log(formattedDate + '-' + translationModel + '-' + translationLanguage + '.vtt');
+        return formattedDate + '-' + translationModel + '-' + translationLanguage + '.vtt';
+    } else {
+        console.log("original name");
+        return originalName;
+    }
+};
+
+exports.addWebVttFile = async (translationObject, eventId, translationModel, translationLanguage) => {
     const assetsUrl = constants.OCAST_ADMIN_EVENT + eventId + constants.OCAST_ASSETS_PATH;
+    const vttFileOriginalName = generateWebVttFileName(translationModel, translationLanguage, translationObject.originalname);
     let bodyFormData = new FormData();
     bodyFormData.append('attachment_captions_webvtt.0', translationObject.buffer, {
-        filename: translationObject.originalname
+        filename: vttFileOriginalName
     });
     bodyFormData.append('metadata', JSON.stringify(constants.WEBVTT_TEMPLATE));
     try {
