@@ -157,7 +157,7 @@ exports.generateAutomaticTranscriptionsForVideo = async (req, res) => {
             translationObject = await azureServiceBatchTranscription.startProcess(result.videoPath, result.videoBasePath, translationLanguage, result.fileName, transcriptionId, loggedUser.eppn, translationModel );
 
             if (areAllRequiredFiles(translationObject, req.user.eppn, identifier) && isValidVttFile(translationObject, identifier, req.user.eppn)) {
-                const response = await apiService.addWebVttFile(translationObject, identifier);
+                const response = await apiService.addWebVttFile(translationObject, identifier, translationModel, translationLanguage);
                 if (response.status === 201) {
                     logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
                     await apiService.republishWebVttFile(identifier);
