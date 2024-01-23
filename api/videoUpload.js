@@ -147,9 +147,9 @@ exports.upload = async (req, res) => {
 
                 if (updateEventMetadataResponse.status === 200) {
                     logger.info(`update event metadata for VIDEO ${identifier} USER ${req.user.eppn} OK`);
-                    logger.info (`selected translation for VIDEO ${identifier} with language ${translationLanguage}`);
                     // generate VTT file for the video
                     if (translationModel && translationLanguage) {
+                        logger.info (`selected translation for VIDEO ${identifier} with language ${translationLanguage}`);
                         await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_STARTED, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
                         logger.info(`starting translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
                         let translationObject;
@@ -157,7 +157,7 @@ exports.upload = async (req, res) => {
                         logger.info(`starting WHISPER translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
                         translationObject = await azureServiceBatchTranscription.startProcess(filePathOnDisk, uploadPath, translationLanguage, filename.filename, uploadId,loggedUser.eppn, translationModel);
                         if (areAllRequiredFiles(translationObject, req.user.eppn, identifier) && isValidVttFile(translationObject, identifier, req.user.eppn)) {
-                            const response = await apiService.addWebVttFile(translationObject, identifier);
+                            const response = await apiService.addWebVttFile(translationObject, identifier, translationModel, translationLanguage);
                             if (response.status === 201) {
                                 logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
                                 await apiService.republishWebVttFile(identifier);
