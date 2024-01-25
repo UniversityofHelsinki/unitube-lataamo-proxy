@@ -50,7 +50,7 @@ test:
   coverage: /All files\s*\|\s*([\d\.]+)/
   artifacts:
     paths:
-      - coverage/lcov.info
+      - coverage
     expire_in: 1 hour
 
 # Define the process for sonarcube check
@@ -69,6 +69,7 @@ sonarqube-check:
     paths:
       - .sonar/cache
   script:
+    - ls -R  # Print contents of the current directory
     - ls -R coverage  # Print contents of the coverage directory
     - sonar-scanner
   allow_failure: true
