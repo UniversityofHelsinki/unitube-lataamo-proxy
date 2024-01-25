@@ -77,8 +77,6 @@ sonarqube-check:
   allow_failure: true
   only:
     - master
-  dependencies:
-    - test
 
 # Define the process for deploy stage to development environment
 deploy_oc_test:
