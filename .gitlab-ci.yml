@@ -69,6 +69,7 @@ sonarqube-check:
     paths:
       - .sonar/cache
   script:
+    - ls -R coverage  # Print contents of the coverage directory
     - sonar-scanner
   allow_failure: true
   only:
