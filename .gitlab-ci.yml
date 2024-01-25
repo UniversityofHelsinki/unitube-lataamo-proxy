@@ -12,6 +12,7 @@ stages:
   - build
   - audit_scan
   - test
+  - sonarqube-check
   - deploy
 
 # Define the process for each stage
@@ -49,13 +50,14 @@ test:
     - npm run coverage
   coverage: /All files\s*\|\s*([\d\.]+)/
   artifacts:
+    name: lataamo-proxy-coverage
     paths:
       - coverage
     expire_in: 1 hour
 
 # Define the process for sonarcube check
 sonarqube-check:
-  stage: test
+  stage: sonarqube-check
   tags:
     - ohtu-build-4
   image:
