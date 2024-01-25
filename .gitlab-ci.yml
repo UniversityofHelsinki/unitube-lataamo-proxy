@@ -48,6 +48,10 @@ test:
   script:
     - npm run coverage
   coverage: /All files\s*\|\s*([\d\.]+)/
+  artifacts:
+    paths:
+      - coverage/lcov.info
+    expire_in: 1 hour
 
 # Define the process for sonarcube check
 sonarqube-check:
