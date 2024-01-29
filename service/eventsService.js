@@ -594,7 +594,7 @@ exports.getEventViews = async (id, eventWithLicenseOptions) => {
     const eventViews = await apiService.getEventViews(id);
     return {
         ...eventWithLicenseOptions,
-        views: eventViews.stats.views
+        views: 0
     };
 };
 

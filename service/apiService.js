@@ -8,8 +8,6 @@ const logger = require('../config/winstonLogger');
 const eventsService = require('./eventsService');
 const fetch = require('node-fetch');
 const { parseContributor } = require('./userService');
-const { filterCorrectSeriesWithCorrectContributors, transformResponseData, isContributorMigrationActive } =
-    require('../utils/ocastMigrationUtils');
 const {v4: uuidv4} = require('uuid');
 const jobsService = require('./jobsService');
 
@@ -144,38 +142,7 @@ exports.getUserTrashSeries = async (user) => {
     const response = await security.opencastBase.get(seriesUrl);
     return response.data;
 };
-/*
-exports.getUserSeries = async (user) => {
-    const contributorParameters = userService.parseContributor(user.hyGroupCn);
-    const seriesUrl =  constants.OCAST_SERIES_PATH + '?filter=contributors:' + user.eppn + ',' + contributorParameters;
-    const response = await security.opencastBase.get(seriesUrl);
-    // response.data is a list of series
-    // HAXXX: split contributors with splitContributorsFromSeriesList
-    return splitContributorsFromSeriesList(response.data);
-};
- */
 
-/**
- * Returns series for logged in user.
- * These series are the ones user is listed as contributor, the contributor value can be user's username or
- * one of the groups user is a member (grp-something).
- *
- * HAXXX:
- * Opencast is queried once with each contributor value the user has (username and possible groups user is member of).
- * Before returning the series the series contributor values are checked using splitContributorsFromSeries
- * function in ocastMigrationUtils.js
- * @see module:ocastMigrationUtils
- *
- * See LATAAMO-510 for the discussion and details ({@link https://jira.it.helsinki.fi/browse/LATAAMO-510}).
- *
- * Checks feature flag value FEATURE_FLAG_FOR_MIGRATION_ACTIVE
- * If value is not set (undefined) or the value is false the old implementation is used
- * to get the list of user's series.
- *
- *
- * @param user the logged user
- * @returns {Promise<*[]>} List of series were user is listed as a contributor
- */
 exports.getUserSeries = async (user) => {
     const contributorParameters = parseContributor(user.hyGroupCn);
     const seriesUrl =  constants.OCAST_SERIES_PATH + '?filter=contributors:' + user.eppn + ',' + contributorParameters;

@@ -3,7 +3,6 @@ const helmet = require('helmet');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const routes = require('./api/routes');
-const routesV2 = require('./api/v2/routes');
 const security = require('./config/security');
 const passport = require('passport');
 const fs = require('fs');
@@ -55,15 +54,9 @@ router.use(busboy({
     highWaterMark: 2 * 1024 * 1024, // Set 2MiB buffer
 }));
 
-console.log(process.env.VERSION);
+app.use('/api', router);
+routes(router);
 
-if (process.env.VERSION === '1') {
-    app.use('/api', router);
-    routes(router);
-} else {
-    app.use('/api/v2', router);
-    routesV2(router);
-}
 
 const server = app.listen(port, host,  () => {
     logger.info(`lataamo proxy is listening on port ${port}!`);
