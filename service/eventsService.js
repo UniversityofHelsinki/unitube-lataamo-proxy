@@ -591,29 +591,9 @@ const deleteFile = (filename) => {
 };
 
 exports.getEventViews = async (id, eventWithLicenseOptions) => {
-    const eventViews = await apiService.getEventViews(id);
+    const eventViews = await apiService.getEventViews(id); // not found in OC 13
     return {
         ...eventWithLicenseOptions,
-        views: eventViews.stats.views
+        views: '-'
     };
 };
-
-/* Not in use
-const returnOrCreateUsersInboxSeries = async (loggedUser) => {
-    const lataamoInboxSeriesTitle = inboxSeriesTitleForLoggedUser(loggedUser.eppn);
-
-    try {
-        const userSeries = await apiService.getUserSeries(loggedUser);
-        let inboxSeries = userSeries.find(series => series.title === lataamoInboxSeriesTitle);
-
-        if (!inboxSeries) {
-            logger.info(`inbox series not found with title ${lataamoInboxSeriesTitle}`);
-            inboxSeries = await apiService.createLataamoInboxSeries(loggedUser.eppn);
-            logger.info(`Created inbox ${inboxSeries}`);
-        }
-        return inboxSeries;
-    }catch(err){
-        logger.error(`Error in returnOrCreateUsersInboxSeries ${err}`);
-        throw err;
-    }
-};*/

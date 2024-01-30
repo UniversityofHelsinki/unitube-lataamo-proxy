@@ -12,6 +12,11 @@ exports.setJobStatus = async (jobId, status) => {
     await cacheService.updateCache(jobId, JSON.stringify({jobId, status: status}));
 };
 
+exports.setJobStatusForEvent = async (eventId, status, type) => {
+    logger.info(`[JobsService] setJobStatus with EVENT_ID: ${eventId} STATUS: ${status}`);
+    await cacheService.updateCache(eventId, JSON.stringify({eventId, type: type, status: status}));
+};
+
 exports.removeJob = async jobId => {
     logger.info(`[JobsService] removeJob with JOB_ID: ${jobId}`);
     await cacheService.removeFromCache(jobId);

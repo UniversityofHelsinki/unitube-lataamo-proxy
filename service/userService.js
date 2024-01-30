@@ -15,6 +15,12 @@ exports.getLoggedUser = (user) => {
     };
 };
 
+exports.isAuthorizedToTranslation = (user) => {
+    let hyGroupCn = concatenateArray(utf8.decode(user.hyGroupCn).split(';'));
+    let group = hyGroupCn.find(group => group === constants.TRANSLATION_GROUP_NAME);
+    return group ? true : false;
+};
+
 const concatenateArray = (data) => Array.prototype.concat.apply([], data);
 
 exports.parseContributor = (paramArr) => {

@@ -1,4 +1,4 @@
-image: node:16-alpine
+image: node:18-alpine
 
 # Cache node modules - speeds up future builds
 cache:
@@ -12,6 +12,7 @@ stages:
   - build
   - audit_scan
   - test
+  - sonarqube-check
   - deploy
 
 # Define the process for each stage
@@ -48,10 +49,15 @@ test:
   script:
     - npm run coverage
   coverage: /All files\s*\|\s*([\d\.]+)/
+  artifacts:
+    name: lataamo-proxy-coverage
+    paths:
+      - coverage
+    expire_in: 1 hour
 
 # Define the process for sonarcube check
 sonarqube-check:
-  stage: test
+  stage: sonarqube-check
   tags:
     - ohtu-build-4
   image:

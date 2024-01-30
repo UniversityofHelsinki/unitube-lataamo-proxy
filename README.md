@@ -14,6 +14,30 @@ ESB_PERSONS_API_KEY (found in keepass)
 REDIS_URL = redis://localhost
 CRYPTO_SECRET_KEY=(found in keepass)
 CRYPTO_SECRET_IV=(found in keepass)
+AZURE_SPEECH_SUBSCRIPTION_KEY (found in keepass, deprecated use batch transcription instead)
+STORAGE_ACCOUNT_NAME=(found in keepass)
+STORAGE_ACCOUNT_KEY=(found in keepass)
+STORAGE_CONTAINER_NAME=(found in keepass)
+TRANSCRIPTION_API_KEY=(found in keepass)
+SPEECH_TO_TEXT_BASE_URL=(found in keepass)
+SPEECH_TO_TEXT_MODEL=(found in keepass)
+
+### Install FFMPEG for local development. Library is used to convert video files to mp4 format.
+#### Windows
+1. Download FFMPEG from https://ffmpeg.org/download.html#build-windows
+2. Extract the zip file to C:\ffmpeg
+3. Add C:\ffmpeg\bin to PATH environment variable
+4. Restart your computer
+5. Open command prompt and run `ffmpeg -version` to check that ffmpeg is installed correctly
+6. If you get an error message about missing dll-files, download them from https://www.dll-files.com/ and place them in C:\ffmpeg\bin
+
+#### Linux
+1. `sudo apt install ffmpeg`
+2. `ffmpeg -version` to check that ffmpeg is installed correctly
+
+### OSX
+1. `brew install ffmpeg`
+2. `ffmpeg -version` to check that ffmpeg is installed correctly
 
 #### Poistamo environment variables
 POSTGRES_USER = (locally use the same username for which you used in the docker container otherwise username is found in keepass)

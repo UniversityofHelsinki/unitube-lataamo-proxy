@@ -1,4 +1,3 @@
-
 // error message keys
 const ERROR_MESSAGE_FAILED_TO_GET_USER = 'error_failed_to_get_user';
 const ERROR_MESSAGE_FAILED_TO_GET_EVENT_DETAILS = 'error_failed_to_get_event';
@@ -31,6 +30,8 @@ const ERROR_MALFORMED_WEBVTT_FILE = 'error-vtt-file-malformed';
 const SUCCESS_WEBVTT_UPLOAD = 'success-vtt-file-upload';
 const ERROR_LIMIT_FILE_SIZE = 'error-limit-file-size';
 const ERROR_WEBVTT_FILE_UPLOAD = 'error-webvtt-file-upload';
+const ERROR_MESSAGE_FAILED_TO_GENERATE_AUTOMATIC_TRANSCRIPTIONS_FOR_VIDEO = 'error-failed-to-generate-automatic-transcriptions-for-video';
+const ERROR_MESSAGE_MISSING_VIDEO_ID_OR_TRANSLATION_MODEL_OR_TRANSLATION_LANGUAGE = 'error-missing-video-id-or-translation-model-or-translation-language';
 
 module.exports = {
     ERROR_MESSAGE_FAILED_TO_GET_USER,
@@ -63,5 +64,7 @@ module.exports = {
     SUCCESS_WEBVTT_UPLOAD,
     ERROR_LIMIT_FILE_SIZE,
     ERROR_WEBVTT_FILE_UPLOAD,
-    ERROR_MESSAGE_FAILED_TO_GET_JOB
+    ERROR_MESSAGE_FAILED_TO_GET_JOB,
+    ERROR_MESSAGE_FAILED_TO_GENERATE_AUTOMATIC_TRANSCRIPTIONS_FOR_VIDEO,
+    ERROR_MESSAGE_MISSING_VIDEO_ID_OR_TRANSLATION_MODEL_OR_TRANSLATION_LANGUAGE
 };

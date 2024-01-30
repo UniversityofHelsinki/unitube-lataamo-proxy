@@ -1,51 +1,22 @@
-
 const path = require('path');
 const apiService = require('../service/apiService');
 const userService = require('../service/userService');
+const azureServiceBatchTranscription = require('../service/azureServiceBatchTranscription');
 const uploadLogger = require('../config/uploadLogger');
-const fs = require('fs-extra'); // https://www.npmjs.com/package/fs-extra
+const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const messageKeys = require('../utils/message-keys');
 const constants = require('../utils/constants');
 const {seriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
 const jobsService = require('../service/jobsService');
 const HttpStatus = require('http-status');
-const dbApi = require("./dbApi");
+const dbApi = require('./dbApi');
 const moment = require('moment');
-const logger = require("../config/winstonLogger");
-const dbService = require("../service/dbService");
+const logger = require('../config/winstonLogger');
+const { areAllRequiredFiles, deleteFile, isValidVttFile, ensureUploadDir, removeDirectory} = require('../utils/fileUtils');
 
 const ERROR_LEVEL = 'error';
 const INFO_LEVEL = 'info';
-
-
-
-
-// make sure the upload dir exists
-const ensureUploadDir = async (directory) => {
-    try {
-        // https://github.com/jprichardson/node-fs-extra/blob/HEAD/docs/ensureDir.md
-        await fs.ensureDir(directory);
-        uploadLogger.log(INFO_LEVEL,`Using uploadPath ${directory}`);
-        return true;
-    } catch (err) {
-        uploadLogger.log(ERROR_LEVEL,`Error in ensureUploadDir ${err}`);
-        return false;
-    }
-};
-
-// clean after post
-const deleteFile = async (filename, uploadId) => {
-    try{
-        // https://github.com/jprichardson/node-fs-extra/blob/2b97fe3e502ab5d5abd92f19d588bd1fc113c3f2/docs/remove.md#removepath-callback
-        await fs.remove(filename);
-        uploadLogger.log(INFO_LEVEL, `Cleaning - removed: ${filename} -- ${uploadId}`);
-        return true;
-    }catch (err){
-        uploadLogger.log(ERROR_LEVEL, `Failed to clean ${filename} | ${err} -- ${uploadId}`);
-        return false;
-    }
-};
 
 const returnUsersInboxSeries = async (loggedUser) => {
     const lataamoInboxSeriesTitle = seriesTitleForLoggedUser(constants.INBOX, loggedUser.eppn);
@@ -65,11 +36,10 @@ const returnUsersInboxSeries = async (loggedUser) => {
     }
 };
 
-
 exports.upload = async (req, res) => {
     const uploadId = uuidv4();
     const loggedUser = userService.getLoggedUser(req.user);
-    const uploadPath = path.join(__dirname, `uploads/${loggedUser.eppn}/`);
+    const uploadPath = path.join(__dirname, `uploads/${loggedUser.eppn}/${uploadId}`);
 
     uploadLogger.log(INFO_LEVEL, `POST /userVideos - Upload video started. USER: ${req.user.eppn} -- ${uploadId}`);
 
@@ -107,6 +77,8 @@ exports.upload = async (req, res) => {
     let description;
     let license;
     let title;
+    let translationLanguage;
+    let translationModel;
 
     req.busboy.on('field', (fieldname, val)  => {
         if (fieldname === 'archivedDate') {
@@ -123,6 +95,12 @@ exports.upload = async (req, res) => {
         }
         if (fieldname === 'license') {
             license = val;
+        }
+        if (fieldname === 'translationLanguage') {
+            translationLanguage = val;
+        }
+        if (fieldname === 'translationModel') {
+            translationModel = val;
         }
     });
 
@@ -155,8 +133,6 @@ exports.upload = async (req, res) => {
 
             if (response && response.status === HttpStatus.CREATED) {
                 identifier = response.data.identifier;
-                // on success clean file from disk and return 200
-                await deleteFile(uploadPath, uploadId);
                 await jobsService.setJobStatus(uploadId, constants.JOB_STATUS_FINISHED);
                 uploadLogger.log(INFO_LEVEL,
                     `${filename.filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)} USER: ${req.user.eppn} -- ${uploadId}`);
@@ -171,15 +147,47 @@ exports.upload = async (req, res) => {
 
                 if (updateEventMetadataResponse.status === 200) {
                     logger.info(`update event metadata for VIDEO ${identifier} USER ${req.user.eppn} OK`);
+                    // generate VTT file for the video
+                    if (translationModel && translationLanguage) {
+                        logger.info (`selected translation for VIDEO ${identifier} with language ${translationLanguage}`);
+                        await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_STARTED, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
+                        logger.info(`starting translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
+                        let translationObject;
+                        // using Azure Speech to Text Batch Transcription API With Whisper Model to generate VTT file
+                        logger.info(`starting WHISPER translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
+                        translationObject = await azureServiceBatchTranscription.startProcess(filePathOnDisk, uploadPath, translationLanguage, filename.filename, uploadId,loggedUser.eppn, translationModel);
+                        if (areAllRequiredFiles(translationObject, req.user.eppn, identifier) && isValidVttFile(translationObject, identifier, req.user.eppn)) {
+                            const response = await apiService.addWebVttFile(translationObject, identifier, translationModel, translationLanguage);
+                            if (response.status === 201) {
+                                logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
+                                await apiService.republishWebVttFile(identifier);
+                                await deleteFile(translationObject.originalname, uploadId, true);
+                                await deleteFile(translationObject.audioFile, uploadId, true);
+                                await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_FINISHED, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
+                            } else {
+                                logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
+                                await deleteFile(translationObject.audioFile, uploadId, true);
+                                await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_ERROR, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
+                            }
+                        } else {
+                            await deleteFile(translationObject.audioFile, uploadId, true);
+                            await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_ERROR, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
+                        }
+                    }
                 } else if (updateEventMetadataResponse.status === 403){
                     logger.warn(`update event metadata for VIDEO ${identifier} USER ${req.user.eppn} failed ${updateEventMetadataResponse.statusText}`);
                 } else {
                     logger.warn(`update event metadata for VIDEO ${identifier} USER ${req.user.eppn} failed ${updateEventMetadataResponse.statusText}`);
                 }
-
+                // clean file from disk
+                await deleteFile(filePathOnDisk, uploadId, true);
+                // remove upload directory from disk
+                await removeDirectory(uploadPath, uploadId, true);
             } else {
                 // on failure clean file from disk and return 500
-                await deleteFile(uploadPath, uploadId);
+                await deleteFile(filePathOnDisk, uploadId, true);
+                // remove upload directory from disk
+                await removeDirectory(uploadPath, uploadId, true);
                 await jobsService.setJobStatus(uploadId, constants.JOB_STATUS_ERROR);
                 res.status(HttpStatus.INTERNAL_SERVER_ERROR);
                 const msg = `${filename.filename} failed to upload to opencast.`;

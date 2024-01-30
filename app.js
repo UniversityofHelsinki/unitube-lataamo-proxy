@@ -41,8 +41,6 @@ database.query('SELECT NOW()', (err, res) => {
     console.log(err ? "errors: " + err : 'Postgres client connected ' , res.rows[0]);
 });
 
-app.use('/api', router);
-
 redisClient.on('connect', function() {
     console.log('Redis client connected');
 });
@@ -56,9 +54,9 @@ router.use(busboy({
     highWaterMark: 2 * 1024 * 1024, // Set 2MiB buffer
 }));
 
-
 app.use('/api', router);
 routes(router);
+
 
 const server = app.listen(port, host,  () => {
     logger.info(`lataamo proxy is listening on port ${port}!`);
