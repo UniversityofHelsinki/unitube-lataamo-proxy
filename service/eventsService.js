@@ -26,6 +26,17 @@ const _mapPublications = (videoList, publications) => {
     return result;
 };
 
+const getCoverImageForVideoFromEvent = (event) => {
+    if (event.publications && event.publications.length > 0) {
+        if (event.publications[0].attachments) {
+            const coverImage = event.publications[0].attachments.find(attachment => {
+                return attachment.flavor === 'presenter/player+preview';
+            });
+            return coverImage ? coverImage.url : '';
+        }
+    }
+};
+
 
 exports.filterEventsForClientList = (ocResponseData, loggedUser) => {
 
@@ -51,7 +62,8 @@ exports.filterEventsForClientList = (ocResponseData, loggedUser) => {
                 'series': event.series,
                 'media': calculateMediaPropertyForVideoList(event, loggedUser),
                 'publications': _mapPublications(calculateMediaPropertyForVideoList(event, loggedUser), event.publications),
-                'archived_date': event.archived_date
+                'archived_date': event.archived_date,
+                'cover_image': getCoverImageForVideoFromEvent(event)
             });
         });
         return eventArray;
