@@ -64,7 +64,32 @@ const filterOnlyHighestQualityPublications = (mediaArray) => {
     return allMedias;
 };
 
+const isPrimaryVideo = (media) => {
+    if (media && media.flavor) {
+        return media.flavor === constants.VIDEO_PRESENTER_DELIVERY;
+    } else {
+        return false;
+    }
+};
 
+const getCoverImage = (media, publication) => {
+    const primaryVideo = isPrimaryVideo(media);
+    for (publication of publication) {
+        if (publication.attachments && publication.attachments.length > 0) {
+            for (const attachment of publication.attachments) {
+                if (primaryVideo) {
+                    if (attachment.flavor && attachment.flavor === constants.PRESENTER_FLAVOR_FOR_VIDEO_THUMBNAIL) {
+                        return attachment.url;
+                    }
+                } else {
+                    if (attachment.flavor && attachment.flavor === constants.PRESENTATION_FLAVOR_FOR_VIDEO_THUMBNAIL) {
+                        return attachment.url;
+                    }
+                }
+            }
+        }
+    }
+};
 
 exports.getMediaUrlsFromPublication = (eventId , publication) => {
     let mediaUrls = [];
@@ -74,7 +99,7 @@ exports.getMediaUrlsFromPublication = (eventId , publication) => {
         filteredMedias = filterOnlyHighestQualityPublications(filteredPublication[0].media);
         if (filteredMedias && filteredMedias.length > 0) {
             filteredMedias.some(media =>  {
-                mediaUrls.push({id: eventId, url: media.url, duration: moment.duration(media.duration, 'milliseconds').format('HH:mm:ss', {trim:false}), resolution: `${media.width}x${media.height}`});
+                mediaUrls.push({id: eventId, url: media.url, duration: moment.duration(media.duration, 'milliseconds').format('HH:mm:ss', {trim:false}), resolution: `${media.width}x${media.height}`, coverImage: getCoverImage(media, filteredPublication)});
             });
         }
     } else {
