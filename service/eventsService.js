@@ -26,13 +26,21 @@ const _mapPublications = (videoList, publications) => {
     return result;
 };
 
+// Specify the target flavor
+const targetFlavor = "presenter/player+preview";
+
 const getCoverImageForVideoFromEvent = (event) => {
     if (event.publications && event.publications.length > 0) {
-        if (event.publications[0].attachments) {
-            const coverImage = event.publications[0].attachments.find(attachment => {
-                return attachment.flavor === 'presenter/player+preview';
-            });
-            return coverImage ? coverImage.url : '';
+        for (const publication of event.publications) {
+            if (publication.attachments && publication.attachments.length > 0) {
+                for(const attachments of publication.attachments) {
+                    if (attachments.flavor) {
+                        if (attachments.flavor === targetFlavor) {
+                            return attachments.url;
+                        }
+                    }
+                }
+            }
         }
     }
 };
