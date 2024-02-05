@@ -344,6 +344,8 @@ exports.downloadVideo = async (req, res) => {
     }
 };
 
+
+
 // buffer and original name are the desired, required properties of the subtitle file
 const srtToVtt = (srtSubtitleFile) => {
     const convertedVtt = {};
@@ -355,6 +357,25 @@ const srtToVtt = (srtSubtitleFile) => {
 
 const isVttFile = (fileMimeType) => {
     return fileMimeType === 'text/vtt';
+};
+
+const validateVTTFile = async (req, res, vttFile) => {
+    try {
+        if (!vttFile) {
+            throw new Error('No file provided');
+        }
+
+        if (!isVttFile(vttFile.mimetype)) {
+            logger.info(`Subtitle file not in a vtt format, trying to convert. [File: (${vttFile.filename}) MIME type: ${vttFile.mimetype}]. -- USER ${req.user.eppn}`);
+            vttFile = srtToVtt(vttFile);
+        }
+
+        // https://www.npmjs.com/package/node-webvtt#parsing
+        await webvttParser.parse(vttFile.buffer.toString(), { strict: true });
+    } catch (err) {
+        logger.error(`VTT file seems to be malformed (${err.message}), please check. -- USER ${req.user.eppn}`);
+        throw new Error(`Malformed WebVTT file: ${err.message}`);
+    }
 };
 
 
@@ -375,61 +396,42 @@ const isVttFile = (fileMimeType) => {
  *  }
  *
  **/
-exports.uploadVideoTextTrack = async(req, res) => {
-    // https://attacomsian.com/blog/express-file-upload-multer
-    // https://www.npmjs.com/package/multer
+exports.uploadVideoTextTrack = async (req, res) => {
     logger.info('addVideoTextTrack called.');
-    upload(req, res, async(err) => {
-        if ( err ) {
-            res.status(500);
-            return res.json({ message: messageKeys.ERROR_MALFORMED_WEBVTT_FILE });
-        }
-
-        let vttFile = req.file;
+    upload(req, res, async () => {
         const eventId = req.body.eventId;
-
-        if (!vttFile) {
-            res.status(400);
-            return res.json({
-                message: 'The vtt file is missing.',
-                msg: 'The vtt file is missing.'
-            });
-        }
-
+        let vttFile = req.file;
+        // Validate VTT file
         try {
-            if (!isVttFile(vttFile.mimetype) ) {
-                logger.info(`Subtitle file not in a vtt format, trying to convert. [File: (${vttFile.filename}) MIME type: ${vttFile.mimetype}]. -- USER ${req.user.eppn}`);
-                vttFile = srtToVtt(vttFile);
-            }
-            // https://www.npmjs.com/package/node-webvtt#parsing
-            webvttParser.parse(vttFile.buffer.toString(), { strict: true });
-        } catch (err) {
-            logger.error(`vtt file seems to be malformed (${err.message}), please check. -- USER ${req.user.eppn}`);
+            validateVTTFile(req, res, vttFile);
+        } catch (validationError) {
+            // Handle validation error
+            logger.error(`VTT file validation failed: ${validationError.message} -- USER ${req.user.eppn}`);
             res.status(400);
-            return res.json({
-                message: messageKeys.ERROR_MALFORMED_WEBVTT_FILE,
-                msg: err.message
-            });
+            return res.json({ message: messageKeys.ERROR_MALFORMED_WEBVTT_FILE, error: validationError.message });
         }
 
+        // Continue with the file upload logic
         try {
             const response = await apiService.addWebVttFile(vttFile, eventId);
+
             if (response.status === 201) {
                 logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
                 res.status(response.status);
-                res.json({message: messageKeys.SUCCESS_WEBVTT_UPLOAD});
+                res.json({ message: messageKeys.SUCCESS_WEBVTT_UPLOAD });
                 await apiService.republishWebVttFile(eventId);
             } else {
                 logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
                 res.status(response.status);
-                res.json({message : messageKeys.ERROR_WEBVTT_FILE_UPLOAD});
+                res.json({ message: messageKeys.ERROR_WEBVTT_FILE_UPLOAD });
             }
         } catch (error) {
             res.status(error.status);
-            res.json({message : error});
+            res.json({ message: error });
         }
     });
 };
+
 
 exports.deleteVideoTextTrack = async(req, res) => {
     logger.info('deleteVideoTextTrack called.');
@@ -454,3 +456,22 @@ exports.deleteVideoTextTrack = async(req, res) => {
         res.json({message: error});
     }
 };
+
+exports.validateVTTFile = async (req, res) => {
+    upload(req, res, async () => {
+        try {
+            let vttFile = req.file;
+            await validateVTTFile(req, res, vttFile);
+
+            // Move the response inside the try block
+            return res.json({ message: messageKeys.SUCCESS_WEBVTT_UPLOAD });
+        } catch (validationError) {
+            // Handle validation error
+            logger.error(`VTT file validation failed: ${validationError.message} -- USER ${req.user.eppn}`);
+            res.status(400);
+            return res.json({ message: messageKeys.ERROR_MALFORMED_WEBVTT_FILE, error: validationError.message });
+        }
+    });
+};
+
+

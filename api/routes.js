@@ -739,4 +739,6 @@ module.exports = function (router) {
      *           description: Internal server error, an error occurred.
      */
     router.put('/event/:id/updateArchivedDateOfVideosInSerie', video.updateArchivedDateOfVideosInSerie);
+
+    router.post('/validateVTTFile', video.validateVTTFile);
 };
