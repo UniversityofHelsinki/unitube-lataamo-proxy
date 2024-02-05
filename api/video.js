@@ -15,32 +15,16 @@ const { parseSync, stringifySync } = require('subtitle');
 const dbService = require('../service/dbService');
 const constants = require('../utils/constants');
 const dbApi = require('./dbApi');
-const { algorithm, key, encryptionIV } = require('../config/security');
-const crypto = require('crypto');
 const fileService = require('../service/fileService');
 const {v4: uuidv4} = require('uuid');
 const HttpStatus = require('http-status');
 const azureServiceBatchTranscription = require('../service/azureServiceBatchTranscription');
 const { areAllRequiredFiles , isValidVttFile, deleteFile, removeDirectory } = require('../utils/fileUtils');
 const jobsService = require("../service/jobsService");
+const {encrypt, decrypt} = require("../utils/encrption");
 
-const encrypt = url => {
-    const cipher = crypto.createCipheriv(algorithm, key, encryptionIV);
-    const encrypted = Buffer.from(
-        cipher.update(url, 'utf8', 'hex') + cipher.final('hex')
-    ).toString('base64');
-    return encrypted;
-};
 
-const decrypt = url => {
-    const buff = Buffer.from(url, 'base64');
-    const decipher = crypto.createDecipheriv(algorithm, key, encryptionIV);
-    return (
-        decipher.update(buff.toString('utf8'), 'hex', 'utf8') +
-        decipher.final('utf8'));
-};
-
-const encryptUrl = videoUrl =>  encrypt(videoUrl);
+const encryptUrl = videoUrl => encrypt(videoUrl);
 
 const encryptVideoAndVTTUrls = episodeWithMediaUrls => {
     episodeWithMediaUrls.some(episodeWithMediaUrl => {
@@ -89,6 +73,24 @@ const calculateRangeHeaders = (req) => {
         }
     } else {
         return range;
+    }
+};
+
+exports.coverImage = async (req, res) => {
+    try {
+        logger.info(`GET cover image /coverImage/:id VIDEO ${req.params.id} USER: ${req.user.eppn}`);
+        const url = decrypt(req.params.url);
+        const response = await apiService.getCoverImage(url);
+        res.set(response.headers);
+        response.pipe(res);
+    } catch (error) {
+        const msg = error.message;
+        logger.error(`GET /coverImage/:id VIDEO: ${req.params.id} USER: ${req.user.eppn} CAUSE: ${error}`);
+        res.status(500);
+        res.json({
+            message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_COVER_IMAGE,
+            msg
+        });
     }
 };
 

@@ -1,5 +1,6 @@
 const constants = require('../utils/constants');
 const moment = require('moment');
+const {encrypt} = require("../utils/encrption");
 
 exports.filterEngagePlayerChannelPublication = (publications) => {
     const filteredPublications = publications.filter(publication => {
@@ -68,7 +69,7 @@ const isPrimaryVideo = (media) => {
     if (media && media.flavor) {
         return media.flavor === constants.VIDEO_PRESENTER_DELIVERY;
     } else {
-        return false;
+        return;
     }
 };
 
@@ -79,11 +80,11 @@ const getCoverImage = (media, publication) => {
             for (const attachment of publication.attachments) {
                 if (primaryVideo) {
                     if (attachment.flavor && attachment.flavor === constants.PRESENTER_FLAVOR_FOR_VIDEO_THUMBNAIL) {
-                        return attachment.url;
+                        return encrypt(attachment.url);
                     }
                 } else {
                     if (attachment.flavor && attachment.flavor === constants.PRESENTATION_FLAVOR_FOR_VIDEO_THUMBNAIL) {
-                        return attachment.url;
+                        return encrypt(attachment.url);
                     }
                 }
             }

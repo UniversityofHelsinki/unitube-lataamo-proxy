@@ -107,6 +107,8 @@ module.exports = function (router) {
 
     router.get('/vttFileName/:url', video.vttFileFromUrl);
 
+    router.get('/coverImage/:url', video.coverImage);
+
     /**
      * @swagger
      *     /api/series/{id}:
