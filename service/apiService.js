@@ -155,6 +155,11 @@ exports.streamVideo = async (url) => {
     return response.data;
 };
 
+exports.getCoverImage = async (url) => {
+    const response =  await security.opencastBaseStream(url);
+    return response.data;
+};
+
 exports.playVideo = async (url, range) => {
     const response = await security.opencastBaseStreamWithRangeHeaders(url, range);
     return response.data;

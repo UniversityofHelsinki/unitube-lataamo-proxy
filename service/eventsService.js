@@ -27,6 +27,27 @@ const _mapPublications = (videoList, publications) => {
 };
 
 
+const getCoverImageForVideoFromEvent = (event) => {
+    if (event.publications && event.publications.length > 0) {
+        for (const publication of event.publications) {
+            if (publication.attachments && publication.attachments.length > 0) {
+                for (const attachments of publication.attachments) {
+                    if (attachments.flavor) {
+                        if (attachments.flavor === constants.PRESENTER_FLAVOR_FOR_VIDEO_THUMBNAIL) {
+                            if (attachments.url) {
+                                return attachments.url;
+                            } else {
+                                return '';
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
+
+
 exports.filterEventsForClientList = (ocResponseData, loggedUser) => {
 
     try {
@@ -51,7 +72,8 @@ exports.filterEventsForClientList = (ocResponseData, loggedUser) => {
                 'series': event.series,
                 'media': calculateMediaPropertyForVideoList(event, loggedUser),
                 'publications': _mapPublications(calculateMediaPropertyForVideoList(event, loggedUser), event.publications),
-                'archived_date': event.archived_date
+                'archived_date': event.archived_date,
+                'cover_image': getCoverImageForVideoFromEvent(event)
             });
         });
         return eventArray;
@@ -114,7 +136,7 @@ const isValidUrl = urlString => {
     try {
         let url;
         url =new URL(urlString);
-        return url.protocol === "http:" || url.protocol === "https:";
+        return url.protocol === 'http:' || url.protocol === 'https:';
     }
     catch (exception) {
         console.log(exception);
@@ -180,7 +202,7 @@ const calculateMediaPropertyForVideoList = (event, loggedUser) => {
                     publication.media.forEach(media => {
                         if (media.has_video && event.processing_state === constants.OPENCAST_STATE_SUCCEEDED) {
                             if (media.height !== undefined && media.flavor !== undefined && isValidUrl(media.url)) {
-                                mediaArrayOfObjects.push({ "hash" : hash(media.height + media.url), "quality" : media.height , "url" : media.url , flavor : media.flavor});
+                                mediaArrayOfObjects.push({ 'hash' : hash(media.height + media.url), 'quality' : media.height , 'url' : media.url , flavor : media.flavor});
                             }
                         }
                     });
@@ -225,7 +247,7 @@ const calculateVisibilityPropertyForVideoList = (video, loggedUser) => {
             moodleAclInstructor = video.acl.filter(acl => acl.role.includes(constants.MOODLE_ACL_INSTRUCTOR));
             moodleAclLearner = video.acl.filter(acl => acl.role.includes(constants.MOODLE_ACL_LEARNER));
         } else {
-            console.log("calculating visibility property for video in list , warning video has no acl roles" , JSON.stringify(video));
+            console.log('calculating visibility property for video in list , warning video has no acl roles' , JSON.stringify(video));
             logger.warn(`warning video has no acl roles ${video.identifier} FOR USER ${loggedUser.eppn}`);
         }
 
@@ -258,7 +280,7 @@ const calculateVisibilityPropertyForVideo = (video, loggedUser) => {
             moodleAclInstructor = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_INSTRUCTOR));
             moodleAclLearner = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_LEARNER));
         } else {
-            console.log("calculating visibility property for video in list , warning video has no acl roles" , JSON.stringify(video));
+            console.log('calculating visibility property for video in list , warning video has no acl roles' , JSON.stringify(video));
             logger.warn(`warning video has no acl roles : ${video.identifier} FOR USER ${loggedUser.eppn}`);
         }
 
