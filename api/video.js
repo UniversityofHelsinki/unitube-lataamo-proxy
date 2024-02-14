@@ -403,7 +403,7 @@ exports.uploadVideoTextTrack = async (req, res) => {
         let vttFile = req.file;
         // Validate VTT file
         try {
-            validateVTTFile(req, res, vttFile);
+            await validateVTTFile(req, res, vttFile);
         } catch (validationError) {
             // Handle validation error
             logger.error(`VTT file validation failed: ${validationError.message} -- USER ${req.user.eppn}`);
