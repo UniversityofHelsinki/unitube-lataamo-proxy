@@ -13,6 +13,7 @@ stages:
   - audit_scan
   - test
   - sonarqube-check
+  - dependency-check
   - deploy
 
 # Define the process for each stage
