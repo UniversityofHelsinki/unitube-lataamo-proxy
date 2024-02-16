@@ -58,6 +58,8 @@ test:
 
 dependency-check:
   stage: dependency-check
+  tags:
+    - ohtu-build-4
   image:
     name: owasp/dependency-check-action:latest
     entrypoint: [""]
