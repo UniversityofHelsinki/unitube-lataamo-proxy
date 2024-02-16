@@ -92,8 +92,6 @@ sonarqube-check:
     key: "${CI_JOB_NAME}"
     paths:
       - .sonar/cache
-  before_script:
-    - git fetch --unshallow || true
   script:
     - sonar-scanner
     - Dsonar.dependencyCheck.jsonReportPath=dependency-check-report.json
