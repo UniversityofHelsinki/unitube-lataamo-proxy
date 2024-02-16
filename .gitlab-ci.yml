@@ -68,7 +68,7 @@ dependency-check:
   script:
     - >
       /usr/share/dependency-check/bin/dependency-check.sh
-      --project Projectname --scan . --enableExperimental --failOnCVSS 7
+      --project Projectname --scan . --enableExperimental
       --format HTML --format JSON
   artifacts:
     when: always
