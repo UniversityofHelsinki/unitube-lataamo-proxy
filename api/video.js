@@ -411,23 +411,28 @@ exports.uploadVideoTextTrack = async (req, res) => {
             return res.json({ message: messageKeys.ERROR_MALFORMED_WEBVTT_FILE, error: validationError.message });
         }
 
+        await jobsService.setJobStatusForEvent(eventId, constants.JOB_STATUS_STARTED, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
+        res.status(HttpStatus.ACCEPTED);
+        res.jobId = eventId;
+        res.json({id: eventId, status: constants.JOB_STATUS_STARTED});
+
         // Continue with the file upload logic
         try {
             const response = await apiService.addWebVttFile(vttFile, eventId);
 
             if (response.status === 201) {
                 logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
-                res.status(response.status);
-                res.json({ message: messageKeys.SUCCESS_WEBVTT_UPLOAD });
                 await apiService.republishWebVttFile(eventId);
+                await jobsService.setJobStatusForEvent(eventId, constants.JOB_STATUS_FINISHED, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
             } else {
                 logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
-                res.status(response.status);
-                res.json({ message: messageKeys.ERROR_WEBVTT_FILE_UPLOAD });
+                await jobsService.setJobStatusForEvent(eventId, constants.JOB_STATUS_ERROR, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
             }
         } catch (error) {
-            res.status(error.status);
-            res.json({ message: error });
+            console.log(error);
+            logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${error}`);
+            await jobsService.setJobStatusForEvent(eventId, constants.JOB_STATUS_ERROR, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
+            res.status(HttpStatus.BAD_REQUEST);
         }
     });
 };
