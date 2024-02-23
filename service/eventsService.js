@@ -14,6 +14,7 @@ const pLimit = require('p-limit');
 // Limit number of request fetched concurrently
 const limit = pLimit(5);
 const { createHash } = require('crypto');
+const {encrypt} = require("../utils/encrption");
 
 const _mapPublications = (videoList, publications) => {
     const media = publications.map(p => p.media).flatMap(m => m);
@@ -35,7 +36,7 @@ const getCoverImageForVideoFromEvent = (event) => {
                     if (attachments.flavor) {
                         if (attachments.flavor === constants.PRESENTER_FLAVOR_FOR_VIDEO_THUMBNAIL) {
                             if (attachments.url) {
-                                return attachments.url;
+                                return encrypt(attachments.url);
                             } else {
                                 return '';
                             }
