@@ -29,6 +29,14 @@ const accessLogStream = fs.createWriteStream(
 
 app.use(morgan('combined', { stream: accessLogStream }));
 app.use(cors());
+
+// Setting up the public directory
+app.use(express.static('public', {
+    setHeaders: (res) => {
+        res.set('Cross-Origin-Resource-Policy', 'crossorigin');
+    }
+}));
+
 app.use(compression());
 app.use(cookieParser());
 security.shibbolethAuthentication(app, passport);
