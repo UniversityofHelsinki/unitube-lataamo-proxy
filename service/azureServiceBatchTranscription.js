@@ -40,6 +40,7 @@ const axiosConfigProxy = {
 };
 
 const getConfig = () => {
+    console.log(process.env.ENVIRONMENT);
     return process.env.ENVIRONMENT === 'oc-test' ? axiosConfigProxy : axiosConfig;
 };
 
