@@ -53,6 +53,12 @@ exports.vttFileFromUrl = (req, res) => {
 exports.vttFile = async (req, res) => {
     const url = decrypt(req.params.url);
     const response = await apiService.downloadVttFile(url);
+    // Get the file name from the URL
+    const fileName = new URL(url).pathname.split('/').pop();
+    res.writeHead(200, {
+        'Content-Type': 'application/octet-stream',
+        'Content-Disposition': `attachment; filename="${fileName}"`,
+    });
     response.body.pipe(res);
 };
 
