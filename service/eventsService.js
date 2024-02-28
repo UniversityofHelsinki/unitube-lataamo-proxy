@@ -14,7 +14,7 @@ const pLimit = require('p-limit');
 // Limit number of request fetched concurrently
 const limit = pLimit(5);
 const { createHash } = require('crypto');
-const {encrypt} = require("../utils/encrption");
+const {encrypt} = require('../utils/encrption');
 
 const _mapPublications = (videoList, publications) => {
     const media = publications.map(p => p.media).flatMap(m => m);
@@ -468,11 +468,18 @@ exports.getMetadataForEvent = async (event) => {
     };
 };
 
+const encryptVideoUrls = (media) => {
+    media.forEach(media => {
+        media.url = encrypt(media.url);
+    });
+    return media;
+};
+
 exports.getMediaForEvent = async (event) => {
     const media = await apiService.getMediaForEvent(event);
     return {
         ...event,
-        media: media
+        media: encryptVideoUrls(media)
     };
 };
 
@@ -532,16 +539,16 @@ exports.modifySeriesEventMetadataForOpencast = (metadata) => {
     const metadataArray = [];
 
     metadataArray.push({
-            'id' : 'title',
-            'value': metadata.title },
-        {
-            'id' : 'description',
-            'value': metadata.description
-        },
-        {
-            'id' : 'contributor',
-            'value': metadata.contributors
-        }
+        'id' : 'title',
+        'value': metadata.title },
+    {
+        'id' : 'description',
+        'value': metadata.description
+    },
+    {
+        'id' : 'contributor',
+        'value': metadata.contributors
+    }
     );
 
     return metadataArray;

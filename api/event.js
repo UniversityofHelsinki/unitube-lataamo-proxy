@@ -18,7 +18,6 @@ exports.getEvent = async (req, res) => {
         const eventWithSeries = await eventsService.getEventWithSeries(event);
         const eventWithAcls = await eventsService.getEventAclsFromSeries(eventWithSeries);
         const eventWithVisibility = eventsService.calculateVisibilityProperty(eventWithAcls);
-        //const eventWithMetadata = await eventsService.getMetadataForEvent(eventWithVisibility);
         const eventWithMedia = await eventsService.getMediaForEvent(eventWithVisibility);
         const eventWithMediaFileMetadata = await eventsService.getMediaFileMetadataForEvent(eventWithMedia);
         const eventWithDuration = eventsService.getDurationFromMediaFileMetadataForEvent(eventWithMediaFileMetadata);

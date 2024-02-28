@@ -584,6 +584,8 @@ module.exports = function (router) {
 
     router.post('/download' , video.downloadVideo);
 
+    router.get('/download/:url', video.downloadVideoFromUrl);
+
     /**
      * @swagger
      *     api/videoTextTrack:

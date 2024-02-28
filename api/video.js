@@ -333,6 +333,30 @@ exports.updateVideo = async (req, res) => {
     }
 };
 
+exports.downloadVideoFromUrl = async (req, res) => {
+    try {
+        logger.info(`GET download VIDEO USER ${req.user.eppn}`);
+        const url = decrypt(req.params.url);
+        const response = await apiService.downloadVideo(url);
+        // Get the file name from the URL
+        const fileName = new URL(url).pathname.split('/').pop();
+        res.writeHead(200, {
+            'Content-Type': 'application/octet-stream',
+            'Content-Disposition': `attachment; filename="${fileName}"`,
+        });
+        response.body.pipe(res);
+    } catch(error) {
+        console.log('ERROR', error.message);
+        res.status(500);
+        const msg = error.message;
+        logger.error(`Error PUT /userVideos/:id ${msg} USER ${req.user.eppn}`);
+        res.json({
+            message: messageKeys.ERROR_MESSAGE_FAILED_TO_DOWNLOAD_VIDEO,
+            msg
+        });
+    }
+};
+
 exports.downloadVideo = async (req, res) => {
     try {
         logger.info(`POST download VIDEO ${req.body.mediaUrl} USER ${req.user.eppn}`);
