@@ -126,13 +126,13 @@ exports.upload = async (req, res) => {
             await jobsService.setJobStatus(uploadId, constants.JOB_STATUS_STARTED);
             res.status(HttpStatus.ACCEPTED);
             res.jobId = uploadId;
-            res.json({id: uploadId, status: constants.JOB_STATUS_STARTED});
 
             // try to send the file to opencast
             const response = await apiService.uploadVideo(filePathOnDisk, filename.filename, selectedSeries ? selectedSeries : inboxSeries.identifier, description, title);
 
             if (response && response.status === HttpStatus.CREATED) {
                 identifier = response.data.identifier;
+              res.json({ id: uploadId, status: constants.JOB_STATUS_STARTED, eventId: identifier });
                 await jobsService.setJobStatus(uploadId, constants.JOB_STATUS_FINISHED);
                 uploadLogger.log(INFO_LEVEL,
                     `${filename.filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)} USER: ${req.user.eppn} -- ${uploadId}`);
