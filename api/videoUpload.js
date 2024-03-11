@@ -132,7 +132,7 @@ exports.upload = async (req, res) => {
 
             if (response && response.status === HttpStatus.CREATED) {
                 identifier = response.data.identifier;
-              res.json({ id: uploadId, status: constants.JOB_STATUS_STARTED, eventId: identifier });
+                res.json({ id: uploadId, status: constants.JOB_STATUS_STARTED, eventId: identifier });
                 await jobsService.setJobStatus(uploadId, constants.JOB_STATUS_FINISHED);
                 uploadLogger.log(INFO_LEVEL,
                     `${filename.filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)} USER: ${req.user.eppn} -- ${uploadId}`);
