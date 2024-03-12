@@ -190,7 +190,7 @@ describe('user series person - and iamgroup administrators returned from /series
         // mock needed opencast apis
         test.mockOCastSeriesApiCall7();
         test.mockOCastEvent1AclCall();
-        test.mockOCastEvents_1_ApiCall();
+        test.mockOCastEvents_1_New_ApiCall();
     });
 
     it('should return user\'s series with three iamgroups and three persons ', async () => {
@@ -202,6 +202,8 @@ describe('user series person - and iamgroup administrators returned from /series
             .set('displayName', test.mockTestUser.displayName)
             .expect(200)
             .expect('Content-Type', /json/);
+
+        console.log(response.body);
 
         assert.lengthOf(response.body.persons, 3, 'Three person administrators should be returned');
         assert.lengthOf(response.body.iamgroups, 3, 'Three group administrators should be returned');

@@ -44,6 +44,7 @@ exports.getEventsBySeriesIdentifier = async (identifier) => {
 exports.getEventsWithSeriesByIdentifier = async (series) => {
     let userEventsUrl = constants.OCAST_VIDEOS_PATH + constants.OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER;
     userEventsUrl = userEventsUrl + series.identifier + constants.OCAST_VIDEOS_WITH_METADATA_ACLS_AND_PUBLICATIONS;
+    console.log(userEventsUrl);
     const response = await security.opencastBase.get(userEventsUrl);
     const events = response.data;
     return {
