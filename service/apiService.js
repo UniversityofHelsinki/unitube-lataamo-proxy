@@ -43,7 +43,7 @@ exports.getEventsBySeriesIdentifier = async (identifier) => {
 
 exports.getEventsWithSeriesByIdentifier = async (series) => {
     let userEventsUrl = constants.OCAST_VIDEOS_PATH + constants.OCAST_VIDEOS_FILTER_SERIE_IDENTIFIER;
-    userEventsUrl = userEventsUrl + series.identifier;
+    userEventsUrl = userEventsUrl + series.identifier + constants.OCAST_VIDEOS_WITH_METADATA_ACLS_AND_PUBLICATIONS;
     const response = await security.opencastBase.get(userEventsUrl);
     const events = response.data;
     return {
@@ -55,8 +55,8 @@ exports.getEventsWithSeriesByIdentifier = async (series) => {
 
 const someEventColumns = (events) => {
     let eventData = [];
-    events.map(({title, identifier}) => {
-        eventData.push({'title': title, 'id': identifier});
+    events.forEach(event => {
+        eventData.push({'title': event.title, 'id': event.identifier, 'cover_image': eventsService.getCoverImageForVideoFromEvent(event)});
     });
     return eventData;
 };
