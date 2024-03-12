@@ -203,8 +203,6 @@ describe('user series person - and iamgroup administrators returned from /series
             .expect(200)
             .expect('Content-Type', /json/);
 
-        console.log(response.body);
-
         assert.lengthOf(response.body.persons, 3, 'Three person administrators should be returned');
         assert.lengthOf(response.body.iamgroups, 3, 'Three group administrators should be returned');
     });
