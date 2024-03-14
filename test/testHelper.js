@@ -3749,7 +3749,7 @@ const trashSeriesEventsForList = () => nock(CONSTANTS.OCAST_BASE_URL)
 // events by series /api/events/?filter=series:80f9ff5b-4163-48b7-b7cf-950be665de3c
 const series1_Events = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(CONSTANTS.OCAST_VIDEOS_PATH)
-    .query({filter: `series:${CONSTANTS.TEST_SERIES_1_ID}`})
+    .query({filter: `series:${CONSTANTS.TEST_SERIES_1_ID}${CONSTANTS.OCAST_VIDEOS_WITH_METADATA_ACLS_AND_PUBLICATIONS}`})
     .reply(200, mockUserEventsForSeries1);
 
 // events by series /api/events/?filter=series:80f9ff5b-4163-48b7-b7cf-950be665de3c&withmetadata=true&withacl=true&withpublications=true

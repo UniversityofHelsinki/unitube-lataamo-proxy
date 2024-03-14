@@ -28,7 +28,7 @@ const _mapPublications = (videoList, publications) => {
 };
 
 
-const getCoverImageForVideoFromEvent = (event) => {
+exports.getCoverImageForVideoFromEvent = (event) => {
     if (event.publications && event.publications.length > 0) {
         for (const publication of event.publications) {
             if (publication.attachments && publication.attachments.length > 0) {
@@ -74,7 +74,7 @@ exports.filterEventsForClientList = (ocResponseData, loggedUser) => {
                 'media': calculateMediaPropertyForVideoList(event, loggedUser),
                 'publications': _mapPublications(calculateMediaPropertyForVideoList(event, loggedUser), event.publications),
                 'archived_date': event.archived_date,
-                'cover_image': getCoverImageForVideoFromEvent(event)
+                'cover_image': this.getCoverImageForVideoFromEvent(event)
             });
         });
         return eventArray;

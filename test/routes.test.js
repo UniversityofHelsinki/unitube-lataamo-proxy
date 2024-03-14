@@ -190,7 +190,7 @@ describe('user series person - and iamgroup administrators returned from /series
         // mock needed opencast apis
         test.mockOCastSeriesApiCall7();
         test.mockOCastEvent1AclCall();
-        test.mockOCastEvents_1_ApiCall();
+        test.mockOCastEvents_1_New_ApiCall();
     });
 
     it('should return user\'s series with three iamgroups and three persons ', async () => {
