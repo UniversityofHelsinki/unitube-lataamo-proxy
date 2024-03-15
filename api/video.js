@@ -230,7 +230,11 @@ exports.getUserVideos = async (req, res) => {
         await getArchivedDate(concatenatedEventsArray);
         // insert removal date to postgres db
         await dbService.insertArchivedAndCreationDates(concatenatedEventsArray, loggedUser);
-        res.json(eventsService.filterEventsForClientList(concatenatedEventsArray, loggedUser));
+        const eventList = eventsService.filterEventsForClientList(concatenatedEventsArray, loggedUser).map(async event => ({
+          ...event,
+          deletionDate: await dbService.getArchivedDate(event.identifier)
+        }));
+        res.json(await Promise.all(eventList));
     } catch (error) {
         res.status(500);
         const msg = error.message;
