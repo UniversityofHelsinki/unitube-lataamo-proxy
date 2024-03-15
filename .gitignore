@@ -27,6 +27,10 @@ reports
 # nyc test coverage
 .nyc_output
 
+# dependency check reports
+.dependency-check-report.json
+.dependency-check-report.html
+
 # Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
 .grunt
 
