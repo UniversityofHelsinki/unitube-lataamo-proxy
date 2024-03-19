@@ -24,7 +24,10 @@ exports.getEvent = async (req, res) => {
         const eventWithLicense = eventsService.getLicenseFromEventMetadata(eventWithDuration);
         const eventWithLicenseOptions = licenseService.getLicenseOptions(eventWithLicense);
         const eventWithLicenseOptionsAndVideoViews = await eventsService.getEventViews(req.params.id, eventWithLicenseOptions);
-        res.json(eventWithLicenseOptionsAndVideoViews);
+        const eventPublications = await apiService.getPublicationsForEvent(req.params.id);
+        const eventDownloadableMediaUrls = await eventsService.calculateMediaPropertyForVideoList({ ...event, publications: eventPublications }, req.user.eppn);
+        const eventDownloadableMedia = eventsService.mapPublications(eventDownloadableMediaUrls, eventPublications);
+        res.json({ ...eventWithLicenseOptionsAndVideoViews, downloadableMedia: eventDownloadableMedia });
 
     } catch (error) {
         const msg = error.message;

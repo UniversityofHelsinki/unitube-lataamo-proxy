@@ -16,7 +16,7 @@ const limit = pLimit(5);
 const { createHash } = require('crypto');
 const {encrypt} = require('../utils/encrption');
 
-const _mapPublications = (videoList, publications) => {
+exports.mapPublications = (videoList, publications) => {
     const media = publications.map(p => p.media).flatMap(m => m);
     const result = {};
     videoList.forEach(url => {
@@ -71,8 +71,8 @@ exports.filterEventsForClientList = (ocResponseData, loggedUser) => {
                 'visibility': calculateVisibilityPropertyForVideoList(event, loggedUser),
                 'created': event.created,
                 'series': event.series,
-                'media': calculateMediaPropertyForVideoList(event, loggedUser),
-                'publications': _mapPublications(calculateMediaPropertyForVideoList(event, loggedUser), event.publications),
+                'media': exports.calculateMediaPropertyForVideoList(event, loggedUser),
+                'publications': exports.mapPublications(exports.calculateMediaPropertyForVideoList(event, loggedUser), event.publications),
                 'archived_date': event.archived_date,
                 'cover_image': this.getCoverImageForVideoFromEvent(event)
             });
@@ -105,8 +105,8 @@ exports.filterEventsForClientTrash = (ocResponseData, loggedUser) => {
                 'visibility' : calculateVisibilityPropertyForVideoList(event, loggedUser),
                 'created': event.created,
                 'series': event.series,
-                'media' : calculateMediaPropertyForVideoList(event, loggedUser),
-                'publications': _mapPublications(calculateMediaPropertyForVideoList(event, loggedUser), event.publications)
+                'media' : exports.calculateMediaPropertyForVideoList(event, loggedUser),
+                'publications': exports.mapPublications(exports.calculateMediaPropertyForVideoList(event, loggedUser), event.publications)
             });
         }
     });
@@ -194,7 +194,7 @@ const filterOnlyUniqueVideos = (mediaArrayOfObjects) => {
     return mediaArrayOfObjects.filter((elem, index) => mediaArrayOfObjects.findIndex(obj => obj.hash === elem.hash) === index);
 };
 
-const calculateMediaPropertyForVideoList = (event, loggedUser) => {
+exports.calculateMediaPropertyForVideoList = (event, loggedUser) => {
     try {
         let mediaArrayOfObjects = [];
         if (event.publications) {
