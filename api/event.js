@@ -10,6 +10,7 @@ const dbService = require('../service/dbService');
 const messageKeys = require('../utils/message-keys');
 const logger = require('../config/winstonLogger');
 const constants = require('../utils/constants');
+const { encrypt } = require('../utils/encrption.js');
 
 exports.getEvent = async (req, res) => {
     try {
@@ -24,10 +25,16 @@ exports.getEvent = async (req, res) => {
         const eventWithLicense = eventsService.getLicenseFromEventMetadata(eventWithDuration);
         const eventWithLicenseOptions = licenseService.getLicenseOptions(eventWithLicense);
         const eventWithLicenseOptionsAndVideoViews = await eventsService.getEventViews(req.params.id, eventWithLicenseOptions);
+
         const eventPublications = await apiService.getPublicationsForEvent(req.params.id);
         const eventDownloadableMediaUrls = await eventsService.calculateMediaPropertyForVideoList({ ...event, publications: eventPublications }, req.user.eppn);
         const eventDownloadableMedia = eventsService.mapPublications(eventDownloadableMediaUrls, eventPublications);
-        res.json({ ...eventWithLicenseOptionsAndVideoViews, downloadableMedia: eventDownloadableMedia });
+        const encryptedDownloadableMedia = Object.fromEntries(Object.keys(eventDownloadableMedia).map((url) => {
+          const encrypted = encrypt(url);
+          return [encrypted, { ...eventDownloadableMedia[url], url: encrypted }];
+        }));
+
+        res.json({ ...eventWithLicenseOptionsAndVideoViews, downloadableMedia: encryptedDownloadableMedia });
 
     } catch (error) {
         const msg = error.message;
