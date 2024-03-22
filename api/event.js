@@ -30,8 +30,8 @@ exports.getEvent = async (req, res) => {
         const eventDownloadableMediaUrls = await eventsService.calculateMediaPropertyForVideoList({ ...event, publications: eventPublications }, req.user.eppn);
         const eventDownloadableMedia = eventsService.mapPublications(eventDownloadableMediaUrls, eventPublications);
         const encryptedDownloadableMedia = Object.fromEntries(Object.keys(eventDownloadableMedia).map((url) => {
-          const encrypted = encrypt(url);
-          return [encrypted, { ...eventDownloadableMedia[url], url: encrypted }];
+            const encrypted = encrypt(url);
+            return [encrypted, { ...eventDownloadableMedia[url], url: encrypted }];
         }));
 
         res.json({ ...eventWithLicenseOptionsAndVideoViews, downloadableMedia: encryptedDownloadableMedia });
@@ -120,7 +120,14 @@ exports.getTrashEvents = async (req, res) => {
         const trashSeries = await apiService.getUserTrashSeries(loggedUser);
         if(trashSeries && trashSeries.length > 0){
             const trashEventsWithAcls = await fetchEventMetadata(trashSeries);
-            res.json(eventsService.filterEventsForClientTrash(trashEventsWithAcls, loggedUser));
+            const trashEventsWithoutArchiveDate = eventsService.filterEventsForClientTrash(trashEventsWithAcls, loggedUser);
+            const trashEventsWithArchiveDates = await Promise.all(trashEventsWithoutArchiveDate.map(async event  => {
+                return {
+                    ...event,
+                    realDeletionDate: await dbService.getArchivedDate(event.identifier)
+                };
+            }));
+            res.json(trashEventsWithArchiveDates);
         }else{
             res.json([]);
         }
@@ -129,7 +136,7 @@ exports.getTrashEvents = async (req, res) => {
         logger.error(`Error GET /userTrashEvents ${msg} USER ${req.user.eppn}`);
         res.status(500);
         return res.json({
-            message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_INBOX_EVENTS,
+            message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_TRASH_EVENTS,
             msg
         });
     }
