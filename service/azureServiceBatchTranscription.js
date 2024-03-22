@@ -243,11 +243,6 @@ const jsonToVtt = (jsonData, uploadId, eppn) => {
                 `${index + 1}`,
                 `${formatTime(startTimeInSeconds)} --> ${formatTime(endTimeInSeconds)}`,
                 highestConfidenceTranscription.display
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;')
-                    .replace(/'/g, '&apos;')
             ];
 
             vttLines.push(vttEntry.join('\n'));
@@ -274,7 +269,7 @@ const saveVttToFile = async (vttContent, filePath, uploadId, eppn) => {
         return;
     }
     try {
-        await fsPromises.writeFile(filePath, vttContent);
+        await fsPromises.writeFile(filePath, vttContent,  'UTF-8');
     } catch (error) {
         logger.error(`Error saving VTT content to file: ${error.message} for uploadId ${uploadId} and username ${eppn}`);
     }

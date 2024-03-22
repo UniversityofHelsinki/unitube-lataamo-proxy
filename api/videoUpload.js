@@ -147,9 +147,9 @@ exports.upload = async (req, res) => {
 
                 if (updateEventMetadataResponse.status === 200) {
                     logger.info(`update event metadata for VIDEO ${identifier} USER ${req.user.eppn} OK`);
-                    logger.info (`selected translation for VIDEO ${identifier} with language ${translationLanguage}`);
                     // generate VTT file for the video
                     if (translationModel && translationLanguage) {
+                        logger.info (`selected translation for VIDEO ${identifier} with language ${translationLanguage}`);
                         await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_STARTED, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
                         logger.info(`starting translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
                         let translationObject;
