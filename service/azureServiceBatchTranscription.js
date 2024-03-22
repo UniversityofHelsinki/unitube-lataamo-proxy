@@ -269,7 +269,7 @@ const saveVttToFile = async (vttContent, filePath, uploadId, eppn) => {
         return;
     }
     try {
-        await fsPromises.writeFile(filePath, vttContent, { encoding: 'utf-8' });
+        await fsPromises.writeFile(filePath, vttContent,  'UTF-8');
     } catch (error) {
         logger.error(`Error saving VTT content to file: ${error.message} for uploadId ${uploadId} and username ${eppn}`);
     }
