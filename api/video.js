@@ -20,8 +20,8 @@ const {v4: uuidv4} = require('uuid');
 const HttpStatus = require('http-status');
 const azureServiceBatchTranscription = require('../service/azureServiceBatchTranscription');
 const { areAllRequiredFiles , isValidVttFile, deleteFile, removeDirectory } = require('../utils/fileUtils');
-const jobsService = require("../service/jobsService");
-const {encrypt, decrypt} = require("../utils/encrption");
+const jobsService = require('../service/jobsService');
+const {encrypt, decrypt} = require('../utils/encrption');
 
 
 const encryptUrl = videoUrl => encrypt(videoUrl);
@@ -231,8 +231,8 @@ exports.getUserVideos = async (req, res) => {
         // insert removal date to postgres db
         await dbService.insertArchivedAndCreationDates(concatenatedEventsArray, loggedUser);
         const eventList = eventsService.filterEventsForClientList(concatenatedEventsArray, loggedUser).map(async event => ({
-          ...event,
-          deletionDate: await dbService.getArchivedDate(event.identifier)
+            ...event,
+            deletionDate: await dbService.getArchivedDate(event.identifier)
         }));
         res.json(await Promise.all(eventList));
     } catch (error) {
@@ -475,6 +475,7 @@ exports.uploadVideoTextTrack = async (req, res) => {
 exports.deleteVideoTextTrack = async(req, res) => {
     logger.info('deleteVideoTextTrack called.');
     const filePath = path.join(__dirname, '../files/empty.vtt');
+
     const vttFile = fs.createReadStream(filePath);
     const eventId = req.params.eventId;
 

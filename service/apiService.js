@@ -319,6 +319,21 @@ exports.addWebVttFile = async (translationObject, eventId, translationModel, tra
 };
 
 exports.deleteWebVttFile = async (vttFile, eventId) => {
+    const updateEventMetadataId = uuidv4();
+    await jobsService.setJobStatus(updateEventMetadataId, constants.JOB_STATUS_STARTED);
+    while (await jobsService.getJob(updateEventMetadataId) != null) {
+        const transactionStatusPath = constants.OCAST_EVENT_MEDIA_PATH_PREFIX + eventId + '/hasActiveTransaction';
+        let transactionResponse = await security.opencastBase.get(transactionStatusPath);
+
+        if (transactionResponse.data && transactionResponse.data.active !== true) {
+            await jobsService.removeJob(updateEventMetadataId);
+            break;
+        } else {
+            // transaction active, try again after minute
+            await new Promise(resolve => setTimeout(resolve, 60000));
+        }
+    }
+
     const assetsUrl = constants.OCAST_ADMIN_EVENT + eventId + constants.OCAST_ASSETS_PATH;
     let bodyFormData = new FormData();
     bodyFormData.append('attachment_captions_webvtt.0', vttFile, {
