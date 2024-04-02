@@ -1,7 +1,6 @@
 const path = require('path');
 const apiService = require('../service/apiService');
 const userService = require('../service/userService');
-const azureServiceBatchTranscription = require('../service/azureServiceBatchTranscription');
 const uploadLogger = require('../config/uploadLogger');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
@@ -13,7 +12,6 @@ const HttpStatus = require('http-status');
 const dbApi = require('./dbApi');
 const moment = require('moment');
 const logger = require('../config/winstonLogger');
-const { areAllRequiredFiles, deleteFile, isValidVttFile, ensureUploadDir, removeDirectory} = require('../utils/fileUtils');
 
 const ERROR_LEVEL = 'error';
 const INFO_LEVEL = 'info';
@@ -147,33 +145,6 @@ exports.upload = async (req, res) => {
 
                 if (updateEventMetadataResponse.status === 200) {
                     logger.info(`update event metadata for VIDEO ${identifier} USER ${req.user.eppn} OK`);
-                    // generate VTT file for the video
-                    if (translationModel && translationLanguage) {
-                        logger.info (`selected translation for VIDEO ${identifier} with language ${translationLanguage}`);
-                        await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_STARTED, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
-                        logger.info(`starting translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
-                        let translationObject;
-                        // using Azure Speech to Text Batch Transcription API With Whisper Model to generate VTT file
-                        logger.info(`starting WHISPER translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
-                        translationObject = await azureServiceBatchTranscription.startProcess(filePathOnDisk, uploadPath, translationLanguage, filename.filename, uploadId,loggedUser.eppn, translationModel);
-                        if (areAllRequiredFiles(translationObject, req.user.eppn, identifier) && isValidVttFile(translationObject, identifier, req.user.eppn)) {
-                            const response = await apiService.addWebVttFile(translationObject, identifier, translationModel, translationLanguage);
-                            if (response.status === 201) {
-                                logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
-                                await apiService.republishWebVttFile(identifier);
-                                await deleteFile(translationObject.originalname, uploadId, true);
-                                await deleteFile(translationObject.audioFile, uploadId, true);
-                                await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_FINISHED, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
-                            } else {
-                                logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
-                                await deleteFile(translationObject.audioFile, uploadId, true);
-                                await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_ERROR, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
-                            }
-                        } else {
-                            await deleteFile(translationObject.audioFile, uploadId, true);
-                            await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_ERROR, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
-                        }
-                    }
                 } else if (updateEventMetadataResponse.status === 403){
                     logger.warn(`update event metadata for VIDEO ${identifier} USER ${req.user.eppn} failed ${updateEventMetadataResponse.statusText}`);
                 } else {

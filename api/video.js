@@ -5,6 +5,7 @@ const seriesService = require('../service/seriesService');
 const eventsService = require('../service/eventsService');
 const apiService = require('../service/apiService');
 const publicationService = require('../service/publicationService');
+const fileUtils = require('../utils/fileUtils');
 const logger = require('../config/winstonLogger');
 const messageKeys = require('../utils/message-keys');
 const webvttParser = require('node-webvtt');
@@ -22,7 +23,6 @@ const azureServiceBatchTranscription = require('../service/azureServiceBatchTran
 const { areAllRequiredFiles , isValidVttFile, deleteFile, removeDirectory } = require('../utils/fileUtils');
 const jobsService = require('../service/jobsService');
 const {encrypt, decrypt} = require('../utils/encrption');
-
 
 const encryptUrl = videoUrl => encrypt(videoUrl);
 
@@ -165,19 +165,21 @@ exports.generateAutomaticTranscriptionsForVideo = async (req, res) => {
             translationObject = await azureServiceBatchTranscription.startProcess(result.videoPath, result.videoBasePath, translationLanguage, result.fileName, transcriptionId, loggedUser.eppn, translationModel );
 
             if (areAllRequiredFiles(translationObject, req.user.eppn, identifier) && isValidVttFile(translationObject, identifier, req.user.eppn)) {
-                const response = await apiService.addWebVttFile(translationObject, identifier, translationModel, translationLanguage);
+                const convertedTranslationObject = await fileUtils.convertToUTF8(translationObject);
+
+                const response = await apiService.addWebVttFile(convertedTranslationObject, identifier, translationModel, translationLanguage);
                 if (response.status === 201) {
                     logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
                     await apiService.republishWebVttFile(identifier);
-                    await deleteFile(translationObject.originalname, transcriptionId, false);
-                    await deleteFile(translationObject.audioFile, transcriptionId, false);
+                    await deleteFile(convertedTranslationObject.originalname, transcriptionId, false);
+                    await deleteFile(convertedTranslationObject.audioFile, transcriptionId, false);
                     await deleteFile(result.videoPath, transcriptionId, false);
                     // remove upload directory from disk
                     await removeDirectory(result.videoBasePath, transcriptionId, false);
                     await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_FINISHED, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
                 } else {
                     logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
-                    await deleteFile(translationObject.audioFile, transcriptionId, false);
+                    await deleteFile(convertedTranslationObject.audioFile, transcriptionId, false);
                     await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_ERROR, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
                 }
             } else {
@@ -445,6 +447,8 @@ exports.uploadVideoTextTrack = async (req, res) => {
             return res.json({ message: messageKeys.ERROR_MALFORMED_WEBVTT_FILE, error: validationError.message });
         }
 
+        const convertedVttFile = await fileUtils.convertToUTF8(vttFile);
+
         await jobsService.setJobStatusForEvent(eventId, constants.JOB_STATUS_STARTED, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
         res.status(HttpStatus.ACCEPTED);
         res.jobId = eventId;
@@ -452,7 +456,7 @@ exports.uploadVideoTextTrack = async (req, res) => {
 
         // Continue with the file upload logic
         try {
-            const response = await apiService.addWebVttFile(vttFile, eventId);
+            const response = await apiService.addWebVttFile(convertedVttFile, eventId);
 
             if (response.status === 201) {
                 logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
