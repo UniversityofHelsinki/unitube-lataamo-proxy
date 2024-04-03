@@ -106,7 +106,7 @@ exports.upload = async (req, res) => {
     });
 
     req.busboy.on('file', (field, file, filename) => {
-remo        const startTime = new Date();
+        const startTime = new Date();
         uploadLogger.log(INFO_LEVEL, `Upload of '${filename.filename}' started  USER: ${req.user.eppn} -- ${uploadId}`);
         // path to the file
         const filePathOnDisk = path.join(uploadPath, filename.filename);
