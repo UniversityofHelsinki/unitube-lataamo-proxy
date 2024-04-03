@@ -106,9 +106,7 @@ exports.upload = async (req, res) => {
     });
 
     req.busboy.on('file', (field, file, filename) => {
-      console.log('busyfoy file');
-
-        const startTime = new Date();
+remo        const startTime = new Date();
         uploadLogger.log(INFO_LEVEL, `Upload of '${filename.filename}' started  USER: ${req.user.eppn} -- ${uploadId}`);
         // path to the file
         const filePathOnDisk = path.join(uploadPath, filename.filename);
@@ -143,7 +141,7 @@ exports.upload = async (req, res) => {
                 await dbApi.insertArchiveAndVideoCreationDatesForVideoUpload(video);
 
                 if (userWantsAutomaticTranscription) {
-                  await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_STARTED, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
+                    await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_STARTED, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
                 }
 
                 res.status(HttpStatus.OK);
