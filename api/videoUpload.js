@@ -106,6 +106,7 @@ exports.upload = async (req, res) => {
     });
 
     req.busboy.on('file', (field, file, filename) => {
+      console.log('busyfoy file');
 
         const startTime = new Date();
         uploadLogger.log(INFO_LEVEL, `Upload of '${filename.filename}' started  USER: ${req.user.eppn} -- ${uploadId}`);
@@ -133,14 +134,20 @@ exports.upload = async (req, res) => {
 
             if (response && response.status === HttpStatus.CREATED) {
                 identifier = response.data.identifier;
-                res.json({ id: uploadId, status: constants.JOB_STATUS_STARTED, eventId: identifier });
                 await jobsService.setJobStatus(uploadId, constants.JOB_STATUS_FINISHED);
+                const userWantsAutomaticTranscription = translationModel && translationLanguage;
                 uploadLogger.log(INFO_LEVEL,
                     `${filename.filename} uploaded to lataamo-proxy in ${timeDiff} milliseconds. Opencast event ID: ${JSON.stringify(response.data)} USER: ${req.user.eppn} -- ${uploadId}`);
 
                 const video = {identifier: identifier, created: new Date(), archivedDate: archivedDate};
                 await dbApi.insertArchiveAndVideoCreationDatesForVideoUpload(video);
+
+                if (userWantsAutomaticTranscription) {
+                  await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_STARTED, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
+                }
+
                 res.status(HttpStatus.OK);
+                res.json({ id: uploadId, status: constants.JOB_STATUS_STARTED, eventId: identifier });
 
                 // republish metadata in background operation
                 const metadata = {title : title, isPartOf : selectedSeries ? selectedSeries : inboxSeries.identifier, description: description, license : license };
@@ -151,7 +158,6 @@ exports.upload = async (req, res) => {
                     // generate VTT file for the video
                     if (translationModel && translationLanguage) {
                         logger.info (`selected translation for VIDEO ${identifier} with language ${translationLanguage}`);
-                        await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_STARTED, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
                         logger.info(`starting translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
                         let translationObject;
                         // using Azure Speech to Text Batch Transcription API With Whisper Model to generate VTT file
