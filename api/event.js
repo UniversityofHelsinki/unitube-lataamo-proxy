@@ -16,6 +16,10 @@ exports.getEvent = async (req, res) => {
     try {
         logger.info(`GET video details /event/:id VIDEO ${req.params.id} USER: ${req.user.eppn}`);
         const event = await apiService.getEvent(req.params.id);
+        if (!event) {
+          return res.status(404).end();
+        }
+
         const eventWithSeries = await eventsService.getEventWithSeries(event);
         const eventWithAcls = await eventsService.getEventAclsFromSeries(eventWithSeries);
         const eventWithVisibility = eventsService.calculateVisibilityProperty(eventWithAcls);
