@@ -24,7 +24,9 @@ exports.getUser = async () => {
 exports.getEvent = async (identifier) => {
     let eventUrl = constants.OCAST_VIDEOS_PATH + identifier;
     const response = await security.opencastBase.get(eventUrl);
-    return response.data;
+    if (response.status === 200) {
+      return response.data;
+    }
 };
 
 exports.getEventsByIdentifier = async (identifier) => {
