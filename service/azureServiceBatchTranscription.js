@@ -243,11 +243,6 @@ const jsonToVtt = (jsonData, uploadId, eppn) => {
                 `${index + 1}`,
                 `${formatTime(startTimeInSeconds)} --> ${formatTime(endTimeInSeconds)}`,
                 highestConfidenceTranscription.display
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;')
-                    .replace(/'/g, '&apos;')
             ];
 
             vttLines.push(vttEntry.join('\n'));

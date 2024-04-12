@@ -14,6 +14,7 @@ const dbApi = require('./dbApi');
 const moment = require('moment');
 const logger = require('../config/winstonLogger');
 const { areAllRequiredFiles, deleteFile, isValidVttFile, ensureUploadDir, removeDirectory} = require('../utils/fileUtils');
+const fileUtils = require('../utils/fileUtils');
 
 const ERROR_LEVEL = 'error';
 const INFO_LEVEL = 'info';
@@ -105,8 +106,6 @@ exports.upload = async (req, res) => {
     });
 
     req.busboy.on('file', (field, file, filename) => {
-      console.log('busyfoy file');
-
         const startTime = new Date();
         uploadLogger.log(INFO_LEVEL, `Upload of '${filename.filename}' started  USER: ${req.user.eppn} -- ${uploadId}`);
         // path to the file
@@ -142,7 +141,7 @@ exports.upload = async (req, res) => {
                 await dbApi.insertArchiveAndVideoCreationDatesForVideoUpload(video);
 
                 if (userWantsAutomaticTranscription) {
-                  await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_STARTED, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
+                    await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_STARTED, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
                 }
 
                 res.status(HttpStatus.OK);
@@ -163,16 +162,17 @@ exports.upload = async (req, res) => {
                         logger.info(`starting WHISPER translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
                         translationObject = await azureServiceBatchTranscription.startProcess(filePathOnDisk, uploadPath, translationLanguage, filename.filename, uploadId,loggedUser.eppn, translationModel);
                         if (areAllRequiredFiles(translationObject, req.user.eppn, identifier) && isValidVttFile(translationObject, identifier, req.user.eppn)) {
-                            const response = await apiService.addWebVttFile(translationObject, identifier, translationModel, translationLanguage);
+                            const convertedTranslationObject = await fileUtils.convertToUTF8(translationObject);
+                            const response = await apiService.addWebVttFile(convertedTranslationObject, identifier, translationModel, translationLanguage);
                             if (response.status === 201) {
                                 logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
                                 await apiService.republishWebVttFile(identifier);
-                                await deleteFile(translationObject.originalname, uploadId, true);
-                                await deleteFile(translationObject.audioFile, uploadId, true);
+                                await deleteFile(convertedTranslationObject.originalname, uploadId, true);
+                                await deleteFile(convertedTranslationObject.audioFile, uploadId, true);
                                 await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_FINISHED, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
                             } else {
                                 logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
-                                await deleteFile(translationObject.audioFile, uploadId, true);
+                                await deleteFile(convertedTranslationObject.audioFile, uploadId, true);
                                 await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_ERROR, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
                             }
                         } else {
