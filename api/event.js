@@ -34,7 +34,7 @@ exports.getEvent = async (req, res) => {
             return [encrypted, { ...eventDownloadableMedia[url], url: encrypted }];
         }));
 
-        res.json({ ...eventWithLicenseOptionsAndVideoViews, downloadableMedia: encryptedDownloadableMedia });
+        res.json({ ...eventWithLicenseOptionsAndVideoViews, downloadableMedia: encryptedDownloadableMedia, subtitles: await subtitles(event.identifier) });
 
     } catch (error) {
         const msg = error.message;
@@ -85,16 +85,19 @@ exports.getInboxEvents = async (req, res) => {
             msg
         });
     }
+    let events = null;
+    let inboxEventsWithAcls = null;
 
     try{
         // get inbox series for user
         const inboxSeries = await apiService.returnOrCreateUsersSeries(constants.INBOX, loggedUser);
         if (inboxSeries && inboxSeries.length > 0) {
-            const inboxEventsWithAcls = await fetchEventMetadata(inboxSeries);
-            const events = eventsService.filterEventsForClientList(inboxEventsWithAcls, loggedUser)
+            inboxEventsWithAcls = await fetchEventMetadata(inboxSeries);
+            events = eventsService.filterEventsForClientList(inboxEventsWithAcls, loggedUser)
                 .map(async event => ({
                     ...event,
-                    deletionDate: await dbService.getArchivedDate(event.identifier)
+                    deletionDate: await dbService.getArchivedDate(event.identifier),
+                    subtitles: await subtitles(event.identifier)
                 }));
             res.json(await Promise.all(events));
             // insert removal date to postgres db
@@ -113,6 +116,28 @@ exports.getInboxEvents = async (req, res) => {
     }
 };
 
+/**
+ * Checks if video have subtitle
+ *
+ * @param identifier
+ * @returns {Promise<boolean>}
+ */
+const subtitles = async (identifier) => {
+
+    const publications = await apiService.getPublicationsForEvent(identifier);
+    const mediaUrls = publicationService.getMediaUrlsFromPublication(identifier, publications);
+    const episode = await apiService.getEpisodeForEvent(identifier);
+    let episodeWithMediaUrls = await eventsService.getVttWithMediaUrls(episode, mediaUrls);
+
+    const subtitles = episodeWithMediaUrls.map((video) => video.vttFile.url).filter(url => url !== undefined && url !== 'empty.vtt' && url !== '');
+
+    if (subtitles.length > 0) {
+        return true;
+    } else {
+        return false;
+    }
+};
+
 exports.getTrashEvents = async (req, res) => {
     logger.info(`GET /userTrashEvents USER: ${req.user.eppn}`);
     const loggedUser = userService.getLoggedUser(req.user);
@@ -124,7 +149,8 @@ exports.getTrashEvents = async (req, res) => {
             const trashEventsWithArchiveDates = await Promise.all(trashEventsWithoutArchiveDate.map(async event  => {
                 return {
                     ...event,
-                    realDeletionDate: await dbService.getArchivedDate(event.identifier)
+                    realDeletionDate: await dbService.getArchivedDate(event.identifier),
+                    subtitles: await subtitles(event.identifier)
                 };
             }));
             res.json(trashEventsWithArchiveDates);
