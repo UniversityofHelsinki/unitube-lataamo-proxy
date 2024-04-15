@@ -91,6 +91,7 @@ exports.getInboxEvents = async (req, res) => {
     try{
         // get inbox series for user
         const inboxSeries = await apiService.returnOrCreateUsersSeries(constants.INBOX, loggedUser);
+
         if (inboxSeries && inboxSeries.length > 0) {
             inboxEventsWithAcls = await fetchEventMetadata(inboxSeries);
             events = eventsService.filterEventsForClientList(inboxEventsWithAcls, loggedUser)
@@ -128,8 +129,7 @@ const subtitles = async (identifier) => {
     const mediaUrls = publicationService.getMediaUrlsFromPublication(identifier, publications);
     const episode = await apiService.getEpisodeForEvent(identifier);
     let episodeWithMediaUrls = await eventsService.getVttWithMediaUrls(episode, mediaUrls);
-
-    const subtitles = episodeWithMediaUrls.map((video) => video.vttFile.url).filter(url => url !== undefined && url !== 'empty.vtt' && url !== '');
+    const subtitles = episodeWithMediaUrls.map((video) => video && video.vttFile && video.vttFile.url).filter(url => url !== undefined && url !== 'empty.vtt' && url !== '');
 
     if (subtitles.length > 0) {
         return true;
