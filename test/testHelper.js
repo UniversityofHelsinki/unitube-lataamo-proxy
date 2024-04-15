@@ -3625,6 +3625,24 @@ const event2Publications = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(`${CONSTANTS.OCAST_VIDEOS_PATH}${CONSTANTS.TEST_EVENT_2_ID}${CONSTANTS.OCAST_VIDEO_PUBLICATION_PATH}`)
     .reply(200, mockEventPublicationContainsTwoVideosWithDifferentQualities);
 
+
+const event3Publications = () => nock(CONSTANTS.OCAST_BASE_URL)
+    .get(`${CONSTANTS.OCAST_VIDEOS_PATH}${CONSTANTS.TEST_INBOX_EVENT_1}${CONSTANTS.OCAST_VIDEO_PUBLICATION_PATH}`)
+    .reply(200, mockEventPublicationContainsOneVideoWithDifferentQualities);
+
+const event4Publications = () => nock(CONSTANTS.OCAST_BASE_URL)
+    .get(`${CONSTANTS.OCAST_VIDEOS_PATH}${CONSTANTS.TEST_INBOX_EVENT_2}${CONSTANTS.OCAST_VIDEO_PUBLICATION_PATH}`)
+    .reply(200, mockEventPublicationContainsTwoVideosWithDifferentQualities);
+
+
+const eventTrash3Publications = () => nock(CONSTANTS.OCAST_BASE_URL)
+    .get(`${CONSTANTS.OCAST_VIDEOS_PATH}${CONSTANTS.TEST_TRASH_EVENT_1}${CONSTANTS.OCAST_VIDEO_PUBLICATION_PATH}`)
+    .reply(200, mockEventPublicationContainsOneVideoWithDifferentQualities);
+
+const eventTrash4Publications = () => nock(CONSTANTS.OCAST_BASE_URL)
+    .get(`${CONSTANTS.OCAST_VIDEOS_PATH}${CONSTANTS.TEST_TRASH_EVENT_2}${CONSTANTS.OCAST_VIDEO_PUBLICATION_PATH}`)
+    .reply(200, mockEventPublicationContainsTwoVideosWithDifferentQualities);
+
 const event1VttFile = () => nock('http://localhost:8080')
     .get('/static/mh_default_org/engage-player/2d72b653-02f6-4638-ba58-281b2d49af33/7578df20-9939-40dc-a305-7f83e225e9af/testwebvtt.vtt')
     .reply(200, mockEvent1VttFile);
@@ -3639,6 +3657,23 @@ const eventEpisode = () => nock(CONSTANTS.OCAST_BASE_URL)
 
 const event2Episode = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(`${CONSTANTS.OCAST_EVENT_EPISODE_PATH}?id=${CONSTANTS.TEST_EVENT_2_ID}`)
+    .reply(200, mockEpisodeForEvent2);
+
+const event3Episode = () => nock(CONSTANTS.OCAST_BASE_URL)
+    .get(`${CONSTANTS.OCAST_EVENT_EPISODE_PATH}?id=${CONSTANTS.TEST_INBOX_EVENT_1}`)
+    .reply(200, mockEpisodeForEvent);
+
+const event4Episode = () => nock(CONSTANTS.OCAST_BASE_URL)
+    .get(`${CONSTANTS.OCAST_EVENT_EPISODE_PATH}?id=${CONSTANTS.TEST_INBOX_EVENT_2}`)
+    .reply(200, mockEpisodeForEvent2);
+
+
+const eventTrash3Episode = () => nock(CONSTANTS.OCAST_BASE_URL)
+    .get(`${CONSTANTS.OCAST_EVENT_EPISODE_PATH}?id=${CONSTANTS.TEST_TRASH_EVENT_1}`)
+    .reply(200, mockEpisodeForEvent);
+
+const eventTrash4Episode = () => nock(CONSTANTS.OCAST_BASE_URL)
+    .get(`${CONSTANTS.OCAST_EVENT_EPISODE_PATH}?id=${CONSTANTS.TEST_TRASH_EVENT_2}`)
     .reply(200, mockEpisodeForEvent2);
 
 const mockInboxEventMetadata1 = [{'flavor':'dublincore\/episode','title':'EVENTS.EVENTS.DETAILS.CATALOG.EPISODE','fields':[{'readOnly':false,'id':'title','label':'EVENTS.EVENTS.DETAILS.METADATA.TITLE','type':'text','value':'INBOX EVENT 1','required':true},{'readOnly':false,'id':'subjects','label':'EVENTS.EVENTS.DETAILS.METADATA.SUBJECT','type':'text','value':['Testin more'],'required':false},{'readOnly':false,'id':'description','label':'EVENTS.EVENTS.DETAILS.METADATA.DESCRIPTION','type':'text_long','value':'','required':false},{'translatable':true,'readOnly':false,'id':'language','label':'EVENTS.EVENTS.DETAILS.METADATA.LANGUAGE','type':'text','value':'','required':false},{'readOnly':false,'id':'rightsHolder','label':'EVENTS.EVENTS.DETAILS.METADATA.RIGHTS','type':'text','value':'','required':false},{'translatable':true,'readOnly':false,'id':'license','label':'EVENTS.EVENTS.DETAILS.METADATA.LICENSE','type':'text','value':'ALLRIGHTS','required':false},{'translatable':false,'readOnly':false,'id':'isPartOf','label':'EVENTS.EVENTS.DETAILS.METADATA.SERIES','type':'text','value':CONSTANTS.TEST_INBOX_SERIES_ID,'required':false},{'translatable':false,'readOnly':false,'id':'creator','label':'EVENTS.EVENTS.DETAILS.METADATA.PRESENTERS','type':'mixed_text','value':[],'required':false},{'translatable':false,'readOnly':false,'id':'contributor','label':'EVENTS.EVENTS.DETAILS.METADATA.CONTRIBUTORS','type':'mixed_text','value':['tzrasane'],'required':false},{'readOnly':false,'id':'startDate','label':'EVENTS.EVENTS.DETAILS.METADATA.START_DATE','type':'date','value':'2019-06-12','required':false},{'readOnly':false,'id':'startTime','label':'EVENTS.EVENTS.DETAILS.METADATA.START_TIME','type':'time','value':'07:47','required':false},{'readOnly':false,'id':'duration','label':'EVENTS.EVENTS.DETAILS.METADATA.DURATION','type':'text','value':'00:00:00','required':false},{'readOnly':false,'id':'location','label':'EVENTS.EVENTS.DETAILS.METADATA.LOCATION','type':'text','value':'','required':false},{'readOnly':false,'id':'source','label':'EVENTS.EVENTS.DETAILS.METADATA.SOURCE','type':'text','value':'','required':false},{'readOnly':true,'id':'created','label':'EVENTS.EVENTS.DETAILS.METADATA.CREATED','type':'date','value':'2019-06-12T07:47:49.000Z','required':false},{'readOnly':true,'id':'identifier','label':'EVENTS.EVENTS.DETAILS.METADATA.ID','type':'text','value':CONSTANTS.TEST_INBOX_EVENT_1,'required':false}]}];
@@ -3999,9 +4034,17 @@ module.exports.mockOcastEvent3AclCall = eventAclsFromSerie3;
 module.exports.mockLataamoPostSeriesCall = lataamoPostSeries;
 module.exports.mockOcastVideoViewsCall = mockOcastVideoViewsCall;
 module.exports.mockEventPublicationCall = event1Publications;
-module.exports.mockEvent2PubcliationCall = event2Publications;
+module.exports.mockEvent2PublicationCall = event2Publications;
+module.exports.mockEvent3PublicationCall = event3Publications;
+module.exports.mockEvent4PublicationCall = event4Publications;
+module.exports.mockEventTrash3PublicationCall = eventTrash3Publications;
+module.exports.mockEventTrash4PublicationCall = eventTrash4Publications;
 module.exports.mockEventEpisodeCall = eventEpisode;
-module.exports.mockeEvent2EpisodeCall = event2Episode;
+module.exports.mockEvent2EpisodeCall = event2Episode;
+module.exports.mockEvent3EpisodeCall = event3Episode;
+module.exports.mockEvent4EpisodeCall = event4Episode;
+module.exports.mockEventTrash3EpisodeCall = eventTrash3Episode;
+module.exports.mockEventTrash4EpisodeCall = eventTrash4Episode;
 module.exports.mockLataamoPutSeriesCall = lataamoPutSeries;
 module.exports.mockLataamoUpdateSeriesAcl = lataamoUpdateSeriesAcl;
 module.exports.mockLataamoUpdateSeriesMetadata = lataamoUpdateSeriesMetadata;
