@@ -17,7 +17,7 @@ exports.getEvent = async (req, res) => {
         logger.info(`GET video details /event/:id VIDEO ${req.params.id} USER: ${req.user.eppn}`);
         const event = await apiService.getEvent(req.params.id);
         if (!event) {
-          return res.status(404).end();
+            return res.status(404).end();
         }
 
         const eventWithSeries = await eventsService.getEventWithSeries(event);
@@ -38,7 +38,7 @@ exports.getEvent = async (req, res) => {
             return [encrypted, { ...eventDownloadableMedia[url], url: encrypted }];
         }));
 
-        res.json({ ...eventWithLicenseOptionsAndVideoViews, downloadableMedia: encryptedDownloadableMedia, subtitles: await subtitles(event.identifier) });
+        res.json({ ...eventWithLicenseOptionsAndVideoViews, downloadableMedia: encryptedDownloadableMedia});
 
     } catch (error) {
         const msg = error.message;
@@ -102,7 +102,7 @@ exports.getInboxEvents = async (req, res) => {
                 .map(async event => ({
                     ...event,
                     deletionDate: await dbService.getArchivedDate(event.identifier),
-                    subtitles: await subtitles(event.identifier)
+                    subtitles: await eventsService.subtitles(event.identifier)
                 }));
             res.json(await Promise.all(events));
             // insert removal date to postgres db
@@ -154,7 +154,7 @@ exports.getTrashEvents = async (req, res) => {
                 return {
                     ...event,
                     realDeletionDate: await dbService.getArchivedDate(event.identifier),
-                    subtitles: await subtitles(event.identifier)
+                    subtitles: await eventsService.subtitles(event.identifier)
                 };
             }));
             res.json(trashEventsWithArchiveDates);

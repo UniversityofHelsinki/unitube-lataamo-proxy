@@ -15,6 +15,7 @@ const pLimit = require('p-limit');
 const limit = pLimit(5);
 const { createHash } = require('crypto');
 const {encrypt} = require('../utils/encrption');
+const {getMediaUrlsFromPublication} = require('./publicationService');
 
 exports.mapPublications = (videoList, publications) => {
     const media = publications.map(p => p.media).flatMap(m => m);
@@ -626,4 +627,22 @@ exports.getEventViews = async (id, eventWithLicenseOptions) => {
         ...eventWithLicenseOptions,
         views: '-'
     };
+};
+
+/**
+ * Checks if video have subtitle
+ *
+ * @param identifier
+ * @returns {Promise<boolean>}
+ */
+exports.subtitles = async (identifier) => {
+    const publications = await apiService.getPublicationsForEvent(identifier);
+    const mediaUrls = getMediaUrlsFromPublication(identifier, publications);
+    const episode = await apiService.getEpisodeForEvent(identifier);
+    let episodeWithMediaUrls = await this.getVttWithMediaUrls(episode, mediaUrls);
+    const subtitles = episodeWithMediaUrls
+        .map((video) => video && video.vttFile && video.vttFile.url)
+        .filter(url => url !== undefined && url !== 'empty.vtt' && url !== '')
+        .filter(url => !url.endsWith('empty.vtt'));
+    return subtitles.length > 0;
 };
