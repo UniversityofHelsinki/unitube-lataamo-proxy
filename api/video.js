@@ -26,18 +26,28 @@ const {encrypt, decrypt} = require('../utils/encrption');
 
 const encryptUrl = videoUrl => encrypt(videoUrl);
 
+
+/**
+ * Encrypts the video URLs and VTT URLs of an array of episodes with media URLs.
+ *
+ * @param {Array} episodeWithMediaUrls - Array of objects representing episodes with media URLs
+ * @returns {Array} - Array of objects with encrypted video URLs and VTT URLs
+ */
 const encryptVideoAndVTTUrls = episodeWithMediaUrls => {
-    episodeWithMediaUrls.some(episodeWithMediaUrl => {
-        const videoUrl = episodeWithMediaUrl.url;
-        const encryptedUrl = encryptUrl(videoUrl);
-        episodeWithMediaUrl.url = encryptedUrl;
+    let processedIds = {};
+    return episodeWithMediaUrls.map(episodeWithMediaUrl => {
+        if (processedIds[episodeWithMediaUrl.id]) {
+            return episodeWithMediaUrl; // Skip previously processed ids
+        }
+        processedIds[episodeWithMediaUrl.id] = true; // Remember this id as processed
+
+        episodeWithMediaUrl.url = encryptUrl(episodeWithMediaUrl.url);
         if (episodeWithMediaUrl.vttFile && episodeWithMediaUrl.vttFile.url) {
             episodeWithMediaUrl.vttFile.filename = episodeWithMediaUrl.vttFile.url.substring(episodeWithMediaUrl.vttFile.url.lastIndexOf('/') + 1);
-            const encryptedVTTFileUrl = encryptUrl(episodeWithMediaUrl.vttFile.url);
-            episodeWithMediaUrl.vttFile.url = encryptedVTTFileUrl;
+            episodeWithMediaUrl.vttFile.url = encryptUrl(episodeWithMediaUrl.vttFile.url);
         }
+        return episodeWithMediaUrl;
     });
-    return episodeWithMediaUrls;
 };
 
 const parseVTTFileFromUrl = (response) => {
