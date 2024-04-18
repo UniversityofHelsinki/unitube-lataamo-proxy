@@ -27,26 +27,33 @@ const {encrypt, decrypt} = require('../utils/encrption');
 const encryptUrl = videoUrl => encrypt(videoUrl);
 
 
+
 /**
- * Encrypts the video URLs and VTT URLs of an array of episodes with media URLs.
+ * Encrypts the video URL and VTT file URL (if present) in the given array of episode objects.
  *
- * @param {Array} episodeWithMediaUrls - Array of objects representing episodes with media URLs
- * @returns {Array} - Array of objects with encrypted video URLs and VTT URLs
+ * @param {Array} episodeWithMediaUrls - An array of episode objects containing video and VTT file URLs.
+ * @returns {Array} - An array of episode objects with encrypted video and VTT file URLs.
  */
 const encryptVideoAndVTTUrls = episodeWithMediaUrls => {
-    let processedIds = {};
     return episodeWithMediaUrls.map(episodeWithMediaUrl => {
-        if (processedIds[episodeWithMediaUrl.id]) {
-            return episodeWithMediaUrl; // Skip previously processed ids
-        }
-        processedIds[episodeWithMediaUrl.id] = true; // Remember this id as processed
+        // making a shallow copy to avoiding changing of the original object
+        let episodeCopy = { ...episodeWithMediaUrl };
 
-        episodeWithMediaUrl.url = encryptUrl(episodeWithMediaUrl.url);
-        if (episodeWithMediaUrl.vttFile && episodeWithMediaUrl.vttFile.url) {
-            episodeWithMediaUrl.vttFile.filename = episodeWithMediaUrl.vttFile.url.substring(episodeWithMediaUrl.vttFile.url.lastIndexOf('/') + 1);
-            episodeWithMediaUrl.vttFile.url = encryptUrl(episodeWithMediaUrl.vttFile.url);
+        // encrypt the video URL
+        const videoUrl = episodeCopy.url;
+        const encryptedUrl = encryptUrl(videoUrl);
+        episodeCopy.url = encryptedUrl;
+
+        // encrypt the vttFile URL if it's present
+        if (episodeCopy.vttFile && episodeCopy.vttFile.url) {
+            // making a shallow copy to avoiding changing of the original object
+            episodeCopy.vttFile = { ...episodeCopy.vttFile };
+
+            episodeCopy.vttFile.filename = episodeCopy.vttFile.url.substring(episodeCopy.vttFile.url.lastIndexOf('/') + 1);
+            const encryptedVTTFileUrl = encryptUrl(episodeCopy.vttFile.url);
+            episodeCopy.vttFile.url = encryptedVTTFileUrl;
         }
-        return episodeWithMediaUrl;
+        return episodeCopy;
     });
 };
 
