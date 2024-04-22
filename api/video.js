@@ -26,18 +26,35 @@ const {encrypt, decrypt} = require('../utils/encrption');
 
 const encryptUrl = videoUrl => encrypt(videoUrl);
 
+
+
+/**
+ * Encrypts the video URL and VTT file URL (if present) in the given array of episode objects.
+ *
+ * @param {Array} episodeWithMediaUrls - An array of episode objects containing video and VTT file URLs.
+ * @returns {Array} - An array of episode objects with encrypted video and VTT file URLs.
+ */
 const encryptVideoAndVTTUrls = episodeWithMediaUrls => {
-    episodeWithMediaUrls.some(episodeWithMediaUrl => {
-        const videoUrl = episodeWithMediaUrl.url;
+    return episodeWithMediaUrls.map(episodeWithMediaUrl => {
+        // making a shallow copy to avoiding changing of the original object
+        let episodeCopy = { ...episodeWithMediaUrl };
+
+        // encrypt the video URL
+        const videoUrl = episodeCopy.url;
         const encryptedUrl = encryptUrl(videoUrl);
-        episodeWithMediaUrl.url = encryptedUrl;
-        if (episodeWithMediaUrl.vttFile && episodeWithMediaUrl.vttFile.url) {
-            episodeWithMediaUrl.vttFile.filename = episodeWithMediaUrl.vttFile.url.substring(episodeWithMediaUrl.vttFile.url.lastIndexOf('/') + 1);
-            const encryptedVTTFileUrl = encryptUrl(episodeWithMediaUrl.vttFile.url);
-            episodeWithMediaUrl.vttFile.url = encryptedVTTFileUrl;
+        episodeCopy.url = encryptedUrl;
+
+        // encrypt the vttFile URL if it's present
+        if (episodeCopy.vttFile && episodeCopy.vttFile.url) {
+            // making a shallow copy to avoiding changing of the original object
+            episodeCopy.vttFile = { ...episodeCopy.vttFile };
+
+            episodeCopy.vttFile.filename = episodeCopy.vttFile.url.substring(episodeCopy.vttFile.url.lastIndexOf('/') + 1);
+            const encryptedVTTFileUrl = encryptUrl(episodeCopy.vttFile.url);
+            episodeCopy.vttFile.url = encryptedVTTFileUrl;
         }
+        return episodeCopy;
     });
-    return episodeWithMediaUrls;
 };
 
 const parseVTTFileFromUrl = (response) => {
