@@ -640,9 +640,8 @@ exports.subtitles = async (identifier) => {
     const mediaUrls = getMediaUrlsFromPublication(identifier, publications);
     const episode = await apiService.getEpisodeForEvent(identifier);
     let episodeWithMediaUrls = await this.getVttWithMediaUrls(episode, mediaUrls);
-    const subtitles = episodeWithMediaUrls
+    const subtitles = (episodeWithMediaUrls || [])
         .map((video) => video && video.vttFile && video.vttFile.url)
-        .filter(url => url !== undefined && url !== 'empty.vtt' && url !== '')
-        .filter(url => !url.endsWith('empty.vtt'));
+        .filter(url => url !== undefined && url !== '' && !url.endsWith('empty.vtt'));
     return subtitles.length > 0;
 };
