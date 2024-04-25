@@ -28,6 +28,9 @@ const constants = require('../utils/constants');
 exports.getSeries = async (req, res) => {
     try {
         const series = await apiService.getSeries(req.params.id);
+        if (!userService.userHasPermissions(req.user, series.contributors)) {
+          return res.status(403).end();
+        }
         await apiService.contributorsToIamGroupsAndPersons(series);
         const seriesWithAllEventsCount = await eventsService.getAllEventsCountForSeries(series);
         const userSeriesWithPublished = await seriesService.addPublishedInfoInSeriesAndMoodleRoles(seriesWithAllEventsCount);
@@ -44,6 +47,9 @@ exports.getSeries = async (req, res) => {
 
 exports.updateSeries = async (req, res) => {
     try {
+        if (!await seriesService.userHasPermissionsForSeries(req.user, req.body.identifier)) {
+          return res.status(403).end();
+        }
         const rawEventMetadata = req.body;
         const loggedUser = userService.getLoggedUser(req.user);
         seriesService.addUserToEmptyContributorsList(rawEventMetadata, loggedUser);
@@ -73,6 +79,9 @@ exports.updateSeries = async (req, res) => {
 exports.updateSeriesAcls = async (req, res) => {
     try {
         const rawEventMetadata = req.body;
+        if (!await seriesService.userHasPermissionsForSeries(req.user, req.body.identifier)) {
+          return res.status(403).end();
+        }
         const loggedUser = userService.getLoggedUser(req.user);
         seriesService.addUserToEmptyContributorsList(rawEventMetadata, loggedUser);
         let modifiedSeriesAclMetadata = await seriesService.getSerieRoles(req.body.identifier);
@@ -201,6 +210,9 @@ exports.createSeries = async (req, res) => {
 
 exports.deleteSeries = async (req, res) => {
     try {
+        if (!await seriesService.userHasPermissionsForSeries(req.user, req.params.id)) {
+          return res.status(403).end();
+        }
         const response = await apiService.deleteSeries(req.params.id);
         res.status(response.status);
         res.json({});
