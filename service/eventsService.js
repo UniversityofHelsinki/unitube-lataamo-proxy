@@ -1,6 +1,7 @@
 const equal = require('deep-equal');
 const commonService = require('./commonService');
 const apiService = require('./apiService');
+const seriesService = require('./seriesService');
 const moment = require('moment');
 const momentDurationFormatSetup = require('moment-duration-format');
 momentDurationFormatSetup(moment);
@@ -644,4 +645,15 @@ exports.subtitles = async (identifier) => {
         .map((video) => video && video.vttFile && video.vttFile.url)
         .filter(url => url !== undefined && url !== '' && !url.endsWith('empty.vtt'));
     return subtitles.length > 0;
+};
+
+exports.userHasPermissionsForEvent = async (user, identifier) => {
+    const event = await apiService.getEvent(identifier);
+    if (event) {
+      return await seriesService.userHasPermissionsForSeries(
+        user, 
+        event.is_part_of
+      );
+    }
+    return false;
 };

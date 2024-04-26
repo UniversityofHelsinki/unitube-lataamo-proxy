@@ -1,6 +1,7 @@
 const commonService = require('../service/commonService');
 const constants = require('../utils/constants');
 const apiService = require('../service/apiService');
+const userService = require('../service/userService');
 
 exports.getUserSeries = (series, user) => filterSeriesByUser(series, user);
 
@@ -240,3 +241,11 @@ const setVisibilityForSeries = (series) => {
 const calculateVisibilityPropertyForSeries = (series) => setVisibilityForSeries(series);
 
 exports.getSeriesIdentifier = (series) => series.find(series => series.identifier).identifier;
+
+exports.userHasPermissionsForSeries = async (user, identifier) => {
+  const series = await apiService.getSeries(identifier);
+  if (series) {
+    return userService.userHasPermissions(user, series.contributors);
+  }
+  return false;
+};

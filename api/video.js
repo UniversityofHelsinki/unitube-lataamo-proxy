@@ -271,6 +271,9 @@ exports.updateArchivedDateOfVideosInSerie = async (req, res) => {
         logger.info(`PUT /updateArchivedDateOfVideosInSerie USER: ${req.user.eppn}`);
         const loggedUser = userService.getLoggedUser(req.user);
         const seriesIdentifier = req.params.id;
+        if (!await seriesService.userHasPermissionsForSeries(req.user, seriesIdentifier)) {
+          return res.status(403).end();
+        }
         const rawEventDeletionDateMetadata = req.body;
         const allEventsWithMetaData = await eventsService.getAllSerieEvents(seriesIdentifier);
 
@@ -326,6 +329,9 @@ const isReturnedFromTrash = (video) => {
 exports.updateVideo = async (req, res) => {
     try {
         logger.info(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn}`);
+        if (!eventsService.userHasPermissionsForEvent(req.user, req.body.identifier)) {
+          return res.status(403).end();
+        }
         const loggedUser = userService.getLoggedUser(req.user);
         const rawEventMetadata = req.body;
         const response = await apiService.updateEventMetadata(rawEventMetadata, req.body.identifier, false, req.user);

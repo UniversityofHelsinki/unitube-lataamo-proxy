@@ -285,7 +285,7 @@ const mockUserSeries4 =
         subjects: [ 'juusto', 'makasiini', 'aamupuuro', 'salama', 'sämpylä' ],
         organizers: [ 'organizer1' ],
         publishers: [ '' ],
-        contributors: ['baabenom', 'grp-a9000-johto', 'e0008344', 'sys-personec-1', 'alanevax', 'hy-duunarit'],
+        contributors: ['baabenom', 'grp-a9000-johto', 'e0008344', 'sys-personec-1', 'alanevax', 'hy-duunarit', 'Tester-XYZ'],
         title: 'title-LATAAMO-132'
     };
 
@@ -904,7 +904,24 @@ const mockUserEventsForInboxSeriesForList = [
     }
 ];
 
-
+const mockEvent = {
+        is_part_of: '3f9ff5b-7663-54b7-b7cf-950be665de3c',
+        identifier: '234234234',
+        creator: 'Opencast Project Administrator',
+        presenter: [],
+        created: '2019-06-12T07:47:49Z',
+        subjects: [ 'Testin more' ],
+        start: '2019-06-12T07:47:49Z',
+        description: '',
+        title: 'INBOX EVENT 1',
+        processing_state: 'SUCCEEDED',
+        duration: 0,
+        archive_version: 7,
+        contributor: [ 'SeriesOwnerEppn' ],
+        has_previews: true,
+        location: '',
+        publication_status: [ 'internal', 'engage-player', 'api', 'oaipmh-default' ]
+};
 
 const mockUserEventsForInboxSeries =  [
     {
@@ -3597,6 +3614,10 @@ const inboxUserSeries = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(`/api/series/${CONSTANTS.TEST_INBOX_SERIES_ID}`)
     .reply(200, mockUserInboxSeries).persist();
 
+const inboxUserSeries1 = () => nock(CONSTANTS.OCAST_BASE_URL)
+    .get(`/api/series/${CONSTANTS.TEST_INBOX_SERIES_ID}`)
+    .reply(200, mockUserInboxSeries[0]).persist();
+
 // /api/series/3f9ff5b-7663-54b7-b7cf-950be665de3c
 const trashUserSeries = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(`/api/series/${CONSTANTS.TEST_TRASH_SERIES_ID}`)
@@ -3616,6 +3637,10 @@ const event2Media = () => nock(CONSTANTS.OCAST_BASE_URL)
 const event3Media = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(`/admin-ng/event/${CONSTANTS.TEST_EVENT_3_ID}/asset/media/media.json`)
     .reply(200, mockMediaData3);
+
+const event = () => nock(CONSTANTS.OCAST_BASE_URL)
+  .get(`${CONSTANTS.OCAST_VIDEOS_PATH}234234234`)
+  .reply(200, mockEvent);
 
 const event1Publications = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(`${CONSTANTS.OCAST_VIDEOS_PATH}${CONSTANTS.TEST_EVENT_1_ID}${CONSTANTS.OCAST_VIDEO_PUBLICATION_PATH}`)
@@ -4004,6 +4029,7 @@ module.exports.mockOCastSeriesApiCall9 = lataamoSeries9;
 module.exports.mockOCastSeriesApiCall10 = lataamoSeries10;
 module.exports.mockOCastUserApiCall = lataamoApiUser;
 module.exports.mockOCastUserApiCall2 = lataamoApiUser2;
+module.exports.mockEvent = event;
 module.exports.mockOCastEvents_1_ApiCall = series1_Events;
 module.exports.mockOCastEvents_1_New_ApiCall = series1_new_events;
 module.exports.mockOCastEvents_2_ApiCall = series2_Events;
@@ -4073,6 +4099,7 @@ module.exports.mockTrashEvent2MediaFileMetadataCall = event2TrashMediaFileMetada
 module.exports.mockInboxSeriesAclCall = inboxEventAclsFromSeries;
 module.exports.mockTrashSeriesAclCall = trashEventAclsFromSeries;
 module.exports.mockInboxSeriesCall = inboxUserSeries;
+module.exports.mockInboxSeriesCall1 = inboxUserSeries1;
 module.exports.mockTrashSeriesCall = trashUserSeries;
 module.exports.mockSeriesWithInboxCall = lataamoWithInboxSeries;
 module.exports.mockEvent1VttFileCall = event1VttFile;

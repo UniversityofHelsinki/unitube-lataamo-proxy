@@ -193,7 +193,7 @@ describe('user series person - and iamgroup administrators returned from /series
         test.mockOCastEvents_1_New_ApiCall();
     });
 
-    it('should return user\'s series with three iamgroups and three persons ', async () => {
+    it('should return user\'s series with three iamgroups and four persons ', async () => {
         let response = await supertest(app)
             .get(LATAAMO_SERIES_PATH + '/123456')
             .set('eppn', test.mockTestUser2.eppn)
@@ -203,7 +203,7 @@ describe('user series person - and iamgroup administrators returned from /series
             .expect(200)
             .expect('Content-Type', /json/);
 
-        assert.lengthOf(response.body.persons, 3, 'Three person administrators should be returned');
+        assert.lengthOf(response.body.persons, 4, 'Four person administrators should be returned');
         assert.lengthOf(response.body.iamgroups, 3, 'Three group administrators should be returned');
     });
 
@@ -307,11 +307,12 @@ describe('user series put', () => {
         test.mockLataamoPutSeriesCall();
         test.mockLataamoUpdateSeriesAcl();
         test.mockLataamoUpdateSeriesMetadata();
+        test.mockOCastSeriesApiCall7();
         test.noSeriesEventsCall();
     });
 
     it('Successful series update should return 200', async () => {
-        const userId = 'NOT_CONTRIBUTOR_IN_ANY_SERIES';
+        const userId = 'baabenom';
         let response = await supertest(app)
             .put(LATAAMO_SERIES_PATH + '/123456')
             .send({identifier: '123456', title: 'Sarja1', description: 'sarjan on hyvä'})
@@ -730,6 +731,9 @@ describe('Updating videos aka events', () => {
     it('Should move event to trash series when deleted and update skip email status to true', async () => {
         await client.query('INSERT INTO videos (video_id, archived_date, video_creation_date) VALUES (234234234, \'2019-01-01\'::date, \'2010-01-01\'::date)');
 
+      
+        test.mockEvent();
+        test.mockInboxSeriesCall1();
         test.mockOpencastEventNoActiveTransaction('234234234');
         test.mockOpencastUpdateEventOK('234234234');
         test.mockOpencastMediaPackageRequest('234234234');
@@ -794,6 +798,8 @@ describe('Updating videos aka events', () => {
         await client.query('INSERT INTO videos (video_id, archived_date, video_creation_date, first_notification_sent_at, second_notification_sent_at, third_notification_sent_at) ' +
             'VALUES (234234234, \'2019-01-01\'::date, \'2010-01-01\'::date, \'2020-01-01\'::date, \'2020-01-01\'::date, \'2020-01-01\'::date)');
 
+        test.mockEvent();
+        test.mockInboxSeriesCall1();
         test.mockOpencastEventNoActiveTransaction('234234234');
         test.mockOpencastUpdateEventOK('234234234');
         test.mockOpencastMediaPackageRequest('234234234');
