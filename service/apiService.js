@@ -6,6 +6,7 @@ const constants = require('../utils/constants');
 const {seriesTitleForLoggedUser} = require('../utils/helpers'); // helper functions
 const logger = require('../config/winstonLogger');
 const eventsService = require('./eventsService');
+const dbService = require('./dbService');
 const fetch = require('node-fetch');
 const { parseContributor } = require('./userService');
 const {v4: uuidv4} = require('uuid');
@@ -51,16 +52,19 @@ exports.getEventsWithSeriesByIdentifier = async (series) => {
     return {
         ...series,
         eventsCount: events.length,
-        eventColumns: someEventColumns(events)
+        eventColumns: await someEventColumns(events)
     };
 };
 
-const someEventColumns = (events) => {
-    let eventData = [];
-    events.forEach(event => {
-        eventData.push({'title': event.title, 'id': event.identifier, 'cover_image': eventsService.getCoverImageForVideoFromEvent(event)});
-    });
-    return eventData;
+const someEventColumns = async (events) => {
+    return Promise.all(events.map(async event => {
+        return ({
+          ...event,
+          'id': event.identifier, 
+          'cover_image': eventsService.getCoverImageForVideoFromEvent(event),
+          'deletion_date': await dbService.getArchivedDate(event.identifier)
+        });
+    }));
 };
 
 exports.getSeries = async (seriesId) => {
