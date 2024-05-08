@@ -4,6 +4,7 @@ const apiService = require('../service/apiService');
 const eventsService = require('../service/eventsService');
 const licenseService = require('../service/licenseService');
 const publicationService = require('../service/publicationService');
+const jobsService = require('../service/jobsService');
 const userService = require('../service/userService');
 const seriesService = require('../service/seriesService');
 const dbService = require('../service/dbService');
@@ -105,7 +106,8 @@ exports.getInboxEvents = async (req, res) => {
                 .map(async event => ({
                     ...event,
                     deletionDate: await dbService.getArchivedDate(event.identifier),
-                    subtitles: await eventsService.subtitles(event.identifier)
+                    subtitles: await eventsService.subtitles(event.identifier),
+                    jobs: JSON.parse(await jobsService.getJob(event.identifier))
                 }));
             res.json(await Promise.all(events));
             // insert removal date to postgres db
