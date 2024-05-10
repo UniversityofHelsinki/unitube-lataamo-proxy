@@ -3,6 +3,8 @@ const webvttParser = require("node-webvtt");
 const fs = require("fs-extra");
 const uploadLogger = require("../config/uploadLogger");
 const fsExtra = require("fs-extra");
+const chardet = require('chardet');
+const iconv = require('iconv-lite');
 
 const ERROR_LEVEL = 'error';
 const INFO_LEVEL = 'info';
@@ -99,6 +101,42 @@ exports.removeDirectory = async (uplaodPath, id, isUpload) => {
         logger.error(`Failed to remove directory ${uplaodPath} | ${err} -- ${id}`);
     }
 };
+
+/**
+ * Converts vtt content to UTF-8 encoding.
+ *
+ * @param {object} translationObject - The object buffer to be converted to UTF-8 encoding.
+ * @returns {object} The object buffer containing UTF-8 encoded string.
+ */
+exports.convertToUTF8 = async (translationObject) => {
+    try {
+        // Detect the input encoding using chardet
+        const detectedEncoding = chardet.detect(translationObject.buffer);
+
+        // If encoding detection fails or is unreliable, default to UTF-8
+        const inputEncoding = detectedEncoding || 'UTF-8';
+
+        logger.info(`detected text encoding of ${inputEncoding}`);
+
+        // Convert the encoding to UTF-8
+        const decoded = iconv.decode(translationObject.buffer, inputEncoding);
+
+        logger.info(`decoding text with ${inputEncoding}`);
+
+        const encoded = iconv.encode(decoded, 'utf8', {addBOM: true});
+
+        logger.info('encoded text with utf8');
+
+        return {
+            ...translationObject,
+            buffer : encoded
+        };
+    } catch (err) {
+        console.error('Error converting file to UTF-8:', err);
+        throw err;
+    }
+};
+
 
 
 

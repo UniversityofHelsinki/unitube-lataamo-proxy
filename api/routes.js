@@ -107,6 +107,8 @@ module.exports = function (router) {
 
     router.get('/vttFileName/:url', video.vttFileFromUrl);
 
+    router.get('/coverImage/:url', video.coverImage);
+
     /**
      * @swagger
      *     /api/series/{id}:
@@ -582,6 +584,8 @@ module.exports = function (router) {
 
     router.post('/download' , video.downloadVideo);
 
+    router.get('/download/:url', video.downloadVideoFromUrl);
+
     /**
      * @swagger
      *     api/videoTextTrack:
@@ -737,4 +741,6 @@ module.exports = function (router) {
      *           description: Internal server error, an error occurred.
      */
     router.put('/event/:id/updateArchivedDateOfVideosInSerie', video.updateArchivedDateOfVideosInSerie);
+
+    router.post('/validateVTTFile', video.validateVTTFile);
 };
