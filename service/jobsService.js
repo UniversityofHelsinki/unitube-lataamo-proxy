@@ -8,16 +8,28 @@ exports.getJob = async jobId => {
 };
 
 exports.setJobStatus = async (jobId, status) => {
-    logger.info(`[JobsService] setJobStatus with JOB_ID: ${jobId} STATUS: ${status}`);
-    await cacheService.updateCache(jobId, JSON.stringify({jobId, status: status}));
+    try {
+        logger.info(`[JobsService] setJobStatus with JOB_ID: ${jobId} STATUS: ${status}`);
+        await cacheService.updateCache(jobId, JSON.stringify({jobId, status: status}));
+    } catch (exception) {
+        logger.error(`[JobsService] setJobStatusForEvent error: ${exception}`);
+    }
 };
 
 exports.setJobStatusForEvent = async (eventId, status, type) => {
-    logger.info(`[JobsService] setJobStatus with EVENT_ID: ${eventId} STATUS: ${status}`);
-    await cacheService.updateCache(eventId, JSON.stringify({eventId, type: type, status: status}));
+    try {
+        logger.info(`[JobsService] setJobStatus with EVENT_ID: ${eventId} STATUS: ${status}`);
+        await cacheService.updateCache(eventId, JSON.stringify({eventId, type: type, status: status}));
+    } catch (exception) {
+        logger.error(`[JobsService] setJobStatusForEvent error: ${exception}`);
+    }
 };
 
 exports.removeJob = async jobId => {
-    logger.info(`[JobsService] removeJob with JOB_ID: ${jobId}`);
-    await cacheService.removeFromCache(jobId);
+    try {
+        logger.info(`[JobsService] removeJob with JOB_ID: ${jobId}`);
+        await cacheService.removeFromCache(jobId);
+    } catch (exception) {
+        logger.error(`[JobsService] removeJob error: ${exception}`);
+    }
 };
