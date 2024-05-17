@@ -220,9 +220,7 @@ exports.getEventDeletionDate = async (req, res) => {
     try {
         logger.info(`GET video deletion date /event/:id/deletionDate VIDEO ${req.params.id} USER: ${req.user.eppn}`);
         const deletionDate = await dbService.getArchivedDate(req.params.id);
-        if (!deletionDate) {
-          return res.status(404).end();
-        } else if (!await eventsService.userHasPermissionsForEvent(req.user, req.params.id)) {
+        if (!await eventsService.userHasPermissionsForEvent(req.user, req.params.id)) {
           return res.status(403).end();
         }
         res.json({
