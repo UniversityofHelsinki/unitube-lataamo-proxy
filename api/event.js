@@ -18,9 +18,9 @@ exports.getEvent = async (req, res) => {
         logger.info(`GET video details /event/:id VIDEO ${req.params.id} USER: ${req.user.eppn}`);
         const event = await apiService.getEvent(req.params.id);
         if (!event) {
-          return res.status(404).end();
+            return res.status(404).end();
         } else if (!await eventsService.userHasPermissionsForEvent(req.user, event.identifier)) {
-          return res.status(403).end();
+            return res.status(403).end();
         }
 
         const eventWithSeries = await eventsService.getEventWithSeries(event);
@@ -101,13 +101,15 @@ exports.getInboxEvents = async (req, res) => {
         const inboxSeries = await apiService.returnOrCreateUsersSeries(constants.INBOX, loggedUser);
 
         if (inboxSeries && inboxSeries.length > 0) {
+            const series = await apiService.getSeries(inboxSeries[0].identifier);
             inboxEventsWithAcls = await fetchEventMetadata(inboxSeries);
             events = eventsService.filterEventsForClientList(inboxEventsWithAcls, loggedUser)
                 .map(async event => ({
                     ...event,
                     deletionDate: await dbService.getArchivedDate(event.identifier),
                     subtitles: await eventsService.subtitles(event.identifier),
-                    jobs: JSON.parse(await jobsService.getJob(event.identifier))
+                    jobs: JSON.parse(await jobsService.getJob(event.identifier)),
+                    contributors: series.contributors ? series.contributors : []
                 }));
             res.json(await Promise.all(events));
             // insert removal date to postgres db
@@ -188,7 +190,7 @@ exports.moveToTrash = async (req, res) =>{
         logger.info(`PUT /moveEventToTrash/:id VIDEO ${req.body.identifier} USER ${req.user.eppn}`);
         const rawEventMetadata = req.body;
         if (!await eventsService.userHasPermissionsForEvent(req.user, req.params.id)) {
-          return res.status(403).end();
+            return res.status(403).end();
         }
         const loggedUser = userService.getLoggedUser(req.user);
         const response = await apiService.updateEventMetadata(rawEventMetadata, req.body.identifier, true, loggedUser);
@@ -221,9 +223,9 @@ exports.getEventDeletionDate = async (req, res) => {
         logger.info(`GET video deletion date /event/:id/deletionDate VIDEO ${req.params.id} USER: ${req.user.eppn}`);
         const deletionDate = await dbService.getArchivedDate(req.params.id);
         if (!deletionDate) {
-          return res.status(404).end();
+            return res.status(404).end();
         } else if (!await eventsService.userHasPermissionsForEvent(req.user, req.params.id)) {
-          return res.status(403).end();
+            return res.status(403).end();
         }
         res.json({
             deletionDate: deletionDate
@@ -244,7 +246,7 @@ exports.updateEventDeletionDate = async (req,res) => {
         logger.info(`PUT video deletion date /event/:id/deletionDate VIDEO ${req.params.id} USER: ${req.user.eppn}`);
         const rawEventDeletionDateMetadata = req.body;
         if (!await eventsService.userHasPermissionsForEvent(req.user, req.params.id)) {
-          return res.status(403).end();
+            return res.status(403).end();
         }
         const loggedUser = userService.getLoggedUser(req.user);
 

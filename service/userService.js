@@ -22,16 +22,16 @@ exports.isAuthorizedToTranslation = (user) => {
 };
 
 exports.userHasPermissions = (requestUser, contributors) => {
-  const user = exports.getLoggedUser(requestUser);
-  if (user && contributors) {
-    const userInContributors = contributors.includes(user.eppn);
-    const iamGroupInContributors = user.hyGroupCn && user.hyGroupCn.some(
-      iamGroup => 
-      contributors.includes(iamGroup)
-    );
-    return userInContributors || iamGroupInContributors;
-  }
-  return false;
+    const user = exports.getLoggedUser(requestUser);
+    if (user && contributors) {
+        const userInContributors = contributors.includes(user.eppn);
+        const iamGroupInContributors = user.hyGroupCn && user.hyGroupCn.some(
+            iamGroup =>
+                contributors.includes(iamGroup)
+        );
+        return userInContributors || iamGroupInContributors;
+    }
+    return false;
 };
 
 const concatenateArray = (data) => Array.prototype.concat.apply([], data);
