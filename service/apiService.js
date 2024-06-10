@@ -26,7 +26,7 @@ exports.getEvent = async (identifier) => {
     let eventUrl = constants.OCAST_VIDEOS_PATH + identifier;
     const response = await security.opencastBase.get(eventUrl);
     if (response.status === 200) {
-      return response.data;
+        return response.data;
     }
 };
 
@@ -52,17 +52,18 @@ exports.getEventsWithSeriesByIdentifier = async (series) => {
     return {
         ...series,
         eventsCount: events.length,
-        eventColumns: await someEventColumns(events)
+        eventColumns: await someEventColumns(events, series)
     };
 };
 
-const someEventColumns = async (events) => {
+const someEventColumns = async (events, series) => {
     return Promise.all(events.map(async event => {
         return ({
-          ...event,
-          'id': event.identifier, 
-          'cover_image': eventsService.getCoverImageForVideoFromEvent(event),
-          'deletion_date': await dbService.getArchivedDate(event.identifier)
+            ...event,
+            'id': event.identifier,
+            'cover_image': eventsService.getCoverImageForVideoFromEvent(event),
+            'deletion_date': await dbService.getArchivedDate(event.identifier),
+            'contributors': series.contributors ? series.contributors : []
         });
     }));
 };
