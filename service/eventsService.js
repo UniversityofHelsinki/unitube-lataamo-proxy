@@ -76,7 +76,8 @@ exports.filterEventsForClientList = (ocResponseData, loggedUser) => {
                 'media': exports.calculateMediaPropertyForVideoList(event, loggedUser),
                 'publications': exports.mapPublications(exports.calculateMediaPropertyForVideoList(event, loggedUser), event.publications),
                 'archived_date': event.archived_date,
-                'cover_image': this.getCoverImageForVideoFromEvent(event)
+                'cover_image': this.getCoverImageForVideoFromEvent(event),
+                'is_part_of' : event.is_part_of
             });
         });
         return eventArray;
@@ -450,7 +451,8 @@ exports.getEventWithSeries = async (event) => {
     return {
         ...event,
         isPartOf : event.is_part_of,
-        series: series
+        series: series,
+        contributors : series.contributors
     };
 };
 
@@ -650,10 +652,15 @@ exports.subtitles = async (identifier) => {
 exports.userHasPermissionsForEvent = async (user, identifier) => {
     const event = await apiService.getEvent(identifier);
     if (event) {
-      return await seriesService.userHasPermissionsForSeries(
-        user, 
-        event.is_part_of
-      );
+        return await seriesService.userHasPermissionsForSeries(
+            user,
+            event.is_part_of
+        );
     }
     return false;
+};
+
+exports.getContributorsForEvent = (event, seriesList) => {
+    const foundSeries = seriesList.find(series => series.identifier === event.is_part_of);
+    return foundSeries && foundSeries.contributors ? foundSeries.contributors : [];
 };

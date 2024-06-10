@@ -252,7 +252,8 @@ exports.getUserVideos = async (req, res) => {
         const eventList = eventsService.filterEventsForClientList(concatenatedEventsArray, loggedUser).map(async event => ({
             ...event,
             deletionDate: await dbService.getArchivedDate(event.identifier),
-            subtitles: await eventsService.subtitles(event.identifier)
+            subtitles: await eventsService.subtitles(event.identifier),
+            contributors: eventsService.getContributorsForEvent(event, ownSeriesWithoutTrash)
         }));
         res.json(await Promise.all(eventList));
     } catch (error) {
