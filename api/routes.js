@@ -11,6 +11,7 @@ const iamGroups = require('./iamGroups');
 const persons = require('./persons');
 const jobs = require('./jobs');
 const licenseService = require('../service/licenseService');
+const releaseNotes = require('./releaseNotes');
 
 const swaggerUi = require('swagger-ui-express');
 const apiSpecs = require('../config/swagger');
@@ -743,4 +744,6 @@ module.exports = function (router) {
     router.put('/event/:id/updateArchivedDateOfVideosInSerie', video.updateArchivedDateOfVideosInSerie);
 
     router.post('/validateVTTFile', video.validateVTTFile);
+
+    router.get('/releaseNotes', releaseNotes.getReleaseNotes);
 };

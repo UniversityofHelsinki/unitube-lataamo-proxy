@@ -7,6 +7,8 @@ const username = process.env.LATAAMO_OPENCAST_USER;
 const password = process.env.LATAAMO_OPENCAST_PASS;
 const userpass = Buffer.from(`${username}:${password}`).toString('base64');
 const auth = `Basic ${userpass}`;
+const gitlabAuth = process.env.GITLAB_TOKEN;
+const gitlabHost = process.env.GITLAB_HOST;
 const axios = require('axios'); // https://www.npmjs.com/package/axios
 const crypto = require('crypto');
 const secretKey = process.env.CRYPTO_SECRET_KEY;
@@ -56,6 +58,14 @@ module.exports.opencastPresentationBase = axios.create({
     maxContentLength: Infinity, // https://github.com/yakovkhalinsky/backblaze-b2/issues/45
     validateStatus: () => { // https://github.com/axios/axios/issues/1143
         return true;        // without this axios might throw error on non 200 responses
+    }
+});
+
+module.exports.gitlabBase = axios.create({
+    baseURL: gitlabHost,
+    headers: {'PRIVATE-TOKEN': gitlabAuth},
+    validateStatus: () => {
+        return true;
     }
 });
 
