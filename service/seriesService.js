@@ -243,9 +243,9 @@ const calculateVisibilityPropertyForSeries = (series) => setVisibilityForSeries(
 exports.getSeriesIdentifier = (series) => series.find(series => series.identifier).identifier;
 
 exports.userHasPermissionsForSeries = async (user, identifier) => {
-  const series = await apiService.getSeries(identifier);
-  if (series) {
-    return userService.userHasPermissions(user, series.contributors);
-  }
-  return false;
+    const series = await apiService.getSeries(identifier);
+    if (series) {
+        return userService.userHasPermissions(user, series.contributors, series.title);
+    }
+    return false;
 };
