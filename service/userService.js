@@ -21,16 +21,15 @@ exports.isAuthorizedToTranslation = (user) => {
     return group ? true : false;
 };
 
-exports.userHasPermissions = (requestUser, contributors, title) => {
+exports.userHasPermissions = (requestUser, contributors) => {
     const user = exports.getLoggedUser(requestUser);
-    if (user && contributors && title) {
-        const isNotInboxSeries = !title.toLowerCase().includes(constants.INBOX);
+    if (user && contributors) {
         const userInContributors = contributors.includes(user.eppn);
         const iamGroupInContributors = user.hyGroupCn && user.hyGroupCn.some(
             iamGroup =>
                 contributors.includes(iamGroup)
         );
-        return (userInContributors || iamGroupInContributors) && isNotInboxSeries;
+        return (userInContributors || iamGroupInContributors);
     }
     return false;
 };

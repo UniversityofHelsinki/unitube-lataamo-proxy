@@ -731,7 +731,7 @@ describe('Updating videos aka events', () => {
     it('Should move event to trash series when deleted and update skip email status to true', async () => {
         await client.query('INSERT INTO videos (video_id, archived_date, video_creation_date) VALUES (234234234, \'2019-01-01\'::date, \'2010-01-01\'::date)');
 
-      
+
         test.mockEvent();
         test.mockInboxSeriesCall1();
         test.mockOpencastEventNoActiveTransaction('234234234');

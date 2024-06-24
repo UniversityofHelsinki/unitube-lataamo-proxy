@@ -245,7 +245,7 @@ exports.getSeriesIdentifier = (series) => series.find(series => series.identifie
 exports.userHasPermissionsForSeries = async (user, identifier) => {
     const series = await apiService.getSeries(identifier);
     if (series) {
-        return userService.userHasPermissions(user, series.contributors, series.title);
+        return userService.userHasPermissions(user, series.contributors);
     }
     return false;
 };

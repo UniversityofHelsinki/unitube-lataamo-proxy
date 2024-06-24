@@ -3881,10 +3881,11 @@ const lataamoSeries6 = () =>
         .get(CONSTANTS.OCAST_SERIES_PATH + '?filter=contributors:Tester-XYZ,contributors:grp-lataamo-6')
         .reply(200, mockUserSeries3);
 
-const lataamoSeries7 = () =>
+const lataamoSeries7 = () => {
     nock(CONSTANTS.OCAST_BASE_URL)
         .get(CONSTANTS.OCAST_SERIES_PATH + '123456')
         .reply(200, mockUserSeries4);
+};
 
 const lataamoSeries8 = () =>
     nock(CONSTANTS.OCAST_BASE_URL)
