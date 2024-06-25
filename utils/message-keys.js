@@ -19,6 +19,10 @@ const ERROR_MESSAGE_FAILED_TO_DELETE_SERIES = 'error-failed-to-delete-series';
 const ERROR_MESSAGE_FAILED_TO_GET_IAM_GROUPS = 'error-failed-to-get-iam-groups';
 const ERROR_MESSAGE_FAILED_TO_GET_PERSONS = 'error-failed-to-get-iam-persons';
 const ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED = 'error_failed_to_save_series_inbox_not_allowed';
+const ERROR_MESSAGE_FAILED_TO_DELETE_SERIES_INBOX_NOT_ALLOWED = 'error_failed_to_delete_series_inbox_not_allowed';
+const ERROR_MESSAGE_FAILED_TO_DELETE_SERIES_TRASH_NOT_ALLOWED = 'error_failed_to_delete_series_trash_not_allowed';
+const ERROR_MESSAGE_FAILED_TO_UPDATE_SERIES_INBOX_NOT_ALLOWED = 'error_message_failed_to_update_series_inbox_not_allowed';
+const ERROR_MESSAGE_FAILED_TO_UPDATE_SERIES_TRASH_NOT_ALLOWED = 'error_message_failed_to_update_series_trash_not_allowed';
 const ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_TRASH_NOT_ALLOWED = 'error_failed_to_save_series_trash_not_allowed';
 const ERROR_MESSAGE_FAILED_TO_GET_INBOX_EVENTS = 'error-failed-to-get-inbox-events';
 const ERROR_MESSAGE_FAILED_TO_GET_TRASH_EVENTS = 'error-failed-to-get-trash-events';
@@ -58,6 +62,10 @@ module.exports = {
     ERROR_MESSAGE_FAILED_TO_GET_PERSONS,
     SUCCESS_MESSAGE_VIDEO_UPLOAD,
     ERROR_MESSAGE_FAILED_TO_SAVE_SERIES_INBOX_NOT_ALLOWED,
+    ERROR_MESSAGE_FAILED_TO_DELETE_SERIES_INBOX_NOT_ALLOWED,
+    ERROR_MESSAGE_FAILED_TO_DELETE_SERIES_TRASH_NOT_ALLOWED,
+    ERROR_MESSAGE_FAILED_TO_UPDATE_SERIES_TRASH_NOT_ALLOWED,
+    ERROR_MESSAGE_FAILED_TO_UPDATE_SERIES_INBOX_NOT_ALLOWED,
     ERROR_MESSAGE_FAILED_TO_GET_INBOX_EVENTS,
     ERROR_MESSAGE_FAILED_TO_DOWNLOAD_VIDEO,
     ERROR_MESSAGE_FAILED_TO_GET_TRASH_EVENTS,

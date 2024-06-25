@@ -177,8 +177,6 @@ exports.generateAutomaticTranscriptionsForVideo = async (req, res) => {
             const result = await fileService.streamVideoToFile(req, res, videoUrl, transcriptionId);
             logger.info(`starting translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
             let translationObject;
-            // using Azure Speech to Text Batch Transcription API With Whisper Model to generate VTT file
-            logger.info(`starting WHISPER translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
             translationObject = await azureServiceBatchTranscription.startProcess(result.videoPath, result.videoBasePath, translationLanguage, result.fileName, transcriptionId, loggedUser.eppn, translationModel );
 
             if (areAllRequiredFiles(translationObject, req.user.eppn, identifier) && isValidVttFile(translationObject, identifier, req.user.eppn)) {
@@ -273,7 +271,7 @@ exports.updateArchivedDateOfVideosInSerie = async (req, res) => {
         const loggedUser = userService.getLoggedUser(req.user);
         const seriesIdentifier = req.params.id;
         if (!await seriesService.userHasPermissionsForSeries(req.user, seriesIdentifier)) {
-          return res.status(403).end();
+            return res.status(403).end();
         }
         const rawEventDeletionDateMetadata = req.body;
         const allEventsWithMetaData = await eventsService.getAllSerieEvents(seriesIdentifier);
