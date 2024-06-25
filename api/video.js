@@ -271,7 +271,7 @@ exports.updateArchivedDateOfVideosInSerie = async (req, res) => {
         const loggedUser = userService.getLoggedUser(req.user);
         const seriesIdentifier = req.params.id;
         if (!await seriesService.userHasPermissionsForSeries(req.user, seriesIdentifier)) {
-          return res.status(403).end();
+            return res.status(403).end();
         }
         const rawEventDeletionDateMetadata = req.body;
         const allEventsWithMetaData = await eventsService.getAllSerieEvents(seriesIdentifier);

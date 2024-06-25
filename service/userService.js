@@ -29,7 +29,7 @@ exports.userHasPermissions = (requestUser, contributors) => {
             iamGroup =>
                 contributors.includes(iamGroup)
         );
-        return userInContributors || iamGroupInContributors;
+        return (userInContributors || iamGroupInContributors);
     }
     return false;
 };
