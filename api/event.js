@@ -42,11 +42,11 @@ exports.getEvent = async (req, res) => {
             return [encrypted, { ...eventDownloadableMedia[url], url: encrypted }];
         }));
 
-        res.json({ 
-          ...eventWithLicenseOptionsAndVideoViews, 
-          downloadableMedia: encryptedDownloadableMedia,
-          jobs: JSON.parse(await jobsService.getJob(event.identifier)),
-          subtitles: await eventsService.subtitles(event.identifier)
+        res.json({
+            ...eventWithLicenseOptionsAndVideoViews,
+            downloadableMedia: encryptedDownloadableMedia,
+            jobs: JSON.parse(await jobsService.getfJob(event.identifier)),
+            subtitles: await eventsService.subtitles(event.identifier)
         });
 
     } catch (error) {
