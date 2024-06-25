@@ -45,7 +45,7 @@ exports.getEvent = async (req, res) => {
         res.json({
             ...eventWithLicenseOptionsAndVideoViews,
             downloadableMedia: encryptedDownloadableMedia,
-            jobs: JSON.parse(await jobsService.getfJob(event.identifier)),
+            jobs: JSON.parse(await jobsService.getJob(event.identifier)),
             subtitles: await eventsService.subtitles(event.identifier)
         });
 
