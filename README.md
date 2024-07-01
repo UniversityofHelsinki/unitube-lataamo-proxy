@@ -21,6 +21,8 @@ STORAGE_CONTAINER_NAME=(found in keepass)
 TRANSCRIPTION_API_KEY=(found in keepass)
 SPEECH_TO_TEXT_BASE_URL=(found in keepass)
 SPEECH_TO_TEXT_MODEL=(found in keepass)
+GITLAB_TOKEN=(found in keepass)
+GITLAB_HOST= (gitlab host url)
 
 ### Install FFMPEG for local development. Library is used to convert video files to mp4 format.
 #### Windows

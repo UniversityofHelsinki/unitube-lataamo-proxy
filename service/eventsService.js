@@ -1,6 +1,7 @@
 const equal = require('deep-equal');
 const commonService = require('./commonService');
 const apiService = require('./apiService');
+const seriesService = require('./seriesService');
 const moment = require('moment');
 const momentDurationFormatSetup = require('moment-duration-format');
 momentDurationFormatSetup(moment);
@@ -14,8 +15,10 @@ const pLimit = require('p-limit');
 // Limit number of request fetched concurrently
 const limit = pLimit(5);
 const { createHash } = require('crypto');
+const {encrypt} = require('../utils/encrption');
+const {getMediaUrlsFromPublication} = require('./publicationService');
 
-const _mapPublications = (videoList, publications) => {
+exports.mapPublications = (videoList, publications) => {
     const media = publications.map(p => p.media).flatMap(m => m);
     const result = {};
     videoList.forEach(url => {
@@ -24,6 +27,27 @@ const _mapPublications = (videoList, publications) => {
         }
     });
     return result;
+};
+
+
+exports.getCoverImageForVideoFromEvent = (event) => {
+    if (event.publications && event.publications.length > 0) {
+        for (const publication of event.publications) {
+            if (publication.attachments && publication.attachments.length > 0) {
+                for (const attachments of publication.attachments) {
+                    if (attachments.flavor) {
+                        if (attachments.flavor === constants.PRESENTER_FLAVOR_FOR_VIDEO_THUMBNAIL) {
+                            if (attachments.url) {
+                                return encrypt(attachments.url);
+                            } else {
+                                return '';
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 };
 
 
@@ -49,9 +73,11 @@ exports.filterEventsForClientList = (ocResponseData, loggedUser) => {
                 'visibility': calculateVisibilityPropertyForVideoList(event, loggedUser),
                 'created': event.created,
                 'series': event.series,
-                'media': calculateMediaPropertyForVideoList(event, loggedUser),
-                'publications': _mapPublications(calculateMediaPropertyForVideoList(event, loggedUser), event.publications),
-                'archived_date': event.archived_date
+                'media': exports.calculateMediaPropertyForVideoList(event, loggedUser),
+                'publications': exports.mapPublications(exports.calculateMediaPropertyForVideoList(event, loggedUser), event.publications),
+                'archived_date': event.archived_date,
+                'cover_image': this.getCoverImageForVideoFromEvent(event),
+                'is_part_of' : event.is_part_of
             });
         });
         return eventArray;
@@ -82,8 +108,8 @@ exports.filterEventsForClientTrash = (ocResponseData, loggedUser) => {
                 'visibility' : calculateVisibilityPropertyForVideoList(event, loggedUser),
                 'created': event.created,
                 'series': event.series,
-                'media' : calculateMediaPropertyForVideoList(event, loggedUser),
-                'publications': _mapPublications(calculateMediaPropertyForVideoList(event, loggedUser), event.publications)
+                'media' : exports.calculateMediaPropertyForVideoList(event, loggedUser),
+                'publications': exports.mapPublications(exports.calculateMediaPropertyForVideoList(event, loggedUser), event.publications)
             });
         }
     });
@@ -114,7 +140,7 @@ const isValidUrl = urlString => {
     try {
         let url;
         url =new URL(urlString);
-        return url.protocol === "http:" || url.protocol === "https:";
+        return url.protocol === 'http:' || url.protocol === 'https:';
     }
     catch (exception) {
         console.log(exception);
@@ -171,7 +197,7 @@ const filterOnlyUniqueVideos = (mediaArrayOfObjects) => {
     return mediaArrayOfObjects.filter((elem, index) => mediaArrayOfObjects.findIndex(obj => obj.hash === elem.hash) === index);
 };
 
-const calculateMediaPropertyForVideoList = (event, loggedUser) => {
+exports.calculateMediaPropertyForVideoList = (event, loggedUser) => {
     try {
         let mediaArrayOfObjects = [];
         if (event.publications) {
@@ -180,7 +206,7 @@ const calculateMediaPropertyForVideoList = (event, loggedUser) => {
                     publication.media.forEach(media => {
                         if (media.has_video && event.processing_state === constants.OPENCAST_STATE_SUCCEEDED) {
                             if (media.height !== undefined && media.flavor !== undefined && isValidUrl(media.url)) {
-                                mediaArrayOfObjects.push({ "hash" : hash(media.height + media.url), "quality" : media.height , "url" : media.url , flavor : media.flavor});
+                                mediaArrayOfObjects.push({ 'hash' : hash(media.height + media.url), 'quality' : media.height , 'url' : media.url , flavor : media.flavor});
                             }
                         }
                     });
@@ -225,7 +251,7 @@ const calculateVisibilityPropertyForVideoList = (video, loggedUser) => {
             moodleAclInstructor = video.acl.filter(acl => acl.role.includes(constants.MOODLE_ACL_INSTRUCTOR));
             moodleAclLearner = video.acl.filter(acl => acl.role.includes(constants.MOODLE_ACL_LEARNER));
         } else {
-            console.log("calculating visibility property for video in list , warning video has no acl roles" , JSON.stringify(video));
+            console.log('calculating visibility property for video in list , warning video has no acl roles' , JSON.stringify(video));
             logger.warn(`warning video has no acl roles ${video.identifier} FOR USER ${loggedUser.eppn}`);
         }
 
@@ -258,7 +284,7 @@ const calculateVisibilityPropertyForVideo = (video, loggedUser) => {
             moodleAclInstructor = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_INSTRUCTOR));
             moodleAclLearner = video.acls.filter(acl => acl.role.includes(constants.MOODLE_ACL_LEARNER));
         } else {
-            console.log("calculating visibility property for video in list , warning video has no acl roles" , JSON.stringify(video));
+            console.log('calculating visibility property for video in list , warning video has no acl roles' , JSON.stringify(video));
             logger.warn(`warning video has no acl roles : ${video.identifier} FOR USER ${loggedUser.eppn}`);
         }
 
@@ -425,7 +451,8 @@ exports.getEventWithSeries = async (event) => {
     return {
         ...event,
         isPartOf : event.is_part_of,
-        series: series
+        series: series,
+        contributors : series.contributors
     };
 };
 
@@ -445,11 +472,18 @@ exports.getMetadataForEvent = async (event) => {
     };
 };
 
+const encryptVideoUrls = (media) => {
+    media.forEach(media => {
+        media.url = encrypt(media.url);
+    });
+    return media;
+};
+
 exports.getMediaForEvent = async (event) => {
     const media = await apiService.getMediaForEvent(event);
     return {
         ...event,
-        media: media
+        media: encryptVideoUrls(media)
     };
 };
 
@@ -509,16 +543,16 @@ exports.modifySeriesEventMetadataForOpencast = (metadata) => {
     const metadataArray = [];
 
     metadataArray.push({
-            'id' : 'title',
-            'value': metadata.title },
-        {
-            'id' : 'description',
-            'value': metadata.description
-        },
-        {
-            'id' : 'contributor',
-            'value': metadata.contributors
-        }
+        'id' : 'title',
+        'value': metadata.title },
+    {
+        'id' : 'description',
+        'value': metadata.description
+    },
+    {
+        'id' : 'contributor',
+        'value': metadata.contributors
+    }
     );
 
     return metadataArray;
@@ -591,29 +625,42 @@ const deleteFile = (filename) => {
 };
 
 exports.getEventViews = async (id, eventWithLicenseOptions) => {
-    const eventViews = await apiService.getEventViews(id);
+    const eventViews = await apiService.getEventViews(id); // not found in OC 13
     return {
         ...eventWithLicenseOptions,
-        views: eventViews.stats.views
+        views: '-'
     };
 };
 
-/* Not in use
-const returnOrCreateUsersInboxSeries = async (loggedUser) => {
-    const lataamoInboxSeriesTitle = inboxSeriesTitleForLoggedUser(loggedUser.eppn);
+/**
+ * Checks if video have subtitle
+ *
+ * @param identifier
+ * @returns {Promise<boolean>}
+ */
+exports.subtitles = async (identifier) => {
+    const publications = await apiService.getPublicationsForEvent(identifier);
+    const mediaUrls = getMediaUrlsFromPublication(identifier, publications);
+    const episode = await apiService.getEpisodeForEvent(identifier);
+    let episodeWithMediaUrls = await this.getVttWithMediaUrls(episode, mediaUrls);
+    const subtitles = (episodeWithMediaUrls || [])
+        .map((video) => video && video.vttFile && video.vttFile.url)
+        .filter(url => url !== undefined && url !== '' && !url.endsWith('empty.vtt'));
+    return subtitles.length > 0;
+};
 
-    try {
-        const userSeries = await apiService.getUserSeries(loggedUser);
-        let inboxSeries = userSeries.find(series => series.title === lataamoInboxSeriesTitle);
-
-        if (!inboxSeries) {
-            logger.info(`inbox series not found with title ${lataamoInboxSeriesTitle}`);
-            inboxSeries = await apiService.createLataamoInboxSeries(loggedUser.eppn);
-            logger.info(`Created inbox ${inboxSeries}`);
-        }
-        return inboxSeries;
-    }catch(err){
-        logger.error(`Error in returnOrCreateUsersInboxSeries ${err}`);
-        throw err;
+exports.userHasPermissionsForEvent = async (user, identifier) => {
+    const event = await apiService.getEvent(identifier);
+    if (event) {
+        return await seriesService.userHasPermissionsForSeries(
+            user,
+            event.is_part_of
+        );
     }
-};*/
+    return false;
+};
+
+exports.getContributorsForEvent = (event, seriesList) => {
+    const foundSeries = seriesList.find(series => series.identifier === event.is_part_of);
+    return foundSeries && foundSeries.contributors ? foundSeries.contributors : [];
+};

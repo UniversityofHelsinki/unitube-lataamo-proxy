@@ -7,8 +7,6 @@ const apiService = require('../service/apiService');
 const messageKeys = require('../utils/message-keys');
 const logger = require('../config/winstonLogger');
 const constants = require('../utils/constants');
-const { splitContributorsFromSeries, isContributorMigrationActive } = require('../utils/ocastMigrationUtils');
-
 
 /**
  * Returns a series by series' id.
@@ -30,13 +28,10 @@ const { splitContributorsFromSeries, isContributorMigrationActive } = require('.
 exports.getSeries = async (req, res) => {
     try {
         const series = await apiService.getSeries(req.params.id);
-        // check the feature flag value
-        if (!isContributorMigrationActive()) {
-            await apiService.contributorsToIamGroupsAndPersons(series);
-        }else{
-            await apiService.contributorsToIamGroupsAndPersons(
-                splitContributorsFromSeries(series, req.user.eppn));
+        if (!userService.userHasPermissions(req.user, series.contributors)) {
+            return res.status(403).end();
         }
+        await apiService.contributorsToIamGroupsAndPersons(series);
         const seriesWithAllEventsCount = await eventsService.getAllEventsCountForSeries(series);
         const userSeriesWithPublished = await seriesService.addPublishedInfoInSeriesAndMoodleRoles(seriesWithAllEventsCount);
         res.json(userSeriesWithPublished);
@@ -50,9 +45,21 @@ exports.getSeries = async (req, res) => {
 };
 
 
+
 exports.updateSeries = async (req, res) => {
     try {
+        if (!await seriesService.userHasPermissionsForSeries(req.user, req.body.identifier)) {
+            return res.status(403).end();
+        }
         const rawEventMetadata = req.body;
+        let existsInbox = rawEventMetadata.title.toLowerCase().includes(constants.INBOX);
+        let existsTrash = rawEventMetadata.title.toLowerCase().includes(constants.TRASH);
+
+        if (existsInbox) {
+            return res.status(403).end();
+        } else if(existsTrash){
+            return res.status(403).end();
+        }
         const loggedUser = userService.getLoggedUser(req.user);
         seriesService.addUserToEmptyContributorsList(rawEventMetadata, loggedUser);
         let modifiedMetadata = eventsService.modifySeriesEventMetadataForOpencast(rawEventMetadata);
@@ -81,6 +88,9 @@ exports.updateSeries = async (req, res) => {
 exports.updateSeriesAcls = async (req, res) => {
     try {
         const rawEventMetadata = req.body;
+        if (!await seriesService.userHasPermissionsForSeries(req.user, req.body.identifier)) {
+            return res.status(403).end();
+        }
         const loggedUser = userService.getLoggedUser(req.user);
         seriesService.addUserToEmptyContributorsList(rawEventMetadata, loggedUser);
         let modifiedSeriesAclMetadata = await seriesService.getSerieRoles(req.body.identifier);
@@ -209,6 +219,28 @@ exports.createSeries = async (req, res) => {
 
 exports.deleteSeries = async (req, res) => {
     try {
+        if (!await seriesService.userHasPermissionsForSeries(req.user, req.params.id)) {
+            return res.status(403).end();
+        }
+
+        const series = await apiService.getSeries(req.params.id);
+        let existsInbox = series.title.toLowerCase().includes(constants.INBOX);
+        let existsTrash = series.title.toLowerCase().includes(constants.TRASH);
+
+        if (existsInbox) {
+            res.status(500);
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_DELETE_SERIES_INBOX_NOT_ALLOWED,
+                msg: 'Inbox word is not allowed in series title'
+            });
+        } else if(existsTrash){
+            res.status(500);
+            res.json({
+                message: messageKeys.ERROR_MESSAGE_FAILED_TO_DELETE_SERIES_TRASH_NOT_ALLOWED,
+                msg: 'trash word is not allowed in series title'
+            });
+        }
+
         const response = await apiService.deleteSeries(req.params.id);
         res.status(response.status);
         res.json({});

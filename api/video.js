@@ -5,6 +5,7 @@ const seriesService = require('../service/seriesService');
 const eventsService = require('../service/eventsService');
 const apiService = require('../service/apiService');
 const publicationService = require('../service/publicationService');
+const fileUtils = require('../utils/fileUtils');
 const logger = require('../config/winstonLogger');
 const messageKeys = require('../utils/message-keys');
 const webvttParser = require('node-webvtt');
@@ -15,45 +16,45 @@ const { parseSync, stringifySync } = require('subtitle');
 const dbService = require('../service/dbService');
 const constants = require('../utils/constants');
 const dbApi = require('./dbApi');
-const { algorithm, key, encryptionIV } = require('../config/security');
-const crypto = require('crypto');
 const fileService = require('../service/fileService');
 const {v4: uuidv4} = require('uuid');
 const HttpStatus = require('http-status');
 const azureServiceBatchTranscription = require('../service/azureServiceBatchTranscription');
 const { areAllRequiredFiles , isValidVttFile, deleteFile, removeDirectory } = require('../utils/fileUtils');
-const jobsService = require("../service/jobsService");
+const jobsService = require('../service/jobsService');
+const {encrypt, decrypt} = require('../utils/encrption');
 
-const encrypt = url => {
-    const cipher = crypto.createCipheriv(algorithm, key, encryptionIV);
-    const encrypted = Buffer.from(
-        cipher.update(url, 'utf8', 'hex') + cipher.final('hex')
-    ).toString('base64');
-    return encrypted;
-};
+const encryptUrl = videoUrl => encrypt(videoUrl);
 
-const decrypt = url => {
-    const buff = Buffer.from(url, 'base64');
-    const decipher = crypto.createDecipheriv(algorithm, key, encryptionIV);
-    return (
-        decipher.update(buff.toString('utf8'), 'hex', 'utf8') +
-        decipher.final('utf8'));
-};
 
-const encryptUrl = videoUrl =>  encrypt(videoUrl);
 
+/**
+ * Encrypts the video URL and VTT file URL (if present) in the given array of episode objects.
+ *
+ * @param {Array} episodeWithMediaUrls - An array of episode objects containing video and VTT file URLs.
+ * @returns {Array} - An array of episode objects with encrypted video and VTT file URLs.
+ */
 const encryptVideoAndVTTUrls = episodeWithMediaUrls => {
-    episodeWithMediaUrls.some(episodeWithMediaUrl => {
-        const videoUrl = episodeWithMediaUrl.url;
+    return episodeWithMediaUrls.map(episodeWithMediaUrl => {
+        // making a shallow copy to avoiding changing of the original object
+        let episodeCopy = { ...episodeWithMediaUrl };
+
+        // encrypt the video URL
+        const videoUrl = episodeCopy.url;
         const encryptedUrl = encryptUrl(videoUrl);
-        episodeWithMediaUrl.url = encryptedUrl;
-        if (episodeWithMediaUrl.vttFile && episodeWithMediaUrl.vttFile.url) {
-            episodeWithMediaUrl.vttFile.filename = episodeWithMediaUrl.vttFile.url.substring(episodeWithMediaUrl.vttFile.url.lastIndexOf('/') + 1);
-            const encryptedVTTFileUrl = encryptUrl(episodeWithMediaUrl.vttFile.url);
-            episodeWithMediaUrl.vttFile.url = encryptedVTTFileUrl;
+        episodeCopy.url = encryptedUrl;
+
+        // encrypt the vttFile URL if it's present
+        if (episodeCopy.vttFile && episodeCopy.vttFile.url) {
+            // making a shallow copy to avoiding changing of the original object
+            episodeCopy.vttFile = { ...episodeCopy.vttFile };
+
+            episodeCopy.vttFile.filename = episodeCopy.vttFile.url.substring(episodeCopy.vttFile.url.lastIndexOf('/') + 1);
+            const encryptedVTTFileUrl = encryptUrl(episodeCopy.vttFile.url);
+            episodeCopy.vttFile.url = encryptedVTTFileUrl;
         }
+        return episodeCopy;
     });
-    return episodeWithMediaUrls;
 };
 
 const parseVTTFileFromUrl = (response) => {
@@ -69,6 +70,12 @@ exports.vttFileFromUrl = (req, res) => {
 exports.vttFile = async (req, res) => {
     const url = decrypt(req.params.url);
     const response = await apiService.downloadVttFile(url);
+    // Get the file name from the URL
+    const fileName = new URL(url).pathname.split('/').pop();
+    res.writeHead(200, {
+        'Content-Type': 'application/octet-stream',
+        'Content-Disposition': `attachment; filename="${fileName}"`,
+    });
     response.body.pipe(res);
 };
 
@@ -89,6 +96,24 @@ const calculateRangeHeaders = (req) => {
         }
     } else {
         return range;
+    }
+};
+
+exports.coverImage = async (req, res) => {
+    try {
+        logger.info(`GET cover image /coverImage/:id VIDEO ${req.params.id} USER: ${req.user.eppn}`);
+        const url = decrypt(req.params.url);
+        const response = await apiService.getCoverImage(url);
+        res.set(response.headers);
+        response.pipe(res);
+    } catch (error) {
+        const msg = error.message;
+        logger.error(`GET /coverImage/:id VIDEO: ${req.params.id} USER: ${req.user.eppn} CAUSE: ${error}`);
+        res.status(500);
+        res.json({
+            message: messageKeys.ERROR_MESSAGE_FAILED_TO_GET_EVENT_COVER_IMAGE,
+            msg
+        });
     }
 };
 
@@ -152,24 +177,24 @@ exports.generateAutomaticTranscriptionsForVideo = async (req, res) => {
             const result = await fileService.streamVideoToFile(req, res, videoUrl, transcriptionId);
             logger.info(`starting translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
             let translationObject;
-            // using Azure Speech to Text Batch Transcription API With Whisper Model to generate VTT file
-            logger.info(`starting WHISPER translation for VIDEO ${identifier} with translation model ${translationModel} and language ${translationLanguage} with USER ${req.user.eppn}`);
             translationObject = await azureServiceBatchTranscription.startProcess(result.videoPath, result.videoBasePath, translationLanguage, result.fileName, transcriptionId, loggedUser.eppn, translationModel );
 
             if (areAllRequiredFiles(translationObject, req.user.eppn, identifier) && isValidVttFile(translationObject, identifier, req.user.eppn)) {
-                const response = await apiService.addWebVttFile(translationObject, identifier, translationModel, translationLanguage);
+                const convertedTranslationObject = await fileUtils.convertToUTF8(translationObject);
+
+                const response = await apiService.addWebVttFile(convertedTranslationObject, identifier, translationModel, translationLanguage);
                 if (response.status === 201) {
                     logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
                     await apiService.republishWebVttFile(identifier);
-                    await deleteFile(translationObject.originalname, transcriptionId, false);
-                    await deleteFile(translationObject.audioFile, transcriptionId, false);
+                    await deleteFile(convertedTranslationObject.originalname, transcriptionId, false);
+                    await deleteFile(convertedTranslationObject.audioFile, transcriptionId, false);
                     await deleteFile(result.videoPath, transcriptionId, false);
                     // remove upload directory from disk
                     await removeDirectory(result.videoBasePath, transcriptionId, false);
                     await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_FINISHED, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
                 } else {
                     logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
-                    await deleteFile(translationObject.audioFile, transcriptionId, false);
+                    await deleteFile(convertedTranslationObject.audioFile, transcriptionId, false);
                     await jobsService.setJobStatusForEvent(identifier, constants.JOB_STATUS_ERROR, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
                 }
             } else {
@@ -222,7 +247,13 @@ exports.getUserVideos = async (req, res) => {
         await getArchivedDate(concatenatedEventsArray);
         // insert removal date to postgres db
         await dbService.insertArchivedAndCreationDates(concatenatedEventsArray, loggedUser);
-        res.json(eventsService.filterEventsForClientList(concatenatedEventsArray, loggedUser));
+        const eventList = eventsService.filterEventsForClientList(concatenatedEventsArray, loggedUser).map(async event => ({
+            ...event,
+            deletionDate: await dbService.getArchivedDate(event.identifier),
+            subtitles: await eventsService.subtitles(event.identifier),
+            contributors: eventsService.getContributorsForEvent(event, ownSeriesWithoutTrash)
+        }));
+        res.json(await Promise.all(eventList));
     } catch (error) {
         res.status(500);
         const msg = error.message;
@@ -239,6 +270,9 @@ exports.updateArchivedDateOfVideosInSerie = async (req, res) => {
         logger.info(`PUT /updateArchivedDateOfVideosInSerie USER: ${req.user.eppn}`);
         const loggedUser = userService.getLoggedUser(req.user);
         const seriesIdentifier = req.params.id;
+        if (!await seriesService.userHasPermissionsForSeries(req.user, seriesIdentifier)) {
+            return res.status(403).end();
+        }
         const rawEventDeletionDateMetadata = req.body;
         const allEventsWithMetaData = await eventsService.getAllSerieEvents(seriesIdentifier);
 
@@ -294,6 +328,9 @@ const isReturnedFromTrash = (video) => {
 exports.updateVideo = async (req, res) => {
     try {
         logger.info(`PUT /userVideos/:id VIDEO ${req.body.identifier} USER ${req.user.eppn}`);
+        if (!eventsService.userHasPermissionsForEvent(req.user, req.body.identifier)) {
+          return res.status(403).end();
+        }
         const loggedUser = userService.getLoggedUser(req.user);
         const rawEventMetadata = req.body;
         const response = await apiService.updateEventMetadata(rawEventMetadata, req.body.identifier, false, req.user);
@@ -325,6 +362,30 @@ exports.updateVideo = async (req, res) => {
     }
 };
 
+exports.downloadVideoFromUrl = async (req, res) => {
+    try {
+        logger.info(`GET download VIDEO USER ${req.user.eppn}`);
+        const url = decrypt(req.params.url);
+        const response = await apiService.downloadVideo(url);
+        // Get the file name from the URL
+        const fileName = new URL(url).pathname.split('/').pop();
+        res.writeHead(200, {
+            'Content-Type': 'application/octet-stream',
+            'Content-Disposition': `attachment; filename="${fileName}"`,
+        });
+        response.body.pipe(res);
+    } catch(error) {
+        console.log('ERROR', error.message);
+        res.status(500);
+        const msg = error.message;
+        logger.error(`Error PUT /userVideos/:id ${msg} USER ${req.user.eppn}`);
+        res.json({
+            message: messageKeys.ERROR_MESSAGE_FAILED_TO_DOWNLOAD_VIDEO,
+            msg
+        });
+    }
+};
+
 exports.downloadVideo = async (req, res) => {
     try {
         logger.info(`POST download VIDEO ${req.body.mediaUrl} USER ${req.user.eppn}`);
@@ -342,6 +403,8 @@ exports.downloadVideo = async (req, res) => {
     }
 };
 
+
+
 // buffer and original name are the desired, required properties of the subtitle file
 const srtToVtt = (srtSubtitleFile) => {
     const convertedVtt = {};
@@ -353,6 +416,25 @@ const srtToVtt = (srtSubtitleFile) => {
 
 const isVttFile = (fileMimeType) => {
     return fileMimeType === 'text/vtt';
+};
+
+const validateVTTFile = async (req, res, vttFile) => {
+    try {
+        if (!vttFile) {
+            throw new Error('No file provided');
+        }
+
+        if (!isVttFile(vttFile.mimetype)) {
+            logger.info(`Subtitle file not in a vtt format, trying to convert. [File: (${vttFile.filename}) MIME type: ${vttFile.mimetype}]. -- USER ${req.user.eppn}`);
+            vttFile = srtToVtt(vttFile);
+        }
+
+        // https://www.npmjs.com/package/node-webvtt#parsing
+        await webvttParser.parse(vttFile.buffer.toString(), { strict: true });
+    } catch (err) {
+        logger.error(`VTT file seems to be malformed (${err.message}), please check. -- USER ${req.user.eppn}`);
+        throw new Error(`Malformed WebVTT file: ${err.message}`);
+    }
 };
 
 
@@ -373,65 +455,54 @@ const isVttFile = (fileMimeType) => {
  *  }
  *
  **/
-exports.uploadVideoTextTrack = async(req, res) => {
-    // https://attacomsian.com/blog/express-file-upload-multer
-    // https://www.npmjs.com/package/multer
+exports.uploadVideoTextTrack = async (req, res) => {
     logger.info('addVideoTextTrack called.');
-    upload(req, res, async(err) => {
-        if ( err ) {
-            res.status(500);
-            return res.json({ message: messageKeys.ERROR_MALFORMED_WEBVTT_FILE });
-        }
-
-        let vttFile = req.file;
+    upload(req, res, async () => {
         const eventId = req.body.eventId;
-
-        if (!vttFile) {
+        let vttFile = req.file;
+        // Validate VTT file
+        try {
+            await validateVTTFile(req, res, vttFile);
+        } catch (validationError) {
+            // Handle validation error
+            logger.error(`VTT file validation failed: ${validationError.message} -- USER ${req.user.eppn}`);
             res.status(400);
-            return res.json({
-                message: 'The vtt file is missing.',
-                msg: 'The vtt file is missing.'
-            });
+            return res.json({ message: messageKeys.ERROR_MALFORMED_WEBVTT_FILE, error: validationError.message });
         }
 
-        try {
-            if (!isVttFile(vttFile.mimetype) ) {
-                logger.info(`Subtitle file not in a vtt format, trying to convert. [File: (${vttFile.filename}) MIME type: ${vttFile.mimetype}]. -- USER ${req.user.eppn}`);
-                vttFile = srtToVtt(vttFile);
-            }
-            // https://www.npmjs.com/package/node-webvtt#parsing
-            webvttParser.parse(vttFile.buffer.toString(), { strict: true });
-        } catch (err) {
-            logger.error(`vtt file seems to be malformed (${err.message}), please check. -- USER ${req.user.eppn}`);
-            res.status(400);
-            return res.json({
-                message: messageKeys.ERROR_MALFORMED_WEBVTT_FILE,
-                msg: err.message
-            });
-        }
+        const convertedVttFile = await fileUtils.convertToUTF8(vttFile);
 
+        await jobsService.setJobStatusForEvent(eventId, constants.JOB_STATUS_STARTED, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
+        res.status(HttpStatus.ACCEPTED);
+        res.jobId = eventId;
+        res.json({id: eventId, status: constants.JOB_STATUS_STARTED});
+
+        // Continue with the file upload logic
         try {
-            const response = await apiService.addWebVttFile(vttFile, eventId);
+            const response = await apiService.addWebVttFile(convertedVttFile, eventId);
+
             if (response.status === 201) {
                 logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
-                res.status(response.status);
-                res.json({message: messageKeys.SUCCESS_WEBVTT_UPLOAD});
                 await apiService.republishWebVttFile(eventId);
+                await jobsService.setJobStatusForEvent(eventId, constants.JOB_STATUS_FINISHED, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
             } else {
                 logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
-                res.status(response.status);
-                res.json({message : messageKeys.ERROR_WEBVTT_FILE_UPLOAD});
+                await jobsService.setJobStatusForEvent(eventId, constants.JOB_STATUS_ERROR, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
             }
         } catch (error) {
-            res.status(error.status);
-            res.json({message : error});
+            console.log(error);
+            logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${error}`);
+            await jobsService.setJobStatusForEvent(eventId, constants.JOB_STATUS_ERROR, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
+            res.status(HttpStatus.BAD_REQUEST);
         }
     });
 };
 
+
 exports.deleteVideoTextTrack = async(req, res) => {
     logger.info('deleteVideoTextTrack called.');
     const filePath = path.join(__dirname, '../files/empty.vtt');
+
     const vttFile = fs.createReadStream(filePath);
     const eventId = req.params.eventId;
 
@@ -452,3 +523,22 @@ exports.deleteVideoTextTrack = async(req, res) => {
         res.json({message: error});
     }
 };
+
+exports.validateVTTFile = async (req, res) => {
+    upload(req, res, async () => {
+        try {
+            let vttFile = req.file;
+            await validateVTTFile(req, res, vttFile);
+
+            // Move the response inside the try block
+            return res.json({ message: messageKeys.SUCCESS_WEBVTT_UPLOAD });
+        } catch (validationError) {
+            // Handle validation error
+            logger.error(`VTT file validation failed: ${validationError.message} -- USER ${req.user.eppn}`);
+            res.status(400);
+            return res.json({ message: messageKeys.ERROR_MALFORMED_WEBVTT_FILE, error: validationError.message });
+        }
+    });
+};
+
+

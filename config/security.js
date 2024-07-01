@@ -7,6 +7,8 @@ const username = process.env.LATAAMO_OPENCAST_USER;
 const password = process.env.LATAAMO_OPENCAST_PASS;
 const userpass = Buffer.from(`${username}:${password}`).toString('base64');
 const auth = `Basic ${userpass}`;
+const gitlabAuth = process.env.GITLAB_TOKEN;
+const gitlabHost = process.env.GITLAB_HOST;
 const axios = require('axios'); // https://www.npmjs.com/package/axios
 const crypto = require('crypto');
 const secretKey = process.env.CRYPTO_SECRET_KEY;
@@ -59,6 +61,14 @@ module.exports.opencastPresentationBase = axios.create({
     }
 });
 
+module.exports.gitlabBase = axios.create({
+    baseURL: gitlabHost,
+    headers: {'PRIVATE-TOKEN': gitlabAuth},
+    validateStatus: () => {
+        return true;
+    }
+});
+
 module.exports.opencastBaseStreamWithRangeHeaders = (url, range) => {
     const streamBase = axios.create({
         maxContentLength: Infinity,
@@ -67,6 +77,7 @@ module.exports.opencastBaseStreamWithRangeHeaders = (url, range) => {
     });
     return streamBase.get(url);
 };
+
 
 module.exports.opencastBaseStream = (url) => {
     const streamBase = axios.create({
