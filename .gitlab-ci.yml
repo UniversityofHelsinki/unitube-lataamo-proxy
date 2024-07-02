@@ -96,11 +96,6 @@ sonarqube-check:
       - .sonar/cache
   script:
     - sonar-scanner
-    - Dsonar.dependencyCheck.jsonReportPath=dependency-check-report.json
-    - Dsonar.dependencyCheck.htmlReportPath=dependency-check-report.html
-    - Dsonar.dependencyCheck.severity.high=7.0
-    - Dsonar.dependencyCheck.severity.medium=4.0
-    - Dsonar.dependencyCheck.severity.low=0.0
   needs:
     - job: dependency-check
       artifacts: true
