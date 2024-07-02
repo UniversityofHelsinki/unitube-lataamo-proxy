@@ -5,10 +5,22 @@
   "main": "index.js",
   "scripts": {
     "test": "cross-env LATAAMO_OPENCAST_HOST=http://localhost:8080 LATAAMO_OPENCAST_PRESENTATION_HOST=http://localhost:8080 mocha --timeout 10000 --recursive --exit",
-    "coverage": "nyc --reporter=lcov --reporter=text --exclude=**/node_modules/** --exclude=**/test/** --exclude=coverage/lcov-report npm run test",  "build": "echo \"Testing build\"",
+    "coverage": "nyc npm run test",
+    "build": "echo \"Testing build\"",
     "start": "node app.js",
     "nodemon": "nodemon ./app.js localhost 3000",
     "eslint": "eslint ."
+  },
+  "nyc": {
+    "reporter": [
+      "lcov",
+      "text"
+    ],
+    "exclude": [
+      "node_modules",
+      "test",
+      "coverage/lcov-report"
+    ]
   },
   "repository": {
     "type": "git",
