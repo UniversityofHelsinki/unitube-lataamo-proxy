@@ -74,7 +74,7 @@ sonarqube-check:
     - sonar-scanner
   allow_failure: true
   only:
-    - main
+    - master
   needs:
     - job: dependency-check
       artifacts: true
@@ -84,7 +84,7 @@ dependency-check:
   tags:
     - ohtu-build-4
   only:
-    - main
+    - master
   timeout: 5m
   allow_failure: true
   image:
