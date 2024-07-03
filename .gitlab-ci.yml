@@ -96,7 +96,7 @@ dependency-check:
     - >
       /usr/share/dependency-check/bin/dependency-check.sh
       --project Projectname --scan . --enableExperimental
-      --format HTML --format JSON --nvdApiKey $NVD_API_KEY
+      --format JSON --nvdApiKey $NVD_API_KEY
   artifacts:
     when: always
     expire_in: 1 week
