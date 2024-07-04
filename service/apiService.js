@@ -152,7 +152,8 @@ exports.getUserTrashSeries = async (user) => {
 
 exports.getUserSeries = async (user) => {
     const contributorParameters = parseContributor(user.hyGroupCn);
-    const seriesUrl =  constants.OCAST_SERIES_PATH + '?filter=contributors:' + user.eppn + ',' + contributorParameters;
+    const seriesUrl =  constants.OCAST_SERIES_PATH + '?filter=contributors:' + user.eppn +
+        (contributorParameters ? ',contributors:' + contributorParameters : '');
     const response = await security.opencastBase.get(seriesUrl);
     return response.data;
 };
