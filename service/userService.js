@@ -37,7 +37,7 @@ exports.userHasPermissions = (requestUser, contributors) => {
 const concatenateArray = (data) => Array.prototype.concat.apply([], data);
 
 exports.parseContributor = (paramArr) => {
-    return paramArr.map(concatContributors);
+    return paramArr.some(el => el !== '') ? paramArr.map(concatContributors) : undefined;
 };
 
 const concatContributors = (value) => {
