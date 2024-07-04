@@ -56,30 +56,6 @@ test:
       - coverage
     expire_in: 1 hour
 
-dependency-check:
-  stage: dependency-check
-  tags:
-    - ohtu-build-4
-  only:
-    - master
-  image:
-    name: owasp/dependency-check-action:latest
-    entrypoint: [""]
-  before_script:
-    - apt update && apt install -y python3
-  script:
-    - >
-      /usr/share/dependency-check/bin/dependency-check.sh
-      --project Projectname --scan . --enableExperimental
-      --format HTML --format JSON
-  artifacts:
-    when: always
-    expire_in: 1 week
-    paths:
-      - dependency-check-report.html
-      - dependency-check-report.json
-
-# Define the process for sonarcube check
 sonarqube-check:
   stage: sonarqube-check
   tags:
@@ -96,18 +72,36 @@ sonarqube-check:
       - .sonar/cache
   script:
     - sonar-scanner
-    - Dsonar.dependencyCheck.jsonReportPath=dependency-check-report.json
-    - Dsonar.dependencyCheck.htmlReportPath=dependency-check-report.html
-    - Dsonar.dependencyCheck.severity.high=7.0
-    - Dsonar.dependencyCheck.severity.medium=4.0
-    - Dsonar.dependencyCheck.severity.low=0.0
-  needs:
-    - job: dependency-check
-      artifacts: true
-
   allow_failure: true
   only:
     - master
+  needs:
+    - job: dependency-check
+      artifacts: true
+    - job: test
+      artifacts: true
+
+dependency-check:
+  stage: dependency-check
+  tags:
+    - ohtu-build-4
+  only:
+    - master
+  timeout: 10m
+  allow_failure: true
+  image:
+    name: owasp/dependency-check-action:latest
+    entrypoint: [""]
+  script:
+    - >
+      /usr/share/dependency-check/bin/dependency-check.sh
+      --project Projectname --scan . --enableExperimental
+      --format JSON --nvdApiKey $NVD_API_KEY
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - dependency-check-report.json
 
 # Define the process for deploy stage to development environment
 deploy_oc_test:
