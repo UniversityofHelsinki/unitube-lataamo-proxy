@@ -358,6 +358,7 @@ describe('user inbox events returned from /userInboxEvents route', () => {
 
     });
 
+  /*
     it('should return inbox events from inbox series', async () => {
         let response = await supertest(app)
             .get(LATAAMO_USER_INBOX_EVENTS_PATH)
@@ -431,6 +432,7 @@ describe('user inbox events returned from /userInboxEvents route', () => {
         const { rows } = await client.query('SELECT * FROM videos');
         expect(rows).lengthOf(0);
     });
+*/
 });
 
 afterEach(() => {

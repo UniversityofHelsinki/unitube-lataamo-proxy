@@ -15,13 +15,16 @@ const { encrypt } = require('../utils/encrption.js');
 
 const fetchEventDownloadableMedia = async (event, user) => {
   const eventPublications = await apiService.getPublicationsForEvent(event.identifier);
-  const eventDownloadableMediaUrls = await eventsService.calculateMediaPropertyForVideoList({ ...event, publications: eventPublications }, user.eppn);
-  const eventDownloadableMedia = eventsService.mapPublications(eventDownloadableMediaUrls, eventPublications);
-  const encryptedDownloadableMedia = Object.fromEntries(Object.keys(eventDownloadableMedia).map((url) => {
-    const encrypted = encrypt(url);
-    return [encrypted, { ...eventDownloadableMedia[url], url: encrypted }];
-  }));
-  return encryptedDownloadableMedia;
+  if (eventPublications && eventPublications.length > 0) {
+    const eventDownloadableMediaUrls = await eventsService.calculateMediaPropertyForVideoList({ ...event, publications: eventPublications }, user.eppn);
+    const eventDownloadableMedia = eventsService.mapPublications(eventDownloadableMediaUrls, eventPublications);
+    const encryptedDownloadableMedia = Object.fromEntries(Object.keys(eventDownloadableMedia).map((url) => {
+      const encrypted = encrypt(url);
+      return [encrypted, { ...eventDownloadableMedia[url], url: encrypted }];
+    }));
+    return encryptedDownloadableMedia;
+  }
+  return [];
 };
 exports.fetchEventDownloadableMedia = fetchEventDownloadableMedia;
 
