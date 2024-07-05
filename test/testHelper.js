@@ -3030,6 +3030,8 @@ const mockEventPublicationContainsOneVideoWithDifferentQualities = [
     }
 ];
 
+const mockEventPublicationsEmpty = [];
+
 const mockEvent1VttFile = 'WEBVTT\n' +
     '\n' +
     '00:00:00.500 --> 00:00:02.000\n' +
@@ -3653,10 +3655,14 @@ const event2Publications = () => nock(CONSTANTS.OCAST_BASE_URL)
 
 const event3Publications = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(`${CONSTANTS.OCAST_VIDEOS_PATH}${CONSTANTS.TEST_INBOX_EVENT_1}${CONSTANTS.OCAST_VIDEO_PUBLICATION_PATH}`)
-    .reply(200, mockEventPublicationContainsOneVideoWithDifferentQualities);
+    .reply(200, []);
 
 const event4Publications = () => nock(CONSTANTS.OCAST_BASE_URL)
     .get(`${CONSTANTS.OCAST_VIDEOS_PATH}${CONSTANTS.TEST_INBOX_EVENT_2}${CONSTANTS.OCAST_VIDEO_PUBLICATION_PATH}`)
+    .reply(200, []);
+
+const event5Publications = () => nock(Constants.OCAST_BASE_URL)
+    .get(`${CONSTANTS.OCAST_VIDEOS_PATH}${CONSTANTS.TEST_INBOX_EVENT_2}${CONSTANTS.OCAST_}`)
     .reply(200, mockEventPublicationContainsTwoVideosWithDifferentQualities);
 
 
