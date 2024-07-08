@@ -171,6 +171,7 @@ deploy_test:
     name: test
   only:
     - test
+    - srt-fix
   script:
     - echo "====== Deploy to test server ========"
     - echo "====== Install rsync and openssh ========="

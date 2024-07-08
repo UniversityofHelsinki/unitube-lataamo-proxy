@@ -409,7 +409,9 @@ exports.downloadVideo = async (req, res) => {
 const srtToVtt = (srtSubtitleFile) => {
     const convertedVtt = {};
     const nodes = parseSync(srtSubtitleFile.buffer.toString());
-    convertedVtt.buffer = stringifySync(nodes, { format: 'WebVTT' });
+    const vttString = stringifySync(nodes, { format: 'WebVTT' });
+    // Convert string to buffer
+    convertedVtt.buffer = Buffer.from(vttString);
     convertedVtt.originalname = srtSubtitleFile.originalname.slice(0, -4) + '.vtt';
     return convertedVtt;
 };
@@ -431,6 +433,7 @@ const validateVTTFile = async (req, res, vttFile) => {
 
         // https://www.npmjs.com/package/node-webvtt#parsing
         await webvttParser.parse(vttFile.buffer.toString(), { strict: true });
+        return vttFile;
     } catch (err) {
         logger.error(`VTT file seems to be malformed (${err.message}), please check. -- USER ${req.user.eppn}`);
         throw new Error(`Malformed WebVTT file: ${err.message}`);
@@ -462,38 +465,37 @@ exports.uploadVideoTextTrack = async (req, res) => {
         let vttFile = req.file;
         // Validate VTT file
         try {
-            await validateVTTFile(req, res, vttFile);
+            const parsedVTTFile = await validateVTTFile(req, res, vttFile);
+            const convertedVttFile = await fileUtils.convertToUTF8(parsedVTTFile);
+
+            await jobsService.setJobStatusForEvent(eventId, constants.JOB_STATUS_STARTED, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
+            res.status(HttpStatus.ACCEPTED);
+            res.jobId = eventId;
+            res.json({id: eventId, status: constants.JOB_STATUS_STARTED});
+
+            // Continue with the file upload logic
+            try {
+                const response = await apiService.addWebVttFile(convertedVttFile, eventId);
+
+                if (response.status === 201) {
+                    logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
+                    await apiService.republishWebVttFile(eventId);
+                    await jobsService.setJobStatusForEvent(eventId, constants.JOB_STATUS_FINISHED, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
+                } else {
+                    logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
+                    await jobsService.setJobStatusForEvent(eventId, constants.JOB_STATUS_ERROR, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
+                }
+            } catch (error) {
+                console.log(error);
+                logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${error}`);
+                await jobsService.setJobStatusForEvent(eventId, constants.JOB_STATUS_ERROR, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
+                res.status(HttpStatus.BAD_REQUEST);
+            }
         } catch (validationError) {
             // Handle validation error
             logger.error(`VTT file validation failed: ${validationError.message} -- USER ${req.user.eppn}`);
             res.status(400);
             return res.json({ message: messageKeys.ERROR_MALFORMED_WEBVTT_FILE, error: validationError.message });
-        }
-
-        const convertedVttFile = await fileUtils.convertToUTF8(vttFile);
-
-        await jobsService.setJobStatusForEvent(eventId, constants.JOB_STATUS_STARTED, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
-        res.status(HttpStatus.ACCEPTED);
-        res.jobId = eventId;
-        res.json({id: eventId, status: constants.JOB_STATUS_STARTED});
-
-        // Continue with the file upload logic
-        try {
-            const response = await apiService.addWebVttFile(convertedVttFile, eventId);
-
-            if (response.status === 201) {
-                logger.info(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} UPLOADED`);
-                await apiService.republishWebVttFile(eventId);
-                await jobsService.setJobStatusForEvent(eventId, constants.JOB_STATUS_FINISHED, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
-            } else {
-                logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${response.message}`);
-                await jobsService.setJobStatusForEvent(eventId, constants.JOB_STATUS_ERROR, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
-            }
-        } catch (error) {
-            console.log(error);
-            logger.error(`POST /files/ingest/addAttachment VTT file for USER ${req.user.eppn} FAILED ${error}`);
-            await jobsService.setJobStatusForEvent(eventId, constants.JOB_STATUS_ERROR, constants.JOB_STATUS_TYPE_TRANSCRIPTION);
-            res.status(HttpStatus.BAD_REQUEST);
         }
     });
 };
