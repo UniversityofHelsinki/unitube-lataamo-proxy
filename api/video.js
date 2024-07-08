@@ -3,6 +3,7 @@
 const userService = require('../service/userService');
 const seriesService = require('../service/seriesService');
 const eventsService = require('../service/eventsService');
+const eventsApi = require('../api/event.js');
 const apiService = require('../service/apiService');
 const publicationService = require('../service/publicationService');
 const fileUtils = require('../utils/fileUtils');
@@ -251,7 +252,9 @@ exports.getUserVideos = async (req, res) => {
             ...event,
             deletionDate: await dbService.getArchivedDate(event.identifier),
             subtitles: await eventsService.subtitles(event.identifier),
-            contributors: eventsService.getContributorsForEvent(event, ownSeriesWithoutTrash)
+            contributors: eventsService.getContributorsForEvent(event, ownSeriesWithoutTrash),
+            downloadableMedia: await eventsApi.fetchEventDownloadableMedia(event, req.user)
+
         }));
         res.json(await Promise.all(eventList));
     } catch (error) {

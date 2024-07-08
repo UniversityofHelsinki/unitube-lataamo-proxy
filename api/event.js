@@ -13,6 +13,22 @@ const logger = require('../config/winstonLogger');
 const constants = require('../utils/constants');
 const { encrypt } = require('../utils/encrption.js');
 
+const fetchEventDownloadableMedia = async (event, user) => {
+  const eventPublications = await apiService.getPublicationsForEvent(event.identifier);
+  if (eventPublications && eventPublications.length > 0) {
+    const eventDownloadableMediaUrls = await eventsService.calculateMediaPropertyForVideoList({ ...event, publications: eventPublications }, user.eppn);
+    const eventDownloadableMedia = eventsService.mapPublications(eventDownloadableMediaUrls, eventPublications);
+    const encryptedDownloadableMedia = Object.fromEntries(Object.keys(eventDownloadableMedia).map((url) => {
+      const encrypted = encrypt(url);
+      return [encrypted, { ...eventDownloadableMedia[url], url: encrypted }];
+    }));
+    return encryptedDownloadableMedia;
+  }
+  return [];
+};
+exports.fetchEventDownloadableMedia = fetchEventDownloadableMedia;
+
+
 exports.getEvent = async (req, res) => {
     try {
         logger.info(`GET video details /event/:id VIDEO ${req.params.id} USER: ${req.user.eppn}`);
@@ -34,17 +50,9 @@ exports.getEvent = async (req, res) => {
         const eventWithLicenseOptions = licenseService.getLicenseOptions(eventWithLicense);
         const eventWithLicenseOptionsAndVideoViews = await eventsService.getEventViews(req.params.id, eventWithLicenseOptions);
 
-        const eventPublications = await apiService.getPublicationsForEvent(req.params.id);
-        const eventDownloadableMediaUrls = await eventsService.calculateMediaPropertyForVideoList({ ...event, publications: eventPublications }, req.user.eppn);
-        const eventDownloadableMedia = eventsService.mapPublications(eventDownloadableMediaUrls, eventPublications);
-        const encryptedDownloadableMedia = Object.fromEntries(Object.keys(eventDownloadableMedia).map((url) => {
-            const encrypted = encrypt(url);
-            return [encrypted, { ...eventDownloadableMedia[url], url: encrypted }];
-        }));
-
         res.json({
             ...eventWithLicenseOptionsAndVideoViews,
-            downloadableMedia: encryptedDownloadableMedia,
+            downloadableMedia: await fetchEventDownloadableMedia(event, req.user),
             jobs: JSON.parse(await jobsService.getJob(event.identifier)),
             subtitles: await eventsService.subtitles(event.identifier)
         });
@@ -114,7 +122,8 @@ exports.getInboxEvents = async (req, res) => {
                     deletionDate: await dbService.getArchivedDate(event.identifier),
                     subtitles: await eventsService.subtitles(event.identifier),
                     jobs: JSON.parse(await jobsService.getJob(event.identifier)),
-                    contributors: series.contributors ? series.contributors : []
+                    contributors: series.contributors ? series.contributors : [],
+                    downloadableMedia: await fetchEventDownloadableMedia(event, req.user)
                 }));
             res.json(await Promise.all(events));
             // insert removal date to postgres db
