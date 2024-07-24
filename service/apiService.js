@@ -71,7 +71,15 @@ const someEventColumns = async (events, series) => {
 exports.getSeries = async (seriesId) => {
     const seriesUrl = constants.OCAST_SERIES_PATH + seriesId;
     const response = await security.opencastBase.get(seriesUrl);
-    return response.data;
+    const series = response.data;
+    if (response.status === 200 && series) {
+      return {
+        ...series,
+        contributors: series.contributors.reduce(
+          (a, c) => a.concat(c.split(',')), []
+        ).filter(c => c)
+      };
+    }
 };
 
 exports.contributorsToIamGroupsAndPersons = async (series) => {
@@ -151,11 +159,28 @@ exports.getUserTrashSeries = async (user) => {
 };
 
 exports.getUserSeries = async (user) => {
-    const contributorParameters = parseContributor(user.hyGroupCn);
-    const seriesUrl =  constants.OCAST_SERIES_PATH + '?filter=contributors:' + user.eppn +
-        (contributorParameters ? ',contributors:' + contributorParameters : '');
-    const response = await security.opencastBase.get(seriesUrl);
-    return response.data;
+    //const contributorParameters = parseContributor(user.hyGroupCn);
+    const groups = (user.hyGroupCn || []).filter(u => u);
+    const userAndGroups = new Set([ user.eppn, ...groups ]);
+    //const seriesUrl =  constants.OCAST_SERIES_PATH + '?filter=contributors:' + user.eppn +
+    //    (contributorParameters ? ',contributors:' + contributorParameters : '');
+    const seriesCountResponse = await security.opencastBase.get('/series/count');
+    const seriesCount = seriesCountResponse.data;
+    const response = await security.opencastBase.get(`/api/series/?limit=${seriesCount}`);
+    const allSeries = response.data;
+    if (allSeries) {
+      return allSeries.map(serie => {
+        return {
+          ...serie,
+          contributors: serie.contributors.reduce(
+            (a, c) => a.concat(c.split(',')), []
+          ).filter(c => c)
+        };
+      }).filter(serie => 
+        serie.contributors.some(contributor => userAndGroups.has(contributor))
+      );
+    }
+    return [];
 };
 
 exports.streamVideo = async (url) => {
