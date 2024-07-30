@@ -21,13 +21,16 @@ exports.isAuthorizedToTranslation = (user) => {
     return group ? true : false;
 };
 
-exports.userHasPermissions = (requestUser, contributors) => {
+exports.userHasPermissions = (requestUser, rawContributors) => {
     const user = exports.getLoggedUser(requestUser);
+    const userGroups = user.hyGroupCn && user.hyGroupCn.filter(group => group);
+    const contributors = rawContributors.reduce(
+      (a, c) => a.concat(c.split(',')), []
+    ).filter(c => c);
     if (user && contributors) {
         const userInContributors = contributors.includes(user.eppn);
-        const iamGroupInContributors = user.hyGroupCn && user.hyGroupCn.some(
-            iamGroup =>
-                contributors.includes(iamGroup)
+        const iamGroupInContributors = contributors.some(contributor => 
+          userGroups.includes(contributor)
         );
         return (userInContributors || iamGroupInContributors);
     }
