@@ -73,15 +73,14 @@ sonarqube-check:
   script:
     - sonar-scanner
   only:
-    - main
+    - master
   needs:
     - job: dependency-check
       artifacts: true
 
 dependency-check:
   stage: dependency-check
-  only:
-    - main
+  only: master
   tags:
     - ohtu-build-4
   image:
