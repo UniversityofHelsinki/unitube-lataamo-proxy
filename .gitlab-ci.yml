@@ -80,7 +80,8 @@ sonarqube-check:
 
 dependency-check:
   stage: dependency-check
-  only: master
+  only:
+    - master
   tags:
     - ohtu-build-4
   image:
@@ -97,6 +98,7 @@ dependency-check:
     paths:
       - dependency-check-report.json
       - dependency-check-report.html
+
 
 # Define the process for deploy stage to development environment
 deploy_oc_test:
