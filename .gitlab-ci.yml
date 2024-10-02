@@ -24,7 +24,7 @@ setup:
   tags:
     - ohtu-build-4
   script:
-    - npm install
+    - npm ci
 
 # Define the process for build stage
 build:
