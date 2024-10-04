@@ -71,11 +71,14 @@ sonarqube-check:
     paths:
       - .sonar/cache
   script:
+    - ls -la coverage  # Debug: List the files in the coverage directory
     - sonar-scanner
   only:
     - master
   needs:
     - job: dependency-check
+      artifacts: true
+    - job: test
       artifacts: true
 
 dependency-check:
