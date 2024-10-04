@@ -71,7 +71,6 @@ sonarqube-check:
     paths:
       - .sonar/cache
   script:
-    - ls -la coverage  # Debug: List the files in the coverage directory
     - sonar-scanner
   only:
     - master
