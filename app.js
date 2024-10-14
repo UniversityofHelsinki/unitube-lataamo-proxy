@@ -20,7 +20,8 @@ const app = express();
 app.use(helmet());
 const router = express.Router();
 const port = 3000;
-const host = '127.0.0.1';
+const host = '0.0.0.0';
+
 const LOG_FILE_NAME = 'access.log';
 const LOG_DIRECTORY = __dirname;
 
@@ -66,13 +67,12 @@ app.use('/api', router);
 routes(router);
 
 
+
+app.requestTimeout = 18000000;
+app.headersTimeout = 0;
 const server = app.listen(port, host,  () => {
     logger.info(`lataamo proxy is listening on port ${port}!`);
 });
-
-server.requestTimeout = 18000000;
-
-server.headersTimeout = 0;
 
 // for the tests
 module.exports = app;
