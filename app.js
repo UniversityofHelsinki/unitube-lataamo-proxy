@@ -20,7 +20,7 @@ const app = express();
 app.use(helmet());
 const router = express.Router();
 const port = 3000;
-const host = '0.0.0.0';
+const host = '127.0.0.1';
 
 const LOG_FILE_NAME = 'access.log';
 const LOG_DIRECTORY = __dirname;
