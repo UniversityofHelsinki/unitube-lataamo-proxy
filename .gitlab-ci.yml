@@ -77,6 +77,8 @@ sonarqube-check:
   needs:
     - job: dependency-check
       artifacts: true
+    - job: test
+      artifacts: true
 
 dependency-check:
   stage: dependency-check
@@ -164,6 +166,9 @@ deploy_test:
   stage: deploy
   tags:
     - ohtu-build-4
+  except:
+    # Skip deploy when scheduled npm audit and outdated scans are executed.
+    - schedules
   environment:
     name: test
   only:
@@ -192,6 +197,9 @@ deploy_prod:
   stage: deploy
   tags:
     - ohtu-build-4
+  except:
+    # Skip deploy when scheduled npm audit and outdated scans are executed.
+    - schedules
   environment:
     name: prod
   only:
