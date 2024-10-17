@@ -67,12 +67,13 @@ app.use('/api', router);
 routes(router);
 
 
-
-app.requestTimeout = 18000000;
-app.headersTimeout = 0;
 const server = app.listen(port, host,  () => {
     logger.info(`lataamo proxy is listening on port ${port}!`);
 });
+
+server.requestTimeout = 18000000;
+
+server.headersTimeout = 0
 
 // for the tests
 module.exports = app;
